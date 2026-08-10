@@ -1,0 +1,1750 @@
+<title>Spiccioli — functional analysis</title>
+
+<style>
+:root{
+  --ink:#15140F; --surface:#1C1B15; --raised:#23221A; --line:#2E2C23; --line-soft:#26251E;
+  --text:#E8E4D8; --muted:#948E7E; --faint:#6B665A;
+  --brass:#D8A657; --brass-dim:#8C6E38; --pos:#6FBE8C; --neg:#E4675F;
+  --auto:#A99AD6; --auto-bg:#221F2C; --auto-line:#3B3452;
+  --c-setf:#D8A657; --c-liq:#5B9EA6; --c-term:#3F6480; --c-pens:#A8607A; --c-betf:#8FA05C;
+  --c-dep:#4E7FA0; --c-stock:#C97B4A; --c-etc:#7E6BA8; --c-vou:#6E6A5E;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;}
+html{color-scheme:dark;scroll-behavior:smooth;}
+body{margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1220px;margin:0 auto;padding:56px 28px 120px;display:flex;flex-direction:column;gap:60px;}
+
+.masthead{display:flex;flex-direction:column;gap:16px;}
+.masthead .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass-dim);}
+.masthead h1{font-family:var(--serif);font-size:clamp(38px,6vw,58px);line-height:1.03;margin:0;font-weight:600;letter-spacing:-.01em;}
+.masthead h1 em{font-style:italic;color:var(--brass);}
+.masthead p{margin:0;max-width:64ch;color:var(--muted);font-size:16px;}
+.rule{height:1px;background:linear-gradient(90deg,var(--brass-dim),transparent);}
+
+.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 28px;border:1px solid var(--line);border-radius:10px;padding:18px 22px;background:var(--surface);}
+.toc a{display:flex;gap:10px;text-decoration:none;color:var(--muted);font-size:13.5px;padding:2px 0;}
+.toc a:hover{color:var(--brass);}
+.toc a b{font-family:var(--mono);font-size:11.5px;color:var(--faint);font-weight:400;min-width:22px;}
+
+section.doc{display:flex;flex-direction:column;gap:20px;scroll-margin-top:24px;}
+section.doc > header{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:22px;}
+section.doc > header .num{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--brass-dim);}
+section.doc > header h2{font-family:var(--serif);font-size:30px;margin:0;font-weight:600;letter-spacing:-.01em;}
+section.doc > header p{margin:0;max-width:74ch;color:var(--muted);font-size:14.5px;}
+h3.sub{font-family:var(--serif);font-size:20px;margin:14px 0 0;font-weight:600;}
+h4.subsub{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);font-weight:500;margin:10px 0 0;}
+.doc p.body{margin:0;max-width:80ch;color:var(--muted);font-size:14px;}
+.doc ul.body{margin:0;padding-left:19px;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:5px;max-width:80ch;}
+.doc ul.body b,.doc p.body b{color:var(--text);font-weight:600;}
+.doc code{font-family:var(--mono);font-size:12.5px;background:#201F17;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--brass);}
+
+table.spec{border-collapse:collapse;width:100%;font-size:13px;}
+table.spec th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:500;padding:0 12px 7px;border-bottom:1px solid var(--line);white-space:nowrap;}
+table.spec td{padding:8px 12px;border-bottom:1px solid var(--line-soft);vertical-align:top;color:var(--muted);}
+table.spec td:first-child{color:var(--text);font-family:var(--mono);font-size:12.5px;white-space:nowrap;}
+table.spec tr:last-child td{border-bottom:none;}
+table.spec td.d{color:var(--faint);font-style:italic;}
+.specwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;padding:16px 6px;background:var(--surface);}
+
+.callout{border-left:2px solid var(--brass-dim);padding:2px 0 2px 16px;color:var(--muted);font-size:13.5px;max-width:80ch;}
+.callout b{color:var(--text);}
+
+.scroller{overflow-x:auto;padding-bottom:4px;}
+.app{min-width:1000px;display:grid;grid-template-columns:198px 1fr;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 26px 60px -34px #000;}
+.side{background:#191811;border-right:1px solid var(--line);padding:16px 0 14px;display:flex;flex-direction:column;gap:22px;}
+.brand{padding:2px 18px 0;}
+.brand b{font-family:var(--serif);font-size:19px;font-weight:600;}
+.brand b::first-letter{color:var(--brass);}
+.nav{display:flex;flex-direction:column;gap:1px;padding:0 10px;}
+.nav a{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:6px;text-decoration:none;color:var(--muted);font-size:13.5px;border-left:2px solid transparent;}
+.nav a.on{background:#242219;color:var(--text);border-left-color:var(--brass);}
+.nav a .badge{font-family:var(--mono);font-size:10px;background:#3A2320;color:var(--neg);padding:1px 6px;border-radius:9px;border:1px solid #4A2B27;}
+.filecard{margin-top:auto;padding:0 18px;display:flex;flex-direction:column;gap:2px;}
+.filecard span{font-family:var(--mono);font-size:10.5px;color:var(--faint);}
+.filecard span.ok{color:var(--brass-dim);}
+.view{padding:20px 24px 26px;display:flex;flex-direction:column;gap:18px;min-width:0;}
+.viewhead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;}
+.viewhead h3{font-family:var(--serif);font-size:22px;margin:0;font-weight:600;}
+.viewhead .sub{font-family:var(--mono);font-size:11px;color:var(--faint);}
+.actions{display:flex;gap:8px;align-items:center;}
+.btn{font-family:var(--sans);font-size:12.5px;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:var(--raised);color:var(--text);}
+.btn.primary{background:var(--brass);border-color:var(--brass);color:#1A1509;font-weight:600;}
+.btn.ghost{background:transparent;color:var(--muted);}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);}
+.tabs a{padding:7px 13px;font-size:13px;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.tabs a.on{color:var(--text);border-bottom-color:var(--brass);}
+.alert{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;background:#2A1B18;border:1px solid #462924;}
+.alert .dot{width:7px;height:7px;border-radius:50%;background:var(--neg);flex:none;box-shadow:0 0 0 4px #46292433;}
+.alert p{margin:0;font-size:13.5px;}
+.alert p b{color:var(--neg);font-weight:600;}
+.alert a{margin-left:auto;font-size:12.5px;color:var(--brass);text-decoration:none;border-bottom:1px solid var(--brass-dim);}
+.card{background:var(--raised);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:14px;min-width:0;}
+.card > h4,.subhead{margin:0;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);font-weight:500;}
+.cols{display:grid;gap:16px;}
+.cols.a{grid-template-columns:1fr 1fr;}
+.cols.c{grid-template-columns:1.55fr 1fr;}
+.sep{border:none;border-top:1px solid var(--line);margin:0;}
+.hero{display:flex;flex-direction:column;gap:3px;}
+.hero .label{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);}
+.hero .val{font-family:var(--serif);font-size:42px;line-height:1.05;font-variant-numeric:tabular-nums;letter-spacing:-.015em;}
+.figs{display:flex;flex-direction:column;gap:9px;}
+.fig{display:flex;align-items:baseline;justify-content:space-between;gap:14px;font-size:13px;}
+.fig span{color:var(--muted);}
+.fig b{font-family:var(--mono);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;}
+.pos{color:var(--pos);} .neg{color:var(--neg);}
+.donutrow{display:grid;grid-template-columns:168px 1fr;gap:28px;align-items:center;}
+.donut{width:168px;height:168px;position:relative;}
+.donut svg{transform:rotate(-90deg);width:100%;height:100%;}
+.donut circle{fill:none;stroke-width:5;}
+.donut .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.donut .center b{font-family:var(--serif);font-size:19px;}
+.donut .center small{font-family:var(--mono);font-size:9.5px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;}
+.breakdown{display:grid;grid-template-columns:1fr 1fr;gap:7px 34px;}
+.brk{display:grid;grid-template-columns:10px 1fr auto auto;gap:10px;align-items:center;font-size:12.5px;}
+.brk i{width:10px;height:10px;border-radius:2px;}
+.brk .amt{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12.5px;}
+.brk .pct{font-family:var(--mono);font-size:11.5px;color:var(--muted);width:44px;text-align:right;}
+.chart{width:100%;} .chart svg{display:block;width:100%;height:auto;}
+.grid line{stroke:var(--line-soft);stroke-width:1;}
+.axis text{fill:var(--faint);font-family:var(--mono);font-size:9px;}
+.chartkey{display:flex;flex-wrap:wrap;gap:18px;font-family:var(--mono);font-size:10.5px;color:var(--muted);}
+.chartkey span{display:flex;align-items:center;gap:6px;}
+.chartkey i{width:14px;height:2px;display:block;}
+.chartkey i.dash{background:repeating-linear-gradient(90deg,var(--brass-dim) 0 4px,transparent 4px 7px);}
+.tblwrap{overflow-x:auto;}
+.app table{border-collapse:collapse;width:100%;font-size:12.5px;}
+.app thead th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:500;padding:0 10px 7px;border-bottom:1px solid var(--line);white-space:nowrap;}
+.app tbody td{padding:7px 10px;border-bottom:1px solid var(--line-soft);vertical-align:middle;}
+.app tbody tr:last-child td{border-bottom:none;}
+.app tbody tr.sel td{background:#262418;}
+.app td.r,.app th.r{text-align:right;}
+.app td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.app td.desc{color:var(--text);}
+.app td.dim{color:var(--muted);}
+.app tfoot td{padding:9px 10px 0;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+.app tfoot td.tot{color:var(--text);}
+.rowact{color:var(--faint);text-align:center;width:26px;letter-spacing:.1em;}
+.chip{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;line-height:1.45;background:#2A2820;border:1px solid #3A3729;color:var(--text);white-space:nowrap;}
+.chip.auto{background:var(--auto-bg);border-color:var(--auto-line);color:var(--auto);}
+.chip.miss{background:#2E1E1B;border-color:#4A2B27;color:var(--neg);}
+.chip.type{background:transparent;border-color:var(--line);color:var(--muted);}
+.rc{font-family:var(--mono);font-size:12px;white-space:nowrap;}
+.rc.done{color:var(--pos);} .rc.wait{color:var(--brass);} .rc.na{color:var(--faint);}
+.link{font-family:var(--mono);font-size:12px;color:var(--auto);}
+.link.none{color:#3A3729;}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.field{display:flex;align-items:center;gap:7px;padding:5px 10px;border-radius:6px;background:#191811;border:1px solid var(--line);font-size:12.5px;color:var(--muted);white-space:nowrap;}
+.field b{color:var(--text);font-weight:500;}
+.field.search{flex:1;min-width:170px;color:var(--faint);}
+.field.act{border-color:var(--brass-dim);color:var(--brass);}
+.field.act b{color:var(--brass);}
+.pager{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11.5px;color:var(--faint);padding-top:4px;}
+.pager .pg{padding:3px 9px;border:1px solid var(--line);border-radius:5px;color:var(--muted);}
+.pager .pg.on{border-color:var(--brass-dim);color:var(--brass);}
+.paste{background:#131209;border:1px solid var(--line);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.85;white-space:pre;overflow-x:auto;}
+.paste .tab{color:#3F3C30;}
+.paste.empty{color:var(--faint);min-height:150px;}
+.detect{display:flex;flex-wrap:wrap;gap:8px;}
+.detect .chip{background:#1E2119;border-color:#2C3226;color:var(--pos);}
+.detect .chip b{color:var(--text);font-weight:500;}
+.cb{width:12px;height:12px;border-radius:3px;border:1px solid var(--brass-dim);background:var(--brass);display:inline-block;vertical-align:-2px;}
+.cb.off{background:transparent;border-color:#4A4638;}
+.app tbody tr.dupe td{background:#2A1C18;}
+.warnline{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:var(--muted);}
+.warnline b{color:var(--neg);font-weight:500;}
+.checks{display:flex;flex-direction:column;gap:1px;}
+.chk{display:grid;grid-template-columns:22px 1fr auto;gap:12px;align-items:baseline;padding:11px 12px;border-radius:7px;}
+.chk:nth-child(odd){background:#1F1E16;}
+.chk .st{font-family:var(--mono);font-size:12px;}
+.chk .st.ok{color:var(--pos);} .chk .st.no{color:var(--neg);}
+.chk .name{font-size:13.5px;}
+.chk .name em{display:block;font-style:normal;color:var(--muted);font-size:12px;margin-top:2px;}
+.chk .name .det{display:block;margin-top:7px;padding-left:11px;border-left:2px solid #462924;font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.75;}
+.chk .res{font-family:var(--mono);font-size:11.5px;color:var(--faint);white-space:nowrap;}
+.chk .res.no{color:var(--neg);}
+.detail{background:#191811;border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:14px;}
+.detail .dh{display:flex;flex-direction:column;gap:2px;}
+.detail .dh b{font-family:var(--serif);font-size:18px;font-weight:600;}
+.detail .dh small{font-family:var(--mono);font-size:11px;color:var(--faint);}
+.detail .note{font-size:11.5px;color:var(--faint);line-height:1.6;margin:0;}
+.ruleno{font-family:var(--mono);color:var(--faint);font-size:11.5px;}
+.grab{color:var(--faint);}
+.app tbody tr.grp td{background:#201F17;color:var(--brass);font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding-top:10px;}
+.app tbody tr.sum td{background:#1E1D16;font-family:var(--mono);color:var(--text);}
+.app tbody tr.net td{background:#242219;font-family:var(--mono);color:var(--text);border-top:1px solid var(--line);}
+.app td.cat{white-space:nowrap;}
+
+/* dialogs */
+.dlgrow{display:flex;flex-wrap:wrap;gap:18px;}
+.dlg{flex:1 1 340px;max-width:520px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 44px -30px #000;}
+.dlg h5{font-family:var(--serif);font-size:18px;margin:0;font-weight:600;}
+.dlg .dsub{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:-10px;}
+.frm{display:grid;grid-template-columns:130px 1fr;gap:9px 14px;align-items:center;}
+.frm label{font-size:12.5px;color:var(--muted);}
+.frm .inp{background:#131209;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-family:var(--mono);font-size:12px;color:var(--text);min-width:0;}
+.frm .inp.ph{color:var(--faint);}
+.frm .inp.sel::after{content:" ▾";color:var(--faint);}
+.frm .inp.chipset{font-family:var(--sans);display:flex;gap:6px;flex-wrap:wrap;background:none;border:none;padding:0;}
+.frm .full{grid-column:1 / -1;}
+.dlg .hint{font-size:11.5px;color:var(--faint);line-height:1.55;margin:0;}
+.dlg .hint b{color:var(--muted);}
+.dlgfoot{display:flex;justify-content:flex-end;gap:8px;padding-top:2px;}
+.newthing{background:#1B1A13;border:1px dashed var(--brass-dim);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.newthing .nt{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);}
+
+@media (max-width:720px){.wrap{padding:36px 16px 64px;gap:48px;}}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow">Functional analysis · v1</div>
+  <h1><em>Spiccioli</em><br>a private ledger for one person</h1>
+  <p>Everything needed to build the application: the domain model, every screen with its mockup,
+  the forms behind each action, the calculations, the consistency checks, and what is deliberately
+  left out. Self-contained — no other document is required to implement it.</p>
+  <div class="rule"></div>
+</header>
+
+<nav class="toc">
+  <a href="#s1"><b>1</b> Premise and constraints</a>
+  <a href="#s2"><b>2</b> Domain model</a>
+  <a href="#s3"><b>3</b> Categories</a>
+  <a href="#s4"><b>4</b> Portfolio</a>
+  <a href="#s5"><b>5</b> Transactions</a>
+  <a href="#s6"><b>6</b> Bulk import</a>
+  <a href="#s7"><b>7</b> Categories report</a>
+  <a href="#s8"><b>8</b> Investments</a>
+  <a href="#s9"><b>9</b> Salaries</a>
+  <a href="#s10"><b>10</b> Checks</a>
+  <a href="#s11"><b>11</b> Settings</a>
+  <a href="#s12"><b>12</b> Calculations</a>
+  <a href="#s13"><b>13</b> Storage</a>
+  <a href="#s14"><b>14</b> Out of scope</a>
+</nav>
+
+<!-- ================= 1 ================= -->
+<section class="doc" id="s1">
+  <header>
+    <div class="num">01</div>
+    <h2>Premise and constraints</h2>
+  </header>
+
+  <ul class="body">
+    <li><b>One user, one machine, one file.</b> No accounts, no server, no sync logic.</li>
+    <li><b>A desktop application on macOS, Windows and Linux.</b> All three are first-class: the
+    same build behaves identically on each, and nothing may depend on a platform-specific path,
+    filesystem behaviour or system service. No mobile, no web deployment (§14).</li>
+    <li><b>Nothing leaves the machine</b> except, optionally and only when explicitly triggered,
+    security identifiers sent to a price provider (§8.4).</li>
+    <li><b>Euro only.</b> Currency is recorded on accounts and securities but every computation
+    assumes EUR. No exchange rates, no conversion.</li>
+    <li><b>English only.</b> The interface ships in one language and there is no language
+    selector. Nothing user-facing may be hard-coded in a way that would make a second language a
+    rewrite: strings stay separable from the code, and dates, decimal separators and currency
+    already come from preferences rather than a system locale (§11.4).</li>
+    <li><b>Dark theme only.</b></li>
+    <li><b>The application replaces a spreadsheet</b> holding ten years of history. Data entry speed
+    and the ability to spot a mistake matter more than features.</li>
+    <li><b>Derived data is never stored.</b> Balances, holdings, averages, totals and pairings are
+    computed from records. The only manual figures are the ones no record can produce: prices, and
+    the default sell fee per institution.</li>
+  </ul>
+
+  <div class="callout">
+    <b>The organising principle.</b> Two independent sources of truth are kept deliberately
+    unlinked — bank transactions come from account exports, trades and payslips are entered by
+    hand — and the application's job is to tell you when they disagree. That is why nothing is
+    auto-generated from anything else, and why §10 exists.
+  </div>
+</section>
+
+<!-- ================= 2 ================= -->
+<section class="doc" id="s2">
+  <header>
+    <div class="num">02</div>
+    <h2>Domain model</h2>
+    <p>Nine stored entities and one derived one. <span style="color:var(--faint);font-style:italic">Italic</span> marks a derived field.</p>
+  </header>
+
+  <h4 class="subsub">Institution</h4>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>id</td><td></td></tr>
+      <tr><td>name</td><td>text</td><td>Fineco, ING, Amundi, Edenred…</td></tr>
+      <tr><td>defaultSellFee</td><td>amount</td><td>Flat. Used only for hypothetical liquidation figures (§12.3).</td></tr>
+      <tr><td>notes</td><td>text</td><td></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsub">Account</h4>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>id</td><td></td></tr>
+      <tr><td>name</td><td>text</td><td></td></tr>
+      <tr><td>institutionId</td><td>ref?</td><td>Optional — physical cash has none.</td></tr>
+      <tr><td>type</td><td>enum</td><td><code>Liquidity</code> · <code>Deposit account</code> · <code>Term deposit</code> · <code>Pension fund</code> · <code>Voucher</code></td></tr>
+      <tr><td>currency</td><td>enum</td><td>EUR in v1.</td></tr>
+      <tr><td>openingBalance</td><td>amount</td><td>Default 0. For accounts whose history starts mid-life.</td></tr>
+      <tr><td>openingDate</td><td>date</td><td></td></tr>
+      <tr><td>status</td><td>enum</td><td><code>open</code> · <code>closed</code>. Closed accounts keep history and leave the portfolio breakdown.</td></tr>
+      <tr><td>notes</td><td>text</td><td></td></tr>
+      <tr><td class="d">balance</td><td class="d">amount</td><td class="d">openingBalance + Σ transaction amounts</td></tr>
+    </tbody>
+  </table></div>
+  <p class="body"><b>There is no brokerage account type.</b> Any account may hold securities.
+  <code>Liquidity</code> covers current accounts, physical cash and uninvested cash sitting at a
+  broker.</p>
+
+  <h4 class="subsub">Security</h4>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>id</td><td></td></tr>
+      <tr><td>isin</td><td>text</td><td>Unique. Used to recognise an existing security during trade entry.</td></tr>
+      <tr><td>ticker</td><td>text</td><td></td></tr>
+      <tr><td>name</td><td>text</td><td></td></tr>
+      <tr><td>type</td><td>enum</td><td><code>Stock</code> · <code>Stock ETF</code> · <code>Bond ETF</code> · <code>ETC</code></td></tr>
+      <tr><td>currency</td><td>enum</td><td></td></tr>
+      <tr><td>notes</td><td>text</td><td></td></tr>
+    </tbody>
+  </table></div>
+  <p class="body">A security belongs to no institution — it is the same instrument everywhere. The
+  <em>holding</em> belongs to one, through its account, so the same security held at two
+  institutions produces two holdings.</p>
+
+  <h4 class="subsub">Price</h4>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>securityId</td><td>ref</td><td></td></tr>
+      <tr><td>date</td><td>date</td><td></td></tr>
+      <tr><td>value</td><td>decimal(4)</td><td></td></tr>
+      <tr><td>source</td><td>enum</td><td><code>manual</code> · <code>fetched</code></td></tr>
+    </tbody>
+  </table></div>
+  <p class="body"><b>Every price is kept.</b> Entering a new one does not overwrite the old. The
+  history is what makes the net worth chart possible (§12.5).</p>
+
+  <h4 class="subsub">Transaction</h4>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>id</td><td></td></tr>
+      <tr><td>accountId</td><td>ref</td><td></td></tr>
+      <tr><td>date</td><td>date</td><td></td></tr>
+      <tr><td>description</td><td>text</td><td>As exported by the bank.</td></tr>
+      <tr><td>amount</td><td>amount</td><td>Signed. Negative is money out.</td></tr>
+      <tr><td>categoryId</td><td>ref?</td><td>Empty is legal and reported by a check.</td></tr>
+      <tr><td>categorySource</td><td>enum</td><td><code>rule</code> · <code>manual</code>. Reversible — see §5.4.</td></tr>
+      <tr><td>receiptState</td><td>enum</td><td><code>unchecked</code> · <code>checked</code> · <code>na</code></td></tr>
+      <tr><td>notes</td><td>text</td><td>User-owned. Never written by the application.</td></tr>
+      <tr><td>insertionSeq</td><td>int</td><td>Monotonic. Second sort key (§5.2).</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsub">Trade</h4>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>id</td><td></td></tr>
+      <tr><td>kind</td><td>enum</td><td><code>purchase</code> · <code>sale</code></td></tr>
+      <tr><td>securityId</td><td>ref</td><td></td></tr>
+      <tr><td>accountId</td><td>ref</td><td></td></tr>
+      <tr><td>date</td><td>date</td><td></td></tr>
+      <tr><td>quantity</td><td>decimal(4)</td><td>Always positive; <code>kind</code> carries direction.</td></tr>
+      <tr><td>unitPrice</td><td>decimal(4)</td><td></td></tr>
+      <tr><td>fees</td><td>amount</td><td>Actually charged, per trade.</td></tr>
+      <tr><td>taxes</td><td>amount</td><td>Capital-gains tax actually withheld. Sales only; always 0 on a purchase.</td></tr>
+      <tr><td>notes</td><td>text</td><td></td></tr>
+      <tr><td>insertionSeq</td><td>int</td><td></td></tr>
+      <tr><td class="d">total</td><td class="d">amount</td><td class="d">purchase: qty × price + fees · sale: qty × price − taxes − fees</td></tr>
+    </tbody>
+  </table></div>
+  <p class="body"><b>A trade never generates a transaction, and a transaction never generates a
+  trade.</b> Both are recorded independently; §10 compares them.</p>
+  <p class="body"><b>Why a sale carries taxes.</b> Under the Italian <i>regime amministrato</i> the
+  broker withholds the tax at the moment of the sale, so the amount that reaches the account is
+  already net of it. Recording it is what lets the sale's <code>total</code> equal the bank
+  transaction it is compared against in check 7, and what makes realised gain a real figure rather
+  than a pre-tax one. It is entered from the trade confirmation, never computed — the hypothetical
+  rate of §12.3 is an estimate and has no bearing on a sale that actually happened.</p>
+
+  <h4 class="subsub">Contract</h4>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>id</td><td></td></tr>
+      <tr><td>name</td><td>text</td><td>Employer.</td></tr>
+      <tr><td>monthsPerYear</td><td>int</td><td>13 today. 14 exists in other contracts.</td></tr>
+      <tr><td>hoursPerDay</td><td>decimal(2)</td><td>8 today.</td></tr>
+      <tr><td>startDate / endDate</td><td>date / date?</td><td></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsub">ContractYear</h4>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>contractId + year</td><td>key</td><td></td></tr>
+      <tr><td>workingDays</td><td>int</td><td>Entered by hand. Only input to hourly pay besides the payslips.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsub">Payslip</h4>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>id</td><td></td></tr>
+      <tr><td>contractId</td><td>ref</td><td></td></tr>
+      <tr><td>year, month</td><td>int, int</td><td><b>Not unique.</b> A month may hold more than one payslip.</td></tr>
+      <tr><td>label</td><td>text?</td><td>“13th” for the tredicesima.</td></tr>
+      <tr><td>contractGross</td><td>amount</td><td>Contractual monthly gross at that date.</td></tr>
+      <tr><td>gross</td><td>amount</td><td>Actual gross for the month.</td></tr>
+      <tr><td>netPayment</td><td>amount</td><td>What reached the bank. The figure check 4 uses.</td></tr>
+      <tr><td>refunds</td><td>amount</td><td>Positive.</td></tr>
+      <tr><td>carPayment</td><td>amount</td><td>Positive; withheld from the payment.</td></tr>
+      <tr><td>pensionContribution</td><td>amount</td><td>As printed on the payslip.</td></tr>
+      <tr><td>notes</td><td>text</td><td></td></tr>
+      <tr><td class="d">netSalary</td><td class="d">amount</td><td class="d">netPayment − refunds + carPayment</td></tr>
+      <tr><td class="d">netGrossPct</td><td class="d">%</td><td class="d">netSalary ÷ gross</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsub">Rule</h4>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>id</td><td></td></tr>
+      <tr><td>order</td><td>int</td><td>First match wins. Reorderable by drag.</td></tr>
+      <tr><td>substring</td><td>text</td><td>Matched case- and accent-insensitively against description only.</td></tr>
+      <tr><td>categoryId</td><td>ref</td><td></td></tr>
+    </tbody>
+  </table></div>
+  <p class="body">Rules are global. They are not scoped to an account.</p>
+
+  <h4 class="subsub">Holding — derived, never stored</h4>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Field</th><th>Derivation</th></tr></thead>
+    <tbody>
+      <tr><td>key</td><td>(securityId, accountId)</td></tr>
+      <tr><td>quantity</td><td>Σ purchases − Σ sales</td></tr>
+      <tr><td>avgCost</td><td>Weighted average, §12.1</td></tr>
+      <tr><td>invested</td><td>quantity × avgCost</td></tr>
+      <tr><td>price, priceDate</td><td>Latest Price record for the security</td></tr>
+      <tr><td>marketValue</td><td>quantity × price</td></tr>
+      <tr><td>gain, gainPct</td><td>marketValue − invested</td></tr>
+    </tbody>
+  </table></div>
+  <p class="body">A holding exists while quantity &gt; 0. It is never edited; it changes only by
+  recording a trade.</p>
+</section>
+
+<!-- ================= 3 ================= -->
+<section class="doc" id="s3">
+  <header>
+    <div class="num">03</div>
+    <h2>Categories</h2>
+    <p>Twenty-seven, fixed in the application and not editable at runtime. Adding one is a change to
+    the application. The old Italian label is retained as an import alias so existing data maps
+    itself.</p>
+  </header>
+
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Category</th><th>Type</th><th>Was</th><th>Receipt check</th></tr></thead>
+    <tbody>
+      <tr><td>Salary</td><td>Income</td><td>Stipendio</td><td>✓</td></tr>
+      <tr><td>Pension fund contribution</td><td>Income</td><td>Contribuzione fondo pensione</td><td></td></tr>
+      <tr><td>Reimbursement</td><td>Income</td><td>Rimborso</td><td></td></tr>
+      <tr><td>Gift received</td><td>Income</td><td>Regalo</td><td></td></tr>
+      <tr><td>Other income</td><td>Income</td><td>Altra entrata</td><td></td></tr>
+      <tr><td>Interest, dividends &amp; bonuses</td><td>Income</td><td>Interessi, dividendi e bonus</td><td></td></tr>
+      <tr><td>Voucher top-up</td><td>Income</td><td>Aggiunta voucher</td><td></td></tr>
+      <tr><td>Securities purchase</td><td>Investment</td><td>Acquisto titoli</td><td></td></tr>
+      <tr><td>Securities sale</td><td>Divestment</td><td>Vendita titoli</td><td></td></tr>
+      <tr><td>Restaurants &amp; bars</td><td>Expense</td><td>Ristorante e bar</td><td></td></tr>
+      <tr><td>Groceries</td><td>Expense</td><td>Supermercato</td><td></td></tr>
+      <tr><td>Travel</td><td>Expense</td><td>Viaggio</td><td></td></tr>
+      <tr><td>Home &amp; household</td><td>Expense</td><td>Casa</td><td></td></tr>
+      <tr><td>Rent &amp; condominium fees</td><td>Expense</td><td>Affitto e spese condominiali</td><td>✓</td></tr>
+      <tr><td>Electricity</td><td>Expense</td><td>Luce</td><td>✓</td></tr>
+      <tr><td>Home internet</td><td>Expense</td><td>Internet casa</td><td>✓</td></tr>
+      <tr><td>Mobile &amp; phone</td><td>Expense</td><td>Internet telefono</td><td>✓</td></tr>
+      <tr><td>Entertainment</td><td>Expense</td><td>Intrattenimento</td><td></td></tr>
+      <tr><td>Other expense</td><td>Expense</td><td>Altro pagamento</td><td></td></tr>
+      <tr><td>Bank fees</td><td>Expense</td><td>Costo banca</td><td></td></tr>
+      <tr><td>Income &amp; other taxes</td><td>Expense</td><td>Tassa non patrimoniale</td><td>✓</td></tr>
+      <tr><td>Wealth tax</td><td>Expense</td><td>Tassa patrimoniale</td><td></td></tr>
+      <tr><td>Culture &amp; education</td><td>Expense</td><td>Cultura</td><td></td></tr>
+      <tr><td>Health &amp; personal care</td><td>Expense</td><td>Salute e persona</td><td></td></tr>
+      <tr><td>Technology &amp; devices</td><td>Expense</td><td>Tecnologia e devices</td><td></td></tr>
+      <tr><td>Internal transfer</td><td>Internal</td><td>Trasferimento interno</td><td></td></tr>
+      <tr><td>Value adjustment</td><td>Revaluation</td><td>— new —</td><td></td></tr>
+    </tbody>
+  </table></div>
+
+  <ul class="body">
+    <li><b>Value adjustment</b> carries the manual correction that realigns an account's balance
+    with its real value when that value moves on its own — the pension fund's underlying
+    investments being the only current case. It counts towards balances and the portfolio total and
+    is excluded from every income and expense aggregate. Historical rows that used <em>Contribuzione
+    fondo pensione</em> for this purpose must be remapped on migration.</li>
+    <li>The <b>receipt check</b> column marks categories whose transactions default to
+    <code>unchecked</code>. Everything else defaults to <code>na</code>.</li>
+    <li>An amount whose sign contradicts its category type is <b>legal and not flagged</b> — a
+    refund routinely zeroes out a purchase inside an expense category.</li>
+  </ul>
+</section>
+
+<!-- ================= 4 PORTFOLIO ================= -->
+<section class="doc" id="s4">
+  <header>
+    <div class="num">04</div>
+    <h2>Portfolio</h2>
+    <p>The home screen.</p>
+  </header>
+
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a class="on" href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="alert">
+        <span class="dot"></span>
+        <p><b>3 checks are failing.</b> One unpaired internal transfer, one uncategorised transaction, one stale price.</p>
+        <a href="#">Review →</a>
+      </div>
+      <div class="cols a">
+        <div class="card">
+          <div class="hero"><span class="label">Net worth</span><span class="val">€ 187.475,25</span></div>
+          <hr class="sep">
+          <div class="figs">
+            <div class="fig"><span>Sum of all transactions</span><b>€ 180.201,05</b></div>
+            <div class="fig"><span>Unrealised investment gain</span><b class="pos">+ € 7.274,20</b></div>
+            <div class="fig"><span>…net, if sold today</span><b class="pos">+ € 5.301,91</b></div>
+          </div>
+        </div>
+        <div class="card">
+          <h4>All time</h4>
+          <div class="figs">
+            <div class="fig"><span>Bank fees</span><b class="neg">− € 1.284,50</b></div>
+            <div class="fig"><span>Wealth tax</span><b class="neg">− € 742,20</b></div>
+            <div class="fig"><span>Interest, dividends &amp; bonuses</span><b class="pos">+ € 3.918,66</b></div>
+            <div class="fig"><span>Realised gain on sales</span><b class="pos">+ € 1.842,30</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Breakdown by type</h4>
+        <div class="donutrow">
+          <div class="donut">
+            <svg viewBox="0 0 40 40" aria-label="Portfolio split by type">
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-setf)" stroke-dasharray="36.5 63.5" stroke-dashoffset="25"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-liq)" stroke-dasharray="18.2 81.8" stroke-dashoffset="-11.5"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-term)" stroke-dasharray="13.3 86.7" stroke-dashoffset="-29.7"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-pens)" stroke-dasharray="12.1 87.9" stroke-dashoffset="-43.0"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-betf)" stroke-dasharray="10.1 89.9" stroke-dashoffset="-55.1"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-dep)" stroke-dasharray="6.7 93.3" stroke-dashoffset="-65.2"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-stock)" stroke-dasharray="2.6 97.4" stroke-dashoffset="-71.9"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-etc)" stroke-dasharray="0.4 99.6" stroke-dashoffset="-74.5"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-vou)" stroke-dasharray="0.1 99.9" stroke-dashoffset="-74.9"></circle>
+            </svg>
+            <div class="center"><b>9</b><small>types</small></div>
+          </div>
+          <div class="breakdown">
+            <div class="brk"><i style="background:var(--c-setf)"></i><span>Stock ETF</span><span class="amt">€ 68.462,58</span><span class="pct">36,5%</span></div>
+            <div class="brk"><i style="background:var(--c-betf)"></i><span>Bond ETF</span><span class="amt">€ 18.930,60</span><span class="pct">10,1%</span></div>
+            <div class="brk"><i style="background:var(--c-liq)"></i><span>Liquidity</span><span class="amt">€ 34.185,22</span><span class="pct">18,2%</span></div>
+            <div class="brk"><i style="background:var(--c-dep)"></i><span>Deposit account</span><span class="amt">€ 12.500,00</span><span class="pct">6,7%</span></div>
+            <div class="brk"><i style="background:var(--c-term)"></i><span>Term deposit</span><span class="amt">€ 25.000,00</span><span class="pct">13,3%</span></div>
+            <div class="brk"><i style="background:var(--c-stock)"></i><span>Stock</span><span class="amt">€ 4.856,10</span><span class="pct">2,6%</span></div>
+            <div class="brk"><i style="background:var(--c-pens)"></i><span>Pension fund</span><span class="amt">€ 22.640,75</span><span class="pct">12,1%</span></div>
+            <div class="brk"><i style="background:var(--c-etc)"></i><span>ETC</span><span class="amt">€ 640,00</span><span class="pct">0,4%</span></div>
+            <div class="brk"><i style="background:var(--c-vou)"></i><span>Voucher</span><span class="amt">€ 260,00</span><span class="pct">0,1%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Net worth over time</h4>
+        <div class="chart">
+          <svg viewBox="0 0 740 196" role="img" aria-label="Net worth from 2023 to 2026">
+            <g class="grid"><line x1="0" y1="15" x2="720" y2="15"></line><line x1="0" y1="53" x2="720" y2="53"></line><line x1="0" y1="92" x2="720" y2="92"></line><line x1="0" y1="131" x2="720" y2="131"></line><line x1="0" y1="170" x2="720" y2="170"></line></g>
+            <g class="axis"><text x="724" y="18">190k</text><text x="724" y="95">150k</text><text x="724" y="173">110k</text><text x="0" y="190">2023</text><text x="247" y="190">2024</text><text x="494" y="190">2025</text><text x="690" y="190">2026</text></g>
+            <path fill="var(--brass)" fill-opacity="0.10" d="M0,153.7 20.6,150.4 41.1,147.1 61.7,148.9 82.3,143.8 102.9,140.9 123.4,136.7 144,138.2 164.6,131.6 185.1,128.3 205.7,125.4 226.3,119.2 246.9,115 267.4,117.5 288,110.7 308.6,105.7 329.1,102.2 349.7,103.9 370.3,96.8 390.9,91.9 411.4,88.6 432,93.3 452.6,85.9 473.1,79.3 493.7,76.6 514.3,71.2 534.9,74.3 555.4,66 576,61.1 596.6,57.6 617.1,50.8 637.7,54.1 658.3,45.6 678.9,37.1 699.4,29.9 720,20 L720,178 L0,178 Z"></path>
+            <polyline fill="none" stroke="var(--brass-dim)" stroke-width="1.6" stroke-dasharray="4 3" points="0,153.7 20.6,150.4 41.1,147.1 61.7,148.9 82.3,143.8 102.9,140.9 123.4,136.7 144,138.2 164.6,131.6 185.1,128.3 205.7,125.4 226.3,119.2 246.9,115 267.4,117.5"></polyline>
+            <polyline fill="none" stroke="var(--brass)" stroke-width="1.8" stroke-linejoin="round" points="267.4,117.5 288,110.7 308.6,105.7 329.1,102.2 349.7,103.9 370.3,96.8 390.9,91.9 411.4,88.6 432,93.3 452.6,85.9 473.1,79.3 493.7,76.6 514.3,71.2 534.9,74.3 555.4,66 576,61.1 596.6,57.6 617.1,50.8 637.7,54.1 658.3,45.6 678.9,37.1 699.4,29.9 720,20"></polyline>
+            <circle cx="720" cy="20" r="3.4" fill="var(--brass)"></circle>
+            <circle cx="267.4" cy="117.5" r="2.6" fill="var(--ink)" stroke="var(--brass-dim)" stroke-width="1.4"></circle>
+          </svg>
+        </div>
+        <div class="chartkey">
+          <span><i class="dash"></i>holdings valued at cost — before any price was recorded</span>
+          <span><i style="background:var(--brass)"></i>holdings valued at the latest price known on that date</span>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Accounts</h4>
+        <div class="tblwrap"><table>
+          <thead><tr><th>Institution</th><th>Account</th><th>Type</th><th class="r">Balance</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Fineco</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.840,55</td><td class="dim">main account</td></tr>
+            <tr><td>Fineco</td><td class="desc">Conto Titoli — uninvested</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.800,00</td><td class="dim">awaiting next purchase</td></tr>
+            <tr><td>Intesa Sanpaolo</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 8.204,10</td><td class="dim">household bills</td></tr>
+            <tr><td class="dim">—</td><td class="desc">Wallet</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 340,57</td><td class="dim">physical cash</td></tr>
+            <tr><td>ING</td><td class="desc">Conto Arancio</td><td><span class="chip type">Deposit account</span></td><td class="n r">€ 12.500,00</td><td class="dim">2,00%</td></tr>
+            <tr><td>Banca Sella</td><td class="desc">Deposito Vincolato 24m</td><td><span class="chip type">Term deposit</span></td><td class="n r">€ 25.000,00</td><td class="dim">matures 03/2027</td></tr>
+            <tr><td>Amundi</td><td class="desc">Fondo Pensione</td><td><span class="chip type">Pension fund</span></td><td class="n r">€ 22.640,75</td><td class="dim">revalued 31/07/2026</td></tr>
+            <tr><td>Edenred</td><td class="desc">Buoni Pasto</td><td><span class="chip type">Voucher</span></td><td class="n r">€ 260,00</td><td class="dim">26 × € 10,00</td></tr>
+            <tr><td>Fineco</td><td class="desc">Conto Titoli — securities</td><td><span class="chip type">3 holdings</span></td><td class="n r">€ 88.370,18</td><td class="dim">at last known price</td></tr>
+            <tr><td>Banca Sella</td><td class="desc">Conto Titoli — securities</td><td><span class="chip type">2 holdings</span></td><td class="n r">€ 5.496,10</td><td class="dim">at last known price</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="3">10 accounts · 5 institutions</td><td class="r tot">€ 187.475,25</td><td></td></tr></tfoot>
+        </table></div>
+      </div>
+    </main>
+  </div></div>
+
+  <h3 class="sub">4.1 Behaviour</h3>
+  <ul class="body">
+    <li><b>Failing-check banner.</b> Shown whenever any check fails, above everything else, naming
+    each failing check in one line and linking to §10. Absent when all pass.</li>
+    <li><b>Net worth</b> = Σ account balances + Σ holding market values (§12.4). Holdings are valued
+    at their latest known price, gross — no hypothetical tax or fee is deducted from the headline
+    figure.</li>
+    <li><b>The three figures beneath it</b> are that total taken apart. <i>Sum of all
+    transactions</i> is the same net worth with holdings valued at cost instead of at price, so
+    <i>unrealised investment gain</i> is exactly the difference between the two.
+    <i>…net, if sold today</i> then restates that gain after the hypothetical tax and sell fees of
+    §12.3, summed across every holding — the only figure on the screen that answers what the
+    portfolio is actually worth in hand. It sits below the gross gain rather than replacing it
+    because it is an estimate resting on average-cost lot matching, and carries the §12.3 caveat on
+    hover.</li>
+    <li><b>All-time figures</b> are lifetime sums of the named categories, plus realised gain from
+    sales (§12.2).</li>
+    <li><b>Breakdown by type.</b> Account balances contribute under the account's type; holdings
+    contribute under their security's type, at market value, consistently with net worth. An account
+    holding securities therefore appears as Liquidity for its cash only, never as a slice of its own.
+    Closed accounts are excluded.</li>
+    <li><b>The pie</b> carries one slice per type, sized by its share of net worth, with the type
+    count at its centre and the same colour keying the list beside it. It exists to make the shape
+    of the portfolio readable at a glance; the list beside it carries the amounts and percentages.</li>
+    <li><b>Net worth over time</b>, monthly points, §12.5. The stretch before the first recorded
+    price is drawn dashed and labelled as cost-based.</li>
+    <li><b>Accounts table</b> lists open accounts with computed balances. Read-only; accounts are
+    created and edited in Settings (§11).</li>
+  </ul>
+</section>
+
+<!-- ================= 5 TRANSACTIONS ================= -->
+<section class="doc" id="s5">
+  <header>
+    <div class="num">05</div>
+    <h2>Transactions</h2>
+    <p>The screen with the most hours on it.</p>
+  </header>
+
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Transactions</h3><div class="sub">4.812 records · 01/2016 – 08/2026</div></div>
+        <div class="actions">
+          <button class="btn ghost">Apply rules to uncategorised</button>
+          <button class="btn">Add transaction</button>
+          <button class="btn primary">Bulk import</button>
+        </div>
+      </div>
+      <div class="filters">
+        <span class="field">Account <b>All</b></span>
+        <span class="field act">Period <b>Aug 2026</b></span>
+        <span class="field">Category <b>All</b></span>
+        <span class="field">Amount <b>Any</b></span>
+        <span class="field">Receipt <b>Any</b></span>
+        <span class="field search">Search description…</span>
+      </div>
+      <div class="card" style="padding-top:14px">
+        <div class="tblwrap"><table>
+          <thead><tr><th>Date</th><th>Account</th><th>Description</th><th class="r">Amount</th><th>Category</th><th>Matched</th><th>Receipt</th><th>Notes</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="n">01/08/2026</td><td class="dim">Fineco</td><td class="desc">STIPENDIO LUGLIO 2026</td><td class="n r pos">+ € 2.310,00</td><td><span class="chip auto">Salary</span></td><td class="link none">—</td><td class="rc done">✓ checked</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">01/08/2026</td><td class="dim">Fineco</td><td class="desc">ADDEBITO SDD ENEL ENERGIA</td><td class="n r neg">− € 78,42</td><td><span class="chip auto">Electricity</span></td><td class="link none">—</td><td class="rc wait">○ pending</td><td class="dim">bill not arrived</td><td class="rowact">···</td></tr>
+            <tr><td class="n">02/08/2026</td><td class="dim">Intesa Sanpaolo</td><td class="desc">BONIFICO AFFITTO AGOSTO</td><td class="n r neg">− € 950,00</td><td><span class="chip auto">Rent &amp; condominium fees</span></td><td class="link none">—</td><td class="rc done">✓ checked</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">03/08/2026</td><td class="dim">Fineco</td><td class="desc">PAGAMENTO POS ESSELUNGA MILANO</td><td class="n r neg">− € 87,31</td><td><span class="chip auto">Groceries</span></td><td class="link none">—</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">03/08/2026</td><td class="dim">Edenred</td><td class="desc">BUONI PASTO AGOSTO</td><td class="n r pos">+ € 220,00</td><td><span class="chip">Voucher top-up</span></td><td class="link none">—</td><td class="rc na">– n/a</td><td class="dim">22 × € 10,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">04/08/2026</td><td class="dim">Fineco</td><td class="desc">PAGAMENTO POS MC DONALD'S 1148</td><td class="n r neg">− € 12,50</td><td><span class="chip auto">Restaurants &amp; bars</span></td><td class="link none">—</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">05/08/2026</td><td class="dim">Fineco</td><td class="desc">BONIFICO A ING CONTO ARANCIO</td><td class="n r neg">− € 2.000,00</td><td><span class="chip">Internal transfer</span></td><td class="link">⇄ ING</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">05/08/2026</td><td class="dim">ING</td><td class="desc">BONIFICO DA FINECO</td><td class="n r pos">+ € 2.000,00</td><td><span class="chip">Internal transfer</span></td><td class="link">⇄ Fineco</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">06/08/2026</td><td class="dim">Fineco</td><td class="desc">ESEGUITO ACQUISTO SWDA 25 PZ</td><td class="n r neg">− € 2.310,50</td><td><span class="chip">Securities purchase</span></td><td class="link">⇄ SWDA</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">07/08/2026</td><td class="dim">Fineco</td><td class="desc">COMMISSIONI CONTO TRIMESTRE</td><td class="n r neg">− € 3,95</td><td><span class="chip auto">Bank fees</span></td><td class="link none">—</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">07/08/2026</td><td class="dim">Amundi</td><td class="desc">CONTRIBUTO AZIENDALE LUGLIO</td><td class="n r pos">+ € 148,00</td><td><span class="chip">Pension fund contribution</span></td><td class="link none">—</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr class="sel"><td class="n">08/08/2026</td><td class="dim">Intesa Sanpaolo</td><td class="desc">ADDEBITO DIVERSI 4471</td><td class="n r neg">− € 41,20</td><td><span class="chip miss">no category</span></td><td class="link none">—</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="3">12 results</td><td class="r tot">− € 803,88</td><td colspan="5"></td></tr></tfoot>
+        </table></div>
+        <div class="pager"><span class="pg on">1</span><span>of 1 · 50 per page · 12 results</span></div>
+      </div>
+    </main>
+  </div></div>
+
+  <h3 class="sub">5.1 Columns</h3>
+  <ul class="body">
+    <li><b>Category</b> chip is violet when <code>categorySource = rule</code>, neutral when
+    <code>manual</code>, red when empty. Violet denotes provenance, not correctness — deliberately
+    not green.</li>
+    <li><b>Matched</b> is derived and read-only: the counterpart account for a paired internal
+    transfer, the security for a trade-matched securities transaction, an em dash otherwise
+    (§12.6).</li>
+    <li><b>Notes</b> is free text the user owns. <b>The application never writes to it.</b></li>
+    <li><b>Receipt</b> cycles <code>unchecked → checked → na</code>.</li>
+    <li>The footer sums the filtered rows, across all pages.</li>
+  </ul>
+
+  <h3 class="sub">5.2 Ordering and paging</h3>
+  <ul class="body">
+    <li>Always <code>date ASC, insertionSeq ASC, id ASC</code>. Columns are not sortable and the
+    order is not configurable — the list must look identical every time it is opened.</li>
+    <li><b>50 rows per page.</b> This is the only paginated table in the application; every other
+    table is shown in full.</li>
+  </ul>
+
+  <h3 class="sub">5.3 Filters</h3>
+  <p class="body">Account · period · category · amount range · receipt state · free-text search on
+  description. Combined with AND. Filters affect the footer totals and the page count.</p>
+
+  <h3 class="sub">5.4 Editing</h3>
+  <ul class="body">
+    <li><b>Every cell is editable in place</b> — date, account, description, amount, category,
+    receipt state, notes. Click to edit.</li>
+    <li>Setting a category by hand sets <code>categorySource = manual</code>, which protects it from
+    every automatic re-categorisation.</li>
+    <li><b>This is reversible.</b> The category picker offers a special entry — <em>Automatic (let
+    rules decide)</em> — at the top of the list. Choosing it sets <code>categorySource</code> back to
+    <code>rule</code> and immediately re-applies the rule list to that transaction, leaving the
+    category empty if no rule matches. There is no state a hand-edit can trap a row in.</li>
+    <li>Row menu: duplicate, delete. <b>Delete asks for confirmation</b> — there is no undo.</li>
+    <li><b>Apply rules to uncategorised</b> runs the rule list over transactions with no category.
+    It never touches a categorised row.</li>
+  </ul>
+
+  <h3 class="sub">5.5 Add transaction</h3>
+  <div class="dlgrow">
+    <div class="dlg">
+      <h5>Add transaction</h5>
+      <div class="dsub">manual entry — for anything not coming from a bank export</div>
+      <div class="frm">
+        <label>Account</label><div class="inp sel">Fineco · Conto Corrente</div>
+        <label>Date</label><div class="inp">08/08/2026</div>
+        <label>Description</label><div class="inp ph">e.g. RIMBORSO SPESE VIAGGIO</div>
+        <label>Amount</label><div class="inp ph">− 41,20</div>
+        <label>Category</label><div class="inp sel">Automatic (let rules decide)</div>
+        <label>Receipt</label><div class="inp chipset"><span class="chip">unchecked</span><span class="chip type">checked</span><span class="chip type">n/a</span></div>
+        <label>Notes</label><div class="inp ph">optional</div>
+      </div>
+      <p class="hint"><b>Account</b> defaults to the one last used. <b>Date</b> defaults to today.
+      <b>Amount</b> is signed — negative is money out — and accepts the preference separators.
+      <b>Category</b> defaults to <em>Automatic</em>, so a manually added row is categorised by the
+      same rules as an imported one. <b>Receipt</b> defaults from the chosen category (§3).</p>
+      <div class="dlgfoot">
+        <button class="btn ghost">Cancel</button>
+        <button class="btn">Save and add another</button>
+        <button class="btn primary">Save</button>
+      </div>
+    </div>
+  </div>
+  <p class="body"><b>Save and add another</b> keeps the dialog open with account and date retained
+  and the other fields cleared — the shape of manual entry is several rows in one sitting.</p>
+</section>
+
+<!-- ================= 6 IMPORT ================= -->
+<section class="doc" id="s6">
+  <header>
+    <div class="num">06</div>
+    <h2>Bulk import</h2>
+    <p>Two steps. One job: get raw rows in without duplicating anything.</p>
+  </header>
+
+  <h3 class="sub">6.1 Step 1 — choose account and paste</h3>
+
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Bulk import</h3><div class="sub">step 1 of 2 · paste</div></div>
+        <div class="actions"><button class="btn ghost">Cancel</button><button class="btn primary">Continue</button></div>
+      </div>
+      <div class="cols c">
+        <div class="card">
+          <h4>Paste rows — tab separated</h4>
+          <div class="paste empty">11/07/2026→PAGAMENTO POS COOP 2213→-54,80
+12/07/2026→ADDEBITO SDD FASTWEB→-29,95
+13/07/2026→PRELIEVO ATM V.LE MONZA→-100,00
+14/07/2026→PAGAMENTO POS MC DONALD'S 1148→-12,50
+15/07/2026→BONIFICO DA ROSSI MARIO→250,00
+16/07/2026→CANONE MENSILE CONTO→-3,95
+<span style="color:var(--brass-dim)">▌</span></div>
+          <div class="detect">
+            <span class="chip">6 rows read</span>
+            <span class="chip">3 columns detected</span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>Import into</h4>
+          <div class="frm" style="grid-template-columns:1fr">
+            <div class="inp sel" style="font-family:var(--mono);font-size:12px">Fineco · Conto Corrente</div>
+          </div>
+          <hr class="sep">
+          <h4>Expected column order</h4>
+          <div class="figs">
+            <div class="fig"><span>1</span><b>Date</b></div>
+            <div class="fig"><span>2</span><b>Description</b></div>
+            <div class="fig"><span>3</span><b>Amount &nbsp;<span style="color:var(--faint)">signed</span></b></div>
+          </div>
+          <hr class="sep">
+          <p class="detail note">Every import uses this order. Rearrange the export before pasting
+          if your bank produces something else. Extra columns are ignored; fewer than three is an
+          error.</p>
+        </div>
+      </div>
+    </main>
+  </div></div>
+
+  <ul class="body">
+    <li>The <b>account is chosen once</b> for the whole paste, not per row. It defaults to the
+    account last imported into.</li>
+    <li><b>Fixed column order: date · description · amount.</b> A single signed amount column;
+    debit/credit pairs are not supported. Bank-specific import profiles are future work.</li>
+    <li>Row and column counts update live as text is pasted, so a mis-shaped paste is visible before
+    continuing.</li>
+    <li><b>Continue</b> is disabled while the paste is empty or any row has fewer than three
+    columns.</li>
+  </ul>
+
+  <h3 class="sub">6.2 Step 2 — review</h3>
+
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Bulk import</h3><div class="sub">step 2 of 2 · review</div></div>
+        <div class="actions"><button class="btn ghost">Back</button><button class="btn primary">Import 5 transactions</button></div>
+      </div>
+      <div class="cols c">
+        <div class="card">
+          <h4>Detected formats</h4>
+          <div class="detect">
+            <span class="chip">Account <b>Fineco · Conto Corrente</b></span>
+            <span class="chip">Date <b>DD/MM/YYYY</b></span>
+            <span class="chip">Decimal <b>comma</b></span>
+            <span class="chip">Thousands <b>dot</b></span>
+          </div>
+          <p class="detail note">Inferred from the pasted rows. Each is overridable, and changing one
+          re-parses the preview immediately.</p>
+        </div>
+        <div class="card">
+          <h4>Outcome</h4>
+          <div class="figs">
+            <div class="fig"><span>Rows pasted</span><b>6</b></div>
+            <div class="fig"><span>Selected for import</span><b class="pos">5</b></div>
+            <div class="fig"><span>Already in the file</span><b class="neg">1</b></div>
+            <div class="fig"><span>Failed to parse</span><b>0</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Preview</h4>
+        <div class="tblwrap"><table>
+          <thead><tr><th style="width:26px"></th><th>Date</th><th>Description</th><th class="r">Amount</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><span class="cb"></span></td><td class="n">11/07/2026</td><td class="desc">PAGAMENTO POS COOP 2213</td><td class="n r neg">− € 54,80</td><td class="dim">new</td></tr>
+            <tr><td><span class="cb"></span></td><td class="n">12/07/2026</td><td class="desc">ADDEBITO SDD FASTWEB</td><td class="n r neg">− € 29,95</td><td class="dim">new</td></tr>
+            <tr><td><span class="cb"></span></td><td class="n">13/07/2026</td><td class="desc">PRELIEVO ATM V.LE MONZA</td><td class="n r neg">− € 100,00</td><td class="dim">new</td></tr>
+            <tr><td><span class="cb"></span></td><td class="n">14/07/2026</td><td class="desc">PAGAMENTO POS MC DONALD'S 1148</td><td class="n r neg">− € 12,50</td><td class="dim">new</td></tr>
+            <tr class="dupe"><td><span class="cb off"></span></td><td class="n">15/07/2026</td><td class="desc">BONIFICO DA ROSSI MARIO</td><td class="n r">+ € 250,00</td><td class="neg">already imported</td></tr>
+            <tr><td><span class="cb"></span></td><td class="n">16/07/2026</td><td class="desc">CANONE MENSILE CONTO</td><td class="n r neg">− € 3,95</td><td class="dim">new</td></tr>
+          </tbody>
+        </table></div>
+        <div class="warnline">
+          <span class="neg">▲</span>
+          <span><b>1 row is already in the file</b> and has been unselected. Tick it anyway if the duplicate is genuine — the same amount on the same day does happen.</span>
+        </div>
+      </div>
+    </main>
+  </div></div>
+
+  <h4 class="subsub">Duplicates</h4>
+  <ul class="body">
+    <li>Exact match on <b>account + date + amount + normalised description</b> against transactions
+    already in the file. Normalisation: trim, collapse whitespace, case-fold.</li>
+    <li>A match is flagged and <b>unselected</b>, not removed. The user may re-select it.</li>
+    <li>Rows within the paste are <b>never</b> compared with each other.</li>
+  </ul>
+
+  <h4 class="subsub">After import</h4>
+  <p class="body">Rows are inserted uncategorised, then the rule list runs over them, setting
+  <code>categorySource = rule</code> where a rule matched. <b>No categorisation is previewed on
+  this screen.</b> The user lands on Transactions filtered to the imported batch, where a wrong
+  category can be fixed in place with the full filter set available.</p>
+</section>
+
+<!-- ================= 7 CATEGORIES ================= -->
+<section class="doc" id="s7">
+  <header>
+    <div class="num">07</div>
+    <h2>Categories</h2>
+    <p>The categories × years matrix — the one screen that answers where the money goes.</p>
+  </header>
+
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Transactions</a><a class="on" href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Categories</h3><div class="sub">2022 – 2026 · 2026 is a partial year, 8 months</div></div>
+        <div class="actions"><span class="field">Years <b>Last 5</b></span><span class="field">Accounts <b>All</b></span></div>
+      </div>
+      <div class="card">
+        <div class="tblwrap"><table>
+          <thead><tr><th>Category</th><th class="r">2022</th><th class="r">2023</th><th class="r">2024</th><th class="r">2025</th><th class="r">2026</th><th class="r">Total</th></tr></thead>
+          <tbody>
+            <tr class="grp"><td colspan="7">Income</td></tr>
+            <tr><td class="cat">Salary</td><td class="n r">€ 21.900</td><td class="n r">€ 23.710</td><td class="n r">€ 25.390</td><td class="n r">€ 27.374</td><td class="n r">€ 18.416</td><td class="n r">€ 116.790</td></tr>
+            <tr><td class="cat">Voucher top-up</td><td class="n r">€ 2.420</td><td class="n r">€ 2.420</td><td class="n r">€ 2.530</td><td class="n r">€ 2.640</td><td class="n r">€ 1.540</td><td class="n r">€ 11.550</td></tr>
+            <tr><td class="cat">Pension fund contribution</td><td class="n r">€ 1.716</td><td class="n r">€ 1.716</td><td class="n r">€ 1.780</td><td class="n r">€ 1.860</td><td class="n r">€ 1.184</td><td class="n r">€ 8.256</td></tr>
+            <tr><td class="cat">Interest, dividends &amp; bonuses</td><td class="n r">€ 412</td><td class="n r">€ 688</td><td class="n r">€ 940</td><td class="n r">€ 1.204</td><td class="n r">€ 674</td><td class="n r">€ 3.918</td></tr>
+            <tr><td class="cat">Reimbursement</td><td class="n r">€ 420</td><td class="n r">€ 380</td><td class="n r">€ 512</td><td class="n r">€ 610</td><td class="n r">€ 182</td><td class="n r">€ 2.104</td></tr>
+            <tr><td class="cat">Gift received</td><td class="n r">€ 250</td><td class="n r">€ 400</td><td class="n r">€ 150</td><td class="n r">€ 300</td><td class="n r">€ 250</td><td class="n r">€ 1.350</td></tr>
+            <tr><td class="cat">Other income</td><td class="n r dim">—</td><td class="n r">€ 120</td><td class="n r dim">—</td><td class="n r">€ 85</td><td class="n r dim">—</td><td class="n r">€ 205</td></tr>
+            <tr class="sum"><td class="cat">Total income</td><td class="n r">€ 27.118</td><td class="n r">€ 29.434</td><td class="n r">€ 31.302</td><td class="n r">€ 34.073</td><td class="n r">€ 22.246</td><td class="n r">€ 144.173</td></tr>
+            <tr class="grp"><td colspan="7">Expense</td></tr>
+            <tr><td class="cat">Rent &amp; condominium fees</td><td class="n r">€ 5.400</td><td class="n r">€ 5.400</td><td class="n r">€ 5.700</td><td class="n r">€ 5.700</td><td class="n r">€ 3.800</td><td class="n r">€ 26.000</td></tr>
+            <tr><td class="cat">Groceries</td><td class="n r">€ 2.090</td><td class="n r">€ 2.260</td><td class="n r">€ 2.380</td><td class="n r">€ 2.490</td><td class="n r">€ 1.560</td><td class="n r">€ 10.780</td></tr>
+            <tr><td class="cat">Restaurants &amp; bars</td><td class="n r">€ 1.320</td><td class="n r">€ 1.490</td><td class="n r">€ 1.605</td><td class="n r">€ 1.710</td><td class="n r">€ 1.090</td><td class="n r">€ 7.215</td></tr>
+            <tr><td class="cat">Travel</td><td class="n r">€ 925</td><td class="n r">€ 1.200</td><td class="n r">€ 1.550</td><td class="n r">€ 1.380</td><td class="n r">€ 970</td><td class="n r">€ 6.025</td></tr>
+            <tr><td class="cat">Technology &amp; devices</td><td class="n r">€ 620</td><td class="n r">€ 240</td><td class="n r">€ 1.050</td><td class="n r">€ 310</td><td class="n r">€ 690</td><td class="n r">€ 2.910</td></tr>
+            <tr><td class="cat">Income &amp; other taxes</td><td class="n r">€ 550</td><td class="n r">€ 590</td><td class="n r">€ 620</td><td class="n r">€ 655</td><td class="n r">€ 320</td><td class="n r">€ 2.735</td></tr>
+            <tr><td class="cat">Home &amp; household</td><td class="n r">€ 490</td><td class="n r">€ 620</td><td class="n r">€ 430</td><td class="n r">€ 755</td><td class="n r">€ 360</td><td class="n r">€ 2.655</td></tr>
+            <tr><td class="cat">Health &amp; personal care</td><td class="n r">€ 440</td><td class="n r">€ 560</td><td class="n r">€ 480</td><td class="n r">€ 620</td><td class="n r">€ 320</td><td class="n r">€ 2.420</td></tr>
+            <tr><td class="cat">Electricity</td><td class="n r">€ 360</td><td class="n r">€ 470</td><td class="n r">€ 440</td><td class="n r">€ 405</td><td class="n r">€ 260</td><td class="n r">€ 1.935</td></tr>
+            <tr><td class="cat">Entertainment</td><td class="n r">€ 320</td><td class="n r">€ 360</td><td class="n r">€ 405</td><td class="n r">€ 380</td><td class="n r">€ 240</td><td class="n r">€ 1.705</td></tr>
+            <tr><td class="cat">Home internet</td><td class="n r">€ 359</td><td class="n r">€ 359</td><td class="n r">€ 359</td><td class="n r">€ 359</td><td class="n r">€ 240</td><td class="n r">€ 1.676</td></tr>
+            <tr><td class="cat">Other expense</td><td class="n r">€ 210</td><td class="n r">€ 190</td><td class="n r">€ 255</td><td class="n r">€ 230</td><td class="n r">€ 140</td><td class="n r">€ 1.025</td></tr>
+            <tr><td class="cat">Culture &amp; education</td><td class="n r">€ 155</td><td class="n r">€ 140</td><td class="n r">€ 210</td><td class="n r">€ 195</td><td class="n r">€ 105</td><td class="n r">€ 805</td></tr>
+            <tr><td class="cat">Bank fees</td><td class="n r">€ 142</td><td class="n r">€ 148</td><td class="n r">€ 156</td><td class="n r">€ 162</td><td class="n r">€ 98</td><td class="n r">€ 706</td></tr>
+            <tr><td class="cat">Wealth tax</td><td class="n r">€ 118</td><td class="n r">€ 132</td><td class="n r">€ 148</td><td class="n r">€ 164</td><td class="n r">€ 92</td><td class="n r">€ 654</td></tr>
+            <tr><td class="cat">Mobile &amp; phone</td><td class="n r">€ 120</td><td class="n r">€ 120</td><td class="n r">€ 132</td><td class="n r">€ 132</td><td class="n r">€ 88</td><td class="n r">€ 592</td></tr>
+            <tr class="sum"><td class="cat">Total expense</td><td class="n r">€ 13.619</td><td class="n r">€ 14.279</td><td class="n r">€ 15.920</td><td class="n r">€ 15.647</td><td class="n r">€ 10.373</td><td class="n r">€ 69.838</td></tr>
+            <tr class="net"><td class="cat">Income − expense</td><td class="n r pos">€ 13.499</td><td class="n r pos">€ 15.155</td><td class="n r pos">€ 15.382</td><td class="n r pos">€ 18.426</td><td class="n r pos">€ 11.873</td><td class="n r pos">€ 74.335</td></tr>
+            <tr class="grp"><td colspan="7">Other types</td></tr>
+            <tr class="sum"><td class="cat">Investment</td><td class="n r">€ 8.400</td><td class="n r">€ 9.200</td><td class="n r">€ 11.000</td><td class="n r">€ 12.400</td><td class="n r">€ 6.900</td><td class="n r">€ 47.900</td></tr>
+            <tr class="sum"><td class="cat">Divestment</td><td class="n r">€ 1.200</td><td class="n r dim">—</td><td class="n r">€ 3.400</td><td class="n r dim">—</td><td class="n r">€ 2.100</td><td class="n r">€ 6.700</td></tr>
+            <tr class="sum"><td class="cat">Revaluation</td><td class="n r">€ 840</td><td class="n r">€ 1.420</td><td class="n r">€ 1.960</td><td class="n r">€ 2.280</td><td class="n r">€ 1.180</td><td class="n r">€ 7.680</td></tr>
+            <tr class="sum"><td class="cat">Internal transfer</td><td class="n r dim">€ 0</td><td class="n r dim">€ 0</td><td class="n r dim">€ 0</td><td class="n r dim">€ 0</td><td class="n r dim">€ 0</td><td class="n r dim">€ 0</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </main>
+  </div></div>
+
+  <ul class="body">
+    <li>Rows are categories grouped under their type, ordered by total descending within each group.
+    Columns are calendar years plus a total. <b>The whole table is shown; there is no paging.</b></li>
+    <li>Amounts are displayed as <b>absolute values</b>; the type header carries the direction.</li>
+    <li><b>Income − expense</b> is the emphasised line the table exists to produce. Investment,
+    Divestment, Revaluation and Internal appear as type subtotals only, below it, and are excluded
+    from it.</li>
+    <li><b>Internal transfer always reads zero.</b> It is shown rather than hidden because a
+    non-zero value means a leg is missing.</li>
+    <li>A cell with no transactions shows an em dash, not <code>€ 0</code>, so a real zero stays
+    distinguishable from nothing recorded.</li>
+    <li>Filters: year range, accounts. A partial year is labelled with the months it covers.</li>
+    <li>Uncategorised transactions appear in no row. Their existence is a failing check, not a
+    silent omission.</li>
+    <li><b>Salary</b> here is the sum of <em>Salary</em> transactions, i.e. net payments received —
+    not gross pay. Gross figures live on the Salaries screen (§9).</li>
+  </ul>
+</section>
+
+<!-- ================= 8 INVESTMENTS ================= -->
+<section class="doc" id="s8">
+  <header>
+    <div class="num">08</div>
+    <h2>Investments</h2>
+    <p>Three tabs: Holdings, Purchases, Sales. Holdings is entirely derived from the other two.</p>
+  </header>
+
+  <h3 class="sub">8.1 Holdings</h3>
+
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Investments</h3><div class="sub">5 open positions · 2 institutions · prices as of 08/08/2026</div></div>
+        <div class="actions"><button class="btn ghost">Update prices</button></div>
+      </div>
+      <nav class="tabs"><a class="on" href="#">Holdings</a><a href="#">Purchases · 41</a><a href="#">Sales · 6</a></nav>
+      <div class="cols c">
+        <div class="card">
+          <div class="tblwrap"><table>
+            <thead><tr><th>Security</th><th>Type</th><th>Where</th><th class="r">Qty</th><th class="r">Avg cost</th><th class="r">Price</th><th class="r">Value</th><th class="r">Gain</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="desc">VWCE <span class="dim">Vanguard FTSE All-World</span></td><td><span class="chip type">Stock ETF</span></td><td class="dim">Fineco</td><td class="n r">338</td><td class="n r">€ 108,2150</td><td class="n r">€ 124,8600</td><td class="n r">€ 42.202,68</td><td class="n r pos">+15,4%</td></tr>
+              <tr><td class="desc">SWDA <span class="dim">iShares Core MSCI World</span></td><td><span class="chip type">Stock ETF</span></td><td class="dim">Fineco</td><td class="n r">285</td><td class="n r">€ 78,4210</td><td class="n r">€ 92,1400</td><td class="n r">€ 26.259,90</td><td class="n r pos">+17,5%</td></tr>
+              <tr><td class="desc">AGGH <span class="dim">iShares Core Global Aggregate Bond</span></td><td><span class="chip type">Bond ETF</span></td><td class="dim">Fineco</td><td class="n r">3.900</td><td class="n r">€ 4,8620</td><td class="n r" style="color:var(--brass)">€ 4,8540 ▲</td><td class="n r">€ 18.930,60</td><td class="n r neg">−0,2%</td></tr>
+              <tr><td class="desc">ENI <span class="dim">Eni S.p.A.</span></td><td><span class="chip type">Stock</span></td><td class="dim">Banca Sella</td><td class="n r">320</td><td class="n r">€ 13,9800</td><td class="n r">€ 15,1753</td><td class="n r">€ 4.856,10</td><td class="n r pos">+8,5%</td></tr>
+              <tr><td class="desc">PHAU <span class="dim">WisdomTree Physical Gold</span></td><td><span class="chip type">ETC</span></td><td class="dim">Banca Sella</td><td class="n r">8</td><td class="n r">€ 72,1000</td><td class="n r">€ 80,0000</td><td class="n r">€ 640,00</td><td class="n r pos">+11,0%</td></tr>
+            </tbody>
+            <tfoot><tr><td colspan="6">5 holdings · ▲ price older than 30 days</td><td class="r tot">€ 92.889,28</td><td class="r pos">+ € 9.950,42</td></tr></tfoot>
+          </table></div>
+        </div>
+        <div class="detail">
+          <div class="dh"><b>VWCE</b><small>IE00BK5BQT80 · Vanguard FTSE All-World UCITS · Stock ETF · Fineco</small></div>
+          <div class="figs">
+            <div class="fig"><span>Purchased, 4 lots</span><b>338</b></div>
+            <div class="fig"><span>Sold</span><b>0</b></div>
+            <div class="fig"><span>Weighted average cost</span><b>€ 108,2150</b></div>
+            <div class="fig"><span>Invested, incl. fees</span><b>€ 36.576,67</b></div>
+          </div>
+          <hr class="sep">
+          <h4 class="subhead">If sold today</h4>
+          <div class="figs">
+            <div class="fig"><span>Gross proceeds</span><b>€ 42.202,68</b></div>
+            <div class="fig"><span>Gain before tax</span><b class="pos">+ € 5.626,01</b></div>
+            <div class="fig"><span>Tax, 26% of gain</span><b class="neg">− € 1.462,76</b></div>
+            <div class="fig"><span>Sell fee, Fineco default</span><b class="neg">− € 19,00</b></div>
+            <div class="fig"><span>Net proceeds</span><b>€ 40.720,92</b></div>
+            <div class="fig"><span>Net gain</span><b class="pos">+ € 4.144,25 · +11,3%</b></div>
+          </div>
+          <hr class="sep">
+          <p class="note">Average cost is an approximation. Your broker may match lots differently
+          when it computes the taxable gain, so treat the tax figure as an estimate rather than the
+          amount that will actually be withheld.</p>
+        </div>
+      </div>
+    </main>
+  </div></div>
+
+  <ul class="body">
+    <li>One row per (security, account) with quantity &gt; 0. Read-only — every figure is derived.</li>
+    <li>A price older than <code>priceStalenessDays</code> is marked on the row itself, not only in
+    §10.</li>
+    <li>Selecting a row opens the detail panel: lots purchased and sold, weighted average cost,
+    invested total, and the full hypothetical liquidation breakdown (§12.3).</li>
+    <li>The caveat about lot matching is shown in the panel, next to the number it qualifies.</li>
+  </ul>
+
+  <h3 class="sub">8.2 Purchases and Sales</h3>
+
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Investments</h3><div class="sub">41 purchases · 2016 – 2026</div></div>
+        <div class="actions"><button class="btn primary">Add purchase</button></div>
+      </div>
+      <nav class="tabs"><a href="#">Holdings</a><a class="on" href="#">Purchases · 41</a><a href="#">Sales · 6</a></nav>
+      <div class="filters">
+        <span class="field">Security <b>All</b></span><span class="field">Account <b>All</b></span><span class="field act">Period <b>2025 – 2026</b></span>
+      </div>
+      <div class="card" style="padding-top:14px">
+        <div class="tblwrap"><table>
+          <thead><tr><th>Date</th><th>Security</th><th>Account</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Fees</th><th class="r">Total cost</th><th>Matched</th><th>Notes</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="n">21/06/2025</td><td class="desc">PHAU</td><td class="dim">Banca Sella</td><td class="n r">8</td><td class="n r">€ 70,6000</td><td class="n r">€ 12,00</td><td class="n r">€ 576,80</td><td class="link">⇄ 21/06</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">09/09/2025</td><td class="desc">ENI</td><td class="dim">Banca Sella</td><td class="n r">120</td><td class="n r">€ 14,2500</td><td class="n r">€ 12,00</td><td class="n r">€ 1.722,00</td><td class="link">⇄ 09/09</td><td class="dim">dividend play</td><td class="rowact">···</td></tr>
+            <tr><td class="n">14/11/2025</td><td class="desc">VWCE</td><td class="dim">Fineco</td><td class="n r">35</td><td class="n r">€ 116,8400</td><td class="n r">€ 19,00</td><td class="n r">€ 4.108,40</td><td class="link">⇄ 14/11</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">03/02/2026</td><td class="desc">AGGH</td><td class="dim">Fineco</td><td class="n r">500</td><td class="n r">€ 4,8900</td><td class="n r">€ 19,00</td><td class="n r">€ 2.464,00</td><td class="link">⇄ 03/02</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">12/05/2026</td><td class="desc">VWCE</td><td class="dim">Fineco</td><td class="n r">40</td><td class="n r">€ 120,3100</td><td class="n r">€ 19,00</td><td class="n r">€ 4.831,40</td><td class="link">⇄ 12/05</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr class="sel"><td class="n">06/08/2026</td><td class="desc">SWDA</td><td class="dim">Fineco</td><td class="n r">25</td><td class="n r">€ 91,6600</td><td class="n r">€ 19,00</td><td class="n r">€ 2.310,50</td><td class="link">⇄ 06/08</td><td class="dim"></td><td class="rowact">···</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="5">6 of 41 shown</td><td class="r">€ 100,00</td><td class="r tot">€ 16.013,10</td><td colspan="3"></td></tr></tfoot>
+        </table></div>
+      </div>
+    </main>
+  </div></div>
+
+  <ul class="body">
+    <li>Where trades are created, edited in place and deleted.</li>
+    <li><b>The Sales tab carries two columns the Purchases tab does not</b>: <i>Taxes</i>, the
+    capital-gains tax the broker actually withheld, entered from the trade confirmation; and
+    <i>Realised gain</i>, derived per §12.2. <i>Total cost</i> is replaced by <i>Net proceeds</i> —
+    what actually reached the account, after both tax and fees. Both money columns are summed in the
+    footer alongside the others.</li>
+    <li><b>Taxes is zero, not blank, when nothing was withheld</b> — a sale at a loss, or one whose
+    gain the broker offset against a carried-forward loss. Blank would be indistinguishable from
+    "not filled in yet", and the figure feeds check 7.</li>
+    <li><b>Matched</b> shows the date of the bank transaction the application paired the trade with
+    (§12.6). A dash is what checks 6 and 7 report.</li>
+    <li>Recording a trade <b>does not</b> create a transaction.</li>
+    <li>Ordering: <code>date ASC, insertionSeq ASC</code> — the same direction as Transactions, so
+    both ledgers read the same way. No paging; filters narrow the list instead.</li>
+    <li>Filters: security, account, period.</li>
+  </ul>
+
+  <h3 class="sub">8.3 Add purchase, and where securities come from</h3>
+  <div class="dlgrow">
+    <div class="dlg">
+      <h5>Add purchase</h5>
+      <div class="dsub">a sale is the same form, with a taxes field and proceeds instead of cost</div>
+      <div class="frm">
+        <label>Date</label><div class="inp">06/08/2026</div>
+        <label>Account</label><div class="inp sel">Fineco · Conto Titoli</div>
+        <label>Security</label><div class="inp ph">IE00BFY0GT14 — not found</div>
+      </div>
+      <div class="newthing">
+        <div class="nt">New security</div>
+        <div class="frm">
+          <label>ISIN</label><div class="inp">IE00BFY0GT14</div>
+          <label>Ticker</label><div class="inp ph">SPPW</div>
+          <label>Name</label><div class="inp ph">SPDR MSCI World UCITS</div>
+          <label>Type</label><div class="inp sel">Stock ETF</div>
+          <label>Currency</label><div class="inp sel">EUR</div>
+        </div>
+      </div>
+      <div class="frm">
+        <label>Quantity</label><div class="inp ph">25</div>
+        <label>Unit price</label><div class="inp ph">91,6600</div>
+        <label>Fees</label><div class="inp">19,00</div>
+        <label>Notes</label><div class="inp ph">optional</div>
+      </div>
+      <p class="hint"><b>Total cost € 2.310,50</b> is computed and shown live as quantity, price and
+      fees are typed — never entered.</p>
+      <div class="dlgfoot">
+        <button class="btn ghost">Cancel</button>
+        <button class="btn">Save and add another</button>
+        <button class="btn primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <ul class="body">
+    <li><b>Securities are created inline, here.</b> Typing an ISIN or ticker searches existing
+    securities; if none matches, the form expands with the fields needed to create one, and it is
+    saved together with the trade. There is no separate “create a security first” step.</li>
+    <li><b>The Securities tab in Settings still exists</b> — not to create securities, but to
+    correct a mistyped ISIN, rename an instrument, change its type, and view or edit its price
+    history. Inline creation covers the common path; the tab covers the rest.</li>
+    <li>A security that has no trades can be deleted. One with trades can only be edited.</li>
+    <li><b>The sale form adds a Taxes field</b> below Fees, and shows <b>net proceeds</b>
+    — <code>qty × price − taxes − fees</code> — live in place of total cost. It defaults to zero and
+    is never pre-filled from the hypothetical rate of §12.3: an estimate silently becoming a recorded
+    figure is exactly the kind of thing §10 exists to catch, and it would defeat check 7.</li>
+  </ul>
+
+  <h3 class="sub">8.4 Prices</h3>
+  <ul class="body">
+    <li>Prices are entered per security with an <b>as-of date</b>, and every value is kept as
+    history. Editing a price adds a record; it does not replace one.</li>
+    <li><b>Optional online lookup is disabled by default.</b> When enabled in Settings, it is
+    triggered only by the explicit <em>Update prices</em> button. Never automatic, never on load.</li>
+    <li>It sends security identifiers — ISIN or ticker — to the configured provider. <b>No amounts,
+    quantities or account data ever leave the machine.</b> The application must state this where the
+    feature is enabled.</li>
+    <li>Fetched values are shown for confirmation before being written as
+    <code>source = fetched</code> Price records.</li>
+    <li>The application is fully usable with the feature off. A provider failure is a message, never
+    a blocked screen.</li>
+  </ul>
+</section>
+
+<!-- ================= 9 SALARIES ================= -->
+<section class="doc" id="s9">
+  <header>
+    <div class="num">09</div>
+    <h2>Salaries</h2>
+    <p>Scoped to one contract, then to one year.</p>
+  </header>
+
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Investments</a><a class="on" href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Salaries</h3><div class="sub">Acme S.p.A. · 13 months per year · 8 hours per day</div></div>
+        <div class="actions"><span class="field act">Contract <b>Acme S.p.A.</b></span><button class="btn primary">Add payslip</button></div>
+      </div>
+      <div class="cols a">
+        <div class="card">
+          <h4>Average per month, per year</h4>
+          <div class="chart">
+            <svg viewBox="0 0 460 150" role="img" aria-label="Average gross and net salary per year">
+              <g class="grid"><line x1="0" y1="12" x2="440" y2="12"></line><line x1="0" y1="48" x2="440" y2="48"></line><line x1="0" y1="84" x2="440" y2="84"></line><line x1="0" y1="120" x2="440" y2="120"></line></g>
+              <g class="axis"><text x="444" y="15">4k</text><text x="444" y="87">2k</text><text x="0" y="140">2017</text><text x="200" y="140">2021</text><text x="410" y="140">2026</text></g>
+              <polyline fill="none" stroke="var(--brass)" stroke-width="1.8" points="0,81 48.9,79 97.8,74 146.7,69 195.6,66 244.4,60 293.3,54 342.2,48 391.1,41 440,35"></polyline>
+              <polyline fill="none" stroke="var(--c-liq)" stroke-width="1.8" points="0,107 48.9,105 97.8,102 146.7,99 195.6,97 244.4,94 293.3,90 342.2,87 391.1,83 440,79"></polyline>
+              <circle cx="440" cy="35" r="3" fill="var(--brass)"></circle><circle cx="440" cy="79" r="3" fill="var(--c-liq)"></circle>
+            </svg>
+          </div>
+          <div class="chartkey"><span><i style="background:var(--brass)"></i>average gross</span><span><i style="background:var(--c-liq)"></i>average net</span></div>
+        </div>
+        <div class="card">
+          <h4>Totals per year</h4>
+          <div class="chart">
+            <svg viewBox="0 0 460 150" role="img" aria-label="Total gross, net and contract gross per year">
+              <g class="grid"><line x1="0" y1="12" x2="440" y2="12"></line><line x1="0" y1="48" x2="440" y2="48"></line><line x1="0" y1="84" x2="440" y2="84"></line><line x1="0" y1="120" x2="440" y2="120"></line></g>
+              <g class="axis"><text x="444" y="15">50k</text><text x="444" y="87">20k</text><text x="0" y="140">2017</text><text x="410" y="140">2026</text></g>
+              <polyline fill="none" stroke="var(--brass)" stroke-width="1.8" points="0,122 48.9,80 97.8,76 146.7,72 195.6,70 244.4,65 293.3,58 342.2,52 391.1,46 440,66"></polyline>
+              <polyline fill="none" stroke="var(--c-liq)" stroke-width="1.8" points="0,133 48.9,105 97.8,102 146.7,99 195.6,97 244.4,94 293.3,90 342.2,86 391.1,82 440,95"></polyline>
+              <polyline fill="none" stroke="var(--c-pens)" stroke-width="1.4" stroke-dasharray="4 3" points="0,84 48.9,82 97.8,78 146.7,74 195.6,71 244.4,66 293.3,60 342.2,54 391.1,48 440,45"></polyline>
+              <circle cx="440" cy="66" r="3" fill="var(--brass)"></circle><circle cx="440" cy="95" r="3" fill="var(--c-liq)"></circle>
+            </svg>
+          </div>
+          <div class="chartkey"><span><i style="background:var(--brass)"></i>gross</span><span><i style="background:var(--c-liq)"></i>net</span><span><i style="background:var(--c-pens)"></i>contract × months</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Per year</h4>
+        <div class="tblwrap"><table>
+          <thead><tr><th>Year</th><th class="r">Payslips</th><th class="r">Contract gross</th><th class="r">Total gross</th><th class="r">Total net salary</th><th class="r">Net/Gross</th><th class="r">Working days</th><th class="r">Gross / hour</th><th class="r">Net / hour</th></tr></thead>
+          <tbody>
+            <tr><td class="n">2017</td><td class="n r">5</td><td class="n r">€ 27.950</td><td class="n r">€ 10.750</td><td class="n r">€ 7.095</td><td class="n r">66,0%</td><td class="n r">86</td><td class="n r">€ 15,62</td><td class="n r">€ 10,31</td></tr>
+            <tr><td class="n">2018</td><td class="n r">13</td><td class="n r">€ 28.730</td><td class="n r">€ 29.860</td><td class="n r">€ 19.520</td><td class="n r">65,4%</td><td class="n r">251</td><td class="n r">€ 14,87</td><td class="n r">€ 9,72</td></tr>
+            <tr><td class="n">2019</td><td class="n r">13</td><td class="n r">€ 30.420</td><td class="n r">€ 31.640</td><td class="n r">€ 20.720</td><td class="n r">65,5%</td><td class="n r">252</td><td class="n r">€ 15,69</td><td class="n r">€ 10,28</td></tr>
+            <tr><td class="n">2020</td><td class="n r">13</td><td class="n r">€ 32.240</td><td class="n r">€ 33.510</td><td class="n r">€ 21.940</td><td class="n r">65,5%</td><td class="n r">253</td><td class="n r">€ 16,56</td><td class="n r">€ 10,84</td></tr>
+            <tr><td class="n">2021</td><td class="n r">13</td><td class="n r">€ 33.280</td><td class="n r">€ 34.620</td><td class="n r">€ 22.630</td><td class="n r">65,4%</td><td class="n r">252</td><td class="n r">€ 17,17</td><td class="n r">€ 11,23</td></tr>
+            <tr><td class="n">2022</td><td class="n r">13</td><td class="n r">€ 35.360</td><td class="n r">€ 36.780</td><td class="n r">€ 24.060</td><td class="n r">65,4%</td><td class="n r">252</td><td class="n r">€ 18,24</td><td class="n r">€ 11,93</td></tr>
+            <tr><td class="n">2023</td><td class="n r">13</td><td class="n r">€ 38.220</td><td class="n r">€ 39.650</td><td class="n r">€ 25.870</td><td class="n r">65,2%</td><td class="n r">252</td><td class="n r">€ 19,67</td><td class="n r">€ 12,83</td></tr>
+            <tr><td class="n">2024</td><td class="n r">13</td><td class="n r">€ 40.560</td><td class="n r">€ 42.120</td><td class="n r">€ 27.550</td><td class="n r">65,4%</td><td class="n r">251</td><td class="n r">€ 20,98</td><td class="n r">€ 13,72</td></tr>
+            <tr class="sel"><td class="n">2025</td><td class="n r">13</td><td class="n r">€ 42.900</td><td class="n r">€ 44.330</td><td class="n r">€ 29.351</td><td class="n r">66,2%</td><td class="n r">252</td><td class="n r">€ 21,99</td><td class="n r">€ 14,56</td></tr>
+            <tr><td class="n">2026</td><td class="n r">8</td><td class="n r">€ 44.200</td><td class="n r">€ 30.690</td><td class="n r">€ 19.856</td><td class="n r">64,7%</td><td class="n r">140</td><td class="n r">€ 27,40</td><td class="n r">€ 17,73</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <h4>2025 payslips</h4>
+        <div class="tblwrap"><table>
+          <thead><tr><th>Month</th><th>Label</th><th class="r">Contract gross</th><th class="r">Gross</th><th class="r">Net payment</th><th class="r">Refunds</th><th class="r">Car</th><th class="r">Net salary</th><th class="r">Net/Gross</th><th class="r">Pension</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="n">01/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">02/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 2.172,50</td><td class="n r">€ 182,50</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">03/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 4.180,00</td><td class="n r">€ 2.555,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.735,00</td><td class="n r">65,4%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">04/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">05/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">06/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">07/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.850,00</td><td class="n r">€ 2.340,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.520,00</td><td class="n r">65,5%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">08/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">09/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">10/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">11/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">12/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
+            <tr class="sel"><td class="n">12/2025</td><td><span class="chip">13th</span></td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 2.396,00</td><td class="n r">€ 0,00</td><td class="n r">€ 0,00</td><td class="n r">€ 2.396,00</td><td class="n r">72,6%</td><td class="n r">€ 0,00</td><td class="rowact">···</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="3">13 payslips</td><td class="r tot">€ 44.330,00</td><td class="r">€ 27.373,50</td><td class="r">€ 182,50</td><td class="r">€ 2.160,00</td><td class="r tot">€ 29.351,00</td><td class="r">66,2%</td><td class="r">€ 1.860,00</td><td></td></tr></tfoot>
+        </table></div>
+      </div>
+    </main>
+  </div></div>
+
+  <ul class="body">
+    <li><b>Contract selector</b> scopes the whole screen. Every table and chart covers the selected
+    contract only, so figures depending on contract terms never mix across employers. There is no
+    cross-contract comparison.</li>
+    <li><b>Per-year table</b> is always visible and complete; selecting a row swaps the payslip table
+    below it. <code>Working days</code> is editable here — it is the ContractYear record.</li>
+    <li><b>Payslip table</b> shows every payslip of the selected year. A month may hold several; the
+    <em>tredicesima</em> is a second December row with a label, not a synthetic thirteenth month.
+    Note it carries no car deduction and no pension contribution, which is why its net/gross ratio
+    is higher.</li>
+    <li>Charts cover all years of the contract. <em>Contract × months</em> uses the contract's own
+    <code>monthsPerYear</code>. A partial first or last year shows visibly below the contract line —
+    that is correct, not a defect.</li>
+    <li>Payslips are edited in place; the row menu holds duplicate and delete. <b>Add payslip</b>
+    opens a form with the same fields as the table, defaulting <code>contractGross</code> and
+    <code>carPayment</code> from the previous month.</li>
+  </ul>
+</section>
+
+<!-- ================= 10 CHECKS ================= -->
+<section class="doc" id="s10">
+  <header>
+    <div class="num">10</div>
+    <h2>Checks</h2>
+    <p>Ten checks. Each passes or names the exact records that made it fail.</p>
+  </header>
+
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a class="on" href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Checks</h3><div class="sub">10 checks · 7 passing · 3 failing · run automatically after every change</div></div>
+        <div class="actions"><button class="btn ghost">Re-run all</button></div>
+      </div>
+      <div class="card">
+        <div class="checks">
+          <div class="chk"><span class="st no">✕</span><span class="name">Internal transfers balance out<em>Every internal transfer should appear in two accounts, with opposite signs.</em><span class="det">22/07/2026 · Intesa Sanpaolo · BONIFICO A UNICREDIT · − € 500,00 — no matching leg within 5 days</span></span><span class="res no">1 unpaired</span></div>
+          <div class="chk"><span class="st no">✕</span><span class="name">Every transaction has a category<em>Uncategorised transactions are excluded from every total, silently.</em><span class="det">08/08/2026 · Intesa Sanpaolo · ADDEBITO DIVERSI 4471 · − € 41,20</span></span><span class="res no">1 of 4.812</span></div>
+          <div class="chk"><span class="st no">✕</span><span class="name">Prices are recent<em>A stale price quietly misstates net worth.</em><span class="det">AGGH · iShares Core Global Aggregate Bond · € 4,8540 on 07/06/2026 — 62 days ago</span></span><span class="res no">1 of 5</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Payslips match salary transactions<em>Net payment on each payslip against Salary transactions, month by month.</em></span><span class="res">104 months</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Payslip pension contributions match pension transactions<em>Month by month, against the pension fund account.</em></span><span class="res">104 months</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Purchase transactions match recorded purchases<em>Securities purchase transactions against the purchases on the Investments screen.</em></span><span class="res">41 purchases</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Sale transactions match recorded sales<em>Securities sale transactions against the sales on the Investments screen.</em></span><span class="res">6 sales</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">No holding has gone negative<em>More sold than ever bought means a missing purchase.</em></span><span class="res">5 holdings</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">No sale precedes its purchase<em>A sale with nothing bought before it in the same account.</em></span><span class="res">6 sales</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">The pension fund has been revalued recently<em>Its balance only moves when a value adjustment is recorded.</em></span><span class="res">9 days ago</span></div>
+        </div>
+      </div>
+    </main>
+  </div></div>
+
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>#</th><th>Check</th><th>Definition</th><th>Failure output</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Internal transfers balance out</td><td>Σ of all <code>Internal transfer</code> amounts = 0, and every leg pairs (§12.6).</td><td>Each unpaired leg, with date, account, description, amount.</td></tr>
+      <tr><td>2</td><td>Every transaction has a category</td><td><code>categoryId</code> is set.</td><td>Each uncategorised transaction.</td></tr>
+      <tr><td>3</td><td>Prices are recent</td><td>Latest price date within <code>priceStalenessDays</code> for every security with an open holding.</td><td>Security, price, date, age.</td></tr>
+      <tr><td>4</td><td>Payslips match salary transactions</td><td>Per month: Σ payslip <code>netPayment</code> = Σ <code>Salary</code> transactions.</td><td>Each month, with both figures and the difference.</td></tr>
+      <tr><td>5</td><td>Payslip pension contributions match transactions</td><td>Per month: Σ payslip <code>pensionContribution</code> = Σ <code>Pension fund contribution</code> transactions.</td><td>Each month, with both figures.</td></tr>
+      <tr><td>6</td><td>Purchase transactions match purchases</td><td>Every <code>Securities purchase</code> transaction pairs with a purchase trade, and vice versa (§12.6).</td><td>Unmatched transactions and unmatched trades, listed separately.</td></tr>
+      <tr><td>7</td><td>Sale transactions match sales</td><td>As above for <code>Securities sale</code> and sale trades. The trade side is net proceeds — after tax and fees — so it can equal what the bank credited.</td><td>As above.</td></tr>
+      <tr><td>8</td><td>No holding has gone negative</td><td>For every (security, account), running quantity never drops below 0.</td><td>Security, account, the trade that took it negative.</td></tr>
+      <tr><td>9</td><td>No sale precedes its purchase</td><td>Every sale has at least one earlier purchase of that security in that account.</td><td>The offending sale.</td></tr>
+      <tr><td>10</td><td>Pension fund revalued recently</td><td>Latest <code>Value adjustment</code> in each pension fund account within <code>pensionRevaluationMonths</code>.</td><td>Account and date of the last adjustment.</td></tr>
+    </tbody>
+  </table></div>
+
+  <ul class="body">
+    <li><b>Two states only</b>, pass or fail. No warning tier — it would become a place for things to
+    sit unfixed.</li>
+    <li>A passing check <b>states its reach</b> (“104 months”, “41 purchases”), so a check that
+    passed because it examined nothing is distinguishable from one that passed properly.</li>
+    <li>Checks run automatically after every change and are summarised in the sidebar badge and the
+    Portfolio banner. They block nothing.</li>
+    <li>Each failing entry links to the record it names.</li>
+  </ul>
+
+  <h4 class="subsub">Deliberately not implemented</h4>
+  <ul class="body">
+    <li><b>Statement balance reconciliation</b> — done by eye against the bank app after each import.</li>
+    <li><b>Duplicate transactions across the dataset</b> — genuine same-day, same-amount duplicates occur.</li>
+    <li><b>Sign vs. category type</b> — a refund legitimately zeroes out a purchase in an expense category.</li>
+    <li><b>Missing salary month</b> — gaps between jobs are legitimate.</li>
+  </ul>
+</section>
+
+<!-- ================= 11 SETTINGS ================= -->
+<section class="doc" id="s11">
+  <header>
+    <div class="num">11</div>
+    <h2>Settings</h2>
+    <p>All reference data is created, edited and retired here. Tabs, in order:
+    <b>Institutions · Accounts · Securities · Contracts · Categorisation rules · Preferences</b> —
+    institutions first, because an account needs one.</p>
+  </header>
+
+  <h3 class="sub">11.1 Accounts</h3>
+
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a class="on" href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Settings</h3><div class="sub">5 institutions · 10 accounts · 7 securities · 1 contract · 9 rules</div></div>
+        <div class="actions"><button class="btn primary">Add account</button></div>
+      </div>
+      <nav class="tabs">
+        <a href="#">Institutions</a><a class="on" href="#">Accounts</a><a href="#">Securities</a>
+        <a href="#">Contracts</a><a href="#">Categorisation rules</a><a href="#">Preferences</a>
+      </nav>
+      <div class="card" style="padding-top:14px">
+        <div class="tblwrap"><table>
+          <thead><tr><th>Name</th><th>Institution</th><th>Type</th><th>Currency</th><th class="r">Opening balance</th><th class="r">Opened</th><th>Status</th><th class="r">Transactions</th><th></th></tr></thead>
+          <tbody>
+            <tr class="sel"><td class="desc">Conto Corrente</td><td class="dim">Fineco</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/01/2016</td><td class="pos">open</td><td class="n r dim">2.914</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Conto Titoli</td><td class="dim">Fineco</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">14/03/2018</td><td class="pos">open</td><td class="n r dim">208</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Conto Corrente</td><td class="dim">Intesa Sanpaolo</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/01/2016</td><td class="pos">open</td><td class="n r dim">1.106</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Wallet</td><td class="dim">—</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 120,00</td><td class="n r">01/01/2016</td><td class="pos">open</td><td class="n r dim">341</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Conto Arancio</td><td class="dim">ING</td><td><span class="chip type">Deposit account</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">08/06/2019</td><td class="pos">open</td><td class="n r dim">96</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Deposito Vincolato 24m</td><td class="dim">Banca Sella</td><td><span class="chip type">Term deposit</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">02/03/2025</td><td class="pos">open</td><td class="n r dim">4</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Conto Titoli</td><td class="dim">Banca Sella</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">02/03/2025</td><td class="pos">open</td><td class="n r dim">31</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Fondo Pensione</td><td class="dim">Amundi</td><td><span class="chip type">Pension fund</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/09/2017</td><td class="pos">open</td><td class="n r dim">142</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Buoni Pasto</td><td class="dim">Edenred</td><td><span class="chip type">Voucher</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/09/2017</td><td class="pos">open</td><td class="n r dim">418</td><td class="rowact">···</td></tr>
+            <tr><td class="desc dim">Conto Corrente</td><td class="dim">Unicredit</td><td><span class="chip type">Liquidity</span></td><td class="n dim">EUR</td><td class="n r dim">€ 0,00</td><td class="n r dim">01/01/2016</td><td class="dim">closed 2021</td><td class="n r dim">583</td><td class="rowact">···</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </main>
+  </div></div>
+
+  <div class="callout">
+    <b>Deletion rule, everywhere in Settings.</b> A record with dependent data cannot be deleted,
+    only closed or retired — it keeps its history and drops out of active views. Deletion remains
+    available while nothing depends on the record. Every delete asks for confirmation: there is no
+    undo.
+  </div>
+
+  <h3 class="sub">11.2 Creating institutions and accounts</h3>
+  <div class="dlgrow">
+    <div class="dlg">
+      <h5>Add institution</h5>
+      <div class="frm">
+        <label>Name</label><div class="inp ph">e.g. Banca Sella</div>
+        <label>Default sell fee</label><div class="inp">12,00</div>
+        <label>Notes</label><div class="inp ph">optional</div>
+      </div>
+      <p class="hint"><b>Default sell fee</b> is a flat amount, used only for the “if sold today”
+      figures on Holdings (§12.3). Fees actually charged are recorded on each trade. Leave it at
+      zero if you would rather see gross figures.</p>
+      <div class="dlgfoot"><button class="btn ghost">Cancel</button><button class="btn primary">Save</button></div>
+    </div>
+
+    <div class="dlg">
+      <h5>Add account</h5>
+      <div class="frm">
+        <label>Name</label><div class="inp ph">e.g. Conto Titoli</div>
+        <label>Institution</label><div class="inp sel">Banca Sella</div>
+        <label>Type</label><div class="inp sel">Liquidity</div>
+        <label>Currency</label><div class="inp sel">EUR</div>
+        <label>Opening balance</label><div class="inp">0,00</div>
+        <label>Opening date</label><div class="inp">02/03/2025</div>
+        <label>Notes</label><div class="inp ph">optional</div>
+      </div>
+      <p class="hint"><b>Institution</b> offers <em>None</em> for physical cash, and <em>New
+      institution…</em> which opens the form on the left without losing what has been typed here.
+      <b>Opening balance</b> is the balance on the opening date, before any recorded transaction —
+      leave it at zero when the account’s full history is being imported.</p>
+      <div class="dlgfoot"><button class="btn ghost">Cancel</button><button class="btn primary">Save</button></div>
+    </div>
+  </div>
+  <p class="body">Contracts are created the same way, with the fields listed in §2:
+  name, months per year, hours per day, start and end date. Securities are normally created inline
+  while recording a purchase (§8.3); the Securities tab exists to correct and manage them
+  afterwards.</p>
+
+  <h3 class="sub">11.3 Categorisation rules</h3>
+
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a class="on" href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Settings</h3><div class="sub">9 rules · first match wins · case and accent insensitive</div></div>
+        <div class="actions"><button class="btn ghost">Re-categorise all rule-assigned</button><button class="btn primary">Add rule</button></div>
+      </div>
+      <nav class="tabs">
+        <a href="#">Institutions</a><a href="#">Accounts</a><a href="#">Securities</a>
+        <a href="#">Contracts</a><a class="on" href="#">Categorisation rules</a><a href="#">Preferences</a>
+      </nav>
+      <div class="cols c">
+        <div class="card">
+          <div class="tblwrap"><table>
+            <thead><tr><th style="width:20px"></th><th style="width:34px">#</th><th>Matches description containing</th><th>Category</th><th class="r">Applies to</th><th></th></tr></thead>
+            <tbody>
+              <tr><td class="grab">⣿</td><td class="ruleno">1</td><td class="desc">MC DONALD'S</td><td><span class="chip auto">Restaurants &amp; bars</span></td><td class="n r dim">47</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">2</td><td class="desc">COOP</td><td><span class="chip auto">Groceries</span></td><td class="n r dim">213</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">3</td><td class="desc">ESSELUNGA</td><td><span class="chip auto">Groceries</span></td><td class="n r dim">386</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">4</td><td class="desc">STIPENDIO</td><td><span class="chip auto">Salary</span></td><td class="n r dim">104</td><td class="rowact">···</td></tr>
+              <tr class="sel"><td class="grab">⣿</td><td class="ruleno">5</td><td class="desc">CANONE</td><td><span class="chip auto">Bank fees</span></td><td class="n r dim">118</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">6</td><td class="desc">ENEL ENERGIA</td><td><span class="chip auto">Electricity</span></td><td class="n r dim">126</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">7</td><td class="desc">FASTWEB</td><td><span class="chip auto">Home internet</span></td><td class="n r dim">98</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">8</td><td class="desc">BOLLO CONTO</td><td><span class="chip auto">Wealth tax</span></td><td class="n r dim">42</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">9</td><td class="desc">ESEGUITO ACQUISTO</td><td><span class="chip auto">Securities purchase</span></td><td class="n r dim">41</td><td class="rowact">···</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="detail">
+          <div class="dh"><b>Rule 5</b><small>editing</small></div>
+          <div class="figs">
+            <div class="fig"><span>Contains</span><b>CANONE</b></div>
+            <div class="fig"><span>Category</span><b>Bank fees</b></div>
+            <div class="fig"><span>Position</span><b>5 of 9</b></div>
+          </div>
+          <hr class="sep">
+          <h4 class="subhead">Test against existing data</h4>
+          <div class="figs">
+            <div class="fig"><span>Would match</span><b>118 transactions</b></div>
+            <div class="fig"><span>Already this category</span><b class="pos">116</b></div>
+            <div class="fig"><span>Currently uncategorised</span><b>2</b></div>
+            <div class="fig"><span>Set by hand to something else</span><b class="neg">0</b></div>
+          </div>
+          <hr class="sep">
+          <div class="tblwrap"><table>
+            <thead><tr><th>Sample matches</th></tr></thead>
+            <tbody>
+              <tr><td class="desc dim">CANONE MENSILE CONTO</td></tr>
+              <tr><td class="desc dim">CANONE CARTA DI CREDITO</td></tr>
+              <tr><td class="desc dim">CANONE FASTWEB CASA</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </main>
+  </div></div>
+
+  <ul class="body">
+    <li>Ordered, draggable, numbered. <b>First match wins</b>, so order is the logic and must be
+    visible. A rule is created with the substring and the category; nothing else.</li>
+    <li>The tester counts what the rule under edit would match, split into already-this-category,
+    currently uncategorised, and hand-set to something else, with sample matching descriptions.</li>
+    <li><b>Re-categorise all rule-assigned</b> re-runs every rule over every transaction whose
+    <code>categorySource = rule</code>. It never touches a manual category. Nothing happens to
+    existing data until this button is pressed.</li>
+    <li>Deleting a rule leaves the categories it already assigned untouched.</li>
+  </ul>
+
+  <h3 class="sub">11.4 Preferences</h3>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Setting</th><th>Default</th><th>Used by</th></tr></thead>
+    <tbody>
+      <tr><td>dateFormat</td><td>DD/MM/YYYY</td><td>Display and import detection</td></tr>
+      <tr><td>decimalSeparator</td><td>,</td><td>Display and import detection</td></tr>
+      <tr><td>thousandsSeparator</td><td>.</td><td>Display and import detection</td></tr>
+      <tr><td>currencySymbol, position</td><td>€, before</td><td>Every monetary figure — <b>all of them carry it</b></td></tr>
+      <tr><td>taxRate per security type</td><td>26% · 12,5% for whitelist government bonds</td><td>§12.3</td></tr>
+      <tr><td>priceStalenessDays</td><td>30</td><td>Check 3, holdings marker</td></tr>
+      <tr><td>pensionRevaluationMonths</td><td>3</td><td>Check 10</td></tr>
+      <tr><td>transferMatchWindowDays</td><td>5</td><td>§12.6, check 1</td></tr>
+      <tr><td>tradeMatchWindowDays</td><td>5</td><td>§12.6, checks 6 and 7</td></tr>
+      <tr><td>backupCount</td><td>10</td><td>§13</td></tr>
+      <tr><td>priceProviderEnabled</td><td>off</td><td>§8.4</td></tr>
+    </tbody>
+  </table></div>
+  <p class="body">Formats are a <b>user preference, not a hard-coded locale</b>. Changing one
+  re-renders every figure in the application immediately.</p>
+</section>
+
+<!-- ================= 12 CALCULATIONS ================= -->
+<section class="doc" id="s12">
+  <header>
+    <div class="num">12</div>
+    <h2>Calculations</h2>
+    <p>Every formula in one place. All amounts are EUR; rounding is to 2 decimals at display, never
+    in intermediate steps.</p>
+  </header>
+
+  <h3 class="sub">12.1 Weighted average cost</h3>
+  <ul class="body">
+    <li>Per (security, account), walking trades in date order.</li>
+    <li><b>Purchase:</b> <code>quantity += q</code>, <code>costBasis += q × price + fees</code>,
+    <code>avgCost = costBasis ÷ quantity</code>.</li>
+    <li><b>Sale:</b> <code>quantity −= q</code>, <code>costBasis −= q × avgCost</code>.
+    <b><code>avgCost</code> is unchanged by a sale.</b></li>
+    <li>Fees increase the cost basis on purchase and reduce proceeds on sale. <b>Taxes withheld on a
+    sale never touch the cost basis</b> — they leave the proceeds, not the position.</li>
+  </ul>
+
+  <h3 class="sub">12.2 Realised gain on a sale</h3>
+  <ul class="body">
+    <li><code>netProceeds = q × price − taxes − fees</code> — the trade's <code>total</code>, and
+    the figure compared against the bank transaction by check 7.</li>
+    <li><code>realisedGain = netProceeds − (q × avgCost at the time of the sale)</code>. Net of
+    everything the broker took, so it is what the sale actually added to net worth.</li>
+    <li>Summed across all sales for the Portfolio all-time figure.</li>
+    <li>The gross counterpart, <code>q × price − fees − (q × avgCost)</code>, is what the tax was
+    computed on. It is not displayed: the tax on a real sale is a recorded fact, so there is nothing
+    to reconcile it against.</li>
+  </ul>
+
+  <h3 class="sub">12.3 Hypothetical liquidation</h3>
+  <ul class="body">
+    <li><code>grossProceeds = quantity × price</code></li>
+    <li><code>gainBeforeTax = grossProceeds − (quantity × avgCost)</code></li>
+    <li><code>tax = gainBeforeTax &gt; 0 ? gainBeforeTax × taxRate(security.type) : 0</code> —
+    <b>never negative</b>; a loss produces no rebate.</li>
+    <li><code>fee = institution.defaultSellFee</code> of the holding's account</li>
+    <li><code>netProceeds = grossProceeds − tax − fee</code></li>
+    <li><code>netGain = netProceeds − (quantity × avgCost)</code></li>
+    <li>The portfolio-level figure is the sum across all holdings, each with its own institution fee
+    and tax rate. This sum is the <i>…net, if sold today</i> line on Portfolio (§4.1).</li>
+    <li><b>Applies only to open holdings.</b> A sale that has happened carries the tax the broker
+    actually withheld (§2, §12.2); this section never restates it.</li>
+  </ul>
+  <div class="callout">Weighted average is an approximation. A broker may match lots differently
+  when computing the taxable gain, so the tax figure is an estimate. <b>The application must say so
+  wherever the figure appears.</b></div>
+  <div class="callout"><b>Room for another tax system.</b> Only the Italian one is implemented, and
+  the shape above is deliberately the smallest that can hold a different one: the rate is a
+  parameter per security type (§11.4), not a constant; the gain it applies to is computed
+  separately from the rate applied to it; and tax appears in exactly two places — this hypothetical,
+  and the recorded figure on a sale. Whitelist government bonds already exercise the mechanism at
+  12,5%. Anything a future regime needs beyond a rate per type — holding-period relief, loss
+  carry-forward, a personal allowance — is a change to this section alone, not to the domain model,
+  and is not designed for now.</div>
+
+  <h3 class="sub">12.4 Balances and net worth</h3>
+  <ul class="body">
+    <li><code>accountBalance = openingBalance + Σ transaction amounts</code></li>
+    <li><code>netWorth = Σ accountBalance (open accounts) + Σ holding marketValue</code></li>
+    <li>Securities purchases already reduce the cash account through their transaction, so holdings
+    are added, not double-counted.</li>
+  </ul>
+
+  <h3 class="sub">12.5 Net worth over time</h3>
+  <ul class="body">
+    <li>Monthly points at each month end, from the earliest transaction to today.</li>
+    <li>At date <code>d</code>: <code>Σ (openingBalance + Σ transactions ≤ d)</code> plus, per
+    holding, <code>quantity(d) × price</code> where price is the <b>most recent Price record dated
+    ≤ d</b>.</li>
+    <li>If no price is known at <code>d</code>, the holding is valued at <code>avgCost(d)</code>.
+    That stretch of the line is drawn dashed and labelled cost-based.</li>
+  </ul>
+
+  <h3 class="sub">12.6 Derived matching</h3>
+  <p class="body">Records that ought to correspond are paired heuristically, with <b>no linking
+  effort from the user</b>. Matching is recomputed, never stored.</p>
+  <ul class="body">
+    <li><b>Internal transfer legs:</b> equal absolute amount, opposite signs, different accounts,
+    dates within <code>transferMatchWindowDays</code>, both categorised <code>Internal transfer</code>.
+    Greedy one-to-one, nearest date first. Unpaired legs are listed by check 1.</li>
+    <li><b>Trades against transactions:</b> a <code>Securities purchase</code> / <code>Securities
+    sale</code> transaction pairs with a trade of the matching kind when the absolute amount equals
+    the trade total, the account matches, and dates are within <code>tradeMatchWindowDays</code>.
+    One-to-one. Unmatched records on either side are listed by checks 6 and 7.</li>
+    <li>The trade total is the one from §2 — <code>qty × price + fees</code> on a purchase,
+    <code>qty × price − taxes − fees</code> on a sale. Both are the figure that moved through the
+    account, which is why the comparison is an exact amount match and not a tolerance.</li>
+  </ul>
+
+  <h3 class="sub">12.7 Salary figures</h3>
+  <ul class="body">
+    <li><code>netSalary = netPayment − refunds + carPayment</code></li>
+    <li><code>netGrossPct = netSalary ÷ gross</code></li>
+    <li><code>yearContractGross = max(contractGross in year) × contract.monthsPerYear</code></li>
+    <li><code>grossPerHour = Σ gross in year ÷ (workingDays × contract.hoursPerDay)</code>, and the
+    same with <code>Σ netSalary</code>.</li>
+    <li>All of the above are computed within the selected contract only.</li>
+  </ul>
+</section>
+
+<!-- ================= 13 STORAGE ================= -->
+<section class="doc" id="s13">
+  <header>
+    <div class="num">13</div>
+    <h2>Storage</h2>
+  </header>
+
+  <ul class="body">
+    <li><b>One file</b> holding everything: institutions, accounts, securities, prices,
+    transactions, trades, contracts, payslips, rules, preferences.</li>
+    <li><b>The file lives wherever the user puts it</b> — a plain local folder, a cloud-synced
+    folder, or an encrypted vault inside one. The application makes no assumption about the
+    location and requires nothing of it.</li>
+    <li><b>Autosave</b>, debounced, written <b>atomically</b> — write to a temporary file in the same
+    directory, then rename — so an interrupted write cannot truncate it.</li>
+    <li><b>External modification detection.</b> Before writing, the application verifies the file has
+    not changed on disk since it last read it. If it has, it warns rather than overwriting.</li>
+    <li><b>Ten rolling timestamped backups</b> in a folder beside the data file, count configurable.</li>
+    <li><b>On launch the application always asks which file to open</b>, offering the recently opened
+    locations. It never reopens the last file automatically.</li>
+    <li><b>No undo/redo</b> in v1. This is why every delete confirms.</li>
+    <li><b>The format must be documented</b> well enough for an external script to write it — the
+    ten years of historical data will be loaded by a one-off migration script, not by the
+    application.</li>
+    <li>The application must <b>refuse to silently drop</b> a category or field it does not
+    recognise in a file, since the category list is fixed in the application and files may outlive a
+    version.</li>
+  </ul>
+
+  <div class="callout">
+    Atomic writes and external-modification detection are not paranoia about a specific setup: they
+    are what makes the file safe in a folder that something else — a sync client, a backup agent, an
+    encrypted volume — may also be touching. They cost little and they are the reason the
+    application does not care where the file is.
+  </div>
+</section>
+
+<!-- ================= 14 OUT OF SCOPE ================= -->
+<section class="doc" id="s14">
+  <header>
+    <div class="num">14</div>
+    <h2>Out of scope for v1</h2>
+    <p>Each of these was raised and deliberately declined. They are listed so they are not
+    reintroduced by accident.</p>
+  </header>
+
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Not building</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Multi-currency conversion</td><td>Everything is EUR. Currency is recorded, never converted.</td></tr>
+      <tr><td>A second interface language</td><td>English only, no language selector. Strings stay separable so it remains possible (§1).</td></tr>
+      <tr><td>Tax systems other than the Italian one</td><td>Rate per security type is a parameter, not a constant; anything more is future work (§12.3).</td></tr>
+      <tr><td>Undo / redo</td><td>Backups and delete confirmation cover it for now.</td></tr>
+      <tr><td>Bank-specific import profiles</td><td>One fixed column order; the user pre-formats the export. Explicitly future work.</td></tr>
+      <tr><td>A migration importer</td><td>A one-off custom script will load the Excel history.</td></tr>
+      <tr><td>Category groups</td><td>The list is readable flat; grouping adds a concept for no gain.</td></tr>
+      <tr><td>Runtime-editable categories</td><td>Fixed in the application. Adding one is a code change.</td></tr>
+      <tr><td>Monthly reports</td><td>Yearly only.</td></tr>
+      <tr><td>Voucher expiry</td><td>Not tracked.</td></tr>
+      <tr><td>Automatic transaction generation from trades, or paired transfer entry</td><td>The independence of the two sources is what makes the checks meaningful.</td></tr>
+      <tr><td>Mobile or web deployment</td><td>Desktop on macOS, Windows and Linux (§1), single machine.</td></tr>
+      <tr><td>Percentage or tiered sell fees</td><td>Flat per institution.</td></tr>
+      <tr><td>Sortable columns</td><td>Fixed chronological order everywhere; filters narrow instead.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</div>
