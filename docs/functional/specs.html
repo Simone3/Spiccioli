@@ -227,7 +227,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <a href="#s8"><b>8</b> Investments</a>
   <a href="#s9"><b>9</b> Salaries</a>
   <a href="#s10"><b>10</b> Checks</a>
-  <a href="#s11"><b>11</b> Settings</a>
+  <a href="#s11"><b>11</b> Reference data</a>
   <a href="#s12"><b>12</b> Calculations</a>
   <a href="#s13"><b>13</b> Storage</a>
   <a href="#s14"><b>14</b> Empty and error states</a>
@@ -454,7 +454,6 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>type</td><td>enum</td><td><code>Income</code> · <code>Expense</code> · <code>Investment</code> · <code>Divestment</code> · <code>Internal</code> · <code>Revaluation</code>. Drives the grouping in §7.</td></tr>
       <tr><td>role</td><td>enum</td><td><code>none</code> · <code>salary</code> · <code>pension contribution</code> · <code>securities purchase</code> · <code>securities sale</code> · <code>internal transfer</code> · <code>value adjustment</code>. <b>What the checks key off.</b></td></tr>
       <tr><td>receiptTracked</td><td>bool</td><td>Its transactions are expected to carry a receipt state other than <code>na</code> — checks 13 and 14.</td></tr>
-      <tr><td>legacyLabel</td><td>text?</td><td>The old Italian label, used as an import alias by the migration script.</td></tr>
       <tr><td>order</td><td>int</td><td>Display order within a type where totals do not decide it.</td></tr>
     </tbody>
   </table></div>
@@ -503,8 +502,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <div class="num">03</div>
     <h2>Categories</h2>
     <p>Twenty-seven, seeded into every new file and not editable at runtime. Adding one is a change
-    to the application. The old Italian label is retained as an import alias so existing data maps
-    itself. <b>Role</b> is what §10 keys off; a blank one means no check cares about the category.</p>
+    to the application. <b>Role</b> is what §10 keys off; a blank one means no check cares about the
+    category. <b>Was</b> records the old Italian label for reference only — the migration script maps
+    the two lists by hand, and the application stores no alias.</p>
   </header>
 
   <div class="specwrap"><table class="spec">
@@ -566,7 +566,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
       <nav class="nav">
-        <a class="on" href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a class="on" href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
       <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
@@ -698,7 +698,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     The stretch before the first recorded price is drawn dashed and labelled as cost-based.</li>
     <li><b>Accounts table</b> lists open accounts with computed balances, brokerage accounts among
     them; its total is the headline net worth. Read-only — accounts are created, edited and closed
-    in Settings (§11).</li>
+    on the Accounts screen (§11.1).</li>
   </ul>
 </section>
 
@@ -714,7 +714,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
       <nav class="nav">
-        <a href="#">Portfolio</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
       <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
@@ -824,13 +824,6 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <label>Receipt</label><div class="inp chipset"><span class="chip type">pending</span><span class="chip type">checked</span><span class="chip">n/a</span></div>
         <label>Notes</label><div class="inp ph">optional</div>
       </div>
-      <p class="hint"><b>Account</b> defaults to the one last used, and lists cash accounts only.
-      <b>Date</b> defaults to today. <b>Amount</b> is signed — negative is money out — and accepts
-      the preference separators. <b>Category</b> defaults to <em>Automatic</em>, so a manually added
-      row is categorised by the same rules as an imported one. <b>Receipt</b> shows a static
-      <em>n/a</em>; the category is not known while the form is open, so on save an untouched field
-      becomes <em>pending</em> if the category the row ends up with is receipt-tracked (§3). Touch
-      the field and your choice stands.</p>
       <div class="dlgfoot">
         <button class="btn ghost">Cancel</button>
         <button class="btn">Save and add another</button>
@@ -838,8 +831,18 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       </div>
     </div>
   </div>
-  <p class="body"><b>Save and add another</b> keeps the dialog open with account and date retained
-  and the other fields cleared — the shape of manual entry is several rows in one sitting.</p>
+  <ul class="body">
+    <li><b>Account</b> defaults to the one last used, and lists cash accounts only. <b>Date</b>
+    defaults to today. <b>Amount</b> is signed — negative is money out — and accepts the preference
+    separators.</li>
+    <li><b>Category</b> defaults to <em>Automatic</em>, so a manually added row is categorised by the
+    same rules as an imported one.</li>
+    <li><b>Receipt</b> shows a static <em>n/a</em>. The category is not known while the form is open,
+    so on save an untouched field becomes <em>pending</em> if the category the row ends up with is
+    receipt-tracked (§3); touch the field and your choice stands.</li>
+    <li><b>Save and add another</b> keeps the dialog open with account and date retained and the
+    other fields cleared — the shape of manual entry is several rows in one sitting.</li>
+  </ul>
 </section>
 
 <!-- ================= 6 IMPORT ================= -->
@@ -856,7 +859,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
       <nav class="nav">
-        <a href="#">Portfolio</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
       <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
@@ -922,7 +925,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
       <nav class="nav">
-        <a href="#">Portfolio</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
       <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
@@ -1007,7 +1010,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
       <nav class="nav">
-        <a href="#">Portfolio</a><a href="#">Transactions</a><a class="on" href="#">Categories</a>
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a class="on" href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
       <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
@@ -1017,6 +1020,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <div><h3>Categories</h3><div class="sub">2022 – 2026 · 2026 is a partial year, 8 months</div></div>
         <div class="actions"><span class="field">Years <b>Last 5</b></span><span class="field">Accounts <b>All</b></span></div>
       </div>
+      <nav class="tabs"><a class="on" href="#">Report</a><a href="#">Rules</a><a href="#">Category list</a></nav>
       <div class="card">
         <div class="tblwrap"><table>
           <thead><tr><th>Category</th><th class="r">2022</th><th class="r">2023</th><th class="r">2024</th><th class="r">2025</th><th class="r">2026</th><th class="r">Total</th></tr></thead>
@@ -1080,6 +1084,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>A cell with no transactions shows an em dash, not <code>€ 0</code>, so a real zero stays
     distinguishable from nothing recorded.</li>
     <li>Filters: year range, accounts. A partial year is labelled with the months it covers.</li>
+    <li>The screen carries three tabs: this report, the categorisation rules (§11.3), and a read-only
+    list of the twenty-seven categories with their types and roles (§3). Rules sit here because the
+    tester's counts only mean something next to the report they change.</li>
     <li>Uncategorised transactions appear in no row. Their existence is a failing check, not a
     silent omission.</li>
     <li><b>Salary</b> here is the sum of <em>Salary</em> transactions, i.e. net payments received —
@@ -1103,7 +1110,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
       <nav class="nav">
-        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
       <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
@@ -1113,7 +1120,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <div><h3>Investments</h3><div class="sub">5 open positions · 2 brokerage accounts · latest price 08/08/2026 · 1 stale</div></div>
         <div class="actions"><button class="btn ghost">Update prices</button></div>
       </div>
-      <nav class="tabs"><a class="on" href="#">Holdings</a><a href="#">Purchases · 41</a><a href="#">Sales · 6</a></nav>
+      <nav class="tabs"><a class="on" href="#">Holdings</a><a href="#">Purchases · 41</a><a href="#">Sales · 6</a><a href="#">Securities · 7</a></nav>
       <div class="cols c">
         <div class="card">
           <div class="tblwrap"><table>
@@ -1161,7 +1168,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>This is where prices are kept up to date.</b> Clicking the price cell opens an inline
     editor — a value and an as-of date defaulting to today — and saving writes a Price record,
     replacing whatever that day already held (§2). The whole editable history of a security lives on
-    the Securities tab in Settings (§11); this screen is the fast path for the one thing done
+    the Securities tab of this same screen (§11); Holdings is the fast path for the one thing done
     weekly, that tab is where a past mistake is repaired.</li>
     <li><b>Update prices</b> fetches from the configured provider (§8.4). The button is present only
     when <code>priceProviderEnabled</code> is on; with the feature off, the inline editor is the
@@ -1182,7 +1189,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
       <nav class="nav">
-        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
       <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
@@ -1192,7 +1199,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <div><h3>Investments</h3><div class="sub">41 purchases · 2016 – 2026</div></div>
         <div class="actions"><button class="btn primary">Add purchase</button></div>
       </div>
-      <nav class="tabs"><a href="#">Holdings</a><a class="on" href="#">Purchases · 41</a><a href="#">Sales · 6</a></nav>
+      <nav class="tabs"><a href="#">Holdings</a><a class="on" href="#">Purchases · 41</a><a href="#">Sales · 6</a><a href="#">Securities · 7</a></nav>
       <div class="filters">
         <span class="field">Security <b>All</b></span><span class="field">Account <b>All</b></span><span class="field act">Period <b>2025 – 2026</b></span>
       </div>
@@ -1260,9 +1267,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <label>Unit price</label><div class="inp ph">91,6600</div>
         <label>Fees</label><div class="inp">19,00</div>
         <label>Notes</label><div class="inp ph">optional</div>
+        <label>Total cost</label><div class="inp" style="border-style:dashed;color:var(--brass)">€ 2.310,50</div>
       </div>
-      <p class="hint"><b>Total cost € 2.310,50</b> is computed and shown live as quantity, price and
-      fees are typed — never entered.</p>
       <div class="dlgfoot">
         <button class="btn ghost">Cancel</button>
         <button class="btn">Save and add another</button>
@@ -1272,15 +1278,17 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </div>
 
   <ul class="body">
+    <li><b>Total cost</b> is computed and shown live as quantity, price and fees are typed — never
+    entered. It is the figure §12.6 pairs against the bank transaction.</li>
     <li><b>Account</b> lists brokerage accounts only, and defaults to the one last used.</li>
     <li><b>Securities are created inline, here.</b> Typing an ISIN or ticker searches existing
     securities; if none matches, the form expands with the fields needed to create one, and it is
     saved together with the trade. There is no separate “create a security first” step.</li>
     <li><b>Tax rate</b> is pre-filled from <code>defaultTaxRate</code> and only needs touching for a
     whitelist government bond. It affects the §12.3 estimate and nothing that is ever recorded.</li>
-    <li><b>The Securities tab in Settings still exists</b> — not to create securities, but to
-    correct a mistyped ISIN, rename an instrument, change its type or tax rate, and view or edit its
-    full price history. Inline creation covers the common path; the tab covers the rest.</li>
+    <li><b>The Securities tab still exists</b>, fourth on this screen — not to create securities,
+    but to correct a mistyped ISIN, rename an instrument, change its type or tax rate, and view or
+    edit its full price history. Inline creation covers the common path; the tab covers the rest.</li>
     <li>A security that has no trades can be deleted. One with trades can only be edited.</li>
     <li><b>The sale form adds a Taxes field</b> below Fees, and shows <b>net proceeds</b>
     — <code>qty × price − taxes − fees</code> — live in place of total cost. It defaults to zero and
@@ -1317,7 +1325,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
       <nav class="nav">
-        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a class="on" href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
       <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
@@ -1327,6 +1335,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <div><h3>Salaries</h3><div class="sub">Acme S.p.A. · 13 months per year · 8 hours per day</div></div>
         <div class="actions"><span class="field act">Contract <b>Acme S.p.A.</b></span><button class="btn primary">Add payslip</button></div>
       </div>
+      <nav class="tabs"><a class="on" href="#">Payslips</a><a href="#">Contracts</a></nav>
       <div class="cols a">
         <div class="card">
           <h4>Average per month, per year</h4>
@@ -1403,6 +1412,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>Contract selector</b> scopes the whole screen. Every table and chart covers the selected
     contract only, so figures depending on contract terms never mix across employers. There is no
     cross-contract comparison.</li>
+    <li>The <b>Contracts tab</b> beside it is where contracts are created and edited (§11.2) — the
+    same place their terms are read all day.</li>
     <li><b>Per-year table</b> is always visible and complete; selecting a row swaps the payslip table
     below it. <code>Working days</code> is editable here — it is the ContractYear record.</li>
     <li><b>Working days is always the whole calendar year</b>, never the part worked. In a partial
@@ -1439,7 +1450,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
       <nav class="nav">
-        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a class="on" href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
       <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
@@ -1522,32 +1533,46 @@ table.spec td.d{color:var(--faint);font-style:italic;}
 <section class="doc" id="s11">
   <header>
     <div class="num">11</div>
-    <h2>Settings</h2>
-    <p>All reference data is created, edited and retired here. Tabs, in order:
-    <b>Institutions · Accounts · Securities · Contracts · Categorisation rules · Preferences</b> —
-    institutions first, because an account needs one.</p>
+    <h2>Reference data and preferences</h2>
+    <p>Everything that exists so that transactions and trades have something to point at. <b>It does
+    not live on one screen.</b> Each kind of reference data sits on the screen that consumes it, so
+    that editing it and seeing its effect are the same trip; Settings keeps only the preferences,
+    which belong to no screen in particular.</p>
   </header>
 
-  <h3 class="sub">11.1 Accounts</h3>
+  <div class="specwrap"><table class="spec">
+    <thead><tr><th>Reference data</th><th>Where it lives</th><th>Why there</th></tr></thead>
+    <tbody>
+      <tr><td>Accounts, Institutions</td><td><b>Accounts</b>, its own sidebar item, two tabs — accounts first, institutions behind it</td><td>Accounts are the spine of the file: transactions, balances and net worth all hang off them. Institutions exist only to group accounts and to carry a sell fee, so they sit behind them rather than in front.</td></tr>
+      <tr><td>Securities</td><td><b>Investments</b>, fourth tab after Holdings, Purchases, Sales</td><td>A security is only ever looked at while looking at what is held of it. The tab is also where the full price history is edited (§8.4), one click from the Holdings row that showed the price was stale.</td></tr>
+      <tr><td>Contracts, ContractYears</td><td><b>Salaries</b>, second tab</td><td>The contract selector already scopes that screen. Its terms — months per year, hours per day — are read on every line of it.</td></tr>
+      <tr><td>Categorisation rules</td><td><b>Categories</b>, second tab, beside the report</td><td>The rule tester counts what a rule would do to existing data (§11.3). That is the report, one tab away, which is where a wrong rule becomes visible.</td></tr>
+      <tr><td>The category list</td><td><b>Categories</b>, third tab, read-only</td><td>Fixed in v1 (§3), but its types and roles decide how every other screen adds things up, so it is worth being able to look at.</td></tr>
+      <tr><td>Preferences</td><td><b>Settings</b>, no tabs</td><td>What is left once reference data has gone to its screen: formats, thresholds, the price provider. Nothing here belongs to one screen.</td></tr>
+    </tbody>
+  </table></div>
+
+  <p class="body">The sidebar is therefore <b>Portfolio · Accounts · Transactions · Categories ·
+  Investments · Salaries · Checks · Settings</b>. The subsections below specify each kind of
+  reference data once, in one place, whichever screen it appears on.</p>
+
+  <h3 class="sub">11.1 Accounts and institutions — the Accounts screen</h3>
 
   <div class="scroller"><div class="app">
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
       <nav class="nav">
-        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
-        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a class="on" href="#">Settings</a>
+        <a href="#">Portfolio</a><a class="on" href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
       <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
-        <div><h3>Settings</h3><div class="sub">7 institutions · 12 accounts · 7 securities · 1 contract · 9 rules</div></div>
+        <div><h3>Accounts</h3><div class="sub">12 accounts · 11 open · 7 institutions</div></div>
         <div class="actions"><button class="btn primary">Add account</button></div>
       </div>
-      <nav class="tabs">
-        <a href="#">Institutions</a><a class="on" href="#">Accounts</a><a href="#">Securities</a>
-        <a href="#">Contracts</a><a href="#">Categorisation rules</a><a href="#">Preferences</a>
-      </nav>
+      <nav class="tabs"><a class="on" href="#">Accounts</a><a href="#">Institutions</a></nav>
       <div class="card" style="padding-top:14px">
         <div class="tblwrap"><table>
           <thead><tr><th>Name</th><th>Institution</th><th>Type</th><th>Currency</th><th class="r">Opening balance</th><th class="r">Opened</th><th class="r">Closed</th><th class="r">Transactions</th><th></th></tr></thead>
@@ -1572,7 +1597,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </div></div>
 
   <div class="callout">
-    <b>Deletion rule, everywhere in Settings.</b> A record with dependent data cannot be deleted;
+    <b>Deletion rule, wherever reference data is edited.</b> A record with dependent data cannot be deleted;
     deletion stays available only while nothing points at it. Every delete asks for confirmation:
     there is no undo.<br><br>
     <b>Only accounts can be retired.</b> Setting an account's <code>closingDate</code> keeps its
@@ -1583,6 +1608,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </div>
 
   <h3 class="sub">11.2 Creating institutions and accounts</h3>
+  <p class="body">Both forms live on the Accounts screen. Institutions have no screen of their own:
+  they are a tab behind accounts, and the only time one is created is in the middle of creating an
+  account, which is why the account form can open the institution form without losing its state.</p>
   <div class="dlgrow">
     <div class="dlg">
       <h5>Add institution</h5>
@@ -1591,10 +1619,6 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <label>Default sell fee</label><div class="inp">12,00</div>
         <label>Notes</label><div class="inp ph">optional</div>
       </div>
-      <p class="hint"><b>Default sell fee</b> is a flat amount, used only for the “if sold today”
-      figures of §12.3 and therefore for net worth itself (§4.1). Fees actually charged are recorded
-      on each trade. Leave it at zero if you would rather see gross figures; an account with no
-      institution — physical cash — is treated as zero too.</p>
       <div class="dlgfoot"><button class="btn ghost">Cancel</button><button class="btn primary">Save</button></div>
     </div>
 
@@ -1610,42 +1634,45 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <label>Closing date</label><div class="inp ph">empty while open</div>
         <label>Notes</label><div class="inp ph">optional</div>
       </div>
-      <p class="hint"><b>Institution</b> offers <em>None</em> for physical cash, and <em>New
-      institution…</em> which opens the form on the left without losing what has been typed here.
-      <b>Opening balance</b> is the balance on the opening date, before any recorded transaction —
-      leave it at zero when the account’s full history is being imported, and note that a
-      <em>Brokerage</em> account has none, since its value is entirely its holdings. <b>Closing
-      date</b> is how an account is retired: fill it in and the account leaves the portfolio, keeping
-      its history. Check 11 will then insist it was emptied first, and check 12 that nothing is dated
-      outside the two dates.</p>
       <div class="dlgfoot"><button class="btn ghost">Cancel</button><button class="btn primary">Save</button></div>
     </div>
   </div>
-  <p class="body">Contracts are created the same way, with the fields listed in §2:
-  name, months per year, hours per day, start and end date. Securities are normally created inline
-  while recording a purchase (§8.3); the Securities tab exists to correct and manage them
-  afterwards.</p>
+  <ul class="body">
+    <li><b>Default sell fee</b> is a flat amount, used only for the “if sold today” figures of §12.3
+    and therefore for net worth itself (§4.1). Fees actually charged are recorded on each trade.
+    Leave it at zero to see gross figures; an account with no institution — physical cash — is
+    treated as zero too.</li>
+    <li><b>Institution</b> offers <em>None</em> for physical cash, and <em>New institution…</em>,
+    which opens the institution form without losing what has been typed here.</li>
+    <li><b>Opening balance</b> is the balance on the opening date, before any recorded transaction.
+    Leave it at zero when the account’s full history is being imported; a <em>Brokerage</em> account
+    has none, its value being entirely its holdings.</li>
+    <li><b>Closing date</b> is how an account is retired: fill it in and the account leaves the
+    portfolio, keeping its history. Check 11 then insists it was emptied first, and check 12 that
+    nothing is dated outside the two dates.</li>
+    <li>Contracts are created the same way, on the Salaries screen, with the fields listed in §2:
+    name, months per year, hours per day, start and end date. Securities are normally created inline
+    while recording a purchase (§8.3); the Securities tab on Investments exists to correct and manage
+    them afterwards.</li>
+  </ul>
 
-  <h3 class="sub">11.3 Categorisation rules</h3>
+  <h3 class="sub">11.3 Categorisation rules — the Categories screen, second tab</h3>
 
   <div class="scroller"><div class="app">
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
       <nav class="nav">
-        <a href="#">Portfolio</a><a href="#">Transactions</a><a href="#">Categories</a>
-        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a class="on" href="#">Settings</a>
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a class="on" href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
       <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
-        <div><h3>Settings</h3><div class="sub">9 rules · first match wins · case and accent insensitive</div></div>
+        <div><h3>Categories</h3><div class="sub">9 rules · first match wins · case and accent insensitive</div></div>
         <div class="actions"><button class="btn ghost">Re-categorise all rule-assigned</button><button class="btn primary">Add rule</button></div>
       </div>
-      <nav class="tabs">
-        <a href="#">Institutions</a><a href="#">Accounts</a><a href="#">Securities</a>
-        <a href="#">Contracts</a><a class="on" href="#">Categorisation rules</a><a href="#">Preferences</a>
-      </nav>
+      <nav class="tabs"><a href="#">Report</a><a class="on" href="#">Rules</a><a href="#">Category list</a></nav>
       <div class="cols c">
         <div class="card">
           <div class="tblwrap"><table>
@@ -1703,7 +1730,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>Deleting a rule leaves the categories it already assigned untouched.</li>
   </ul>
 
-  <h3 class="sub">11.4 Preferences</h3>
+  <h3 class="sub">11.4 Preferences — the Settings screen</h3>
+  <p class="body">All that is left on Settings once reference data has moved to the screens that use
+  it. No tabs, one list.</p>
   <div class="specwrap"><table class="spec">
     <thead><tr><th>Setting</th><th>Default</th><th>Used by</th></tr></thead>
     <tbody>
@@ -1953,7 +1982,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>Investments</td><td>No trades: “Record a purchase to start tracking holdings,” with the button. Trades but no prices: holdings render at cost, with the price cells inviting a value.</td><td>Provider unreachable or unknown identifier: a line on the screen naming the securities that could not be fetched. The rest of the screen works; already-known prices stay.</td></tr>
       <tr><td>Salaries</td><td>No contract: “Add the contract first,” with a button to Settings. Contract but no payslips: the tables render with headers and a prompt to add one.</td><td>—</td></tr>
       <tr><td>Checks</td><td>Never empty. A check with nothing to examine <b>passes and says so</b> — “0 payslips” — which is why every passing check states its reach (§10).</td><td>—</td></tr>
-      <tr><td>Settings</td><td>Each tab names what it holds and offers its add button. The Accounts tab additionally explains that an account needs an institution, or <em>None</em> for cash.</td><td>A delete refused because something depends on the record says what depends on it.</td></tr>
+      <tr><td>Accounts</td><td>No accounts: “Add the first account — a current account is the usual place to start,” with the button. The Institutions tab explains that an account may have <em>None</em>, for cash.</td><td>A delete refused because something depends on the record says what depends on it.</td></tr>
+      <tr><td>Settings</td><td>Never empty; every preference has a default (§11.4).</td><td>A value that cannot be applied is rejected in place, leaving the previous one in force.</td></tr>
       <tr><td>Launch</td><td>No recent files: only <em>New file…</em> and <em>Open…</em>.</td><td>File missing, unreadable, or written by a newer schema version: stated on the launch screen, with the other files still openable. This is the one place an error blocks a screen (§13).</td></tr>
     </tbody>
   </table></div>
