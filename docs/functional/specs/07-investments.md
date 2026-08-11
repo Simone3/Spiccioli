@@ -18,10 +18,11 @@ Securities is what all three point at.
   that day already held ([§2](02-domain-model.md)). The whole editable history of a security lives
   on the Securities tab of this same screen ([§7.4](#74-securities)); Holdings is the fast path for
   the one thing done weekly, that tab is where a past mistake is repaired.
-- **Update prices** fetches from the provider ([§7.6](#76-prices)). It is a button and nothing else
-  — there is no setting behind it, and pressing it is the only thing that ever contacts the network.
-  Never press it and the inline editor is the only way in, which is a complete way to use the
-  application.
+- **Update prices** fetches today's quote for **every security in the file** and writes what comes
+  back, with no selection beforehand and no confirmation afterwards — then a notice says what
+  happened ([§7.6](#76-prices)). It is a button and nothing else: there is no setting behind it, and
+  pressing it is the only thing that ever contacts the network. Never press it and the inline editor
+  is the only way in, which is a complete way to use the application.
 - A price older than `priceStalenessDays` is marked on the row itself, not only in
   [§9](09-checks.md). **A security with no price at all is marked more loudly**: its price cell
   reads *none*, its value reads `€ 0,00`, its gain reads **minus everything the position cost**, and
@@ -168,6 +169,24 @@ Securities is what all three point at.
   never on load, never in the background. A switch in Settings would have been a second way to
   express what the button already expresses by not being pressed, and a state in which the button is
   present but refuses is worse than no state at all.
+- **One press covers every security in the file**, held or fully sold, and asks for one thing:
+  today's quote. There is no list to tick first — a fetch is cheap, the securities are a few dozen,
+  and choosing among them is a decision the user would have to make correctly every week to save
+  nothing.
+- **What comes back is written straight in**, as a `fetched` Price record dated **today**, replacing
+  whatever that day already held ([§2](02-domain-model.md)). **Nothing is shown for confirmation
+  first.** A confirmation step here would be a list of two dozen numbers nobody can check — the
+  figure being replaced is at most a few hours old and the one replacing it comes from the same
+  provider — and it would ask the question once per security every week.
+- **A security the provider has no quote for today is left exactly as it is.** No record is written,
+  the price it already had still stands and still ages towards check 3, and nothing is carried
+  forward or invented. The same is true of one the provider does not recognise, or of a fetch that
+  fails outright.
+- **The notice afterwards is the whole report of the pass**: how many prices were written, how many
+  securities had no quote for today, and how many could not be fetched at all, **naming the
+  securities in the last two groups**. It sits on the screen until dismissed. Nothing about a failed
+  fetch is recorded in the file — the notice is where it lives, and the remedy is to press the
+  button again or to type the price in by hand ([§7.1](#71-holdings)).
 - It sends security identifiers — ISIN or ticker — to the provider. **No amounts, quantities or
   account data ever leave the machine.** The application must state this **next to the button**,
   which is the moment it matters and now the only place the feature is visible.
@@ -177,10 +196,8 @@ Securities is what all three point at.
   reading it is code. When the provider has to change, that is a new version, and
   [§1](01-premise-and-constraints.md)'s promise about what leaves the machine stays something this
   document can actually make.
-- Fetched values are shown for confirmation before being written as `source = fetched` Price
-  records.
-- The application is fully usable without ever pressing the button. A provider failure is a message,
-  never a blocked screen.
+- The application is fully usable without ever pressing the button. A provider failure is a line in
+  the notice, never a blocked screen.
 
 ---
 

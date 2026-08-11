@@ -138,16 +138,15 @@
 12/07/2026→ADDEBITO SDD FASTWEB→-29,95
 13/07/2026→PRELIEVO ATM V.LE MONZA→-100,00
 14/07/2026→PAGAMENTO POS MC DONALD'S 1148→-12,50
-15/07/2026→BONIFICO DA ROSSI MARIO→250,00
+15/07/2026→BONIFICO DA ROSSI MARIO→1.250,00
 16/07/2026→CANONE MENSILE CONTO→-3,95
 17/07/2026→BONIFICO ESTERO
 <span style="color:var(--brass-dim)">▌</span></div>
           <div class="detect">
             <span class="chip">7 rows read</span>
             <span class="chip">3 columns detected</span>
-            <span class="chip">Date <b>DD/MM/YYYY</b></span>
-            <span class="chip">Decimal <b>comma</b></span>
-            <span class="chip">Thousands <b>none in these rows</b></span>
+            <span class="chip auto">Date order <b>DMY</b> — overridable</span>
+            <span class="chip">Amounts <b>2 decimals, always</b></span>
           </div>
         </div>
         <div class="card">
@@ -171,9 +170,11 @@
             <div class="fig"><span>3</span><b>Amount &nbsp;<span style="color:var(--faint)">signed</span></b></div>
           </div>
           <p class="detail note">Every import uses this order; rearrange the export before pasting if
-          your bank produces something else, and extra columns are ignored. The formats above are
-          inferred from the pasted rows themselves, never from the display preferences of §10 —
-          each chip is overridable, and changing one re-parses the preview immediately.</p>
+          your bank produces something else. A fourth column and beyond is ignored. <b>Only the date
+          order is inferred</b> — from the pasted rows themselves, never from the display preferences
+          of §10 — and its chip is overridable, re-parsing the preview immediately. Nothing about an
+          amount is inferred: it carries two decimals or it cannot be read, and whichever of
+          <code>.</code> or <code>,</code> introduces them is the decimal separator.</p>
         </div>
       </div>
       <div class="card">
@@ -185,7 +186,7 @@
             <tr><td><span class="cb"></span></td><td class="n">12/07/2026</td><td class="desc">ADDEBITO SDD FASTWEB</td><td class="n r neg">− € 29,95</td><td class="dim">new</td></tr>
             <tr><td><span class="cb"></span></td><td class="n">13/07/2026</td><td class="desc">PRELIEVO ATM V.LE MONZA</td><td class="n r neg">− € 100,00</td><td class="dim">new</td></tr>
             <tr><td><span class="cb"></span></td><td class="n">14/07/2026</td><td class="desc">PAGAMENTO POS MC DONALD'S 1148</td><td class="n r neg">− € 12,50</td><td class="dim">new</td></tr>
-            <tr class="dupe"><td><span class="cb off"></span></td><td class="n">15/07/2026</td><td class="desc">BONIFICO DA ROSSI MARIO</td><td class="n r">+ € 250,00</td><td class="neg">already imported</td></tr>
+            <tr class="dupe"><td><span class="cb off"></span></td><td class="n">15/07/2026</td><td class="desc">BONIFICO DA ROSSI MARIO</td><td class="n r">+ € 1.250,00</td><td class="neg">already imported</td></tr>
             <tr><td><span class="cb"></span></td><td class="n">16/07/2026</td><td class="desc">CANONE MENSILE CONTO</td><td class="n r neg">− € 3,95</td><td class="dim">new</td></tr>
             <tr class="dupe"><td><span class="cb off"></span></td><td class="n dim">17/07/2026</td><td class="desc dim">BONIFICO ESTERO</td><td class="n r dim">—</td><td class="neg">cannot be read — 2 columns, no amount</td></tr>
           </tbody>

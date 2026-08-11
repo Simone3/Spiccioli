@@ -113,14 +113,20 @@
   ([§12.1](#121-the-launch-screen)) is what the application opens *with*; the File menu is how you
   leave one file for another once it is running. Both reach the same code, so there is nothing you
   can do at launch that you cannot do afterwards.
-- **The File menu is the whole menu bar, and it holds four actions**: *New…*, which writes a fresh
-  seeded file; *Open…*, which browses for one; *Open Recent*, which is the same list the launch
-  screen offers; and *Quit*, which takes the closing backup. There is no Edit menu, because there is
-  no undo, and no View menu, because there is nothing to configure about the view.
-- The menu bar is **native on each platform** — in the macOS menu bar, in the window on Windows and
-  Linux — and carries the platform's own *About* and *Quit* conventions. That is presentation; those
-  four actions are the same three files and one exit everywhere
-  ([§1](01-premise-and-constraints.md)).
+- **Two things the menu bar must carry, and everything else is the platform's business.**
+  - **A File menu of four actions**: *New…*, which writes a fresh seeded file; *Open…*, which
+    browses for one; *Open Recent*, which is the same list the launch screen offers; and *Quit*,
+    which takes the closing backup. Those four are the same three files and one exit on every
+    platform ([§1](01-premise-and-constraints.md)).
+  - **An About item naming the application and its version.** It is the only place a version number
+    appears, and it is the thing to read before saying which version wrote a file
+    ([§12.1](#121-the-launch-screen)) or reporting that something went wrong.
+- **Everything else is left to the implementation and to the platform's conventions** — where
+  *About* and *Quit* sit, whether there is a Window or a Help menu, the standard edit-field items a
+  toolkit puts in by default. Specifying them would be specifying the operating system. What is
+  *not* left open is that there is no application-specific menu beyond File: there is no Edit menu,
+  because there is no undo, and no View menu, because there is nothing to configure about the view —
+  everything the application does, it does on a screen.
 
 ---
 

@@ -105,15 +105,20 @@ rule list currently produces, which may be nothing — a transaction no rule mat
 with an empty `categoryId`, and stays that way until a rule matches it or the user sets a category
 by hand. `manual` means the user chose it and no automatic pass may overwrite it.
 
-**That is an invariant held at all times, not a pass run on request.** The stored `categoryId` of an
-`automatic` transaction is never allowed to disagree with what the rule list would produce for it,
-so it is recomputed the moment either side of that equation moves: when a transaction is created or
-imported, when its description is edited, when a row is switched back to `automatic`
-([§5.4](05-transactions.md#54-editing)), and when any rule is added, edited, deleted or reordered
-([§6.2](06-categories.md#62-rules)). There is no button to press and no state in which the file
-holds an automatic category no rule would assign — which is what lets
-[§6.1](06-categories.md#61-report) and [§9](09-checks.md) read the stored value instead of
-re-deriving it behind every total.
+**That is an invariant on the file, not a pass run on request.** The stored `categoryId` of an
+`automatic` transaction is never allowed to disagree with what **the rule list as the file holds it**
+would produce, so it is recomputed the moment either side of that equation moves: when a transaction
+is created or imported, when its description is edited, when a row is switched back to `automatic`
+([§5.4](05-transactions.md#54-editing)), and when a changed rule list is applied
+([§6.2](06-categories.md#62-rules)). There is no state in which the file holds an automatic category
+no rule would assign — which is what lets [§6.1](06-categories.md#61-report) and
+[§9](09-checks.md) read the stored value instead of re-deriving it behind every total.
+
+**A rule list being edited is not yet the rule list.** Rules are changed in an editing session that
+writes nothing until it is applied, and the application writes the new rules and the categories they
+produce in the same step ([§6.2](06-categories.md#62-rules)). So the invariant is never suspended:
+what a draft on screen would produce is a preview, and the file goes from one consistent state to
+the next without passing through a third.
 
 ## Trade
 

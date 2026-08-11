@@ -20,6 +20,12 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
   salary, net/gross, working days and the two hourly figures
   ([§11.7](11-calculations.md#117-salary-figures)) — totals and rates, never averages. `Working
   days` is editable here — it is the ContractYear record, created by typing into the cell.
+- **One row per calendar year from the contract's start year to its end year**, or to the current
+  year while the contract is running, ascending. The rows come from the contract's own dates and not
+  from the payslips: a year in the middle with nothing recorded in it is a year that shows zeros and
+  an empty working-days cell, which is a fact worth seeing and also the only way that year's
+  ContractYear can be created at all — a table built from the payslips would have no row to type
+  into for the year whose payslips are the thing that is missing.
 - **A year with no ContractYear record shows an empty working-days cell**, and the two hourly
   columns read *undefined* rather than zero or a dash. The empty cell is the invitation: type the
   number and the row completes itself. Nothing is invented and nothing is hidden — a year whose
@@ -35,6 +41,10 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
   may hold several; the *tredicesima* is a second December row with a label, not a synthetic
   thirteenth month. Note it carries no car deduction and no pension contribution, which is why its
   net/gross ratio is higher.
+- **Ordered by month ascending, then by label alphabetically with the unlabelled row first.** A
+  label is what distinguishes the second payslip of a month from the first, so it is what breaks the
+  tie; and the ordinary monthly payslip is the one that has none, which puts December's pay above
+  December's tredicesima — the order they were earned in, and the order they are read in.
 - A payslip's money often reaches the bank the following month. The screen does not care — every
   figure here comes from the payslips — but checks 4 and 5 do, and they look one month ahead
   ([§11.6](11-calculations.md#116-derived-matching)).

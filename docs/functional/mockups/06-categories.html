@@ -109,8 +109,8 @@
     </aside>
     <main class="view">
       <div class="viewhead">
-        <div><h3>Categories</h3><div class="sub">11 rules · first match wins · case and accent insensitive</div></div>
-        <div class="actions"><button class="btn primary">Add rule</button></div>
+        <div><h3>Categories</h3><div class="sub">11 rules · first match wins · case and accent insensitive · <span style="color:var(--brass)">3 unapplied changes</span></div></div>
+        <div class="actions"><button class="btn">Add rule</button><button class="btn ghost">Discard changes</button><button class="btn primary">Apply changes</button></div>
       </div>
       <nav class="tabs"><a href="#">Report</a><a class="on" href="#">Rules</a><a href="#">Category list</a></nav>
       <div class="cols c">
@@ -122,40 +122,42 @@
               <tr><td class="grab">⣿</td><td class="ruleno">2</td><td class="desc">COOP</td><td><span class="chip auto">Groceries</span></td><td class="n r dim">213</td><td class="rowact">···</td></tr>
               <tr><td class="grab">⣿</td><td class="ruleno">3</td><td class="desc">ESSELUNGA</td><td><span class="chip auto">Groceries</span></td><td class="n r dim">386</td><td class="rowact">···</td></tr>
               <tr><td class="grab">⣿</td><td class="ruleno">4</td><td class="desc">STIPENDIO</td><td><span class="chip auto">Salary</span></td><td class="n r dim">117</td><td class="rowact">···</td></tr>
-              <tr class="sel"><td class="grab">⣿</td><td class="ruleno">5</td><td class="desc">CANONE</td><td><span class="chip auto">Bank fees</span></td><td class="n r dim">118</td><td class="rowact">···</td></tr>
-              <tr><td class="grab">⣿</td><td class="ruleno">6</td><td class="desc">ENEL ENERGIA</td><td><span class="chip auto">Electricity</span></td><td class="n r dim">126</td><td class="rowact">···</td></tr>
-              <tr><td class="grab">⣿</td><td class="ruleno">7</td><td class="desc">FASTWEB</td><td><span class="chip auto">Home internet</span></td><td class="n r dim">98</td><td class="rowact">···</td></tr>
-              <tr><td class="grab">⣿</td><td class="ruleno">8</td><td class="desc">BOLLO CONTO</td><td><span class="chip auto">Wealth tax</span></td><td class="n r dim">42</td><td class="rowact">···</td></tr>
-              <tr><td class="grab">⣿</td><td class="ruleno">9</td><td class="desc">ESEGUITO ACQUISTO</td><td><span class="chip auto">Securities purchase</span></td><td class="n r dim">41</td><td class="rowact">···</td></tr>
-              <tr><td class="grab">⣿</td><td class="ruleno">10</td><td class="desc">AFFITTO</td><td><span class="chip auto">Rent &amp; condominium fees</span></td><td class="n r dim">128</td><td class="rowact">···</td></tr>
+              <tr class="sel"><td class="grab">⣿</td><td class="ruleno">5</td><td class="desc">AFFITTO &nbsp;<span class="chip" style="color:var(--brass)">moved ▲</span></td><td><span class="chip auto">Rent &amp; condominium fees</span></td><td class="n r dim">128</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">6</td><td class="desc">BONIFICO</td><td><span class="chip auto">Other expense</span></td><td class="n r dim">402</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">7</td><td class="desc">ADDEBITO DIVERSI &nbsp;<span class="chip" style="color:var(--brass)">added</span></td><td><span class="chip auto">Other expense</span></td><td class="n r dim">—</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">8</td><td class="desc">ENEL ENERGIA</td><td><span class="chip auto">Electricity</span></td><td class="n r dim">126</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">9</td><td class="desc">FASTWEB</td><td><span class="chip auto">Home internet</span></td><td class="n r dim">98</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">10</td><td class="desc">ESEGUITO ACQUISTO</td><td><span class="chip auto">Securities purchase</span></td><td class="n r dim">41</td><td class="rowact">···</td></tr>
               <tr><td class="grab">⣿</td><td class="ruleno">11</td><td class="desc">COMMISSIONI</td><td><span class="chip auto">Bank fees</span></td><td class="n r dim">96</td><td class="rowact">···</td></tr>
+              <tr style="opacity:.45"><td class="grab"></td><td class="ruleno">—</td><td class="desc"><s>BOLLO CONTO</s> &nbsp;<span class="chip" style="color:var(--brass)">deleted</span></td><td><span class="chip auto">Wealth tax</span></td><td class="n r dim">42</td><td class="rowact">···</td></tr>
             </tbody>
+            <tfoot><tr><td colspan="4">11 rules after these edits · <b>nothing written yet</b></td><td class="r dim">as applied</td><td></td></tr></tfoot>
           </table></div>
         </div>
         <div class="detail">
-          <div class="dh"><b>Rule 5</b><small>editing</small></div>
+          <div class="dh"><b>Apply changes?</b><small>3 edits in this session · nothing has been written yet</small></div>
           <div class="figs">
-            <div class="fig"><span>Contains</span><b>CANONE</b></div>
-            <div class="fig"><span>Category</span><b>Bank fees</b></div>
-            <div class="fig"><span>Position</span><b>5 of 11</b></div>
+            <div class="fig"><span>Change category</span><b class="neg">64</b></div>
+            <div class="fig"><span>Lose their category</span><b class="neg">12</b></div>
+            <div class="fig"><span>Uncategorised → categorised</span><b class="pos">1</b></div>
+            <div class="fig"><span>Unchanged</span><b>4.735 of 4.812</b></div>
           </div>
           <hr class="sep">
-          <h4 class="subhead">Test against existing data</h4>
-          <div class="figs">
-            <div class="fig"><span>Would match</span><b>118 transactions</b></div>
-            <div class="fig"><span>Already this category</span><b class="pos">116</b></div>
-            <div class="fig"><span>Currently uncategorised</span><b>2</b></div>
-            <div class="fig"><span>Set by hand to something else</span><b class="neg">0</b></div>
-          </div>
-          <hr class="sep">
+          <h4 class="subhead">What each edit accounts for</h4>
           <div class="tblwrap"><table>
-            <thead><tr><th>Sample matches</th></tr></thead>
+            <thead><tr><th>Edit</th><th class="r">Rows</th></tr></thead>
             <tbody>
-              <tr><td class="desc dim">CANONE MENSILE CONTO</td></tr>
-              <tr><td class="desc dim">CANONE CARTA DI CREDITO</td></tr>
-              <tr><td class="desc dim">CANONE ANNUO DEPOSITO TITOLI</td></tr>
+              <tr><td class="desc">moved <b>AFFITTO</b> above <b>BONIFICO</b></td><td class="n r neg">64</td></tr>
+              <tr><td class="desc">deleted <b>BOLLO CONTO</b> → Wealth tax</td><td class="n r neg">12</td></tr>
+              <tr><td class="desc">added <b>ADDEBITO DIVERSI</b> → Other expense, at 7</td><td class="n r pos">1</td></tr>
             </tbody>
           </table></div>
+          <p class="note">The 12 rows losing Wealth tax become uncategorised, and check 2 will report
+          them. That is the figure to read twice before confirming a delete.</p>
+          <p class="note">Hand-set categories are never touched. Confirming writes the rules and
+          every category above in one step; cancelling writes nothing and leaves the list exactly as
+          it is on screen.</p>
+          <div class="dlgfoot"><button class="btn ghost">Cancel</button><button class="btn primary">Apply</button></div>
         </div>
       </div>
     </main>

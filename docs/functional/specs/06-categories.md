@@ -86,8 +86,8 @@ The categories × years matrix — the one screen that answers where the money g
   covers.
 - The screen carries three tabs: this report, the categorisation rules ([§6.2](#62-rules)), and a
   read-only list of the twenty-seven categories with their types and roles
-  ([§6.3](#63-category-list)). Rules sit here because the tester's counts only mean something next
-  to the report they change.
+  ([§6.3](#63-category-list)). Rules sit here because what a rule change does is move figures in
+  this report, and the two are worth being a tab apart.
 - Uncategorised transactions appear in no row. Their existence is a failing check, not a silent
   omission.
 - **Total income is money that arrived, not money that was earned.** It adds net salary, the
@@ -108,22 +108,47 @@ The categories × years matrix — the one screen that answers where the money g
 
 - Ordered, draggable, numbered. **First match wins**, so order is the logic and must be visible. A
   rule is created with the substring and the category; nothing else.
-- The tester counts what the rule under edit would match, split into already-this-category,
-  currently uncategorised, and hand-set to something else, with sample matching descriptions. **It
-  previews the rule as edited, before the edit is committed** — which is why it can report rows that
-  are currently uncategorised even though a committed rule would already have caught them. It is the
-  answer to “what will this do?”, asked before it does it.
-- **Every committed change to the list re-categorises immediately.** Adding, editing, deleting or
-  dragging a rule re-runs the whole list over every transaction whose `categorySource = automatic`,
-  as the change is made. A `manual` category is never touched. There is no apply button, because an
-  automatic category that disagreed with the rules would break the invariant of
-  [§2](02-domain-model.md) — and the moment there is a button, there is a file in which it has not
-  been pressed.
-- **Deleting a rule therefore un-categorises the rows only it matched**, unless a rule further down
-  the list picks them up. That is the visible consequence of the rule above rather than a surprise,
-  and it is what the tester's counts are for reading before deleting. Rows set by hand keep their
-  category regardless.
-- The *Applies to* counts are computed against current data, so they never go stale.
+
+### The list is edited as a session, and applied once
+
+- **Editing the list changes nothing until *Apply changes* is pressed.** Add a rule, edit another,
+  delete a third, drag two into a different order — all of it accumulates on the screen as a
+  **draft**, and neither the rules nor a single transaction's category is written while it does. The
+  header says how many changes are pending, *Apply changes* is enabled only while there are some,
+  and *Discard changes* puts the list back to what the file holds.
+- **The unit of work is the edit session, not the keystroke.** A rule list is reasoned about as a
+  whole — a new rule usually wants to sit above an existing one, which means an edit and a drag that
+  are only correct together — and applying each half as it happens would re-categorise the file
+  twice, the first time into a state nobody asked for. It is also the only way a drag can be part of
+  the same decision as the rule it moves.
+- **Apply asks first, and what it shows is the consequence rather than the diff.** Pressing it runs
+  the draft list over every transaction whose `categorySource = automatic`, compares the result with
+  what those rows carry now, and reports:
+  - **how many transactions change from one category to another**, the number that says a rule took
+    over rows another one was catching;
+  - **how many lose their category**, the rows a deleted or narrowed rule was the only match for;
+  - **how many currently uncategorised gain one**, which is what a new rule is usually for;
+  - **how many are unchanged**, so the three figures above are read against the size of the file;
+  - and **a line per rule that was added, edited, moved or deleted**, with what each accounted for.
+- Confirm and the rules and every affected category are written **together, in one step**. Cancel
+  and nothing at all is written: the draft is still on the screen, exactly as it was, and can be
+  edited further or discarded. **A `manual` category is never touched by any of this**
+  ([§2](02-domain-model.md)).
+- **Leaving the tab, closing the file or quitting with a draft pending asks what to do with it** —
+  apply, discard, or stay. A draft is the one thing in the application that is not in the file the
+  moment it is typed, so it is the one thing that has to be asked about before it can be lost.
+- **The *Applies to* column describes the applied list**, not the draft: it counts the transactions
+  each rule currently accounts for in the file. While a draft is pending it is dimmed and labelled
+  as such, because a count that silently switched between describing the file and describing a
+  proposal would be the one number on the screen nobody could trust.
+- **There is no per-rule tester.** The question worth answering is what the *list* will do, and a
+  panel that answered it one rule at a time could not answer it for a drag at all — reordering is
+  the edit most likely to change a category, and it has no rule under edit to hang a preview on. One
+  summary over the whole draft says everything the per-rule counts said and the thing they could
+  not.
+- **Deleting a rule un-categorises the rows only it matched**, unless a rule further down the list
+  picks them up. That is arithmetic, not a surprise, and it is the second figure in the summary —
+  which is the number to read before confirming a delete.
 - **Eleven rules is the mockup, not the expectation.** A real file runs to several dozen, and the
   target is that **the rules categorise about 95% of transactions** and the remaining twentieth is
   set by hand — one-off transfers, gifts, the payment whose description is a reference number. That
@@ -131,15 +156,12 @@ The categories × years matrix — the one screen that answers where the money g
   ([§5.6](05-transactions.md#56-selecting-and-deleting-in-bulk)): if a quarter of the file needed
   touching by hand, the rules would be the thing that was wrong.
 
-> **If it turns out to be too slow.** Re-running several dozen rules over ten years of transactions
-> is a scan of the whole file, debounced behind each rule edit. If that proves too slow to do on
-> every commit, the fallback is **two explicit buttons**, and the difference between them is the
-> whole point: *Apply rules to uncategorised* touches only the rows with no category, which is a
-> handful after an import and costs nothing, while *Re-categorise all rule-assigned* is the full
-> pass over every `automatic` row and is what a changed or reordered rule actually needs. The
-> invariant of [§2](02-domain-model.md) relaxes with them, to “whatever the rule list produced when
-> it was last run”. That is a worse specification and it is not the one being built; it is written
-> down so the trade is made deliberately rather than discovered.
+> **What this costs to run.** One apply is one pass of several dozen rules over ten years of
+> transactions, and the pass that produces the summary is the same pass that produces the result —
+> compute it once, show the figures, and write what was already computed if the user confirms.
+> Nothing is recomputed on confirmation. That is the whole reason the summary is affordable at all,
+> and it is also why the previous design — re-running the list behind every keystroke — is not
+> missed.
 
 ## 6.3 Category list
 

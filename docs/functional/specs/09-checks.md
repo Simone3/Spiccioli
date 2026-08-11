@@ -19,7 +19,7 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 | 7 | Sale transactions match sales | As above for role `securities sale` and sale trades. The trade side is net proceeds — after tax and fees — so it can equal what the bank credited. | As above. |
 | 8 | No holding has gone negative | For every (security, account), running quantity in date order never drops below 0. | Security, account, the trade that took it negative. |
 | 9 | No sale precedes its purchase | Every sale has at least one earlier purchase of that security in that account. | The offending sale. |
-| 10 | Pension fund revalued recently | Latest transaction in a role `value adjustment` category, in each pension fund account, within `pensionRevaluationMonths`. | Account and date of the last adjustment. |
+| 10 | Pension fund revalued recently | Latest transaction in a role `value adjustment` category, in each **open** pension fund account, within `pensionRevaluationMonths`. An account that has never had one fails too. | Account and date of the last adjustment, or “never revalued”. |
 | 11 | Closed accounts are empty | Every account with a `closingDate` has a balance of exactly 0 and no holding with quantity > 0. | Account, closing date, the balance or holdings left in it. |
 | 12 | Records fall within their account's life | No transaction or trade is dated before its account's `openingDate` or after its `closingDate`. Both ends, not just the near one. | The record, its date, and the account's opening or closing date. |
 | 13 | Receipt-tracked transactions carry a state | No transaction in a category with `receiptTracked` has `receiptState = na`. | Each such transaction. |
@@ -66,6 +66,19 @@ thinking about it.
   step with the first.
 - Checks key off category **roles** ([§2](02-domain-model.md)), never off category names, so
   rewording a label never silently switches a check off.
+- **Every check reads the whole file, closed accounts included.** A closed account keeps its history
+  and its rows stay editable — it is still in every picker, marked and last
+  ([§4.3](04-accounts.md#43-creating-and-editing)) — so an unpaired transfer, an uncategorised row
+  or a receipt left `pending` on an account shut in 2021 is as findable and as fixable as one on the
+  current account, and there is no reason for a check to look away from it. Closing an account
+  removes its balance from net worth ([§11.4](11-calculations.md#114-balances-and-net-worth)); it
+  does not remove its records from the file, and the checks are about the records.
+- **Check 10 is the one exception, and it is an exception about meaning rather than about scope.**
+  It asks whether a pension fund's balance has been kept in step with its real value, and a closed
+  account has no balance left to keep in step: it reads **open pension fund accounts only**. The
+  alternative was a check that failed forever on an account closed years ago, with no legitimate way
+  to satisfy it — a value adjustment dated after the closing date would immediately fail check 12
+  instead.
 
 > **What a run actually costs.** Fourteen checks over ten years is a handful of passes over the
 > whole file — a few thousand transactions, a few dozen trades, a hundred-odd payslips — plus the

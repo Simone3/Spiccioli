@@ -14,26 +14,36 @@ particular.
 
 ---
 
-| Setting | Default | Used by |
-| --- | --- | --- |
-| dateFormat | DD/MM/YYYY | Display only |
-| decimalSeparator | , | Display only |
-| thousandsSeparator | . | Display only |
-| currencySymbol | € | Every monetary figure — **all of them carry it** |
-| currencyPosition | before | As above |
-| defaultTaxRate | 26% | Initial value of `Security.taxRate` ([§2](02-domain-model.md)). Changing it does not touch securities that already exist. |
-| priceStalenessDays | 30 | Check 3, holdings marker |
-| pensionRevaluationMonths | 3 | Check 10 |
-| receiptPendingMonths | 3 | Check 14 |
-| transferMatchWindowDays | 5 | [§11.6](11-calculations.md#116-derived-matching), check 1 |
-| tradeMatchWindowDays | 5 | [§11.6](11-calculations.md#116-derived-matching), checks 6 and 7 |
-| backupCount | 10 | [§12](12-storage.md) |
+**Every preference is a closed set or a bounded number** — there is no free-text setting on this
+screen except the currency symbol, and nothing here can be given a value the application then has to
+interpret.
+
+| Setting | Values | Default | Used by |
+| --- | --- | --- | --- |
+| dateFormat | `DD/MM/YYYY` · `MM/DD/YYYY` · `YYYY-MM-DD` | `DD/MM/YYYY` | Display only |
+| decimalSeparator | `,` · `.` | `,` | Display only |
+| thousandsSeparator | `.` · `,` · space · **none** | `.` | Display only |
+| currencySymbol | 1 – 3 characters, required | `€` | Every monetary figure — **all of them carry it** |
+| currencyPosition | before · after | before | As above |
+| defaultTaxRate | 0 – 100%, one decimal | 26% | Initial value of `Security.taxRate` ([§2](02-domain-model.md)). Changing it does not touch securities that already exist. |
+| priceStalenessDays | integer ≥ 1 | 30 | Check 3, holdings marker |
+| pensionRevaluationMonths | integer ≥ 1 | 3 | Check 10 |
+| receiptPendingMonths | integer ≥ 1 | 3 | Check 14 |
+| transferMatchWindowDays | integer 0 – 31 | 5 | [§11.6](11-calculations.md#116-derived-matching), check 1 |
+| tradeMatchWindowDays | integer 0 – 31 | 5 | [§11.6](11-calculations.md#116-derived-matching), checks 6 and 7 |
+| backupCount | integer 1 – 100 | 10 | [§12](12-storage.md) |
+
+**The three date formats are the three that are unambiguous to write down**, one per order, and the
+separator inside them is part of the format rather than a choice of its own. **The thousands
+separator may be none**, which prints `21900,00` and is a legitimate way to want figures; the
+decimal separator may not be, since without it two decimals would run into the units
+([§11](11-calculations.md)). The two must differ ([§13](13-validation.md)).
 
 Formats are a **user preference, not a hard-coded locale**. Changing one re-renders every figure in
 the application immediately.
 
-**They are display-only, and importing ignores them.** A pasted export is parsed by detecting its
-own date order and separators from the rows themselves
+**They are display-only, and importing ignores them.** A pasted export has its date order detected
+from the rows themselves and its amounts read by a rule that admits of no detection at all
 ([§5.7](05-transactions.md#57-bulk-import)), because the file came from a bank and has no reason to
 match how you like to read numbers. The two are kept apart deliberately: changing how dates are
 displayed must never change how a paste is interpreted.

@@ -87,13 +87,19 @@ that will survive every future rule change, which is the set worth keeping small
   deliberately makes a second row; that is a detection that warns you may be about to make one by
   accident. They share a word and nothing else, and a row created by this action is not flagged by
   that detection — it is only consulted when rows are pasted.
-- **There is no “apply rules” action here.** Automatic categories are always current, so a button
-  that re-ran the rule list would have nothing left to do.
+- **There is no “apply rules” action on this screen.** The automatic categories in the file are
+  always current, so a button that re-ran the rule list would have nothing left to do. The one place
+  the list is applied is the Rules tab, and it is applied there as part of changing it
+  ([§6.2](06-categories.md#62-rules)).
 
 ## 5.5 Add transaction
 
 > **Mockup —** [Add transaction](../mockups/05-transactions.html#add-transaction)
 
+- **Seven fields, in this order: account, date, description, amount, category, receipt, notes** —
+  every stored field of a transaction that is not derived ([§2](02-domain-model.md)). Description is
+  required and is the only thing a rule will match on ([§13](13-validation.md)); notes are optional
+  and the application never writes to them ([§5.1](#51-columns)).
 - **Account** defaults to the one last used, and lists cash accounts only — closed ones among them,
   marked and last ([§4.3](04-accounts.md#43-creating-and-editing)). **Date** is a date picker
   defaulting to today; **amount** is a validated numeric field, signed, negative being money out.
@@ -158,40 +164,59 @@ produces — it is a mode of this screen rather than a destination of its own.
 - A line is split on tabs and each field trimmed; **a line that is empty or all whitespace is
   skipped silently**, not reported as unreadable, since a trailing newline is what every paste ends
   with.
+- **Columns after the third are ignored**, not treated as an error. Exports routinely carry a
+  running balance or a value date in a fourth column, and a row that carries the three things needed
+  is a readable row whatever follows them. Only *fewer* than three columns makes a row unreadable.
 - A single signed amount column; debit/credit pairs are not supported. Bank-specific import profiles
   are future work.
 
-### Formats
+### Dates
 
-- Date order and decimal and thousands separators are **inferred from the pasted rows themselves**,
-  never from the display preferences of [§10](10-settings.md) — the file came from a bank and has no
-  reason to match how you like to read numbers.
-- Each is shown as a chip and **each is overridable**; changing one re-parses every row immediately.
-  When a format cannot be inferred — no row carries a thousands separator, or every date is
-  ambiguous between the two orders — the chip states the assumption that was made rather than hiding
-  it, because it is the thing to correct when the preview looks wrong.
-- **Both separators are optional.** `12345` is a perfectly good amount and reads as `€ 12.345,00`;
-  so is `12345.67`. Detection looks at the whole amount column at once, in this order:
-  1. A row carrying **both** a dot and a comma settles it for the column: the **last** one is the
-     decimal separator, the other is thousands. `12.345,67` and `12,345.67` are both read correctly
-     and neither needs a preference.
-  2. Otherwise, with only one kind of separator present, it is the **decimal separator** —
-     `12345.67` and `1234,50` mean what they look like.
-  3. **Except** when that separator is followed by exactly three digits in every row it appears in,
-     in which case it is thousands. An amount never carries three decimals
-     ([§13](13-validation.md)), so `1.234` is one thousand two hundred and thirty-four euros —
-     reading it as `€ 1,23` would be off by a factor of a thousand, silently, on a row that looks
-     ordinary.
-  4. No separator anywhere: whole euros.
-- Rule 3 is the only guess in the list, and it is the one the chip exists for: a column of round
-  thousands is genuinely ambiguous, so the application takes the reading that cannot lose three
-  orders of magnitude and shows you which one it took.
+- **The order is inferred from the pasted rows themselves**, never from the display preferences of
+  [§10](10-settings.md) — the file came from a bank and has no reason to match how you like to read
+  numbers. It is shown as a chip and **the chip is overridable**; changing it re-parses every row
+  immediately.
+- **Three orders are read: `DMY`, `MDY` and `YMD`.** The last is what an ISO date is, so
+  `2026-07-11` needs no rule of its own.
+- **The separator between the parts may be `/`, `-` or `.`**, and carries no meaning: it is not
+  inferred, not shown on the chip, and a paste may mix rows that use different ones. It is the order
+  that is ambiguous, never the punctuation.
+- **The year may be four digits or two**, and a two-digit `YY` reads as `20YY`. A ledger that begins
+  in 2016 has no use for 1926, and a bank that prints two digits is not offering to disambiguate
+  them.
+- Inference reads the whole column: a leading four-digit field settles `YMD`, a first part above 12
+  settles `DMY`, a second part above 12 settles `MDY`. **When every row in the paste is ambiguous,
+  `DMY` is assumed and the chip says so** — a fixed assumption written into the application, not a
+  preference read from [§10](10-settings.md), and the thing to change when the preview looks wrong.
+- Anything else in the date column — a month name, a weekday, a time appended after the date —
+  **cannot be read** ([§15](15-out-of-scope.md)).
+
+### Amounts
+
+- **An amount carries exactly two decimals, and a row whose amount does not cannot be read.** The
+  final `.` or `,` in the field must be followed by exactly two digits: `-54,80`, `1234.50` and
+  `0,00` are amounts, and `12345`, `1.234` and `12,3` are not. It is the rule that removes every
+  guess from this column — the alternative was inferring whether `1.234` meant one thousand or one
+  and a bit, silently, on a row that looks perfectly ordinary and is out by a factor of a thousand
+  when it is wrong.
+- **Whichever character introduces those two digits is the decimal separator**, and the other one,
+  where it appears, is the thousands separator grouping the integer part in threes. `1.234,56` and
+  `1,234.56` are both read correctly, each row on its own evidence. **Thousands separators are
+  optional**: `1234,56` is the same amount as `1.234,56`.
+- **There is therefore no amount chip and nothing to override**, because nothing about an amount is
+  inferred — every field says what it is or is not an amount. The one chip on this screen is the
+  date order.
+- The sign is a leading `-`, or nothing for money in. Trailing signs, parentheses and `D`/`C`
+  markers are not read ([§15](15-out-of-scope.md)).
+- **A bank export that writes whole euros as `1234` is reshaped before pasting, not guessed at.**
+  Two decimals is what a statement prints, it costs one spreadsheet column to produce, and requiring
+  it buys a column that is never wrong instead of one that is nearly always right.
 
 ### Rows that cannot be read
 
-- A row with fewer than three columns, whose date or amount does not parse under the current
-  formats, or **whose description is empty** once trimmed, appears in the preview **marked with the
-  reason, and cannot be ticked**. It is excluded from the count on the *Import* button and from the
+- A row with fewer than three columns, whose date does not parse under the current order, whose
+  amount does not carry two decimals, or **whose description is empty** once trimmed, appears in the
+  preview **marked with the reason, and cannot be ticked**. It is excluded from the count on the *Import* button and from the
   import. These are the transaction rules of [§13](13-validation.md) and nothing more — an import
   cannot write a row the form would have refused.
 - **An amount of `0,00` reads fine and is imported.** It is a legal amount
