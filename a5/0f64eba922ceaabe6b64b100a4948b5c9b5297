@@ -1,0 +1,19 @@
+docs/functional/specs.html
+  s_722914fc4f0ceb::t_50b26118b0cf33 574-576,662-666,668-669,1297,1315-1316,1325,1341,1368,1782,1798-1799,1802,1918,2402-2407
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "a50f64eba922ceaabe6b64b100a4948b5c9b5297",
+  "prompts": {},
+  "sessions": {
+    "s_722914fc4f0ceb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8520c6d1-4f51-4f64-8ac6-1436540946c4",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
