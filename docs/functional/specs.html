@@ -300,11 +300,11 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>type</td><td>enum</td><td><code>Liquidity</code> · <code>Deposit account</code> · <code>Term deposit</code> · <code>Pension fund</code> · <code>Voucher</code> · <code>Brokerage</code></td></tr>
       <tr><td>currency</td><td>enum</td><td>EUR in v1.</td></tr>
       <tr><td>openingBalance</td><td>amount</td><td>Default 0. For accounts whose history starts mid-life. Always 0 on a <code>Brokerage</code> account.</td></tr>
-      <tr><td>openingDate</td><td>date</td><td>Nothing may be dated before it — check 12.</td></tr>
+      <tr><td>openingDate</td><td>date</td><td>Records dated before it are reported by check 12, never prevented.</td></tr>
       <tr><td>closingDate</td><td>date?</td><td>Empty means open. An account is closed by editing it and setting this date; there is no other retirement mechanism.</td></tr>
       <tr><td>notes</td><td>text</td><td></td></tr>
       <tr><td class="d">status</td><td class="d">enum</td><td class="d"><code>closed</code> when <code>closingDate</code> is set, <code>open</code> otherwise. Closed accounts keep their history and leave the portfolio breakdown.</td></tr>
-      <tr><td class="d">balance</td><td class="d">amount</td><td class="d">Cash accounts: openingBalance + Σ transaction amounts. Brokerage: Σ holding values (§12.4).</td></tr>
+      <tr><td class="d">balance</td><td class="d">amount</td><td class="d">Cash accounts: openingBalance + Σ transaction amounts. Brokerage: Σ holding <code>netValue</code> — net of the hypothetical tax and sell fee of §12.3, per §12.4.</td></tr>
     </tbody>
   </table></div>
   <p class="body"><b>Cash and securities never live in the same account.</b> The five cash types hold
@@ -363,7 +363,6 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>categorySource</td><td>enum</td><td><code>automatic</code> · <code>manual</code>. Never empty. Reversible — see §5.4.</td></tr>
       <tr><td>receiptState</td><td>enum</td><td><code>pending</code> · <code>checked</code> · <code>na</code></td></tr>
       <tr><td>notes</td><td>text</td><td>User-owned. Never written by the application.</td></tr>
-      <tr><td>importBatchId</td><td>ref?</td><td>Set on rows created by a bulk import, empty on manual entry. Its only use is the after-import filter (§6).</td></tr>
       <tr><td>insertionSeq</td><td>int</td><td>Monotonic. Second sort key (§5.2).</td></tr>
     </tbody>
   </table></div>
@@ -372,6 +371,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   be nothing — a transaction no rule matches is <code>automatic</code> with an empty
   <code>categoryId</code>, and stays that way until a rule matches it or the user sets a category by
   hand. <code>manual</code> means the user chose it and no automatic pass may overwrite it.</p>
+  <p class="body"><b>That is an invariant held at all times, not a pass run on request.</b> The
+  stored <code>categoryId</code> of an <code>automatic</code> transaction is never allowed to
+  disagree with what the rule list would produce for it, so it is recomputed the moment either side
+  of that equation moves: when a transaction is created or imported, when its description is edited,
+  when a row is switched back to <code>automatic</code> (§5.4), and when any rule is added, edited,
+  deleted or reordered (§11.3). There is no button to press and no state in which the file holds an
+  automatic category no rule would assign — which is what lets §7 and §10 read the stored value
+  instead of re-deriving it behind every total.</p>
 
   <h4 class="subsub">Trade</h4>
   <div class="specwrap"><table class="spec">
@@ -723,7 +730,6 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <div class="viewhead">
         <div><h3>Transactions</h3><div class="sub">4.812 records · 01/2016 – 08/2026</div></div>
         <div class="actions">
-          <button class="btn ghost">Apply rules to uncategorised</button>
           <button class="btn">Add transaction</button>
           <button class="btn primary">Bulk import</button>
         </div>
@@ -805,9 +811,13 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     rules decide)</em> — at the top of the list. Choosing it sets <code>categorySource</code> back to
     <code>automatic</code> and immediately re-applies the rule list to that transaction, leaving the
     category empty if no rule matches. There is no state a hand-edit can trap a row in.</li>
+    <li><b>Editing the description of an <code>automatic</code> row re-runs the rule list over that
+    row</b> as the edit is committed. The description is the only thing a rule matches on, so
+    changing it changes what the rules produce, and the row follows (§2). A <code>manual</code> row
+    keeps its category whatever its description becomes.</li>
     <li>Row menu: duplicate, delete. <b>Delete asks for confirmation</b> — there is no undo.</li>
-    <li><b>Apply rules to uncategorised</b> runs the rule list over transactions with no category.
-    It never touches a categorised row.</li>
+    <li><b>There is no “apply rules” action here.</b> Automatic categories are always current, so a
+    button that re-ran the rule list would have nothing left to do.</li>
   </ul>
 
   <h3 class="sub">5.5 Add transaction</h3>
@@ -832,9 +842,11 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     </div>
   </div>
   <ul class="body">
-    <li><b>Account</b> defaults to the one last used, and lists cash accounts only. <b>Date</b>
-    defaults to today. <b>Amount</b> is signed — negative is money out — and accepts the preference
-    separators.</li>
+    <li><b>Account</b> defaults to the one last used, and lists cash accounts only. <b>Date</b> is a
+    date picker defaulting to today; <b>amount</b> is a validated numeric field, signed, negative
+    being money out. Neither can hold text that would have to be interpreted: nothing invalid can be
+    entered, so nothing invalid has to be rejected on save, and the display preferences of §11.4
+    never enter into data entry.</li>
     <li><b>Category</b> defaults to <em>Automatic</em>, so a manually added row is categorised by the
     same rules as an imported one.</li>
     <li><b>Receipt</b> shows a static <em>n/a</em>. The category is not known while the form is open,
@@ -850,10 +862,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <header>
     <div class="num">06</div>
     <h2>Bulk import</h2>
-    <p>Two steps. One job: get raw rows in without duplicating anything.</p>
+    <p>One screen. One job: get raw rows in without duplicating anything.</p>
   </header>
-
-  <h3 class="sub">6.1 Step 1 — choose account and paste</h3>
 
   <div class="scroller"><div class="app">
     <aside class="side">
@@ -866,8 +876,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     </aside>
     <main class="view">
       <div class="viewhead">
-        <div><h3>Bulk import</h3><div class="sub">step 1 of 2 · paste</div></div>
-        <div class="actions"><button class="btn ghost">Cancel</button><button class="btn primary">Continue</button></div>
+        <div><h3>Bulk import</h3><div class="sub">7 rows pasted · 5 selected · 1 duplicate · 1 unreadable</div></div>
+        <div class="actions"><button class="btn ghost">Cancel</button><button class="btn primary">Import 5 transactions</button></div>
       </div>
       <div class="cols c">
         <div class="card">
@@ -878,10 +888,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
 14/07/2026→PAGAMENTO POS MC DONALD'S 1148→-12,50
 15/07/2026→BONIFICO DA ROSSI MARIO→250,00
 16/07/2026→CANONE MENSILE CONTO→-3,95
+17/07/2026→BONIFICO ESTERO
 <span style="color:var(--brass-dim)">▌</span></div>
           <div class="detect">
-            <span class="chip">6 rows read</span>
+            <span class="chip">7 rows read</span>
             <span class="chip">3 columns detected</span>
+            <span class="chip">Date <b>DD/MM/YYYY</b></span>
+            <span class="chip">Decimal <b>comma</b></span>
+            <span class="chip">Thousands <b>dot</b></span>
           </div>
         </div>
         <div class="card">
@@ -890,71 +904,24 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <div class="inp sel" style="font-family:var(--mono);font-size:12px">Fineco · Conto Corrente</div>
           </div>
           <hr class="sep">
+          <h4>Outcome</h4>
+          <div class="figs">
+            <div class="fig"><span>Rows pasted</span><b>7</b></div>
+            <div class="fig"><span>Selected for import</span><b class="pos">5</b></div>
+            <div class="fig"><span>Already in the file</span><b class="neg">1</b></div>
+            <div class="fig"><span>Cannot be read</span><b class="neg">1</b></div>
+          </div>
+          <hr class="sep">
           <h4>Expected column order</h4>
           <div class="figs">
             <div class="fig"><span>1</span><b>Date</b></div>
             <div class="fig"><span>2</span><b>Description</b></div>
             <div class="fig"><span>3</span><b>Amount &nbsp;<span style="color:var(--faint)">signed</span></b></div>
           </div>
-          <hr class="sep">
-          <p class="detail note">Every import uses this order. Rearrange the export before pasting
-          if your bank produces something else. Extra columns are ignored; fewer than three is an
-          error.</p>
-        </div>
-      </div>
-    </main>
-  </div></div>
-
-  <ul class="body">
-    <li>The <b>account is chosen once</b> for the whole paste, not per row. It defaults to the
-    account last imported into, and lists cash accounts only — a brokerage account holds no
-    transactions to import.</li>
-    <li><b>Fixed column order: date · description · amount.</b> A single signed amount column;
-    debit/credit pairs are not supported. Bank-specific import profiles are future work.</li>
-    <li>Row and column counts update live as text is pasted, so a mis-shaped paste is visible before
-    continuing.</li>
-    <li><b>Continue is disabled unless every row is good</b>: the paste is non-empty, no row has
-    fewer than three columns, and every row's date and amount parse. Offending rows are marked in
-    the paste with the reason. <b>Nothing unparseable ever reaches step 2</b> — the review screen is
-    for deciding what to import, not for repairing input.</li>
-  </ul>
-
-  <h3 class="sub">6.2 Step 2 — review</h3>
-
-  <div class="scroller"><div class="app">
-    <aside class="side">
-      <div class="brand"><b>Spiccioli</b></div>
-      <nav class="nav">
-        <a href="#">Portfolio</a><a href="#">Accounts</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
-        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
-      </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
-    </aside>
-    <main class="view">
-      <div class="viewhead">
-        <div><h3>Bulk import</h3><div class="sub">step 2 of 2 · review</div></div>
-        <div class="actions"><button class="btn ghost">Back</button><button class="btn primary">Import 5 transactions</button></div>
-      </div>
-      <div class="cols c">
-        <div class="card">
-          <h4>Detected formats</h4>
-          <div class="detect">
-            <span class="chip">Account <b>Fineco · Conto Corrente</b></span>
-            <span class="chip">Date <b>DD/MM/YYYY</b></span>
-            <span class="chip">Decimal <b>comma</b></span>
-            <span class="chip">Thousands <b>dot</b></span>
-          </div>
-          <p class="detail note">Inferred from the pasted rows themselves, never from the display
-          preferences of §11.4. Each is overridable, and changing one re-parses the preview
-          immediately.</p>
-        </div>
-        <div class="card">
-          <h4>Outcome</h4>
-          <div class="figs">
-            <div class="fig"><span>Rows pasted</span><b>6</b></div>
-            <div class="fig"><span>Selected for import</span><b class="pos">5</b></div>
-            <div class="fig"><span>Already in the file</span><b class="neg">1</b></div>
-          </div>
+          <p class="detail note">Every import uses this order; rearrange the export before pasting if
+          your bank produces something else, and extra columns are ignored. The formats above are
+          inferred from the pasted rows themselves, never from the display preferences of §11.4 —
+          each chip is overridable, and changing one re-parses the preview immediately.</p>
         </div>
       </div>
       <div class="card">
@@ -968,15 +935,56 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <tr><td><span class="cb"></span></td><td class="n">14/07/2026</td><td class="desc">PAGAMENTO POS MC DONALD'S 1148</td><td class="n r neg">− € 12,50</td><td class="dim">new</td></tr>
             <tr class="dupe"><td><span class="cb off"></span></td><td class="n">15/07/2026</td><td class="desc">BONIFICO DA ROSSI MARIO</td><td class="n r">+ € 250,00</td><td class="neg">already imported</td></tr>
             <tr><td><span class="cb"></span></td><td class="n">16/07/2026</td><td class="desc">CANONE MENSILE CONTO</td><td class="n r neg">− € 3,95</td><td class="dim">new</td></tr>
+            <tr class="dupe"><td><span class="cb off"></span></td><td class="n dim">17/07/2026</td><td class="desc dim">BONIFICO ESTERO</td><td class="n r dim">—</td><td class="neg">cannot be read — 2 columns, no amount</td></tr>
           </tbody>
         </table></div>
         <div class="warnline">
           <span class="neg">▲</span>
-          <span><b>1 row is already in the file</b> and has been unselected. Tick it anyway if the duplicate is genuine — the same amount on the same day does happen.</span>
+          <span><b>1 row is already in the file</b> and has been unselected. Tick it anyway if the
+          duplicate is genuine — the same amount on the same day does happen. <b>1 row cannot be
+          read</b> and cannot be ticked: correct it in the paste above, or import without it.</span>
         </div>
       </div>
     </main>
   </div></div>
+
+  <h4 class="subsub">One screen</h4>
+  <ul class="body">
+    <li><b>The paste box and the consequences of the paste are on screen together.</b> Row count,
+    detected formats, preview, duplicate flags and the count on the <em>Import</em> button all update
+    live as text is pasted or edited. There is no <em>Continue</em>, no review step and no way back:
+    a mis-shaped paste is corrected where it was made, and the correction is visible without leaving
+    the screen.</li>
+    <li>This is the reason the two steps became one. A row that will not parse is almost always a
+    format chip set wrongly, and a gate that refused to advance put the diagnosis on one screen and
+    the chip that fixes it on the next.</li>
+    <li>The <b>account is chosen once</b> for the whole paste, not per row. It defaults to the
+    account last imported into, and lists cash accounts only — a brokerage account holds no
+    transactions to import.</li>
+    <li><b>Fixed column order: date · description · amount.</b> A single signed amount column;
+    debit/credit pairs are not supported. Bank-specific import profiles are future work.</li>
+  </ul>
+
+  <h4 class="subsub">Formats</h4>
+  <ul class="body">
+    <li>Date order and decimal and thousands separators are <b>inferred from the pasted rows
+    themselves</b>, never from the display preferences of §11.4 — the file came from a bank and has
+    no reason to match how you like to read numbers.</li>
+    <li>Each is shown as a chip and <b>each is overridable</b>; changing one re-parses every row
+    immediately. When a format cannot be inferred — no row carries a thousands separator, or every
+    date is ambiguous between the two orders — the chip states the assumption that was made rather
+    than hiding it, because it is the thing to correct when the preview looks wrong.</li>
+  </ul>
+
+  <h4 class="subsub">Rows that cannot be read</h4>
+  <ul class="body">
+    <li>A row with fewer than three columns, or whose date or amount does not parse under the current
+    formats, appears in the preview <b>marked with the reason, and cannot be ticked</b>. It is
+    excluded from the count on the <em>Import</em> button and from the import.</li>
+    <li><b>An unreadable row never blocks the rows around it.</b> Import what is good, fix the rest,
+    paste again — the duplicate detection below is what makes re-pasting safe.</li>
+    <li><em>Import</em> is disabled only while nothing is selected.</li>
+  </ul>
 
   <h4 class="subsub">Duplicates</h4>
   <ul class="body">
@@ -990,11 +998,16 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </ul>
 
   <h4 class="subsub">After import</h4>
-  <p class="body">Rows are inserted with <code>categorySource = automatic</code> and no category,
-  then the rule list runs over them and fills in what it matches. <b>No categorisation is previewed
-  on this screen.</b> Every imported row carries the same <code>importBatchId</code>, and the user
-  lands on Transactions filtered to that batch — the account and date range of what was just
-  imported — where a wrong category can be fixed in place with the full filter set available.</p>
+  <p class="body">Rows are inserted with <code>categorySource = automatic</code>, which means the
+  rule list applies to them as they are written and they arrive categorised wherever a rule matches
+  (§2). <b>No categorisation is previewed on this screen</b> — the preview is about which rows come
+  in, not what they will be called. The user lands on Transactions filtered to the account imported
+  into and to the date range of the rows imported, where a wrong category can be fixed in place with
+  the full filter set available.</p>
+  <p class="body">That filter is an ordinary account-and-period filter, reachable by hand like any
+  other. Nothing is stamped on the imported rows to make it possible: <b>an import leaves no trace on
+  the transactions it created</b>, and a row that came from a paste is indistinguishable from one
+  typed by hand, which is correct — they are the same kind of record.</p>
 </section>
 
 <!-- ================= 7 CATEGORIES ================= -->
@@ -1026,38 +1039,38 @@ table.spec td.d{color:var(--faint);font-style:italic;}
           <thead><tr><th>Category</th><th class="r">2022</th><th class="r">2023</th><th class="r">2024</th><th class="r">2025</th><th class="r">2026</th><th class="r">Total</th></tr></thead>
           <tbody>
             <tr class="grp"><td colspan="7">Income</td></tr>
-            <tr><td class="cat">Salary</td><td class="n r pos">+ € 21.900</td><td class="n r pos">+ € 23.710</td><td class="n r pos">+ € 25.390</td><td class="n r pos">+ € 27.374</td><td class="n r pos">+ € 18.416</td><td class="n r pos">+ € 116.790</td></tr>
-            <tr><td class="cat">Voucher top-up</td><td class="n r pos">+ € 2.420</td><td class="n r pos">+ € 2.420</td><td class="n r pos">+ € 2.530</td><td class="n r pos">+ € 2.640</td><td class="n r pos">+ € 1.540</td><td class="n r pos">+ € 11.550</td></tr>
-            <tr><td class="cat">Pension fund contribution</td><td class="n r pos">+ € 1.716</td><td class="n r pos">+ € 1.716</td><td class="n r pos">+ € 1.780</td><td class="n r pos">+ € 1.860</td><td class="n r pos">+ € 1.184</td><td class="n r pos">+ € 8.256</td></tr>
-            <tr><td class="cat">Interest, dividends &amp; bonuses</td><td class="n r pos">+ € 412</td><td class="n r pos">+ € 688</td><td class="n r pos">+ € 940</td><td class="n r pos">+ € 1.204</td><td class="n r pos">+ € 674</td><td class="n r pos">+ € 3.918</td></tr>
-            <tr><td class="cat">Reimbursement</td><td class="n r pos">+ € 420</td><td class="n r pos">+ € 380</td><td class="n r pos">+ € 512</td><td class="n r pos">+ € 610</td><td class="n r pos">+ € 182</td><td class="n r pos">+ € 2.104</td></tr>
-            <tr><td class="cat">Gift received</td><td class="n r pos">+ € 250</td><td class="n r pos">+ € 400</td><td class="n r pos">+ € 150</td><td class="n r pos">+ € 300</td><td class="n r pos">+ € 250</td><td class="n r pos">+ € 1.350</td></tr>
-            <tr><td class="cat">Other income</td><td class="n r dim">—</td><td class="n r pos">+ € 120</td><td class="n r dim">—</td><td class="n r pos">+ € 85</td><td class="n r dim">—</td><td class="n r pos">+ € 205</td></tr>
-            <tr class="sum"><td class="cat">Total income</td><td class="n r pos">+ € 27.118</td><td class="n r pos">+ € 29.434</td><td class="n r pos">+ € 31.302</td><td class="n r pos">+ € 34.073</td><td class="n r pos">+ € 22.246</td><td class="n r pos">+ € 144.173</td></tr>
+            <tr><td class="cat">Salary</td><td class="n r pos">+ € 21.900,00</td><td class="n r pos">+ € 23.710,00</td><td class="n r pos">+ € 25.390,00</td><td class="n r pos">+ € 27.373,50</td><td class="n r pos">+ € 18.416,00</td><td class="n r pos">+ € 116.789,50</td></tr>
+            <tr><td class="cat">Voucher top-up</td><td class="n r pos">+ € 2.420,00</td><td class="n r pos">+ € 2.420,00</td><td class="n r pos">+ € 2.530,00</td><td class="n r pos">+ € 2.640,00</td><td class="n r pos">+ € 1.540,00</td><td class="n r pos">+ € 11.550,00</td></tr>
+            <tr><td class="cat">Pension fund contribution</td><td class="n r pos">+ € 1.716,00</td><td class="n r pos">+ € 1.716,00</td><td class="n r pos">+ € 1.780,00</td><td class="n r pos">+ € 1.860,00</td><td class="n r pos">+ € 1.184,00</td><td class="n r pos">+ € 8.256,00</td></tr>
+            <tr><td class="cat">Interest, dividends &amp; bonuses</td><td class="n r pos">+ € 412,00</td><td class="n r pos">+ € 688,00</td><td class="n r pos">+ € 940,00</td><td class="n r pos">+ € 1.204,00</td><td class="n r pos">+ € 674,00</td><td class="n r pos">+ € 3.918,00</td></tr>
+            <tr><td class="cat">Reimbursement</td><td class="n r pos">+ € 420,00</td><td class="n r pos">+ € 380,00</td><td class="n r pos">+ € 512,00</td><td class="n r pos">+ € 610,00</td><td class="n r pos">+ € 182,00</td><td class="n r pos">+ € 2.104,00</td></tr>
+            <tr><td class="cat">Gift received</td><td class="n r pos">+ € 250,00</td><td class="n r pos">+ € 400,00</td><td class="n r pos">+ € 150,00</td><td class="n r pos">+ € 300,00</td><td class="n r pos">+ € 250,00</td><td class="n r pos">+ € 1.350,00</td></tr>
+            <tr><td class="cat">Other income</td><td class="n r dim">—</td><td class="n r pos">+ € 120,00</td><td class="n r dim">—</td><td class="n r pos">+ € 85,00</td><td class="n r dim">—</td><td class="n r pos">+ € 205,00</td></tr>
+            <tr class="sum"><td class="cat">Total income</td><td class="n r pos">+ € 27.118,00</td><td class="n r pos">+ € 29.434,00</td><td class="n r pos">+ € 31.302,00</td><td class="n r pos">+ € 34.072,50</td><td class="n r pos">+ € 22.246,00</td><td class="n r pos">+ € 144.172,50</td></tr>
             <tr class="grp"><td colspan="7">Expense</td></tr>
-            <tr><td class="cat">Rent &amp; condominium fees</td><td class="n r neg">− € 5.400</td><td class="n r neg">− € 5.400</td><td class="n r neg">− € 5.700</td><td class="n r neg">− € 5.700</td><td class="n r neg">− € 3.800</td><td class="n r neg">− € 26.000</td></tr>
-            <tr><td class="cat">Groceries</td><td class="n r neg">− € 2.090</td><td class="n r neg">− € 2.260</td><td class="n r neg">− € 2.380</td><td class="n r neg">− € 2.490</td><td class="n r neg">− € 1.560</td><td class="n r neg">− € 10.780</td></tr>
-            <tr><td class="cat">Restaurants &amp; bars</td><td class="n r neg">− € 1.320</td><td class="n r neg">− € 1.490</td><td class="n r neg">− € 1.605</td><td class="n r neg">− € 1.710</td><td class="n r neg">− € 1.090</td><td class="n r neg">− € 7.215</td></tr>
-            <tr><td class="cat">Travel</td><td class="n r neg">− € 925</td><td class="n r neg">− € 1.200</td><td class="n r neg">− € 1.550</td><td class="n r neg">− € 1.380</td><td class="n r neg">− € 970</td><td class="n r neg">− € 6.025</td></tr>
-            <tr><td class="cat">Technology &amp; devices</td><td class="n r neg">− € 620</td><td class="n r neg">− € 240</td><td class="n r neg">− € 1.050</td><td class="n r neg">− € 310</td><td class="n r neg">− € 690</td><td class="n r neg">− € 2.910</td></tr>
-            <tr><td class="cat">Income &amp; other taxes</td><td class="n r neg">− € 550</td><td class="n r neg">− € 590</td><td class="n r neg">− € 620</td><td class="n r neg">− € 655</td><td class="n r neg">− € 320</td><td class="n r neg">− € 2.735</td></tr>
-            <tr><td class="cat">Home &amp; household</td><td class="n r neg">− € 490</td><td class="n r neg">− € 620</td><td class="n r neg">− € 430</td><td class="n r neg">− € 755</td><td class="n r neg">− € 360</td><td class="n r neg">− € 2.655</td></tr>
-            <tr><td class="cat">Health &amp; personal care</td><td class="n r neg">− € 440</td><td class="n r neg">− € 560</td><td class="n r neg">− € 480</td><td class="n r neg">− € 620</td><td class="n r neg">− € 320</td><td class="n r neg">− € 2.420</td></tr>
-            <tr><td class="cat">Electricity</td><td class="n r neg">− € 360</td><td class="n r neg">− € 470</td><td class="n r neg">− € 440</td><td class="n r neg">− € 405</td><td class="n r neg">− € 260</td><td class="n r neg">− € 1.935</td></tr>
-            <tr><td class="cat">Entertainment</td><td class="n r neg">− € 320</td><td class="n r neg">− € 360</td><td class="n r neg">− € 405</td><td class="n r neg">− € 380</td><td class="n r neg">− € 240</td><td class="n r neg">− € 1.705</td></tr>
-            <tr><td class="cat">Home internet</td><td class="n r neg">− € 359</td><td class="n r neg">− € 359</td><td class="n r neg">− € 359</td><td class="n r neg">− € 359</td><td class="n r neg">− € 240</td><td class="n r neg">− € 1.676</td></tr>
-            <tr><td class="cat">Other expense</td><td class="n r neg">− € 210</td><td class="n r neg">− € 190</td><td class="n r neg">− € 255</td><td class="n r neg">− € 230</td><td class="n r neg">− € 140</td><td class="n r neg">− € 1.025</td></tr>
-            <tr><td class="cat">Culture &amp; education</td><td class="n r neg">− € 155</td><td class="n r neg">− € 140</td><td class="n r neg">− € 210</td><td class="n r neg">− € 195</td><td class="n r neg">− € 105</td><td class="n r neg">− € 805</td></tr>
-            <tr><td class="cat">Bank fees</td><td class="n r neg">− € 142</td><td class="n r neg">− € 148</td><td class="n r neg">− € 156</td><td class="n r neg">− € 162</td><td class="n r neg">− € 98</td><td class="n r neg">− € 706</td></tr>
-            <tr><td class="cat">Wealth tax</td><td class="n r neg">− € 118</td><td class="n r neg">− € 132</td><td class="n r neg">− € 148</td><td class="n r neg">− € 164</td><td class="n r neg">− € 92</td><td class="n r neg">− € 654</td></tr>
-            <tr><td class="cat">Mobile &amp; phone</td><td class="n r neg">− € 120</td><td class="n r neg">− € 120</td><td class="n r neg">− € 132</td><td class="n r neg">− € 132</td><td class="n r neg">− € 88</td><td class="n r neg">− € 592</td></tr>
-            <tr class="sum"><td class="cat">Total expense</td><td class="n r neg">− € 13.619</td><td class="n r neg">− € 14.279</td><td class="n r neg">− € 15.920</td><td class="n r neg">− € 15.647</td><td class="n r neg">− € 10.373</td><td class="n r neg">− € 69.838</td></tr>
-            <tr class="net"><td class="cat">Net</td><td class="n r pos">+ € 13.499</td><td class="n r pos">+ € 15.155</td><td class="n r pos">+ € 15.382</td><td class="n r pos">+ € 18.426</td><td class="n r pos">+ € 11.873</td><td class="n r pos">+ € 74.335</td></tr>
+            <tr><td class="cat">Rent &amp; condominium fees</td><td class="n r neg">− € 5.400,00</td><td class="n r neg">− € 5.400,00</td><td class="n r neg">− € 5.700,00</td><td class="n r neg">− € 5.700,00</td><td class="n r neg">− € 3.800,00</td><td class="n r neg">− € 26.000,00</td></tr>
+            <tr><td class="cat">Groceries</td><td class="n r neg">− € 2.090,00</td><td class="n r neg">− € 2.260,00</td><td class="n r neg">− € 2.380,00</td><td class="n r neg">− € 2.490,00</td><td class="n r neg">− € 1.560,00</td><td class="n r neg">− € 10.780,00</td></tr>
+            <tr><td class="cat">Restaurants &amp; bars</td><td class="n r neg">− € 1.320,00</td><td class="n r neg">− € 1.490,00</td><td class="n r neg">− € 1.605,00</td><td class="n r neg">− € 1.710,00</td><td class="n r neg">− € 1.090,00</td><td class="n r neg">− € 7.215,00</td></tr>
+            <tr><td class="cat">Travel</td><td class="n r neg">− € 925,00</td><td class="n r neg">− € 1.200,00</td><td class="n r neg">− € 1.550,00</td><td class="n r neg">− € 1.380,00</td><td class="n r neg">− € 970,00</td><td class="n r neg">− € 6.025,00</td></tr>
+            <tr><td class="cat">Technology &amp; devices</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 240,00</td><td class="n r neg">− € 1.050,00</td><td class="n r neg">− € 310,00</td><td class="n r neg">− € 690,00</td><td class="n r neg">− € 2.910,00</td></tr>
+            <tr><td class="cat">Income &amp; other taxes</td><td class="n r neg">− € 550,00</td><td class="n r neg">− € 590,00</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 655,00</td><td class="n r neg">− € 320,00</td><td class="n r neg">− € 2.735,00</td></tr>
+            <tr><td class="cat">Home &amp; household</td><td class="n r neg">− € 490,00</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 430,00</td><td class="n r neg">− € 755,00</td><td class="n r neg">− € 360,00</td><td class="n r neg">− € 2.655,00</td></tr>
+            <tr><td class="cat">Health &amp; personal care</td><td class="n r neg">− € 440,00</td><td class="n r neg">− € 560,00</td><td class="n r neg">− € 480,00</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 320,00</td><td class="n r neg">− € 2.420,00</td></tr>
+            <tr><td class="cat">Electricity</td><td class="n r neg">− € 360,00</td><td class="n r neg">− € 470,00</td><td class="n r neg">− € 440,00</td><td class="n r neg">− € 405,00</td><td class="n r neg">− € 260,00</td><td class="n r neg">− € 1.935,00</td></tr>
+            <tr><td class="cat">Entertainment</td><td class="n r neg">− € 320,00</td><td class="n r neg">− € 360,00</td><td class="n r neg">− € 405,00</td><td class="n r neg">− € 380,00</td><td class="n r neg">− € 240,00</td><td class="n r neg">− € 1.705,00</td></tr>
+            <tr><td class="cat">Home internet</td><td class="n r neg">− € 359,40</td><td class="n r neg">− € 359,40</td><td class="n r neg">− € 359,40</td><td class="n r neg">− € 359,40</td><td class="n r neg">− € 239,60</td><td class="n r neg">− € 1.677,20</td></tr>
+            <tr><td class="cat">Other expense</td><td class="n r neg">− € 210,00</td><td class="n r neg">− € 190,00</td><td class="n r neg">− € 255,00</td><td class="n r neg">− € 230,00</td><td class="n r neg">− € 140,00</td><td class="n r neg">− € 1.025,00</td></tr>
+            <tr><td class="cat">Culture &amp; education</td><td class="n r neg">− € 155,00</td><td class="n r neg">− € 140,00</td><td class="n r neg">− € 210,00</td><td class="n r neg">− € 195,00</td><td class="n r neg">− € 105,00</td><td class="n r neg">− € 805,00</td></tr>
+            <tr><td class="cat">Bank fees</td><td class="n r neg">− € 142,00</td><td class="n r neg">− € 148,00</td><td class="n r neg">− € 156,00</td><td class="n r neg">− € 162,00</td><td class="n r neg">− € 98,00</td><td class="n r neg">− € 706,00</td></tr>
+            <tr><td class="cat">Wealth tax</td><td class="n r neg">− € 118,00</td><td class="n r neg">− € 132,00</td><td class="n r neg">− € 148,00</td><td class="n r neg">− € 164,00</td><td class="n r neg">− € 92,00</td><td class="n r neg">− € 654,00</td></tr>
+            <tr><td class="cat">Mobile &amp; phone</td><td class="n r neg">− € 120,00</td><td class="n r neg">− € 120,00</td><td class="n r neg">− € 132,00</td><td class="n r neg">− € 132,00</td><td class="n r neg">− € 88,00</td><td class="n r neg">− € 592,00</td></tr>
+            <tr class="sum"><td class="cat">Total expense</td><td class="n r neg">− € 13.619,40</td><td class="n r neg">− € 14.279,40</td><td class="n r neg">− € 15.920,40</td><td class="n r neg">− € 15.647,40</td><td class="n r neg">− € 10.372,60</td><td class="n r neg">− € 69.839,20</td></tr>
+            <tr class="net"><td class="cat">Net</td><td class="n r pos">+ € 13.498,60</td><td class="n r pos">+ € 15.154,60</td><td class="n r pos">+ € 15.381,60</td><td class="n r pos">+ € 18.425,10</td><td class="n r pos">+ € 11.873,40</td><td class="n r pos">+ € 74.333,30</td></tr>
             <tr class="grp"><td colspan="7">Other types</td></tr>
-            <tr class="sum"><td class="cat">Investment</td><td class="n r neg">− € 8.400</td><td class="n r neg">− € 9.200</td><td class="n r neg">− € 11.000</td><td class="n r neg">− € 12.400</td><td class="n r neg">− € 6.900</td><td class="n r neg">− € 47.900</td></tr>
-            <tr class="sum"><td class="cat">Divestment</td><td class="n r pos">+ € 1.200</td><td class="n r dim">—</td><td class="n r pos">+ € 3.400</td><td class="n r dim">—</td><td class="n r pos">+ € 2.100</td><td class="n r pos">+ € 6.700</td></tr>
-            <tr class="sum"><td class="cat">Revaluation</td><td class="n r pos">+ € 840</td><td class="n r pos">+ € 1.420</td><td class="n r pos">+ € 1.960</td><td class="n r pos">+ € 2.280</td><td class="n r pos">+ € 1.180</td><td class="n r pos">+ € 7.680</td></tr>
-            <tr class="sum"><td class="cat">Internal transfer</td><td class="n r dim">€ 0</td><td class="n r dim">€ 0</td><td class="n r dim">€ 0</td><td class="n r dim">€ 0</td><td class="n r dim">€ 0</td><td class="n r dim">€ 0</td></tr>
+            <tr class="sum"><td class="cat">Investment</td><td class="n r neg">− € 8.400,00</td><td class="n r neg">− € 9.200,00</td><td class="n r neg">− € 11.000,00</td><td class="n r neg">− € 12.400,00</td><td class="n r neg">− € 6.900,00</td><td class="n r neg">− € 47.900,00</td></tr>
+            <tr class="sum"><td class="cat">Divestment</td><td class="n r pos">+ € 1.200,00</td><td class="n r dim">—</td><td class="n r pos">+ € 3.400,00</td><td class="n r dim">—</td><td class="n r pos">+ € 2.100,00</td><td class="n r pos">+ € 6.700,00</td></tr>
+            <tr class="sum"><td class="cat">Revaluation</td><td class="n r pos">+ € 840,00</td><td class="n r pos">+ € 1.420,00</td><td class="n r pos">+ € 1.960,00</td><td class="n r pos">+ € 2.280,00</td><td class="n r pos">+ € 1.180,00</td><td class="n r pos">+ € 7.680,00</td></tr>
+            <tr class="sum"><td class="cat">Internal transfer</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td></tr>
           </tbody>
         </table></div>
       </div>
@@ -1370,16 +1383,16 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <div class="tblwrap"><table>
           <thead><tr><th>Year</th><th class="r">Payslips</th><th class="r">Contract gross</th><th class="r">Total gross</th><th class="r">Total net salary</th><th class="r">Net/Gross</th><th class="r">Working days</th><th class="r">Gross / hour</th><th class="r">Net / hour</th></tr></thead>
           <tbody>
-            <tr><td class="n">2017</td><td class="n r">5</td><td class="n r">€ 27.950</td><td class="n r">€ 10.750</td><td class="n r">€ 7.095</td><td class="n r">66,0%</td><td class="n r">251</td><td class="n r">€ 5,35</td><td class="n r">€ 3,53</td></tr>
-            <tr><td class="n">2018</td><td class="n r">13</td><td class="n r">€ 28.730</td><td class="n r">€ 29.860</td><td class="n r">€ 19.520</td><td class="n r">65,4%</td><td class="n r">251</td><td class="n r">€ 14,87</td><td class="n r">€ 9,72</td></tr>
-            <tr><td class="n">2019</td><td class="n r">13</td><td class="n r">€ 30.420</td><td class="n r">€ 31.640</td><td class="n r">€ 20.720</td><td class="n r">65,5%</td><td class="n r">252</td><td class="n r">€ 15,69</td><td class="n r">€ 10,28</td></tr>
-            <tr><td class="n">2020</td><td class="n r">13</td><td class="n r">€ 32.240</td><td class="n r">€ 33.510</td><td class="n r">€ 21.940</td><td class="n r">65,5%</td><td class="n r">253</td><td class="n r">€ 16,56</td><td class="n r">€ 10,84</td></tr>
-            <tr><td class="n">2021</td><td class="n r">13</td><td class="n r">€ 33.280</td><td class="n r">€ 34.620</td><td class="n r">€ 22.630</td><td class="n r">65,4%</td><td class="n r">252</td><td class="n r">€ 17,17</td><td class="n r">€ 11,23</td></tr>
-            <tr><td class="n">2022</td><td class="n r">13</td><td class="n r">€ 35.360</td><td class="n r">€ 36.780</td><td class="n r">€ 24.060</td><td class="n r">65,4%</td><td class="n r">252</td><td class="n r">€ 18,24</td><td class="n r">€ 11,93</td></tr>
-            <tr><td class="n">2023</td><td class="n r">13</td><td class="n r">€ 38.220</td><td class="n r">€ 39.650</td><td class="n r">€ 25.870</td><td class="n r">65,2%</td><td class="n r">252</td><td class="n r">€ 19,67</td><td class="n r">€ 12,83</td></tr>
-            <tr><td class="n">2024</td><td class="n r">13</td><td class="n r">€ 40.560</td><td class="n r">€ 42.120</td><td class="n r">€ 27.550</td><td class="n r">65,4%</td><td class="n r">251</td><td class="n r">€ 20,98</td><td class="n r">€ 13,72</td></tr>
-            <tr class="sel"><td class="n">2025</td><td class="n r">13</td><td class="n r">€ 42.900</td><td class="n r">€ 44.330</td><td class="n r">€ 29.351</td><td class="n r">66,2%</td><td class="n r">252</td><td class="n r">€ 21,99</td><td class="n r">€ 14,56</td></tr>
-            <tr><td class="n">2026</td><td class="n r">8</td><td class="n r">€ 44.200</td><td class="n r">€ 30.690</td><td class="n r">€ 19.856</td><td class="n r">64,7%</td><td class="n r">252</td><td class="n r">€ 15,22</td><td class="n r">€ 9,85</td></tr>
+            <tr><td class="n">2017</td><td class="n r">5</td><td class="n r">€ 27.950,00</td><td class="n r">€ 10.750,00</td><td class="n r">€ 7.095,00</td><td class="n r">66,0%</td><td class="n r">251</td><td class="n r">€ 5,35</td><td class="n r">€ 3,53</td></tr>
+            <tr><td class="n">2018</td><td class="n r">13</td><td class="n r">€ 28.730,00</td><td class="n r">€ 29.860,00</td><td class="n r">€ 19.520,00</td><td class="n r">65,4%</td><td class="n r">251</td><td class="n r">€ 14,87</td><td class="n r">€ 9,72</td></tr>
+            <tr><td class="n">2019</td><td class="n r">13</td><td class="n r">€ 30.420,00</td><td class="n r">€ 31.640,00</td><td class="n r">€ 20.720,00</td><td class="n r">65,5%</td><td class="n r">252</td><td class="n r">€ 15,69</td><td class="n r">€ 10,28</td></tr>
+            <tr><td class="n">2020</td><td class="n r">13</td><td class="n r">€ 32.240,00</td><td class="n r">€ 33.510,00</td><td class="n r">€ 21.940,00</td><td class="n r">65,5%</td><td class="n r">253</td><td class="n r">€ 16,56</td><td class="n r">€ 10,84</td></tr>
+            <tr><td class="n">2021</td><td class="n r">13</td><td class="n r">€ 33.280,00</td><td class="n r">€ 34.620,00</td><td class="n r">€ 22.630,00</td><td class="n r">65,4%</td><td class="n r">252</td><td class="n r">€ 17,17</td><td class="n r">€ 11,23</td></tr>
+            <tr><td class="n">2022</td><td class="n r">13</td><td class="n r">€ 35.360,00</td><td class="n r">€ 36.780,00</td><td class="n r">€ 24.060,00</td><td class="n r">65,4%</td><td class="n r">252</td><td class="n r">€ 18,24</td><td class="n r">€ 11,93</td></tr>
+            <tr><td class="n">2023</td><td class="n r">13</td><td class="n r">€ 38.220,00</td><td class="n r">€ 39.650,00</td><td class="n r">€ 25.870,00</td><td class="n r">65,2%</td><td class="n r">252</td><td class="n r">€ 19,67</td><td class="n r">€ 12,83</td></tr>
+            <tr><td class="n">2024</td><td class="n r">13</td><td class="n r">€ 40.560,00</td><td class="n r">€ 42.120,00</td><td class="n r">€ 27.550,00</td><td class="n r">65,4%</td><td class="n r">251</td><td class="n r">€ 20,98</td><td class="n r">€ 13,72</td></tr>
+            <tr class="sel"><td class="n">2025</td><td class="n r">13</td><td class="n r">€ 42.900,00</td><td class="n r">€ 44.330,00</td><td class="n r">€ 29.351,00</td><td class="n r">66,2%</td><td class="n r">252</td><td class="n r">€ 21,99</td><td class="n r">€ 14,56</td></tr>
+            <tr><td class="n">2026</td><td class="n r">8</td><td class="n r">€ 44.200,00</td><td class="n r">€ 30.690,00</td><td class="n r">€ 19.856,00</td><td class="n r">64,7%</td><td class="n r">252</td><td class="n r">€ 15,22</td><td class="n r">€ 9,85</td></tr>
           </tbody>
         </table></div>
       </div>
@@ -1510,6 +1523,13 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <ul class="body">
     <li><b>Two states only</b>, pass or fail. No warning tier — it would become a place for things to
     sit unfixed.</li>
+    <li><b>A check never prevents anything.</b> Checks report; they do not validate, refuse or roll
+    back. No save, close, delete or edit anywhere in the application is blocked because a check would
+    fail afterwards — the record is written and the check names it on the next run, which is the same
+    instant. This is what makes them usable over a half-entered file: the ordinary way to work is to
+    enter one side of something, watch a check fail, and enter the other side. Where a rule has to be
+    enforced rather than observed, it is enforced by the form that collects it — a picker that offers
+    only cash accounts, a date field that cannot hold a non-date — never by a check.</li>
     <li>A passing check <b>states its reach</b> (“117 payslips”, “41 purchases”), so a check that
     passed because it examined nothing is distinguishable from one that passed properly.</li>
     <li>Checks run <b>at application startup and after every change</b>, and are summarised in the
@@ -1648,8 +1668,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     Leave it at zero when the account’s full history is being imported; a <em>Brokerage</em> account
     has none, its value being entirely its holdings.</li>
     <li><b>Closing date</b> is how an account is retired: fill it in and the account leaves the
-    portfolio, keeping its history. Check 11 then insists it was emptied first, and check 12 that
-    nothing is dated outside the two dates.</li>
+    portfolio, keeping its history. The form does not require the account to be empty first — check
+    11 reports a closed account that still holds something, and check 12 the records dated outside
+    the two dates. Both name the situation; neither refuses the edit (§10).</li>
     <li>Contracts are created the same way, on the Salaries screen, with the fields listed in §2:
     name, months per year, hours per day, start and end date. Securities are normally created inline
     while recording a purchase (§8.3); the Securities tab on Investments exists to correct and manage
@@ -1670,7 +1691,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <main class="view">
       <div class="viewhead">
         <div><h3>Categories</h3><div class="sub">9 rules · first match wins · case and accent insensitive</div></div>
-        <div class="actions"><button class="btn ghost">Re-categorise all rule-assigned</button><button class="btn primary">Add rule</button></div>
+        <div class="actions"><button class="btn primary">Add rule</button></div>
       </div>
       <nav class="tabs"><a href="#">Report</a><a class="on" href="#">Rules</a><a href="#">Category list</a></nav>
       <div class="cols c">
@@ -1723,12 +1744,28 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>Ordered, draggable, numbered. <b>First match wins</b>, so order is the logic and must be
     visible. A rule is created with the substring and the category; nothing else.</li>
     <li>The tester counts what the rule under edit would match, split into already-this-category,
-    currently uncategorised, and hand-set to something else, with sample matching descriptions.</li>
-    <li><b>Re-categorise all rule-assigned</b> re-runs every rule over every transaction whose
-    <code>categorySource = automatic</code>. It never touches a manual category. Nothing happens to
-    existing data until this button is pressed.</li>
-    <li>Deleting a rule leaves the categories it already assigned untouched.</li>
+    currently uncategorised, and hand-set to something else, with sample matching descriptions.
+    <b>It previews the rule as edited, before the edit is committed</b> — which is why it can report
+    rows that are currently uncategorised even though a committed rule would already have caught
+    them. It is the answer to “what will this do?”, asked before it does it.</li>
+    <li><b>Every committed change to the list re-categorises immediately.</b> Adding, editing,
+    deleting or dragging a rule re-runs the whole list over every transaction whose
+    <code>categorySource = automatic</code>, as the change is made. A <code>manual</code> category is
+    never touched. There is no apply button, because an automatic category that disagreed with the
+    rules would break the invariant of §2 — and the moment there is a button, there is a file in
+    which it has not been pressed.</li>
+    <li><b>Deleting a rule therefore un-categorises the rows only it matched</b>, unless a rule
+    further down the list picks them up. That is the visible consequence of the rule above rather
+    than a surprise, and it is what the tester's counts are for reading before deleting. Rows set by
+    hand keep their category regardless.</li>
+    <li>The <em>Applies to</em> counts are computed against current data, so they never go stale.</li>
   </ul>
+  <div class="callout"><b>If it turns out to be too slow.</b> Re-running nine rules over ten years of
+  transactions is a scan of the whole file, debounced behind each rule edit. If that proves too slow
+  to do on every commit, the fallback is an explicit apply button — and the invariant of §2 relaxes
+  with it, to “whatever the rule list produced when it was last run”. That is a worse specification
+  and it is not the one being built; it is written down so the trade is made deliberately rather than
+  discovered.</div>
 
   <h3 class="sub">11.4 Preferences — the Settings screen</h3>
   <p class="body">All that is left on Settings once reference data has moved to the screens that use
@@ -1754,10 +1791,16 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <p class="body">Formats are a <b>user preference, not a hard-coded locale</b>. Changing one
   re-renders every figure in the application immediately.</p>
   <p class="body"><b>They are display-only, and importing ignores them.</b> A pasted export is
-  parsed by detecting its own date order and separators from the rows themselves (§6.2), because the
+  parsed by detecting its own date order and separators from the rows themselves (§6), because the
   file came from a bank and has no reason to match how you like to read numbers. The two are kept
   apart deliberately: changing how dates are displayed must never change how a paste is
   interpreted.</p>
+  <p class="body"><b>Nothing the user types is parsed either.</b> Every date in the application is
+  entered through a date picker and every amount through a validated numeric field that accepts one
+  shape and refuses the rest as it is typed — so no form holds free text needing interpretation, and
+  these preferences have no second job anywhere. The only text the application parses is a pasted
+  bank export, which carries its own formats. Display, entry and import are three separate things,
+  and only one of them involves guessing.</p>
 </section>
 
 <!-- ================= 12 CALCULATIONS ================= -->
@@ -1766,9 +1809,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <div class="num">12</div>
     <h2>Calculations</h2>
     <p>Every formula in one place. All amounts are EUR; rounding is to 2 decimals at display, never
-    in intermediate steps. <b>One exception:</b> the amount comparisons of §12.6 are made on totals
-    rounded to 2 decimals, because the figure on the other side of the comparison is a bank
-    transaction that was itself rounded to the cent.</p>
+    in intermediate steps. <b>Every monetary figure carries exactly two decimals</b> — single
+    amounts, column totals, yearly aggregates, hourly rates — so a round thousand reads
+    <code>€ 21.900,00</code> and never <code>€ 21.900</code>, and a column of figures always aligns
+    on the same decimal place. Quantities and unit prices carry four; percentages carry one. The
+    only figures written short are the axis labels on a chart, where <code>100k</code> is the point.
+    <b>One exception to the no-intermediate-rounding rule:</b> the amount comparisons of §12.6 are
+    made on totals rounded to 2 decimals, because the figure on the other side of the comparison is
+    a bank transaction that was itself rounded to the cent.</p>
   </header>
 
   <h3 class="sub">12.1 Weighted average cost</h3>
@@ -1835,9 +1883,11 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     the two are the decomposition shown on Portfolio (§4.1).</li>
     <li>Securities purchases already reduce the cash account through their transaction, so holdings
     are added, not double-counted.</li>
-    <li><b>Closed accounts are excluded</b>, which is safe only because check 11 refuses to let one
-    be closed while it still holds anything. Without that check the exclusion would quietly delete
-    money from net worth.</li>
+    <li><b>Closed accounts are excluded</b> — and nothing stops an account being closed with money
+    still in it, since checks report rather than block (§10). The exclusion can therefore move net
+    worth on its own, which is exactly what check 11 exists to say out loud: it fails naming the
+    account and the balance left in it, and the Portfolio banner carries it until the account is
+    emptied or its closing date removed. The money is never quietly gone; it is gone and named.</li>
   </ul>
 
   <h3 class="sub">12.5 Net worth over time</h3>
@@ -1909,8 +1959,10 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </header>
 
   <ul class="body">
-    <li><b>One file</b> holding everything: institutions, accounts, securities, prices,
-    transactions, trades, contracts, payslips, rules, preferences.</li>
+    <li><b>One file</b> holding everything: institutions, accounts, securities, prices, transactions,
+    trades, contracts, contract years, payslips, categories, rules, preferences. All eleven stored
+    entities of §2 and the preferences of §11.4 — nothing about the file lives outside it, and the
+    only thing not in it is the list of recently opened locations.</li>
     <li><b>The file lives wherever the user puts it</b> — a plain local folder, a cloud-synced
     folder, or an encrypted vault inside one. The application makes no assumption about the
     location and requires nothing of it.</li>
@@ -1932,12 +1984,22 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>No undo/redo</b> in v1. This is why every delete confirms.</li>
     <li><b>The format must be documented</b> well enough for an external script to write it — the
     ten years of historical data will be loaded by a one-off migration script, not by the
-    application. It carries a <b>schema version</b>, so a file written by a later version is
-    recognised as such instead of being misread.</li>
-    <li>The application must <b>refuse to silently drop</b> anything it does not recognise in a file
-    — an unknown category, role or field. It opens the file read-only and says what it did not
-    understand, rather than writing back a file with the unknown parts quietly removed. Files outlive
-    versions.</li>
+    application. It carries a <b>schema version</b>, and every file is at exactly one of three
+    positions relative to the running application: current, older, or not understood.</li>
+    <li><b>An older file is upgraded once, with the user's consent.</b> Opening one shows a screen
+    that says which version wrote it and which version it will become, and states that a copy of the
+    file as it stands now is written to the backup folder first. Confirm and the upgrade runs and the
+    file opens; cancel and nothing is written and the launch screen returns. It is never silent and
+    never automatic, because it is the one operation that makes a file unreadable by the version the
+    user was running yesterday.</li>
+    <li><b>Anything not understood is not opened at all.</b> A schema version later than the
+    application's, or a file at a known version carrying something unrecognised — an unknown
+    category, role or field — is refused with a statement of what was not understood, and the launch
+    screen stays up with the other files still openable. <b>There is no read-only mode</b>: a file is
+    either open and fully editable or not open. Half-open is a state that would have to be explained
+    on every screen, and the alternative it exists to avoid — writing back a file with the unknown
+    parts quietly removed — is already prevented by refusing. Files outlive versions, and the way to
+    honour that is to leave alone the ones you cannot fully read.</li>
   </ul>
 
   <div class="callout">
@@ -1975,16 +2037,16 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <div class="specwrap"><table class="spec">
     <thead><tr><th>Screen</th><th>Empty state</th><th>Error state</th></tr></thead>
     <tbody>
-      <tr><td>Portfolio</td><td>No accounts: “Nothing here yet — add the accounts you want to track.” with a button to Settings. Accounts but no transactions: the table renders with opening balances and the charts say they need history.</td><td>—</td></tr>
+      <tr><td>Portfolio</td><td>No accounts: “Nothing here yet — add the accounts you want to track.” with a button to Accounts. Accounts but no transactions: the table renders with opening balances and the charts say they need history.</td><td>—</td></tr>
       <tr><td>Transactions</td><td>No transactions: “Import a bank export, or add a row by hand,” with both buttons. Filtered to nothing: “No transaction matches these filters,” with <em>Clear filters</em>.</td><td>An edit that cannot be saved keeps the cell open and states why; the row is never left half-changed.</td></tr>
-      <tr><td>Bulk import</td><td>Empty paste: step 1 explains the three expected columns; <em>Continue</em> stays disabled.</td><td>Unparseable rows are marked in place with the reason, and block <em>Continue</em> (§6.1). No account to import into: the screen points at Settings.</td></tr>
+      <tr><td>Bulk import</td><td>Empty paste: the screen explains the three expected columns and shows the account picker; <em>Import</em> stays disabled while nothing is selected.</td><td>Rows that cannot be read are marked in the preview with the reason and cannot be ticked; the readable rows around them import normally (§6). No cash account to import into: the screen points at Accounts.</td></tr>
       <tr><td>Categories report</td><td>No categorised transactions: the matrix is replaced by a line saying it fills as transactions are categorised.</td><td>—</td></tr>
       <tr><td>Investments</td><td>No trades: “Record a purchase to start tracking holdings,” with the button. Trades but no prices: holdings render at cost, with the price cells inviting a value.</td><td>Provider unreachable or unknown identifier: a line on the screen naming the securities that could not be fetched. The rest of the screen works; already-known prices stay.</td></tr>
-      <tr><td>Salaries</td><td>No contract: “Add the contract first,” with a button to Settings. Contract but no payslips: the tables render with headers and a prompt to add one.</td><td>—</td></tr>
+      <tr><td>Salaries</td><td>No contract: “Add the contract first,” with a button to the Contracts tab beside it. Contract but no payslips: the tables render with headers and a prompt to add one.</td><td>—</td></tr>
       <tr><td>Checks</td><td>Never empty. A check with nothing to examine <b>passes and says so</b> — “0 payslips” — which is why every passing check states its reach (§10).</td><td>—</td></tr>
       <tr><td>Accounts</td><td>No accounts: “Add the first account — a current account is the usual place to start,” with the button. The Institutions tab explains that an account may have <em>None</em>, for cash.</td><td>A delete refused because something depends on the record says what depends on it.</td></tr>
       <tr><td>Settings</td><td>Never empty; every preference has a default (§11.4).</td><td>A value that cannot be applied is rejected in place, leaving the previous one in force.</td></tr>
-      <tr><td>Launch</td><td>No recent files: only <em>New file…</em> and <em>Open…</em>.</td><td>File missing, unreadable, or written by a newer schema version: stated on the launch screen, with the other files still openable. This is the one place an error blocks a screen (§13).</td></tr>
+      <tr><td>Launch</td><td>No recent files: only <em>New file…</em> and <em>Open…</em>.</td><td>File missing, unreadable, written by a newer schema version, or carrying something unrecognised: stated on the launch screen, with the other files still openable. A file written by an <em>older</em> version is not an error — it asks for confirmation to upgrade, naming both versions and the backup taken first (§13). This is the one place an error blocks a screen.</td></tr>
     </tbody>
   </table></div>
 </section>
