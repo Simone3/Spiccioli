@@ -323,6 +323,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <code>Brokerage</code> one for the securities — and the money leaving the first to fund a purchase
   is what check 6 pairs against the trade recorded in the second. <code>Liquidity</code> otherwise
   covers current accounts and physical cash.</p>
+  <p class="body"><b>The split runs all the way out to every account list in the application.</b>
+  Anywhere accounts are offered — a form's picker, a screen's filter — the list holds only the kind
+  that screen can contain: <b>cash accounts</b> where transactions are created, edited, imported,
+  filtered or reported (§5, §5.7, §6.1), <b>brokerage accounts</b> where trades and holdings are
+  (§7.1, §7.2, §7.3). Neither list ever shows the other kind, because choosing it could only produce
+  an empty result or a record that cannot exist. Closed accounts are the one thing both lists still
+  carry, marked and last (§4.3). The Portfolio and Accounts screens are the two that show every
+  account together, and neither of them filters.</p>
 
   <h4 class="subsub">Security</h4>
   <div class="specwrap"><table class="spec">
@@ -712,17 +720,17 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <div class="tblwrap"><table>
           <thead><tr><th>Name</th><th>Institution</th><th>Type</th><th>Currency</th><th class="r">Opening balance</th><th class="r">Opened</th><th class="r">Closed</th><th class="r">Transactions</th><th>Notes</th><th></th></tr></thead>
           <tbody>
+            <tr><td class="desc">Wallet</td><td class="dim">—</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 120,00</td><td class="n r">01/01/2016</td><td class="n r dim">—</td><td class="n r dim">341</td><td class="dim">physical cash</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Fondo Pensione</td><td class="dim">Amundi</td><td><span class="chip type">Pension fund</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/09/2017</td><td class="n r dim">—</td><td class="n r dim">250</td><td class="dim">revalued 31/07/2026</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Conto Titoli</td><td class="dim">Banca Sella</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">31</td><td class="dim">uninvested</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Deposito Vincolato 24m</td><td class="dim">Banca Sella</td><td><span class="chip type">Term deposit</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">4</td><td class="dim">matures 03/2027</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Dossier Titoli</td><td class="dim">Banca Sella</td><td><span class="chip type">Brokerage</span></td><td class="n">EUR</td><td class="n r dim">—</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">—</td><td class="dim">2 holdings, net of tax and fees</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Buoni Pasto</td><td class="dim">Edenred</td><td><span class="chip type">Voucher</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/09/2017</td><td class="n r dim">—</td><td class="n r dim">418</td><td class="dim">26 × € 10,00</td><td class="rowact">···</td></tr>
             <tr class="sel"><td class="desc">Conto Corrente</td><td class="dim">Fineco</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/01/2016</td><td class="n r dim">—</td><td class="n r dim">2.302</td><td class="dim">main account</td><td class="rowact">···</td></tr>
             <tr><td class="desc">Conto Titoli</td><td class="dim">Fineco</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">14/03/2018</td><td class="n r dim">—</td><td class="n r dim">208</td><td class="dim">uninvested, awaiting next purchase</td><td class="rowact">···</td></tr>
             <tr><td class="desc">Dossier Titoli</td><td class="dim">Fineco</td><td><span class="chip type">Brokerage</span></td><td class="n">EUR</td><td class="n r dim">—</td><td class="n r">14/03/2018</td><td class="n r dim">—</td><td class="n r dim">—</td><td class="dim">3 holdings, net of tax and fees</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Conto Corrente</td><td class="dim">Intesa Sanpaolo</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/01/2016</td><td class="n r dim">—</td><td class="n r dim">906</td><td class="dim">household bills</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Wallet</td><td class="dim">—</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 120,00</td><td class="n r">01/01/2016</td><td class="n r dim">—</td><td class="n r dim">341</td><td class="dim">physical cash</td><td class="rowact">···</td></tr>
             <tr><td class="desc">Conto Arancio</td><td class="dim">ING</td><td><span class="chip type">Deposit account</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">08/06/2019</td><td class="n r dim">—</td><td class="n r dim">96</td><td class="dim">2,00%</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Deposito Vincolato 24m</td><td class="dim">Banca Sella</td><td><span class="chip type">Term deposit</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">4</td><td class="dim">matures 03/2027</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Conto Titoli</td><td class="dim">Banca Sella</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">31</td><td class="dim">uninvested</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Dossier Titoli</td><td class="dim">Banca Sella</td><td><span class="chip type">Brokerage</span></td><td class="n">EUR</td><td class="n r dim">—</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">—</td><td class="dim">2 holdings, net of tax and fees</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Fondo Pensione</td><td class="dim">Amundi</td><td><span class="chip type">Pension fund</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/09/2017</td><td class="n r dim">—</td><td class="n r dim">250</td><td class="dim">revalued 31/07/2026</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Buoni Pasto</td><td class="dim">Edenred</td><td><span class="chip type">Voucher</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/09/2017</td><td class="n r dim">—</td><td class="n r dim">418</td><td class="dim">26 × € 10,00</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Conto Corrente</td><td class="dim">Intesa Sanpaolo</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/01/2016</td><td class="n r dim">—</td><td class="n r dim">906</td><td class="dim">household bills</td><td class="rowact">···</td></tr>
             <tr><td class="desc dim">Conto Corrente</td><td class="dim">Unicredit</td><td><span class="chip type">Liquidity</span></td><td class="n dim">EUR</td><td class="n r dim">€ 0,00</td><td class="n r dim">01/01/2016</td><td class="n r dim">30/06/2021</td><td class="n r dim">256</td><td class="dim">moved everything to Fineco</td><td class="rowact">···</td></tr>
           </tbody>
           <tfoot><tr><td colspan="7">12 accounts · 11 open · 7 institutions</td><td class="r tot">4.812</td><td></td><td></td></tr></tfoot>
@@ -739,7 +747,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     that appears twice is a figure that can disagree with itself.</li>
     <li>A <code>Brokerage</code> account shows an em dash for opening balance and for transactions:
     it can hold neither (§2). The form enforces both (§13).</li>
-    <li>Ordered by institution, then opening date. Closed accounts sort last regardless.</li>
+    <li>Ordered by <b>institution name</b>, then opening date, then account name — the last only to
+    break the tie when a bank's accounts were all opened on the same day, so the order is total and
+    the table never rearranges itself between two openings. <b>Accounts belonging to no institution
+    come first</b>: there is exactly one of them in practice, physical cash, and a row with an em
+    dash where every other row has a bank reads as a heading rather than as a gap when it sits at the
+    top. <b>Closed accounts sort last regardless</b>, after everything open.</li>
   </ul>
 
   <h3 class="sub">4.2 Institutions</h3>
@@ -955,7 +968,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
 
   <h3 class="sub">5.3 Filters</h3>
   <p class="body">Account · period · category · <b>set by</b> · amount range · receipt state ·
-  free-text search on description. Combined with AND. Filters affect the footer totals and the page count.
+  free-text search on description. <b>The account filter lists cash accounts only</b> (§2). Combined with AND. Filters affect the footer totals and the page count.
   <b>No filter is applied by default</b> — the screen opens on the whole history — and the mockup
   above shows a user-applied period filter. The category filter carries an
   <em>Uncategorised</em> entry alongside the twenty-seven categories.</p>
@@ -985,7 +998,22 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     row</b> as the edit is committed. The description is the only thing a rule matches on, so
     changing it changes what the rules produce, and the row follows (§2). A <code>manual</code> row
     keeps its category whatever its description becomes.</li>
-    <li>Row menu: duplicate, delete. <b>Delete asks for confirmation</b> — there is no undo.</li>
+    <li>Row menu: <b>Duplicate</b>, <b>Delete</b>. Delete asks for confirmation — there is no
+    undo.</li>
+    <li><b>Duplicate copies the record and opens the copy for editing</b>, on the same row position
+    the original occupies. It carries over account, date, description, amount, category and notes;
+    it takes a new <code>id</code> and a new <code>insertionSeq</code>, so the copy sorts after the
+    original on the same day (§5.2). Two fields do not come across as-is. <code>receiptState</code>
+    resets to <code>na</code>, because a duplicate is a new row and every new row starts there
+    whatever made it (§6.3). <code>categorySource</code> is preserved: a copy of a hand-set row is
+    itself hand-set and keeps the category, a copy of an automatic row is automatic and is
+    re-derived from the description it inherited — which produces the same category, by the same
+    rule, for the same reason. Duplicating is for the recurring payment that differs in one field,
+    so it is worth the copy landing exactly where the original was and needing one edit.</li>
+    <li><b>“Duplicate” here is not the “duplicate” of §5.7.</b> This is an action that deliberately
+    makes a second row; that is a detection that warns you may be about to make one by accident. They
+    share a word and nothing else, and a row created by this action is not flagged by that detection
+    — it is only consulted when rows are pasted.</li>
     <li><b>There is no “apply rules” action here.</b> Automatic categories are always current, so a
     button that re-ran the rule list would have nothing left to do.</li>
   </ul>
@@ -1041,8 +1069,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     and they do it repeatably and leave a reason behind; a bulk edit does it once and leaves
     nothing. Everything else worth changing on many rows at once is a mistake better deleted and
     re-imported.</li>
-    <li>Selection is cleared by any change to the filters, so a selection can never contain rows that
-    are no longer on screen.</li>
+    <li><b>Selection survives paging.</b> Turning the page keeps every tick, so a selection may span
+    pages and the count in the header and the footer is the whole of it, not the part in view — which
+    is the only reading under which the header checkbox means what §5.6 says it means. Coming back to
+    a page shows the ticks still there.</li>
+    <li><b>Selection is cleared by any change to the filters</b>, and by nothing else. A filter change
+    is the one action that can put a selected row somewhere the user cannot see or reach it, so it is
+    the one action that discards the selection rather than carrying an invisible one forward. Paging
+    does not, because the pager can always take you back.</li>
   </ul>
 
   <h3 class="sub">5.7 Bulk import</h3>
@@ -1281,7 +1315,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <tr class="sum"><td class="cat">Investment</td><td class="n r neg">− € 8.400,00</td><td class="n r neg">− € 9.200,00</td><td class="n r neg">− € 11.000,00</td><td class="n r neg">− € 6.407,20</td><td class="n r neg">− € 9.605,90</td><td class="n r neg">− € 44.613,10</td></tr>
             <tr class="sum"><td class="cat">Divestment</td><td class="n r pos">+ € 1.189,33</td><td class="n r dim">—</td><td class="n r pos">+ € 3.323,23</td><td class="n r dim">—</td><td class="n r pos">+ € 2.039,79</td><td class="n r pos">+ € 6.552,35</td></tr>
             <tr class="sum"><td class="cat">Revaluation</td><td class="n r pos">+ € 840,00</td><td class="n r pos">+ € 1.420,00</td><td class="n r pos">+ € 1.960,00</td><td class="n r pos">+ € 2.280,00</td><td class="n r pos">+ € 1.180,00</td><td class="n r pos">+ € 7.680,00</td></tr>
-            <tr class="sum"><td class="cat">Internal transfer</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td></tr>
+            <tr class="sum"><td class="cat">Internal</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td></tr>
           </tbody>
         </table></div>
       </div>
@@ -1306,7 +1340,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>Net</b> — income plus expense, the two carrying their own signs — is the emphasised line
     the table exists to produce. Investment, Divestment, Revaluation and Internal appear as type
     subtotals only, below it, and are excluded from it.</li>
-    <li><b>Internal transfer reads zero when every account is in scope.</b> It is shown rather than
+    <li><b>Those four rows are named after their type, never after the category inside it.</b> Each
+    of the four holds exactly one category today — <i>Securities purchase</i>, <i>Securities
+    sale</i>, <i>Value adjustment</i>, <i>Internal transfer</i> — so either name would identify the
+    same money, and naming three of them after the type and the fourth after its category would have
+    made the odd one look like a category row that had wandered under the wrong heading. They are
+    subtotals of a type, they sit under a heading that says <i>Other types</i>, and a second category
+    added to any of them later changes what the row sums without changing what it is called.</li>
+    <li><b>Internal reads zero when every account is in scope.</b> It is shown rather than
     hidden because a non-zero value means a leg is missing. <b>Filter to a subset of accounts and it
     stops being zero by design</b> — the transfers crossing the boundary of the selection no longer
     have both legs in view — so with an account filter active the row is labelled as scoped and its
@@ -1322,7 +1363,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     Nothing is offered that cannot then be shown.</li>
     <li>A cell with no transactions shows an em dash, not <code>€ 0,00</code>, so a real zero stays
     distinguishable from nothing recorded — and an em dash is not a link.</li>
-    <li>Filters: year range, accounts. A partial year is labelled with the months it covers.</li>
+    <li>Filters: year range, accounts — <b>cash accounts only</b>, since a brokerage account holds no
+    transactions to report (§2). A partial year is labelled with the months it covers.</li>
     <li>The screen carries three tabs: this report, the categorisation rules (§6.2), and a read-only
     list of the twenty-seven categories with their types and roles (§6.3). Rules sit here because the
     tester's counts only mean something next to the report they change.</li>
@@ -1694,7 +1736,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>Recording a trade <b>does not</b> create a transaction.</li>
     <li>Ordering: <code>date ASC, insertionSeq ASC</code> — the same direction as Transactions, so
     both ledgers read the same way. No paging; filters narrow the list instead.</li>
-    <li>Filters: security, account, period.</li>
+    <li>Filters: security, account — <b>brokerage accounts only</b> (§2) — and period.</li>
   </ul>
 
   <h3 class="sub">7.3 Sales</h3>
@@ -2058,7 +2100,10 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>Charts cover all years of the contract. <em>Contract × months</em> uses the contract's own
     <code>monthsPerYear</code>. A partial first or last year shows visibly below the contract line —
     that is correct, not a defect.</li>
-    <li>Payslips are edited in place; the row menu holds duplicate and delete. <b>Add payslip</b>
+    <li>Payslips are edited in place; the row menu holds <b>Duplicate</b> and <b>Delete</b>.
+    Duplicate copies every field including <code>year</code>, <code>month</code> and
+    <code>label</code> — a month may legitimately hold more than one payslip (§2), so the copy is
+    valid where it lands and the tredicesima is the case it exists for. <b>Add payslip</b>
     opens a form with the same fields as the table, defaulting <code>contractGross</code> and
     <code>carPayment</code> from the previous month.</li>
   </ul>
@@ -2206,9 +2251,11 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     only cash accounts, a date field that cannot hold a non-date — never by a check.</li>
     <li>A passing check <b>states its reach</b> (“117 payslips”, “41 purchases”), so a check that
     passed because it examined nothing is distinguishable from one that passed properly.</li>
-    <li>Checks run <b>at application startup and after every change</b>, and are summarised in the
-    sidebar badge and the Portfolio banner. There is no manual re-run button: a result that could be
-    stale enough to need one would not be worth showing in a badge.</li>
+    <li>Checks run <b>at application startup and after every change</b>, <b>debounced</b> — a change
+    schedules a run rather than performing one, and a run in flight is superseded by the next. Typing
+    in a cell produces one run when the typing stops, not one per keystroke. They are summarised in
+    the sidebar badge and the Portfolio banner. There is no manual re-run button: a result that could
+    be stale enough to need one would not be worth showing in a badge.</li>
     <li>Each failing entry links to the record it names.</li>
     <li><b>Checks 13 and 14 fail immediately after an import, by design.</b> Receipt state is never
     set by the application (§6.3): every row arrives <code>na</code>, so the rent, the electricity
@@ -2218,6 +2265,22 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>Checks key off category <b>roles</b> (§2), never off category names, so rewording a label
     never silently switches a check off.</li>
   </ul>
+
+  <div class="callout"><b>What a run actually costs.</b> Fourteen checks over ten years is a handful
+  of passes over the whole file — a few thousand transactions, a few dozen trades, a hundred-odd
+  payslips — plus the greedy one-to-one matchers of §11.6, which are the expensive part: checks 1, 4,
+  6 and 7 each pair two sets against each other, and a careless implementation makes that quadratic.
+  It does not need to be. Every one of those pairings keys off an <b>amount and a date window</b>, so
+  bucketing each side by amount turns the search for a counterpart into a lookup among the few
+  records that could possibly match, and the run stays linear in the size of the file. <b>That is the
+  intended implementation, not an optimisation to reach for later</b> — at this size it is fast
+  enough to be invisible, which is the only reason a debounced run after every change is a
+  reasonable thing to ask for.<br><br>
+  If it nevertheless proves too slow, the fallback is <b>not</b> a manual re-run button, which would
+  put a stale badge on screen and make the user responsible for noticing. It is to keep running the
+  cheap checks after every change and move the four matchers to a longer debounce, so the badge is
+  never wrong for more than a moment. The order of preference is: make the run cheap, then make it
+  less frequent, and only then make it manual — and the third is out of scope (§15).</div>
 
   <h4 class="subsub">Deliberately not implemented</h4>
   <ul class="body">
@@ -2481,7 +2544,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
 
   <h3 class="sub">11.5 Net worth over time</h3>
   <ul class="body">
-    <li>Monthly points at each month end, from the earliest transaction to today.</li>
+    <li>Monthly points at each month end, from the month of the earliest transaction up to the last
+    month end before today — <b>plus one final point at today itself</b>, which is the only point not
+    on a month end. Ending on the last completed month would leave the chart short of the headline
+    figure above it by however far into the month it happens to be, and the line would appear to stop
+    growing for a few weeks every month. The final point is the same date every other figure on the
+    screen is computed at (§11).</li>
     <li>At date <code>d</code>, over every account whose <code>openingDate ≤ d</code> and which was
     not yet closed at <code>d</code>: <code>Σ (openingBalance + Σ transactions ≤ d)</code> plus, per
     holding, <code>quantity(d) × price</code> where price is the <b>most recent Price record dated
