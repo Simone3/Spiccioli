@@ -43,7 +43,8 @@ Account · period · category · **set by** · amount range · receipt state · 
 description. **The account filter lists cash accounts only** ([§2](02-domain-model.md)). Combined
 with AND. Filters affect the footer totals and the page count. **No filter is applied by default** —
 the screen opens on the whole history — and the mockup above shows a user-applied period filter. The
-category filter carries an *Uncategorised* entry alongside the twenty-seven categories.
+category filter lists the twenty-seven categories **alphabetically**, with an *Uncategorised* entry
+above them ([§6.3](06-categories.md#63-category-list)).
 
 **Set by** filters on `categorySource`: *anything*, *a rule*, *by hand*. It is the filter for the
 question the rules raise — after changing one, which rows did it take over, and which ones did I set
@@ -58,10 +59,11 @@ that will survive every future rule change, which is the set worth keeping small
   moved onto a brokerage one.
 - Setting a category by hand sets `categorySource = manual`, which protects it from every automatic
   re-categorisation.
-- **The picker has no way to choose nothing.** It offers *Automatic* and the twenty-seven
-  categories, and no clearing entry: a row the user has touched always ends up with a category or
-  back under the rules ([§13](13-validation.md)). The only empty category in the file is therefore
-  one no rule matched, which is exactly what check 2 is counting.
+- **The picker has no way to choose nothing.** It offers *Automatic* at the top and the twenty-seven
+  categories **alphabetically** below it ([§6.3](06-categories.md#63-category-list)), and no
+  clearing entry: a row the user has touched always ends up with a category or back under the rules
+  ([§13](13-validation.md)). The only empty category in the file is therefore one no rule matched,
+  which is exactly what check 2 is counting.
 - **This is reversible.** The category picker offers a special entry — *Automatic (let rules
   decide)* — at the top of the list. Choosing it sets `categorySource` back to `automatic` and
   immediately re-applies the rule list to that transaction, leaving the category empty if no rule

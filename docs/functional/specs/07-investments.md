@@ -24,10 +24,12 @@ Securities is what all three point at.
   application.
 - A price older than `priceStalenessDays` is marked on the row itself, not only in
   [§9](09-checks.md). **A security with no price at all is marked more loudly**: its price cell
-  reads *none*, its value and gain read `€ 0,00`, and check 3 fails. Valuing it at cost instead
-  would have hidden the omission inside a plausible number, and a holding worth nothing is the one
-  wrong answer nobody mistakes for the right one
-  ([§11.3](11-calculations.md#113-hypothetical-liquidation)).
+  reads *none*, its value reads `€ 0,00`, its gain reads **minus everything the position cost**, and
+  check 3 fails. The gain is not zero and must not be shown as zero: what the row is saying is that
+  this holding is currently worth nothing, and a position worth nothing has lost exactly what was
+  paid for it ([§2](02-domain-model.md), [§11.3](11-calculations.md#113-hypothetical-liquidation)).
+  Valuing it at cost instead would have hidden the omission inside a plausible number, and a holding
+  worth nothing is the one wrong answer nobody mistakes for the right one.
 - The table carries **gross** value and gain — market price, no tax, no fees. This is the
   counterpart to the Portfolio headline, which is net ([§3.1](03-portfolio.md#31-behaviour)); one
   screen shows what the positions are worth, the other what they would leave you with.

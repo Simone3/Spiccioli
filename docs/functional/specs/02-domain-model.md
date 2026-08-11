@@ -192,8 +192,8 @@ keep in step. Checks 4 and 5 therefore look for their counterpart in month M *or
 | name | text | |
 | type | enum | `Income` · `Expense` · `Investment` · `Divestment` · `Internal` · `Revaluation`. Drives the grouping in [§6.1](06-categories.md#61-report), where `Income`, `Expense` and `Internal` are a group each and the other three share one. |
 | role | enum | `none` · `salary` · `pension contribution` · `securities purchase` · `securities sale` · `internal transfer` · `value adjustment` · `bank fees` · `wealth tax` · `interest and dividends`. **What the checks and the Portfolio all-time card key off** — never a name. |
-| receiptTracked | bool | Its transactions are expected to carry a receipt state other than `na` — checks 13 and 14. |
-| order | int | Display order within a type. **It decides the order everywhere a category appears** — the report, the list, every picker — and nothing anywhere sorts categories by their amounts ([§6.1](06-categories.md#61-report)). |
+| receiptTracked | bool | Its transactions are expected to carry a receipt state other than `na` — check 13. |
+| order | int | Global display order. **It decides the order of every table a category appears in** — the report and the category list — and nothing anywhere sorts categories by their amounts ([§6.1](06-categories.md#61-report)). **Pickers do not use it:** every category picker and filter is alphabetical by name ([§6.3](06-categories.md#63-category-list)). |
 
 **Categories are stored, but not editable in v1.** The application seeds the list of
 [§6.3](06-categories.md#63-category-list) into every new file and offers no way to add, rename or

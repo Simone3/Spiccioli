@@ -12,12 +12,18 @@ hang off an account, so it sits second in the sidebar and everything else refers
 > **Mockup —** [Accounts tab](../mockups/04-accounts.html#accounts)
 
 - Every account ever opened, closed ones dimmed and last. The columns are the stored fields of
-  [§2](02-domain-model.md) plus a **transaction count**, which is the column that says whether a row
-  can be deleted and the quickest way to spot an account that was created twice.
+  [§2](02-domain-model.md) plus a **transaction count** and a **trade count**. They are also the
+  quickest way to spot an account that was created twice: two rows for the same account at the same
+  bank, one carrying the history and the other a handful of rows that belong to it.
+- **Together those two columns are what says whether a row can be deleted**, and they have to be
+  two because the account types hold different things: a cash account is blocked by its
+  transactions, a `Brokerage` one by its trades ([§13](13-validation.md)). One count would have left
+  brokerage accounts with a column that never explains why the delete is refused.
 - **No balance column.** Balances are what the Portfolio screen is for ([§3](03-portfolio.md)), and
   a figure that appears twice is a figure that can disagree with itself.
-- A `Brokerage` account shows an em dash for opening balance and for transactions: it can hold
-  neither ([§2](02-domain-model.md)). The form enforces both ([§13](13-validation.md)).
+- A `Brokerage` account shows an em dash for opening balance and for transactions, and every cash
+  account shows one for trades: neither can hold what the other does ([§2](02-domain-model.md)). The
+  form enforces it ([§13](13-validation.md)).
 - Ordered by **institution name**, then opening date, then account name — the last only to break the
   tie when a bank's accounts were all opened on the same day, so the order is total and the table
   never rearranges itself between two openings. **Accounts belonging to no institution come first**:
@@ -32,13 +38,18 @@ hang off an account, so it sits second in the sidebar and everything else refers
 - An institution exists to **group accounts** and to **carry a sell fee**. It has no balance, no
   history and no screen of its own — which is why it is the tab behind accounts rather than beside
   them.
+- **Institutions are created, edited and deleted here**, with the *Add institution* button above the
+  list and the row menu on each line. This is the only place: the account form picks from what
+  already exists and cannot create one ([§4.3](#43-creating-and-editing)).
 - **Accounts** counts the accounts pointing at it, open and closed alike, and is the column that
   says whether an institution can be deleted: at zero it can, otherwise it cannot.
 - **Default sell fee** is the flat fee [§11.3](11-calculations.md#113-hypothetical-liquidation)
   charges once per holding when estimating what a position would leave you with. It is not a fee
   anyone was charged — real fees sit on each trade ([§7.2](07-investments.md#72-purchases),
-  [§7.3](07-investments.md#73-sales)). An institution that never sells anything can leave it at
-  zero, and an institution with no fee recorded behaves as zero.
+  [§7.3](07-investments.md#73-sales)). An institution that never sells anything is given a zero: the
+  field is required and empty is not a value, so a fee of nothing is a fee that was typed
+  ([§13](13-validation.md)). The only thing that behaves as zero without one being entered is an
+  account with no institution at all ([§11.3](11-calculations.md#113-hypothetical-liquidation)).
 - An institution is **never retired**. It has no closing date and no status: when its last account
   closes it simply stops appearing anywhere that matters, and it stays in this list because the
   closed account still points at it ([§4.3](#43-creating-and-editing)).
@@ -47,19 +58,23 @@ hang off an account, so it sits second in the sidebar and everything else refers
 
 ## 4.3 Creating and editing
 
-Both forms live on the Accounts screen. Institutions have no screen of their own: they are a tab
-behind accounts, and the only time one is created is in the middle of creating an account, which is
-why the account form can open the institution form without losing its state.
+Both forms live on the Accounts screen, and **each tab creates what it lists**: *Add account* on the
+Accounts tab, *Add institution* on the Institutions tab. They are two independent forms and neither
+opens the other. An institution is entered once and lasts for years, so the account form picks from
+the institutions that already exist rather than growing a way to create one mid-form — a form that
+can open a second form has to hold the first one's half-finished state while it does, which is a
+great deal of machinery for a keystroke saved twice a decade. Add the bank first, then the account.
 
-> **Mockup —** [New account · new institution](../mockups/04-accounts.html#forms)
+> **Mockup —** [Add account · add institution](../mockups/04-accounts.html#forms)
 
 - **Default sell fee** is a flat amount, used only for the “if sold today” figures of
   [§11.3](11-calculations.md#113-hypothetical-liquidation) and therefore for net worth itself
-  ([§3.1](03-portfolio.md#31-behaviour)). Fees actually charged are recorded on each trade. Leave it
-  at zero to see gross figures; an account with no institution — physical cash — is treated as zero
-  too.
-- **Institution** offers *None* for physical cash, and *New institution…*, which opens the
-  institution form without losing what has been typed here.
+  ([§3.1](03-portfolio.md#31-behaviour)). Fees actually charged are recorded on each trade. Type a
+  zero to see gross figures — the field is required and has no empty state
+  ([§13](13-validation.md)); an account with no institution — physical cash — is treated as zero
+  without one.
+- **Institution** offers *None*, for physical cash, and the institutions already recorded. There is
+  no *New institution…* entry ([§4.2](#42-institutions)).
 - **Opening balance** is the balance on the opening date, before any recorded transaction. Leave it
   at zero when the account’s full history is being imported; a *Brokerage* account has none, its
   value being entirely its holdings.

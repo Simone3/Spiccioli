@@ -25,8 +25,9 @@ The categories × years matrix — the one screen that answers where the money g
   group, which reads well once and badly forever: change the year filter and every row jumps, so the
   eye has to find *Groceries* again instead of going straight to where it was last time. A table
   read every month is worth more when its shape is memorised, and that is only possible if the shape
-  is a constant. The same order is used on the list tab and in every category picker, so a category
-  is always in the same place wherever it appears.
+  is a constant. The same order is used on the list tab — the two tables agree, so a category is
+  always in the same place in both. **Pickers do not follow it and are alphabetical**
+  ([§6.3](#63-category-list)).
 - Amounts **carry the sign and colour of the transactions behind them** — income green and positive,
   expense red and negative — exactly as on the Transactions screen. Absolute values with the
   direction implied by the group header would have read fine for Income and Expense and lied about
@@ -152,9 +153,16 @@ the two lists by hand, and the application stores no alias.
 - **Read-only, and the only place the whole taxonomy is visible at once.** Its types and roles
   decide how every other screen adds things up, so being able to look at them without reading this
   document is worth a tab even though nothing on it can be changed.
-- **The order of this list is the order of everything.** Its `order` field
-  ([§2](02-domain-model.md)) fixes where a category sits in the report, in this list and in every
-  picker, and no screen ever re-sorts by amount ([§6.1](#61-report)).
+- **The order of this list is the order of every table.** Its `order` field
+  ([§2](02-domain-model.md)) fixes where a category sits in the report and in this list, and no
+  screen ever re-sorts by amount ([§6.1](#61-report)).
+- **Every picker is alphabetical instead** — the category picker on a transaction, the category
+  filter, the category on a rule. A table is read down and its shape is worth memorising; a picker
+  is opened with a name already in mind, and the place to look for a name is the alphabet. The two
+  orders serve two different actions and neither is improved by matching the other. Only the entries
+  that are not categories sit outside it: *Automatic* at the top of the transaction picker and
+  *Uncategorised* at the top of the filter ([§5.3](05-transactions.md#53-filters),
+  [§5.4](05-transactions.md#54-editing)).
 - The **Transactions** column is a live count and the reason the tab is more than decoration: a
   category with none is one the rules never reach, and the total across all 27 is every categorised
   transaction in the file — 4.811 of 4.812 here, the missing one being the failure of check 2.
@@ -203,11 +211,13 @@ the two lists by hand, and the application stores no alias.
   gets recorded: **receipt state is entered by hand and by nothing else**. Every transaction is
   created `na` — typed, imported, duplicated, however it arrived — and moves only when the user
   moves it ([§5.1](05-transactions.md#51-columns)).
-- **Checks 13 and 14 therefore fail the moment a receipt-tracked row is created**, and that is the
-  point. The rent that was just imported *is* outstanding until someone has looked for the invoice,
-  and the check is the list of what to look for. An application that set the state to `pending` on
-  the user's behalf would have been guessing, and one that set it to `checked` would have been
-  lying; the only honest default is the one that says nobody has been near this yet.
+- **Check 13 therefore fails the moment a receipt-tracked row is created**, and that is the point.
+  The rent that was just imported *is* outstanding until someone has looked for the invoice, and the
+  check is the list of what to look for. An application that set the state to `pending` on the
+  user's behalf would have been guessing, and one that set it to `checked` would have been lying;
+  the only honest default is the one that says nobody has been near this yet. **Check 14 says
+  nothing at that moment** — it reads only rows already moved to `pending`, so it starts counting
+  after the user has been through them, not before ([§9](09-checks.md)).
 - An amount whose sign contradicts its category type is **legal and not flagged** — a refund
   routinely zeroes out a purchase inside an expense category.
 

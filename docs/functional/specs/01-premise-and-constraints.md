@@ -30,7 +30,10 @@
 - **Derived data is never stored.** Balances, holdings, averages, totals and pairings are recomputed
   from records every time they are shown, never persisted. Plenty of figures are still entered by
   hand — opening balances, prices, payslip lines, working days, sell fees — but none of them is
-  something the application could have calculated for itself.
+  something the application could have calculated for itself. **One value is computed and then
+  written down, deliberately:** the category a rule assigns to a transaction is stored on the
+  transaction and held in step with the rule list at all times, so that every total can read it
+  instead of re-deriving it ([§2](02-domain-model.md)). It is the exception, and it is the only one.
 
 > **The organising principle.** Two independent sources of truth are kept deliberately unlinked —
 > bank transactions come from account exports, trades and payslips are entered by hand — and the

@@ -7,10 +7,18 @@ intermediate steps. **Every monetary figure carries exactly two decimals** — s
 totals, yearly aggregates, hourly rates — so a round thousand reads `€ 21.900,00` and never
 `€ 21.900`, and a column of figures always aligns on the same decimal place. Quantities and unit
 prices carry four; percentages carry one. The only figures written short are the axis labels on a
-chart, where `100k` is the point. **One exception to the no-intermediate-rounding rule:** the amount
-comparisons of [§11.6](#116-derived-matching) are made on totals rounded to 2 decimals, because the
-figure on the other side of the comparison is a bank transaction that was itself rounded to the
-cent.
+chart, where `100k` is the point.
+
+**There are exactly two exceptions to the no-intermediate-rounding rule, and both round to the
+cent** because on both sides of them sits an amount of money someone else has already rounded to the
+cent:
+
+1. The amount comparisons of [§11.6](#116-derived-matching) are made on totals rounded to 2
+   decimals — the figure being compared against is a bank transaction that was itself rounded.
+2. The hypothetical tax of [§11.3](#113-hypothetical-liquidation) is rounded before it is
+   subtracted — it stands for an amount a broker would withhold in cents.
+
+Nothing else rounds until it is displayed.
 
 **“Today” is the computer's own clock** — its current local date, read at the moment a figure is
 computed and never cached. Every age in the application rests on it: the staleness of a price, the
@@ -79,10 +87,11 @@ look like “none recorded”.
   ordering under which this estimate and the recorded figures of
   [§11.2](#112-realised-gain-on-a-sale) mean the same thing by the same arithmetic. It is worth a
   quarter of the fee, and it is worth being right about.
-- **Tax is rounded to the cent** before it is subtracted — the one place a figure is rounded
-  mid-calculation. It is an amount of money that a broker would withhold in cents, and leaving it
-  unrounded would make the per-holding net values fail to add up to the portfolio total by a
-  fraction of a cent.
+- **Tax is rounded to the cent** before it is subtracted — the second of the two places a figure is
+  rounded mid-calculation ([§11](#11--calculations)), the other being the amount comparison of
+  [§11.6](#116-derived-matching). It is an amount of money that a broker would withhold in cents,
+  and leaving it unrounded would make the per-holding net values fail to add up to the portfolio
+  total by a fraction of a cent.
 - **netProceeds can be negative, and that is correct.** A position worth less than the fee to sell
   it would cost money to close, and net worth says so. The fee is charged whatever the position is
   worth — a smaller gain does not buy a smaller commission — and a holding whose whole value is a

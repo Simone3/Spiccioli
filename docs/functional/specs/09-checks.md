@@ -49,11 +49,14 @@ thinking about it.
   badge and the Portfolio banner. There is no manual re-run button: a result that could be stale
   enough to need one would not be worth showing in a badge.
 - Each failing entry links to the record it names.
-- **Checks 13 and 14 fail immediately after an import, by design.** Receipt state is never set by
-  the application ([§6.3](06-categories.md#63-category-list)): every row arrives `na`, so the rent,
-  the electricity and the salary that just came in are all reported as untracked until the user goes
+- **Check 13 fails immediately after an import, by design.** Receipt state is never set by the
+  application ([§6.3](06-categories.md#63-category-list)): every row arrives `na`, so the rent, the
+  electricity and the salary that just came in are all reported as untracked until the user goes
   through them. That is the to-do list working, not a defect — the alternative was an application
   that quietly marked a receipt as expected and let the user believe someone had looked at it.
+  **Check 14 cannot fail then, and the two are not a pair**: it examines only rows already moved to
+  `pending`, and an imported row is `na`. 13 is the list of what has not been looked at; 14 is the
+  list of what was looked at, marked as awaiting a document, and then left.
 - Checks key off category **roles** ([§2](02-domain-model.md)), never off category names, so
   rewording a label never silently switches a check off.
 

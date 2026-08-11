@@ -99,22 +99,27 @@
 
 ## 12.2 The menu bar, and which file is open
 
-> **Mockup —** [Conflict and read-only dialogs](../mockups/12-storage.html#conflicts)
+> **Mockup —** [The File menu · switching files](../mockups/12-storage.html#conflicts)
 
 - **The window title is where the current file is named.** It carries the file's name and nothing
   else — *finances — Spiccioli* — and it is the one place that answers “which file am I in?” at a
   glance. The full path is on Settings ([§10](10-settings.md)), a click away, because a path is too
   long to read at a glance and too useful to hide.
-- **The sidebar carries only the save state** — *Saved 14:32*. It used to carry the file name as
-  well, which put the answer in two places and meant the sidebar had to be wide enough for the
-  longer of them. The window title already had the job.
+- **The sidebar carries the eight screens, the failing-check badge beside *Checks*
+  ([§9](09-checks.md)), and the save state** — *Saved 14:32*. **What it does not carry is the file
+  name.** It used to, which put the answer in two places and meant the sidebar had to be wide enough
+  for the longer of them. The window title already had the job.
 - **Opening another file is a menu action, not a restart.** The launch screen
   ([§12.1](#121-the-launch-screen)) is what the application opens *with*; the File menu is how you
   leave one file for another once it is running. Both reach the same code, so there is nothing you
   can do at launch that you cannot do afterwards.
+- **The File menu is the whole menu bar, and it holds four actions**: *New…*, which writes a fresh
+  seeded file; *Open…*, which browses for one; *Open Recent*, which is the same list the launch
+  screen offers; and *Quit*, which takes the closing backup. There is no Edit menu, because there is
+  no undo, and no View menu, because there is nothing to configure about the view.
 - The menu bar is **native on each platform** — in the macOS menu bar, in the window on Windows and
-  Linux — and carries the platform's own *About* and *Quit* conventions. That is presentation; the
-  four actions above are the same three files and one exit everywhere
+  Linux — and carries the platform's own *About* and *Quit* conventions. That is presentation; those
+  four actions are the same three files and one exit everywhere
   ([§1](01-premise-and-constraints.md)).
 
 ---
