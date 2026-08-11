@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spiccioli — mockups — §12 Storage</title>
+<link rel="stylesheet" href="_mockups.css">
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow">Mockups · §12</div>
+  <h1>Storage</h1>
+  <p>The mockups for §12. The written specification is in
+  <a href="../specs/12-storage.md">specs/12-storage.md</a>; the other screens are in
+  <a href="index.html">the mockup index</a>.</p>
+  <div class="rule"></div>
+</header>
+
+
+<nav class="toc">
+  <a href="#launch"><b>§12.1</b> The launch screen</a>
+  <a href="#conflicts"><b>§12.2</b> Conflict and read-only dialogs</a>
+</nav>
+
+
+<section class="doc" id="launch">
+  <header>
+    <div class="num">§12.1</div>
+    <h2>The launch screen</h2>
+  </header>
+  <div class="dlgrow">
+    <div class="dlg">
+      <h5>Spiccioli</h5>
+      <div class="dsub">choose a file to open</div>
+      <div class="tblwrap"><table class="spec">
+        <tbody>
+          <tr><td>finances.spiccioli</td><td class="d">~/Documents · yesterday 18:04</td></tr>
+          <tr><td>finances-2016.spiccioli</td><td class="d">~/Documents/old · 12/03/2026</td></tr>
+          <tr><td>test.spiccioli</td><td class="d">~/Desktop · 02/01/2026</td></tr>
+        </tbody>
+      </table></div>
+      <div class="dlgfoot">
+        <button class="btn ghost">Open…</button>
+        <button class="btn">New file…</button>
+      </div>
+    </div>
+
+    <div class="dlg">
+      <h5>This file must be upgraded</h5>
+      <div class="dsub">finances-2016.spiccioli</div>
+      <div class="figs">
+        <div class="fig"><span>Written by schema</span><b>3</b></div>
+        <div class="fig"><span>This version reads</span><b>5</b></div>
+      </div>
+      <hr class="sep">
+      <p class="hint">Opening it will convert it to schema 5. <b>A copy of the file as it stands is
+      written to the backup folder first</b>, as one of the ten kept there — it will be rotated out
+      in time, so move it elsewhere if you want to keep it. After the upgrade, Spiccioli 1.2 and
+      earlier will no longer be able to open it.</p>
+      <div class="dlgfoot">
+        <button class="btn ghost">Cancel</button>
+        <button class="btn primary">Back up and upgrade</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="doc" id="conflicts">
+  <header>
+    <div class="num">§12.2</div>
+    <h2>Conflict and read-only dialogs</h2>
+  </header>
+  <div class="dlgrow">
+    <div class="dlg">
+      <h5>File</h5>
+      <div class="dsub">the whole menu</div>
+      <div class="tblwrap"><table class="spec">
+        <tbody>
+          <tr><td>New…</td><td class="d">a fresh file, categories seeded</td></tr>
+          <tr><td>Open…</td><td class="d">browse for one</td></tr>
+          <tr><td>Open Recent ▸</td><td class="d">the same list the launch screen offers</td></tr>
+          <tr><td>Quit</td><td class="d">takes the closing backup</td></tr>
+        </tbody>
+      </table></div>
+      <p class="hint">Everything else the application does, it does on a screen. There is no Edit
+      menu because there is no undo (§12), and no View menu because there is nothing to configure
+      about the view.</p>
+    </div>
+
+    <div class="dlg">
+      <h5>Switching files</h5>
+      <div class="dsub">Open… or Open Recent, mid-session</div>
+      <div class="figs">
+        <div class="fig"><span>1 · the open file</span><b>autosaved and closed</b></div>
+        <div class="fig"><span>2 · the new file</span><b>backed up on open</b></div>
+        <div class="fig"><span>3 · schema</span><b>checked as at launch</b></div>
+        <div class="fig"><span>4 · the screen</span><b>Portfolio, filters cleared</b></div>
+      </div>
+      <p class="hint">A file opened from the menu goes through <b>exactly</b> what a file opened from
+      the launch screen goes through — the same backup, the same upgrade prompt, the same refusal if
+      it cannot be understood. If it is refused, the file you had stays open and the message says
+      why; the launch screen is not brought back mid-session.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</body>
+</html>

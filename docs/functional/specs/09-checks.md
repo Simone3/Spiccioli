@@ -1,0 +1,87 @@
+# §9 — Checks
+
+*[Index](../README.md) · [mockups for this section](../mockups/09-checks.html)*
+
+Fourteen checks. Each passes or names the exact records that made it fail. No tabs.
+
+> **Mockup —** [Checks screen](../mockups/09-checks.html#checks)
+
+---
+
+| # | Check | Definition | Failure output |
+| --- | --- | --- | --- |
+| 1 | Internal transfers balance out | Every transaction in a category with role `internal transfer` pairs with an opposite leg ([§11.6](11-calculations.md#116-derived-matching)). | Each unpaired leg, with date, account, description, amount. |
+| 2 | Every transaction has a category | `categoryId` is set. | Each uncategorised transaction. |
+| 3 | Prices are recent | Every security with an open holding has at least one Price record, and its latest one is dated within `priceStalenessDays`. **No price at all fails too**, and is the more serious of the two: that holding is valued at zero everywhere ([§11.3](11-calculations.md#113-hypothetical-liquidation)). | Security, price, date, age — or “no price recorded”. |
+| 4 | Payslips match salary transactions | Every payslip pairs one-to-one with a transaction in a role `salary` category, of equal `netPayment`, dated in the payslip's month or the one after — and every such transaction pairs with a payslip ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched payslips and unmatched transactions, listed separately, with amounts. |
+| 5 | Payslip pension contributions match transactions | **Monthly totals, not record by record.** For each month, Σ `pensionContribution` over that month's payslips = Σ of the role `pension contribution` transactions attributed to it ([§11.6](11-calculations.md#116-derived-matching)). A month's contribution reaches the fund as two or three separate credits — employee share, employer share, TFR — so pairing them one to one could never have worked. Months whose payslips total zero are out of scope. | The month, the payslip total, the transaction total, and the difference. |
+| 6 | Purchase transactions match purchases | Every transaction in a role `securities purchase` category pairs with a purchase trade, and vice versa ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched transactions and unmatched trades, listed separately. |
+| 7 | Sale transactions match sales | As above for role `securities sale` and sale trades. The trade side is net proceeds — after tax and fees — so it can equal what the bank credited. | As above. |
+| 8 | No holding has gone negative | For every (security, account), running quantity in date order never drops below 0. | Security, account, the trade that took it negative. |
+| 9 | No sale precedes its purchase | Every sale has at least one earlier purchase of that security in that account. | The offending sale. |
+| 10 | Pension fund revalued recently | Latest transaction in a role `value adjustment` category, in each pension fund account, within `pensionRevaluationMonths`. | Account and date of the last adjustment. |
+| 11 | Closed accounts are empty | Every account with a `closingDate` has a balance of exactly 0 and no holding with quantity > 0. | Account, closing date, the balance or holdings left in it. |
+| 12 | Records fall within their account's life | No transaction or trade is dated before its account's `openingDate` or after its `closingDate`. Both ends, not just the near one. | The record, its date, and the account's opening or closing date. |
+| 13 | Receipt-tracked transactions carry a state | No transaction in a category with `receiptTracked` has `receiptState = na`. | Each such transaction. |
+| 14 | No receipt has been pending too long | Every transaction with `receiptState = pending` is dated within `receiptPendingMonths` of today. | Each overdue transaction, with its age. |
+
+**Checks 8 and 9 overlap on purpose.** Any sale with no purchase before it also drives the running
+quantity below zero, so 9 never fails alone — but the two say different things when you read the
+failure. 8 reports a quantity that cannot exist; 9 reports a sale that arrived before its purchase
+was entered, which during data entry is the ordinary case and resolves itself as soon as the missing
+purchase is recorded. Keeping both costs nothing and names the situation the way the user is
+thinking about it.
+
+- **Two states only**, pass or fail. No warning tier — it would become a place for things to sit
+  unfixed.
+- **A check never prevents anything.** Checks report; they do not validate, refuse or roll back. No
+  save, close, delete or edit anywhere in the application is blocked because a check would fail
+  afterwards — the record is written and the check names it on the next run, which is the same
+  instant. This is what makes them usable over a half-entered file: the ordinary way to work is to
+  enter one side of something, watch a check fail, and enter the other side. Where a rule has to be
+  enforced rather than observed, it is enforced by the form that collects it — a picker that offers
+  only cash accounts, a date field that cannot hold a non-date — never by a check.
+- A passing check **states its reach** (“117 payslips”, “41 purchases”), so a check that passed
+  because it examined nothing is distinguishable from one that passed properly.
+- Checks run **at application startup and after every change**, **debounced** — a change schedules a
+  run rather than performing one, and a run in flight is superseded by the next. Typing in a cell
+  produces one run when the typing stops, not one per keystroke. They are summarised in the sidebar
+  badge and the Portfolio banner. There is no manual re-run button: a result that could be stale
+  enough to need one would not be worth showing in a badge.
+- Each failing entry links to the record it names.
+- **Checks 13 and 14 fail immediately after an import, by design.** Receipt state is never set by
+  the application ([§6.3](06-categories.md#63-category-list)): every row arrives `na`, so the rent,
+  the electricity and the salary that just came in are all reported as untracked until the user goes
+  through them. That is the to-do list working, not a defect — the alternative was an application
+  that quietly marked a receipt as expected and let the user believe someone had looked at it.
+- Checks key off category **roles** ([§2](02-domain-model.md)), never off category names, so
+  rewording a label never silently switches a check off.
+
+> **What a run actually costs.** Fourteen checks over ten years is a handful of passes over the
+> whole file — a few thousand transactions, a few dozen trades, a hundred-odd payslips — plus the
+> greedy one-to-one matchers of [§11.6](11-calculations.md#116-derived-matching), which are the
+> expensive part: checks 1, 4, 6 and 7 each pair two sets against each other, and a careless
+> implementation makes that quadratic. It does not need to be. Every one of those pairings keys off
+> an **amount and a date window**, so bucketing each side by amount turns the search for a
+> counterpart into a lookup among the few records that could possibly match, and the run stays
+> linear in the size of the file. **That is the intended implementation, not an optimisation to
+> reach for later** — at this size it is fast enough to be invisible, which is the only reason a
+> debounced run after every change is a reasonable thing to ask for.
+>
+> If it nevertheless proves too slow, the fallback is **not** a manual re-run button, which would
+> put a stale badge on screen and make the user responsible for noticing. It is to keep running the
+> cheap checks after every change and move the four matchers to a longer debounce, so the badge is
+> never wrong for more than a moment. The order of preference is: make the run cheap, then make it
+> less frequent, and only then make it manual — and the third is out of scope
+> ([§15](15-out-of-scope.md)).
+
+### Deliberately not implemented
+
+- **Statement balance reconciliation** — done by eye against the bank app after each import.
+- **Duplicate transactions across the dataset** — genuine same-day, same-amount duplicates occur.
+- **Sign vs. category type** — a refund legitimately zeroes out a purchase in an expense category.
+- **Missing salary month** — gaps between jobs are legitimate.
+
+---
+
+[← §8 Salaries](08-salaries.md) · [§10 Settings →](10-settings.md)

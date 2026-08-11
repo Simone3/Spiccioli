@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spiccioli — mockups — §9 Checks</title>
+<link rel="stylesheet" href="_mockups.css">
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow">Mockups · §9</div>
+  <h1>Checks</h1>
+  <p>The mockups for §9. The written specification is in
+  <a href="../specs/09-checks.md">specs/09-checks.md</a>; the other screens are in
+  <a href="index.html">the mockup index</a>.</p>
+  <div class="rule"></div>
+</header>
+
+
+<section class="doc" id="checks">
+  <header>
+    <div class="num">§9</div>
+    <h2>Checks screen</h2>
+  </header>
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a class="on" href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Checks</h3><div class="sub">14 checks · 11 passing · 3 failing · run at startup and after every change</div></div>
+      </div>
+      <div class="card">
+        <div class="checks">
+          <div class="chk"><span class="st no">✕</span><span class="name">Internal transfers balance out<em>Every internal transfer should appear in two accounts, with opposite signs.</em><span class="det">22/07/2026 · Intesa Sanpaolo · Conto Corrente · BONIFICO A FINECO · − € 500,00 — no matching leg within 5 days</span></span><span class="res no">1 unpaired</span></div>
+          <div class="chk"><span class="st no">✕</span><span class="name">Every transaction has a category<em>Uncategorised transactions are excluded from every total, silently.</em><span class="det">08/08/2026 · Intesa Sanpaolo · Conto Corrente · ADDEBITO DIVERSI 4471 · − € 41,20</span></span><span class="res no">1 of 4.812</span></div>
+          <div class="chk"><span class="st no">✕</span><span class="name">Prices are recent<em>A stale price quietly misstates net worth.</em><span class="det">AGGH · iShares Core Global Aggregate Bond · € 4,8540 on 07/06/2026 — 62 days ago</span></span><span class="res no">1 of 5</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Payslips match salary transactions<em>Net payment on each payslip against a Salary transaction in the same month or the next.</em></span><span class="res">117 payslips</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Payslip pension contributions match transactions<em>Monthly totals, same window, against the pension fund account.</em></span><span class="res">109 months</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Purchase transactions match purchases<em>Securities purchase transactions against the purchases on the Investments screen.</em></span><span class="res">41 purchases</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Sale transactions match sales<em>Securities sale transactions against the sales on the Investments screen.</em></span><span class="res">6 sales</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">No holding has gone negative<em>More sold than ever bought means a missing purchase.</em></span><span class="res">5 holdings</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">No sale precedes its purchase<em>A sale with nothing bought before it in the same account.</em></span><span class="res">6 sales</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Pension fund revalued recently<em>Its balance only moves when a value adjustment is recorded.</em></span><span class="res">8 days ago</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Closed accounts are empty<em>A closed account leaves net worth, so anything left in it would vanish silently.</em></span><span class="res">1 closed</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Records fall within their account's life<em>A transaction or trade dated before the account opened, or after it closed, is a typo or the wrong account.</em></span><span class="res">4.812 + 47</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Receipt-tracked transactions carry a state<em>A category that expects a receipt should never read n/a.</em></span><span class="res">623 tracked</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">No receipt has been pending too long<em>Pending is a to-do; after three months it is an oversight.</em></span><span class="res">6 pending</span></div>
+        </div>
+      </div>
+    </main>
+  </div></div>
+</section>
+
+</div>
+
+</body>
+</html>

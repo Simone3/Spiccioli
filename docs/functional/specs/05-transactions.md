@@ -1,0 +1,220 @@
+# §5 — Transactions
+
+*[Index](../README.md) · [mockups for this section](../mockups/05-transactions.html)*
+
+The screen with the most hours on it. No tabs.
+
+> **Mockup —** [Transactions list](../mockups/05-transactions.html#list)
+
+---
+
+## 5.1 Columns
+
+- **Account** names the account, not the institution — *Fineco · Conto Corrente*, never *Fineco*.
+  One institution routinely holds several accounts, and which one a row belongs to is what the
+  matching of [§11.6](11-calculations.md#116-derived-matching) turns on. The same rule holds
+  everywhere an account is shown.
+- **Category** chip is violet when `categorySource = automatic` and a rule matched, neutral when
+  `manual`, red when no category was assigned. Violet denotes provenance, not correctness —
+  deliberately not green.
+- **Matched** is derived and read-only: the counterpart account for a paired internal transfer, the
+  security for a trade-matched securities transaction, an em dash otherwise
+  ([§11.6](11-calculations.md#116-derived-matching)).
+- **Notes** is free text the user owns. **The application never writes to it.**
+- **Receipt** is a picker with three values — `pending`, `checked`, `na` — chosen directly. It is
+  not a cycle and there is no order to work through: a transaction is not on its way anywhere, it
+  simply has one of three states and the user says which
+  ([§6.3](06-categories.md#63-category-list)).
+- The footer sums the filtered rows, across all pages.
+
+## 5.2 Ordering and paging
+
+- Always `date ASC, insertionSeq ASC, id ASC`. Columns are not sortable and the order is not
+  configurable — the list must look identical every time it is opened.
+- **50 rows per page.** This is the only paginated table in the application; every other table is
+  shown in full.
+- **The screen opens on the last page**, so the most recent rows are in view. Ascending order with a
+  jump to the end keeps chronology reading the same direction everywhere while still landing on the
+  rows just imported; the pager is how you go back.
+
+## 5.3 Filters
+
+Account · period · category · **set by** · amount range · receipt state · free-text search on
+description. **The account filter lists cash accounts only** ([§2](02-domain-model.md)). Combined
+with AND. Filters affect the footer totals and the page count. **No filter is applied by default** —
+the screen opens on the whole history — and the mockup above shows a user-applied period filter. The
+category filter carries an *Uncategorised* entry alongside the twenty-seven categories.
+
+**Set by** filters on `categorySource`: *anything*, *a rule*, *by hand*. It is the filter for the
+question the rules raise — after changing one, which rows did it take over, and which ones did I set
+myself and would not want it to? Combined with a category it answers “show me everything a rule
+called *Groceries*”, which is how a wrong rule is found; combined with *by hand* it lists the rows
+that will survive every future rule change, which is the set worth keeping small.
+
+## 5.4 Editing
+
+- **Every cell is editable in place** — date, account, description, amount, category, receipt state,
+  notes. Click to edit. The account picker offers only cash accounts; a transaction can never be
+  moved onto a brokerage one.
+- Setting a category by hand sets `categorySource = manual`, which protects it from every automatic
+  re-categorisation.
+- **The picker has no way to choose nothing.** It offers *Automatic* and the twenty-seven
+  categories, and no clearing entry: a row the user has touched always ends up with a category or
+  back under the rules ([§13](13-validation.md)). The only empty category in the file is therefore
+  one no rule matched, which is exactly what check 2 is counting.
+- **This is reversible.** The category picker offers a special entry — *Automatic (let rules
+  decide)* — at the top of the list. Choosing it sets `categorySource` back to `automatic` and
+  immediately re-applies the rule list to that transaction, leaving the category empty if no rule
+  matches. There is no state a hand-edit can trap a row in.
+- **Editing the description of an `automatic` row re-runs the rule list over that row** as the edit
+  is committed. The description is the only thing a rule matches on, so changing it changes what the
+  rules produce, and the row follows ([§2](02-domain-model.md)). A `manual` row keeps its category
+  whatever its description becomes.
+- Row menu: **Duplicate**, **Delete**. Delete asks for confirmation — there is no undo.
+- **Duplicate copies the record and opens the copy for editing**, on the same row position the
+  original occupies. It carries over account, date, description, amount, category and notes; it
+  takes a new `id` and a new `insertionSeq`, so the copy sorts after the original on the same day
+  ([§5.2](#52-ordering-and-paging)). Two fields do not come across as-is. `receiptState` resets to
+  `na`, because a duplicate is a new row and every new row starts there whatever made it
+  ([§6.3](06-categories.md#63-category-list)). `categorySource` is preserved: a copy of a hand-set
+  row is itself hand-set and keeps the category, a copy of an automatic row is automatic and is
+  re-derived from the description it inherited — which produces the same category, by the same rule,
+  for the same reason. Duplicating is for the recurring payment that differs in one field, so it is
+  worth the copy landing exactly where the original was and needing one edit.
+- **“Duplicate” here is not the “duplicate” of [§5.7](#57-bulk-import).** This is an action that
+  deliberately makes a second row; that is a detection that warns you may be about to make one by
+  accident. They share a word and nothing else, and a row created by this action is not flagged by
+  that detection — it is only consulted when rows are pasted.
+- **There is no “apply rules” action here.** Automatic categories are always current, so a button
+  that re-ran the rule list would have nothing left to do.
+
+## 5.5 Add transaction
+
+> **Mockup —** [Add transaction](../mockups/05-transactions.html#add-transaction)
+
+- **Account** defaults to the one last used, and lists cash accounts only — closed ones among them,
+  marked and last ([§4.3](04-accounts.md#43-creating-and-editing)). **Date** is a date picker
+  defaulting to today; **amount** is a validated numeric field, signed, negative being money out.
+  Neither can hold text that would have to be interpreted: nothing invalid can be entered, so
+  nothing invalid has to be rejected on save, and the display preferences of
+  [§10](10-settings.md) never enter into data entry.
+- **Category** defaults to *Automatic*, so a manually added row is categorised by the same rules as
+  an imported one.
+- **Receipt** defaults to *n/a* and stays there unless the user says otherwise, on this form as
+  everywhere else ([§6.3](06-categories.md#63-category-list)). Nothing about the category the row
+  ends up with changes it.
+- **Save and add another** keeps the dialog open with account and date retained and the other fields
+  cleared — the shape of manual entry is several rows in one sitting.
+
+## 5.6 Selecting and deleting in bulk
+
+- A **checkbox column** leads every row. Click one, shift-click another and the range between them
+  is selected; the header checkbox selects **everything the filters currently match**, across pages,
+  not just the page in view — which is the only way it is useful after an import that went into the
+  wrong account.
+- The only bulk action is **delete**. It confirms once, stating the count and the total amount about
+  to disappear — *Delete 214 transactions totalling − € 8.412,90?* — because there is no undo
+  ([§12](12-storage.md)) and the count alone does not tell you whether you selected the right
+  fortnight.
+- **There is no bulk edit.** Changing many categories at once is what rules are for
+  ([§6.2](06-categories.md#62-rules)), and they do it repeatably and leave a reason behind; a bulk
+  edit does it once and leaves nothing. Everything else worth changing on many rows at once is a
+  mistake better deleted and re-imported.
+- **Selection survives paging.** Turning the page keeps every tick, so a selection may span pages
+  and the count in the header and the footer is the whole of it, not the part in view — which is the
+  only reading under which the header checkbox means what [§5.6](#56-selecting-and-deleting-in-bulk)
+  says it means. Coming back to a page shows the ticks still there.
+- **Selection is cleared by any change to the filters**, and by nothing else. A filter change is the
+  one action that can put a selected row somewhere the user cannot see or reach it, so it is the one
+  action that discards the selection rather than carrying an invisible one forward. Paging does not,
+  because the pager can always take you back.
+
+## 5.7 Bulk import
+
+One screen. One job: get raw rows in without duplicating anything. It is reached from the *Bulk
+import* button above and the sidebar stays on Transactions, because transactions are what it
+produces — it is a mode of this screen rather than a destination of its own.
+
+> **Mockup —** [Bulk import](../mockups/05-transactions.html#bulk-import)
+
+### One screen
+
+- **The paste box and the consequences of the paste are on screen together.** Row count, detected
+  formats, preview, duplicate flags and the count on the *Import* button all update live as text is
+  pasted or edited. There is no *Continue*, no review step and no way back: a mis-shaped paste is
+  corrected where it was made, and the correction is visible without leaving the screen.
+- This is the reason the two steps became one. A row that will not parse is almost always a format
+  chip set wrongly, and a gate that refused to advance put the diagnosis on one screen and the chip
+  that fixes it on the next.
+- The **account is chosen once** for the whole paste, not per row. It defaults to the account last
+  imported into, and lists cash accounts only — a brokerage account holds no transactions to import.
+- **Fixed column order: date · description · amount.** A single signed amount column; debit/credit
+  pairs are not supported. Bank-specific import profiles are future work.
+
+### Formats
+
+- Date order and decimal and thousands separators are **inferred from the pasted rows themselves**,
+  never from the display preferences of [§10](10-settings.md) — the file came from a bank and has no
+  reason to match how you like to read numbers.
+- Each is shown as a chip and **each is overridable**; changing one re-parses every row immediately.
+  When a format cannot be inferred — no row carries a thousands separator, or every date is
+  ambiguous between the two orders — the chip states the assumption that was made rather than hiding
+  it, because it is the thing to correct when the preview looks wrong.
+- **Both separators are optional.** `12345` is a perfectly good amount and reads as `€ 12.345,00`;
+  so is `12345.67`. Detection looks at the whole amount column at once, in this order:
+  1. A row carrying **both** a dot and a comma settles it for the column: the **last** one is the
+     decimal separator, the other is thousands. `12.345,67` and `12,345.67` are both read correctly
+     and neither needs a preference.
+  2. Otherwise, with only one kind of separator present, it is the **decimal separator** —
+     `12345.67` and `1234,50` mean what they look like.
+  3. **Except** when that separator is followed by exactly three digits in every row it appears in,
+     in which case it is thousands. An amount never carries three decimals
+     ([§13](13-validation.md)), so `1.234` is one thousand two hundred and thirty-four euros —
+     reading it as `€ 1,23` would be off by a factor of a thousand, silently, on a row that looks
+     ordinary.
+  4. No separator anywhere: whole euros.
+- Rule 3 is the only guess in the list, and it is the one the chip exists for: a column of round
+  thousands is genuinely ambiguous, so the application takes the reading that cannot lose three
+  orders of magnitude and shows you which one it took.
+
+### Rows that cannot be read
+
+- A row with fewer than three columns, whose date or amount does not parse under the current
+  formats, or **whose description is empty** once trimmed, appears in the preview **marked with the
+  reason, and cannot be ticked**. It is excluded from the count on the *Import* button and from the
+  import. These are the transaction rules of [§13](13-validation.md) and nothing more — an import
+  cannot write a row the form would have refused.
+- **An amount of `0,00` reads fine and is imported.** It is a legal amount
+  ([§13](13-validation.md)), banks post them, and a row is unreadable only when the amount cannot be
+  understood — not when it is understood to be nothing.
+- **An unreadable row never blocks the rows around it.** Import what is good, fix the rest, paste
+  again — the duplicate detection below is what makes re-pasting safe.
+- *Import* is disabled only while nothing is selected.
+
+### Duplicates
+
+- Exact match on **account + date + amount + normalised description** against transactions already
+  in the file. Normalisation: trim, collapse whitespace, case-fold.
+- A match is flagged and **unselected**, not removed. The user may re-select it.
+- Rows within the paste are **never** compared with each other. Two identical rows in one paste that
+  also match a single existing transaction are therefore **both** unselected — the application
+  cannot tell which of them is the genuine second occurrence, so it hands both back for review
+  rather than guessing.
+
+### After import
+
+Rows are inserted with `categorySource = automatic`, which means the rule list applies to them as
+they are written and they arrive categorised wherever a rule matches ([§2](02-domain-model.md)).
+**No categorisation is previewed on this screen** — the preview is about which rows come in, not
+what they will be called. The user lands on Transactions filtered to the account imported into and
+to the date range of the rows imported, where a wrong category can be fixed in place with the full
+filter set available.
+
+That filter is an ordinary account-and-period filter, reachable by hand like any other. Nothing is
+stamped on the imported rows to make it possible: **an import leaves no trace on the transactions it
+created**, and a row that came from a paste is indistinguishable from one typed by hand, which is
+correct — they are the same kind of record.
+
+---
+
+[← §4 Accounts](04-accounts.md) · [§6 Categories →](06-categories.md)

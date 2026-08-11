@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spiccioli — mockups — §7 Investments</title>
+<link rel="stylesheet" href="_mockups.css">
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow">Mockups · §7</div>
+  <h1>Investments</h1>
+  <p>The mockups for §7. The written specification is in
+  <a href="../specs/07-investments.md">specs/07-investments.md</a>; the other screens are in
+  <a href="index.html">the mockup index</a>.</p>
+  <div class="rule"></div>
+</header>
+
+
+<nav class="toc">
+  <a href="#holdings"><b>§7.1</b> Holdings tab</a>
+  <a href="#purchases"><b>§7.2</b> Purchases tab</a>
+  <a href="#sales"><b>§7.3</b> Sales tab</a>
+  <a href="#securities"><b>§7.4</b> Securities tab</a>
+  <a href="#record-trade"><b>§7.5</b> Record a purchase · new security</a>
+</nav>
+
+
+<section class="doc" id="holdings">
+  <header>
+    <div class="num">§7.1</div>
+    <h2>Holdings tab</h2>
+  </header>
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Investments</h3><div class="sub">5 open positions · 2 brokerage accounts · latest price 08/08/2026 · 1 stale</div></div>
+        <div class="actions"><button class="btn ghost">Update prices</button></div>
+      </div>
+      <nav class="tabs"><a class="on" href="#">Holdings</a><a href="#">Purchases · 41</a><a href="#">Sales · 6</a><a href="#">Securities · 7</a></nav>
+      <div class="cols c">
+        <div class="card">
+          <div class="tblwrap"><table>
+            <thead><tr><th>Security</th><th>Type</th><th>Where</th><th class="r">Qty</th><th class="r">Avg cost</th><th class="r">Price</th><th class="r">Value</th><th class="r">Gain</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="desc">VWCE <span class="dim">Vanguard FTSE All-World</span></td><td><span class="chip type">Stock ETF</span></td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">338</td><td class="n r">€ 108,2150</td><td class="n r">€ 124,8600</td><td class="n r">€ 42.202,68</td><td class="n r pos">+15,4%</td></tr>
+              <tr><td class="desc">SWDA <span class="dim">iShares Core MSCI World</span></td><td><span class="chip type">Stock ETF</span></td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">285</td><td class="n r">€ 78,4200</td><td class="n r">€ 92,1400</td><td class="n r">€ 26.259,90</td><td class="n r pos">+17,5%</td></tr>
+              <tr><td class="desc">AGGH <span class="dim">iShares Core Global Aggregate Bond</span></td><td><span class="chip type">Bond ETF</span></td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">3.900</td><td class="n r">€ 4,8620</td><td class="n r" style="color:var(--brass)">€ 4,8540 ▲</td><td class="n r">€ 18.930,60</td><td class="n r neg">−0,2%</td></tr>
+              <tr><td class="desc">ENI <span class="dim">Eni S.p.A.</span></td><td><span class="chip type">Stock</span></td><td class="dim">Banca Sella · Dossier Titoli</td><td class="n r">320</td><td class="n r">€ 13,9800</td><td class="n r">€ 15,1750</td><td class="n r">€ 4.856,00</td><td class="n r pos">+8,5%</td></tr>
+              <tr><td class="desc">PHAU <span class="dim">WisdomTree Physical Gold</span></td><td><span class="chip type">ETC</span></td><td class="dim">Banca Sella · Dossier Titoli</td><td class="n r">8</td><td class="n r">€ 72,1000</td><td class="n r">€ 80,0000</td><td class="n r">€ 640,00</td><td class="n r pos">+11,0%</td></tr>
+            </tbody>
+            <tfoot><tr><td colspan="6">5 holdings · gross of tax and fees · ▲ price older than <code>priceStalenessDays</code></td><td class="r tot">€ 92.889,18</td><td class="r pos">+ € 9.950,61</td></tr></tfoot>
+          </table></div>
+        </div>
+        <div class="detail">
+          <div class="dh"><b>VWCE</b><small>IE00BK5BQT80 · Vanguard FTSE All-World UCITS · Stock ETF · Fineco · Dossier Titoli</small></div>
+          <div class="figs">
+            <div class="fig"><span>Purchased, 14 lots</span><b>338</b></div>
+            <div class="fig"><span>Sold</span><b>0</b></div>
+            <div class="fig"><span>Weighted average cost</span><b>€ 108,2150</b></div>
+            <div class="fig"><span>Invested, incl. fees</span><b>€ 36.576,67</b></div>
+          </div>
+          <hr class="sep">
+          <h4 class="subhead">If sold today</h4>
+          <div class="figs">
+            <div class="fig"><span>Gross proceeds</span><b>€ 42.202,68</b></div>
+            <div class="fig"><span>Sell fee, Fineco default</span><b class="neg">− € 19,00</b></div>
+            <div class="fig"><span>Taxable gain</span><b class="pos">+ € 5.607,01</b></div>
+            <div class="fig"><span>Tax, 26,0% — VWCE rate</span><b class="neg">− € 1.457,82</b></div>
+            <div class="fig"><span>Net proceeds</span><b>€ 40.725,86</b></div>
+            <div class="fig"><span>Net gain</span><b class="pos">+ € 4.149,19 · +11,3%</b></div>
+          </div>
+          <hr class="sep">
+          <p class="note">Average cost is an approximation. Your broker may match lots differently
+          when it computes the taxable gain, so treat the tax figure as an estimate rather than the
+          amount that will actually be withheld.</p>
+        </div>
+      </div>
+    </main>
+  </div></div>
+</section>
+
+<section class="doc" id="purchases">
+  <header>
+    <div class="num">§7.2</div>
+    <h2>Purchases tab</h2>
+  </header>
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Investments</h3><div class="sub">41 purchases · 2016 – 2026</div></div>
+        <div class="actions"><button class="btn primary">Add purchase</button></div>
+      </div>
+      <nav class="tabs"><a href="#">Holdings</a><a class="on" href="#">Purchases · 41</a><a href="#">Sales · 6</a><a href="#">Securities · 7</a></nav>
+      <div class="filters">
+        <span class="field">Security <b>All</b></span><span class="field">Account <b>All</b></span><span class="field act">Period <b>2025 – 2026</b></span>
+      </div>
+      <div class="card" style="padding-top:14px">
+        <div class="tblwrap"><table>
+          <thead><tr><th>Date</th><th>Security</th><th>Account</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Fees</th><th class="r">Total cost</th><th>Matched</th><th>Notes</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="n">21/06/2025</td><td class="desc">PHAU</td><td class="dim">Banca Sella · Dossier Titoli</td><td class="n r">8</td><td class="n r">€ 70,6000</td><td class="n r">€ 12,00</td><td class="n r">€ 576,80</td><td class="link">⇄ 21/06</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">09/09/2025</td><td class="desc">ENI</td><td class="dim">Banca Sella · Dossier Titoli</td><td class="n r">120</td><td class="n r">€ 14,2500</td><td class="n r">€ 12,00</td><td class="n r">€ 1.722,00</td><td class="link">⇄ 09/09</td><td class="dim">dividend play</td><td class="rowact">···</td></tr>
+            <tr><td class="n">14/11/2025</td><td class="desc">VWCE</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">35</td><td class="n r">€ 116,8400</td><td class="n r">€ 19,00</td><td class="n r">€ 4.108,40</td><td class="link">⇄ 14/11</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">03/02/2026</td><td class="desc">AGGH</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">500</td><td class="n r">€ 4,8900</td><td class="n r">€ 19,00</td><td class="n r">€ 2.464,00</td><td class="link">⇄ 03/02</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">12/05/2026</td><td class="desc">VWCE</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">40</td><td class="n r">€ 120,3100</td><td class="n r">€ 19,00</td><td class="n r">€ 4.831,40</td><td class="link">⇄ 12/05</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr class="sel"><td class="n">06/08/2026</td><td class="desc">SWDA</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">25</td><td class="n r">€ 91,6600</td><td class="n r">€ 19,00</td><td class="n r">€ 2.310,50</td><td class="link">⇄ 06/08</td><td class="dim"></td><td class="rowact">···</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="5">6 of 41 shown</td><td class="r">€ 100,00</td><td class="r tot">€ 16.013,10</td><td colspan="3"></td></tr></tfoot>
+        </table></div>
+      </div>
+    </main>
+  </div></div>
+</section>
+
+<section class="doc" id="sales">
+  <header>
+    <div class="num">§7.3</div>
+    <h2>Sales tab</h2>
+  </header>
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Investments</h3><div class="sub">6 sales · 2018 – 2026</div></div>
+        <div class="actions"><button class="btn primary">Add sale</button></div>
+      </div>
+      <nav class="tabs"><a href="#">Holdings</a><a href="#">Purchases · 41</a><a class="on" href="#">Sales · 6</a><a href="#">Securities · 7</a></nav>
+      <div class="filters">
+        <span class="field">Security <b>All</b></span><span class="field">Account <b>All</b></span><span class="field">Period <b>All</b></span>
+      </div>
+      <div class="card" style="padding-top:14px">
+        <div class="tblwrap"><table>
+          <thead><tr><th>Date</th><th>Security</th><th>Account</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Fees</th><th class="r">Taxes</th><th class="r">Net proceeds</th><th class="r">Realised gain</th><th>Matched</th><th>Notes</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="n">12/06/2018</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">40</td><td class="n r">€ 25,4000</td><td class="n r">€ 19,00</td><td class="n r">€ 28,86</td><td class="n r">€ 968,14</td><td class="n r pos">+ € 82,14</td><td class="link">⇄ 12/06</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">03/03/2020</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">60</td><td class="n r">€ 21,8000</td><td class="n r">€ 19,00</td><td class="n r">€ 0,00</td><td class="n r">€ 1.289,00</td><td class="n r neg">− € 169,00</td><td class="link">⇄ 03/03</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">19/11/2020</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">80</td><td class="n r">€ 29,7500</td><td class="n r">€ 19,00</td><td class="n r">€ 108,42</td><td class="n r">€ 2.252,58</td><td class="n r pos">+ € 308,58</td><td class="link">⇄ 19/11</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">08/07/2022</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">45</td><td class="n r">€ 27,6000</td><td class="n r">€ 19,00</td><td class="n r">€ 33,67</td><td class="n r">€ 1.189,33</td><td class="n r pos">+ € 95,83</td><td class="link">⇄ 08/07</td><td class="dim">rebalancing</td><td class="rowact">···</td></tr>
+            <tr><td class="n">22/05/2024</td><td class="desc">VUSA</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">45</td><td class="n r">€ 78,4000</td><td class="n r">€ 19,00</td><td class="n r">€ 185,77</td><td class="n r">€ 3.323,23</td><td class="n r pos">+ € 528,73</td><td class="link">⇄ 22/05</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr class="sel"><td class="n">14/04/2026</td><td class="desc">VUSA</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">25</td><td class="n r">€ 89,2000</td><td class="n r">€ 19,00</td><td class="n r">€ 171,21</td><td class="n r">€ 2.039,79</td><td class="n r pos">+ € 487,29</td><td class="link">⇄ 14/04</td><td class="dim">closed the position</td><td class="rowact">···</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="5">6 sales · 2 securities</td><td class="r">€ 114,00</td><td class="r">€ 527,93</td><td class="r tot">€ 11.062,07</td><td class="r pos">+ € 1.333,57</td><td colspan="3"></td></tr></tfoot>
+        </table></div>
+      </div>
+    </main>
+  </div></div>
+</section>
+
+<section class="doc" id="securities">
+  <header>
+    <div class="num">§7.4</div>
+    <h2>Securities tab</h2>
+  </header>
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="viewhead">
+        <div><h3>Investments</h3><div class="sub">7 securities · 5 held · 2 fully sold</div></div>
+        <div class="actions"><button class="btn">Add security</button></div>
+      </div>
+      <nav class="tabs"><a href="#">Holdings</a><a href="#">Purchases · 41</a><a href="#">Sales · 6</a><a class="on" href="#">Securities · 7</a></nav>
+      <div class="cols c">
+        <div class="card">
+          <div class="tblwrap"><table>
+            <thead><tr><th>Ticker</th><th>ISIN</th><th>Type</th><th class="r">Tax rate</th><th class="r">Held</th><th class="r">Trades</th><th class="r">Prices</th><th></th></tr></thead>
+            <tbody>
+              <tr><td class="desc">VWCE <span class="dim">Vanguard FTSE All-World</span></td><td class="n dim">IE00BK5BQT80</td><td><span class="chip type">Stock ETF</span></td><td class="n r">26,0%</td><td class="n r">338</td><td class="n r dim">14</td><td class="n r dim">96</td><td class="rowact">···</td></tr>
+              <tr><td class="desc">SWDA <span class="dim">iShares Core MSCI World</span></td><td class="n dim">IE00B4L5Y983</td><td><span class="chip type">Stock ETF</span></td><td class="n r">26,0%</td><td class="n r">285</td><td class="n r dim">9</td><td class="n r dim">88</td><td class="rowact">···</td></tr>
+              <tr class="sel"><td class="desc">AGGH <span class="dim">iShares Core Global Aggregate Bond</span></td><td class="n dim">IE00BDBRDM35</td><td><span class="chip type">Bond ETF</span></td><td class="n r">26,0%</td><td class="n r">3.900</td><td class="n r dim">7</td><td class="n r dim">42</td><td class="rowact">···</td></tr>
+              <tr><td class="desc">ENI <span class="dim">Eni S.p.A.</span></td><td class="n dim">IT0003132476</td><td><span class="chip type">Stock</span></td><td class="n r">26,0%</td><td class="n r">320</td><td class="n r dim">3</td><td class="n r dim">31</td><td class="rowact">···</td></tr>
+              <tr><td class="desc">PHAU <span class="dim">WisdomTree Physical Gold</span></td><td class="n dim">JE00B1VS3770</td><td><span class="chip type">ETC</span></td><td class="n r">26,0%</td><td class="n r">8</td><td class="n r dim">1</td><td class="n r dim">18</td><td class="rowact">···</td></tr>
+              <tr><td class="desc dim">EIMI <span class="dim">iShares Core MSCI EM IMI</span></td><td class="n dim">IE00BKM4GZ66</td><td><span class="chip type">Stock ETF</span></td><td class="n r dim">26,0%</td><td class="n r dim">—</td><td class="n r dim">9</td><td class="n r dim">54</td><td class="rowact">···</td></tr>
+              <tr><td class="desc dim">VUSA <span class="dim">Vanguard S&amp;P 500</span></td><td class="n dim">IE00B3XXRP09</td><td><span class="chip type">Stock ETF</span></td><td class="n r dim">26,0%</td><td class="n r dim">—</td><td class="n r dim">4</td><td class="n r dim">37</td><td class="rowact">···</td></tr>
+            </tbody>
+            <tfoot><tr><td colspan="4">7 securities · 2 no longer held</td><td class="r tot">—</td><td class="r">47</td><td class="r">366</td><td></td></tr></tfoot>
+          </table></div>
+        </div>
+        <div class="detail">
+          <div class="dh"><b>AGGH</b><small>IE00BDBRDM35 · iShares Core Global Aggregate Bond · Bond ETF</small></div>
+          <div class="frm">
+            <label>ISIN</label><div class="inp">IE00BDBRDM35</div>
+            <label>Ticker</label><div class="inp">AGGH</div>
+            <label>Name</label><div class="inp">iShares Core Global Aggregate Bond</div>
+            <label>Type</label><div class="inp sel">Bond ETF</div>
+            <label>Currency</label><div class="inp sel">EUR</div>
+            <label>Tax rate</label><div class="inp">26,0%</div>
+            <label>Notes</label><div class="inp ph">optional</div>
+          </div>
+          <hr class="sep">
+          <h4 class="subhead">Price history — 42 records</h4>
+          <div class="tblwrap"><table>
+            <thead><tr><th>Date</th><th class="r">Value</th><th>Source</th><th></th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="n">07/06/2026</td><td class="n r">€ 4,8540</td><td><span class="chip auto">manual</span></td><td class="rowact">···</td></tr>
+              <tr><td class="n">30/04/2026</td><td class="n r">€ 4,8720</td><td><span class="chip auto">manual</span></td><td class="rowact">···</td></tr>
+              <tr><td class="n">31/03/2026</td><td class="n r">€ 4,9010</td><td><span class="chip">fetched</span></td><td class="rowact">···</td></tr>
+              <tr><td class="n">28/02/2026</td><td class="n r">€ 4,8850</td><td><span class="chip auto">manual</span></td><td class="rowact">···</td></tr>
+              <tr><td class="n">31/01/2026</td><td class="n r">€ 4,9140</td><td><span class="chip auto">manual</span></td><td class="rowact">···</td></tr>
+            </tbody>
+            <tfoot><tr><td colspan="2">5 of 42 · newest first</td><td colspan="2">01/2018 – 06/2026</td></tr></tfoot>
+          </table></div>
+          <p class="note">Deleting the newest price re-values the holding at the one before it. There
+          is no undo.</p>
+        </div>
+      </div>
+    </main>
+  </div></div>
+</section>
+
+<section class="doc" id="record-trade">
+  <header>
+    <div class="num">§7.5</div>
+    <h2>Record a purchase · new security</h2>
+  </header>
+  <div class="dlgrow">
+    <div class="dlg">
+      <h5>Add purchase</h5>
+      <div class="dsub">a sale is the same form, with a taxes field and proceeds instead of cost</div>
+      <div class="frm">
+        <label>Date</label><div class="inp">08/08/2026</div>
+        <label>Account</label><div class="inp sel">Fineco · Dossier Titoli</div>
+        <label>Security</label><div class="inp ph">IE00BFY0GT14 — not found</div>
+      </div>
+      <div class="newthing">
+        <div class="nt">New security</div>
+        <div class="frm">
+          <label>ISIN</label><div class="inp">IE00BFY0GT14</div>
+          <label>Ticker</label><div class="inp ph">SPPW</div>
+          <label>Name</label><div class="inp ph">SPDR MSCI World UCITS</div>
+          <label>Type</label><div class="inp sel">Stock ETF</div>
+          <label>Currency</label><div class="inp sel">EUR</div>
+          <label>Tax rate</label><div class="inp">26,0%</div>
+        </div>
+      </div>
+      <div class="frm">
+        <label>Quantity</label><div class="inp ph">30</div>
+        <label>Unit price</label><div class="inp ph">41,2500</div>
+        <label>Fees</label><div class="inp">19,00</div>
+        <label>Notes</label><div class="inp ph">optional</div>
+        <label>Total cost</label><div class="inp" style="border-style:dashed;color:var(--brass)">€ 1.256,50</div>
+      </div>
+      <div class="dlgfoot">
+        <button class="btn ghost">Cancel</button>
+        <button class="btn">Save and add another</button>
+        <button class="btn primary">Save</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</body>
+</html>

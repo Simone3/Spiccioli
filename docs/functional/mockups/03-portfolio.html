@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spiccioli — mockups — §3 Portfolio</title>
+<link rel="stylesheet" href="_mockups.css">
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow">Mockups · §3</div>
+  <h1>Portfolio</h1>
+  <p>The mockups for §3. The written specification is in
+  <a href="../specs/03-portfolio.md">specs/03-portfolio.md</a>; the other screens are in
+  <a href="index.html">the mockup index</a>.</p>
+  <div class="rule"></div>
+</header>
+
+
+<section class="doc" id="portfolio">
+  <header>
+    <div class="num">§3</div>
+    <h2>Portfolio — the home screen</h2>
+  </header>
+  <div class="scroller"><div class="app">
+    <aside class="side">
+      <div class="brand"><b>Spiccioli</b></div>
+      <nav class="nav">
+        <a class="on" href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
+        <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
+      </nav>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
+    </aside>
+    <main class="view">
+      <div class="alert">
+        <span class="dot"></span>
+        <p><b>3 checks are failing.</b> One unpaired internal transfer, one uncategorised transaction, one stale price.</p>
+        <a href="#">Review →</a>
+      </div>
+      <div class="cols a">
+        <div class="card">
+          <div class="hero"><span class="label">Net worth</span><span class="val">€ 184.815,01</span></div>
+          <hr class="sep">
+          <div class="figs">
+            <div class="fig"><span>Total at cost</span><b>€ 177.524,54</b></div>
+            <div class="fig"><span>Unrealised net investment gain</span><b class="pos">+ € 7.290,47</b></div>
+          </div>
+        </div>
+        <div class="card">
+          <h4>All time</h4>
+          <div class="figs">
+            <div class="fig"><span>Bank fees</span><b class="neg">− € 1.284,50</b></div>
+            <div class="fig"><span>Wealth tax</span><b class="neg">− € 742,20</b></div>
+            <div class="fig"><span>Interest, dividends &amp; bonuses</span><b class="pos">+ € 5.276,40</b></div>
+            <div class="fig"><span>Realised gain on sales</span><b class="pos">+ € 1.333,57</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Breakdown by type</h4>
+        <div class="donutrow">
+          <div class="donut">
+            <svg viewBox="0 0 40 40" aria-label="Portfolio split by type">
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-setf)" stroke-dasharray="35.7 64.3" stroke-dashoffset="25"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-liq)" stroke-dasharray="18.5 81.5" stroke-dashoffset="-10.7"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-term)" stroke-dasharray="13.5 86.5" stroke-dashoffset="-29.2"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-pens)" stroke-dasharray="12.3 87.7" stroke-dashoffset="-42.7"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-betf)" stroke-dasharray="10.2 89.8" stroke-dashoffset="-55.0"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-dep)" stroke-dasharray="6.8 93.2" stroke-dashoffset="-65.2"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-stock)" stroke-dasharray="2.6 97.4" stroke-dashoffset="-72.0"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-etc)" stroke-dasharray="0.3 99.7" stroke-dashoffset="-74.6"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-vou)" stroke-dasharray="0.1 99.9" stroke-dashoffset="-74.9"></circle>
+            </svg>
+            <div class="center"><b>9</b><small>types</small></div>
+          </div>
+          <div class="breakdown">
+            <div class="brk"><i style="background:var(--c-setf)"></i><span>Stock ETF</span><span class="amt">€ 65.955,05</span><span class="pct">35,7%</span></div>
+            <div class="brk"><i style="background:var(--c-liq)"></i><span>Liquidity</span><span class="amt">€ 34.185,22</span><span class="pct">18,5%</span></div>
+            <div class="brk"><i style="background:var(--c-term)"></i><span>Term deposit</span><span class="amt">€ 25.000,00</span><span class="pct">13,5%</span></div>
+            <div class="brk"><i style="background:var(--c-pens)"></i><span>Pension fund</span><span class="amt">€ 22.640,75</span><span class="pct">12,3%</span></div>
+            <div class="brk"><i style="background:var(--c-betf)"></i><span>Bond ETF</span><span class="amt">€ 18.911,60</span><span class="pct">10,2%</span></div>
+            <div class="brk"><i style="background:var(--c-dep)"></i><span>Deposit account</span><span class="amt">€ 12.500,00</span><span class="pct">6,8%</span></div>
+            <div class="brk"><i style="background:var(--c-stock)"></i><span>Stock</span><span class="amt">€ 4.747,70</span><span class="pct">2,6%</span></div>
+            <div class="brk"><i style="background:var(--c-etc)"></i><span>ETC</span><span class="amt">€ 614,69</span><span class="pct">0,3%</span></div>
+            <div class="brk"><i style="background:var(--c-vou)"></i><span>Voucher</span><span class="amt">€ 260,00</span><span class="pct">0,1%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Net worth over time</h4>
+        <div class="chart">
+          <svg viewBox="0 0 740 196" role="img" aria-label="Net worth from 2016 to 2026">
+            <g class="grid"><line x1="0" y1="10" x2="720" y2="10"></line><line x1="0" y1="52" x2="720" y2="52"></line><line x1="0" y1="94" x2="720" y2="94"></line><line x1="0" y1="136" x2="720" y2="136"></line><line x1="0" y1="178" x2="720" y2="178"></line></g>
+            <g class="axis"><text x="724" y="13">200k</text><text x="724" y="97">100k</text><text x="724" y="181">0</text><text x="0" y="192">2016</text><text x="136" y="192">2018</text><text x="272" y="192">2020</text><text x="408" y="192">2022</text><text x="544" y="192">2024</text><text x="680" y="192">2026</text></g>
+            <path fill="var(--brass)" fill-opacity="0.10" d="M0.0,171.5 5.7,171.3 11.3,169.9 17.0,170.2 22.7,168.7 28.3,168.2 34.0,168.0 39.7,166.4 45.4,166.4 51.0,164.9 56.7,164.7 62.4,163.8 68.0,162.2 73.7,160.6 79.4,161.0 85.0,159.9 90.7,158.1 96.4,156.5 102.0,156.3 107.7,155.7 113.4,153.5 119.1,154.5 124.7,151.7 130.4,152.0 136.1,151.3 141.7,150.4 147.4,148.9 153.1,146.6 158.7,147.1 164.4,145.1 170.1,143.9 175.7,143.5 181.4,142.0 187.1,142.2 192.8,141.1 198.4,139.6 204.1,137.2 209.8,136.8 215.4,136.0 221.1,134.2 226.8,133.4 232.4,132.7 238.1,130.2 243.8,129.3 249.4,129.5 255.1,127.4 260.8,126.4 266.5,124.1 272.1,123.4 277.8,123.7 283.5,120.3 289.1,121.9 294.8,119.8 300.5,117.5 306.1,118.3 311.8,116.0 317.5,116.4 323.1,113.0 328.8,111.5 334.5,110.9 340.2,108.6 345.8,109.4 351.5,106.8 357.2,106.0 362.8,104.8 368.5,104.1 374.2,101.4 379.8,99.8 385.5,100.3 391.2,98.3 396.9,99.5 402.5,95.7 408.2,94.7 413.9,92.0 419.5,91.5 425.2,92.4 430.9,90.7 436.5,88.3 442.2,89.7 447.9,86.6 453.5,86.6 459.2,85.6 464.9,84.6 470.6,80.2 476.2,81.7 481.9,79.9 487.6,78.0 493.2,74.6 498.9,76.9 504.6,73.9 510.2,72.1 515.9,69.3 521.6,68.3 527.2,66.7 532.9,68.2 538.6,66.2 544.3,65.2 549.9,61.4 555.6,59.7 561.3,62.3 566.9,60.9 572.6,59.3 578.3,58.0 583.9,55.4 589.6,53.5 595.3,53.8 600.9,53.9 606.6,50.4 612.3,49.3 618.0,46.9 623.6,43.5 629.3,43.6 635.0,43.2 640.6,41.3 646.3,39.6 652.0,41.6 657.6,35.6 663.3,34.9 669.0,33.0 674.6,32.1 680.3,33.0 686.0,31.6 691.7,31.9 697.3,27.5 703.0,29.4 708.7,28.0 714.3,25.9 720.0,22.8 L720.0,178 L0,178 Z"></path>
+            <polyline fill="none" stroke="var(--brass-dim)" stroke-width="1.6" stroke-dasharray="4 3" points="0.0,171.5 5.7,171.3 11.3,169.9 17.0,170.2 22.7,168.7 28.3,168.2 34.0,168.0 39.7,166.4 45.4,166.4 51.0,164.9 56.7,164.7 62.4,163.8 68.0,162.2 73.7,160.6 79.4,161.0 85.0,159.9 90.7,158.1 96.4,156.5 102.0,156.3 107.7,155.7 113.4,153.5 119.1,154.5 124.7,151.7 130.4,152.0 136.1,151.3 141.7,150.4 147.4,148.9"></polyline>
+            <polyline fill="none" stroke="var(--brass)" stroke-width="1.8" stroke-linejoin="round" points="147.4,148.9 153.1,146.6 158.7,147.1 164.4,145.1 170.1,143.9 175.7,143.5 181.4,142.0 187.1,142.2 192.8,141.1 198.4,139.6 204.1,137.2 209.8,136.8 215.4,136.0 221.1,134.2 226.8,133.4 232.4,132.7 238.1,130.2 243.8,129.3 249.4,129.5 255.1,127.4 260.8,126.4 266.5,124.1 272.1,123.4 277.8,123.7 283.5,120.3 289.1,121.9 294.8,119.8 300.5,117.5 306.1,118.3 311.8,116.0 317.5,116.4 323.1,113.0 328.8,111.5 334.5,110.9 340.2,108.6 345.8,109.4 351.5,106.8 357.2,106.0 362.8,104.8 368.5,104.1 374.2,101.4 379.8,99.8 385.5,100.3 391.2,98.3 396.9,99.5 402.5,95.7 408.2,94.7 413.9,92.0 419.5,91.5 425.2,92.4 430.9,90.7 436.5,88.3 442.2,89.7 447.9,86.6 453.5,86.6 459.2,85.6 464.9,84.6 470.6,80.2 476.2,81.7 481.9,79.9 487.6,78.0 493.2,74.6 498.9,76.9 504.6,73.9 510.2,72.1 515.9,69.3 521.6,68.3 527.2,66.7 532.9,68.2 538.6,66.2 544.3,65.2 549.9,61.4 555.6,59.7 561.3,62.3 566.9,60.9 572.6,59.3 578.3,58.0 583.9,55.4 589.6,53.5 595.3,53.8 600.9,53.9 606.6,50.4 612.3,49.3 618.0,46.9 623.6,43.5 629.3,43.6 635.0,43.2 640.6,41.3 646.3,39.6 652.0,41.6 657.6,35.6 663.3,34.9 669.0,33.0 674.6,32.1 680.3,33.0 686.0,31.6 691.7,31.9 697.3,27.5 703.0,29.4 708.7,28.0 714.3,25.9 720.0,22.8"></polyline>
+            <circle cx="720" cy="22.8" r="3.4" fill="var(--brass)"></circle>
+            <circle cx="147.4" cy="148.9" r="2.6" fill="var(--ink)" stroke="var(--brass-dim)" stroke-width="1.4"></circle>
+          </svg>
+        </div>
+        <div class="chartkey">
+          <span><i class="dash"></i>holdings valued at cost — before any price was recorded</span>
+          <span><i style="background:var(--brass)"></i>holdings valued at the latest price known on that date</span>
+          <span style="color:var(--faint)">gross of tax and fees throughout — the headline above is net</span>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Accounts</h4>
+        <div class="tblwrap"><table>
+          <thead><tr><th>Institution</th><th>Account</th><th>Type</th><th class="r">Balance</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Fineco</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.840,55</td><td class="dim">main account</td></tr>
+            <tr><td>Fineco</td><td class="desc">Conto Titoli</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.800,00</td><td class="dim">uninvested, awaiting next purchase</td></tr>
+            <tr><td>Fineco</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 84.866,65</td><td class="dim">3 holdings, net of tax and fees</td></tr>
+            <tr><td>Intesa Sanpaolo</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 8.204,10</td><td class="dim">household bills</td></tr>
+            <tr><td class="dim">—</td><td class="desc">Wallet</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 340,57</td><td class="dim">physical cash</td></tr>
+            <tr><td>ING</td><td class="desc">Conto Arancio</td><td><span class="chip type">Deposit account</span></td><td class="n r">€ 12.500,00</td><td class="dim">2,00%</td></tr>
+            <tr><td>Banca Sella</td><td class="desc">Deposito Vincolato 24m</td><td><span class="chip type">Term deposit</span></td><td class="n r">€ 25.000,00</td><td class="dim">matures 03/2027</td></tr>
+            <tr><td>Banca Sella</td><td class="desc">Conto Titoli</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 0,00</td><td class="dim">uninvested</td></tr>
+            <tr><td>Banca Sella</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 5.362,39</td><td class="dim">2 holdings, net of tax and fees</td></tr>
+            <tr><td>Amundi</td><td class="desc">Fondo Pensione</td><td><span class="chip type">Pension fund</span></td><td class="n r">€ 22.640,75</td><td class="dim">revalued 31/07/2026</td></tr>
+            <tr><td>Edenred</td><td class="desc">Buoni Pasto</td><td><span class="chip type">Voucher</span></td><td class="n r">€ 260,00</td><td class="dim">26 × € 10,00</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="3">11 open accounts · 6 institutions</td><td class="r tot">€ 184.815,01</td><td></td></tr></tfoot>
+        </table></div>
+      </div>
+    </main>
+  </div></div>
+</section>
+
+</div>
+
+</body>
+</html>
