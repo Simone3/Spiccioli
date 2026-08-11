@@ -167,7 +167,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
 .chk .st.ok{color:var(--pos);} .chk .st.no{color:var(--neg);}
 .chk .name{font-size:13.5px;}
 .chk .name em{display:block;font-style:normal;color:var(--muted);font-size:12px;margin-top:2px;}
-.chk .name .det{display:block;margin-top:7px;padding-left:11px;border-left:2px solid #462924;font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.75;}
+.chk .name .det,.doc ul.body .det{display:block;margin-top:7px;padding-left:11px;border-left:2px solid #462924;font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.75;}
+.doc ul.body .det{border-left-color:var(--brass-dim);margin-bottom:4px;}
 .chk .res{font-family:var(--mono);font-size:11.5px;color:var(--faint);white-space:nowrap;}
 .chk .res.no{color:var(--neg);}
 .detail{background:#191811;border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:14px;}
@@ -877,6 +878,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <span class="field">Account <b>All</b></span>
         <span class="field act">Period <b>Aug 2026</b></span>
         <span class="field">Category <b>All</b></span>
+        <span class="field">Set by <b>Anything</b></span>
         <span class="field">Amount <b>Any</b></span>
         <span class="field">Receipt <b>Any</b></span>
         <span class="field search">Search description…</span>
@@ -936,11 +938,17 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </ul>
 
   <h3 class="sub">5.3 Filters</h3>
-  <p class="body">Account · period · category · amount range · receipt state · free-text search on
-  description. Combined with AND. Filters affect the footer totals and the page count.
+  <p class="body">Account · period · category · <b>set by</b> · amount range · receipt state ·
+  free-text search on description. Combined with AND. Filters affect the footer totals and the page count.
   <b>No filter is applied by default</b> — the screen opens on the whole history — and the mockup
   above shows a user-applied period filter. The category filter carries an
   <em>Uncategorised</em> entry alongside the twenty-seven categories.</p>
+  <p class="body"><b>Set by</b> filters on <code>categorySource</code>: <em>anything</em>,
+  <em>a rule</em>, <em>by hand</em>. It is the filter for the question the rules raise — after
+  changing one, which rows did it take over, and which ones did I set myself and would not want it
+  to? Combined with a category it answers “show me everything a rule called <i>Groceries</i>”, which
+  is how a wrong rule is found; combined with <em>by hand</em> it lists the rows that will survive
+  every future rule change, which is the set worth keeping small.</p>
 
   <h3 class="sub">5.4 Editing</h3>
   <ul class="body">
@@ -1059,7 +1067,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <span class="chip">3 columns detected</span>
             <span class="chip">Date <b>DD/MM/YYYY</b></span>
             <span class="chip">Decimal <b>comma</b></span>
-            <span class="chip">Thousands <b>dot</b></span>
+            <span class="chip">Thousands <b>none in these rows</b></span>
           </div>
         </div>
         <div class="card">
@@ -1138,6 +1146,23 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     immediately. When a format cannot be inferred — no row carries a thousands separator, or every
     date is ambiguous between the two orders — the chip states the assumption that was made rather
     than hiding it, because it is the thing to correct when the preview looks wrong.</li>
+    <li><b>Both separators are optional.</b> <code>12345</code> is a perfectly good amount and reads
+    as <code>€ 12.345,00</code>; so is <code>12345.67</code>. Detection looks at the whole amount
+    column at once, in this order:
+      <span class="det">1 · A row carrying <b>both</b> a dot and a comma settles it for the column:
+      the <b>last</b> one is the decimal separator, the other is thousands. <code>12.345,67</code>
+      and <code>12,345.67</code> are both read correctly and neither needs a preference.<br>
+      2 · Otherwise, with only one kind of separator present, it is the <b>decimal separator</b> —
+      <code>12345.67</code> and <code>1234,50</code> mean what they look like.<br>
+      3 · <b>Except</b> when that separator is followed by exactly three digits in every row it
+      appears in, in which case it is thousands. An amount never carries three decimals (§14), so
+      <code>1.234</code> is one thousand two hundred and thirty-four euros — reading it as
+      <code>€ 1,23</code> would be off by a factor of a thousand, silently, on a row that looks
+      ordinary.<br>
+      4 · No separator anywhere: whole euros.</span></li>
+    <li>Rule 3 is the only guess in the list, and it is the one the chip exists for: a column of
+    round thousands is genuinely ambiguous, so the application takes the reading that cannot lose
+    three orders of magnitude and shows you which one it took.</li>
   </ul>
 
   <h4 class="subsub">Rows that cannot be read</h4>
@@ -1267,14 +1292,29 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     stops being zero by design</b> — the transfers crossing the boundary of the selection no longer
     have both legs in view — so with an account filter active the row is labelled as scoped and its
     value is not evidence of anything.</li>
-    <li>A cell with no transactions shows an em dash, not <code>€ 0</code>, so a real zero stays
-    distinguishable from nothing recorded.</li>
+    <li><b>Every figure in a category row is a link.</b> Clicking a cell opens Transactions
+    filtered to that category and that year — plus whatever account filter the report already has —
+    and clicking the row total drops the year. It is the answer to the question the table always
+    provokes: <i>what is in there?</i> Without it the matrix reports a number and leaves the user to
+    reconstruct the filter by hand on another screen, which is the sort of small friction that ends
+    with a spreadsheet being opened instead.</li>
+    <li><b>The subtotal, Net and type rows are not links</b>, because no filter expresses them: the
+    category filter takes one category, and <i>Net</i> is a subtraction rather than a selection.
+    Nothing is offered that cannot then be shown.</li>
+    <li>A cell with no transactions shows an em dash, not <code>€ 0,00</code>, so a real zero stays
+    distinguishable from nothing recorded — and an em dash is not a link.</li>
     <li>Filters: year range, accounts. A partial year is labelled with the months it covers.</li>
     <li>The screen carries three tabs: this report, the categorisation rules (§7.2), and a read-only
     list of the twenty-seven categories with their types and roles (§7.3). Rules sit here because the
     tester's counts only mean something next to the report they change.</li>
     <li>Uncategorised transactions appear in no row. Their existence is a failing check, not a
     silent omission.</li>
+    <li><b>Total income is money that arrived, not money that was earned.</b> It adds net salary,
+    the employer's pension contributions and meal-voucher top-ups, which are three different things
+    with one property in common: each increased what the portfolio is worth. It is therefore not
+    comparable to gross pay, not a tax base, and not what anyone means by an annual salary — §9.1 is
+    the screen for those. The line is the top of a cash-flow statement, and the figure it exists to
+    produce is <b>Net</b>, further down.</li>
     <li><b>Salary</b> here is the sum of <em>Salary</em> transactions, i.e. net payments received —
     not gross pay. Gross figures live on the Salaries screen (§9.1). Because a payslip for December is
     typically paid in January, a calendar year of Salary transactions need not line up exactly with
@@ -1476,7 +1516,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     is excluded from every income and expense aggregate. Historical rows that used <em>Contribuzione
     fondo pensione</em> for this purpose must be remapped on migration.</li>
     <li>The <b>receipt tracked</b> column marks categories whose transactions are <i>expected</i> to
-    carry a receipt state other than <code>na</code>. It changes nothing about what gets recorded:
+    carry a receipt state other than <code>na</code> — the document that ought to exist somewhere for
+    that payment: the invoice for the electricity, the contract for the rent, and for <i>Salary</i>
+    the payslip itself, which is also the record §9.1 is built from. It changes nothing about what gets recorded:
     <b>receipt state is entered by hand and by nothing else</b>. Every transaction is created
     <code>na</code> — typed, imported, duplicated, however it arrived — and moves only when the user
     moves it (§5.1).</li>
@@ -1566,7 +1608,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     replacing whatever that day already held (§2). The whole editable history of a security lives on
     the Securities tab of this same screen (§8.4); Holdings is the fast path for the one thing done
     weekly, that tab is where a past mistake is repaired.</li>
-    <li><b>Update prices</b> fetches from the configured provider (§8.6). The button is present only
+    <li><b>Update prices</b> fetches from the provider (§8.6). The button is present only
     when <code>priceProviderEnabled</code> is on; with the feature off, the inline editor is the
     only way in, and that is a complete way to use the application.</li>
     <li>A price older than <code>priceStalenessDays</code> is marked on the row itself, not only in
@@ -1849,9 +1891,15 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     cannot.</li>
     <li><b>Optional online lookup is disabled by default.</b> When enabled in Settings, it is
     triggered only by the explicit <em>Update prices</em> button. Never automatic, never on load.</li>
-    <li>It sends security identifiers — ISIN or ticker — to the configured provider. <b>No amounts,
-    quantities or account data ever leave the machine.</b> The application must state this where the
-    feature is enabled.</li>
+    <li>It sends security identifiers — ISIN or ticker — to the provider. <b>No amounts, quantities
+    or account data ever leave the machine.</b> The application must state this where the feature is
+    enabled.</li>
+    <li><b>Which provider is built in, not chosen.</b> There is one, named in the application, with
+    no endpoint or credential to configure — the only preference is whether it is used at all. A
+    setting for the URL would have implied the application can talk to whatever is put in it, which
+    is not true: a price provider has a response shape, and reading it is code. When the provider has
+    to change, that is a new version, and §1's promise about what leaves the machine stays something
+    this document can actually make.</li>
     <li>Fetched values are shown for confirmation before being written as
     <code>source = fetched</code> Price records.</li>
     <li>The application is fully usable with the feature off. A provider failure is a message, never
@@ -2177,7 +2225,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     </aside>
     <main class="view">
       <div class="viewhead">
-        <div><h3>Settings</h3><div class="sub">13 preferences · applied as they change · no save button</div></div>
+        <div><h3>Settings</h3><div class="sub">12 preferences · applied as they change · no save button</div></div>
       </div>
       <div class="cols a">
         <div class="card">
@@ -2219,12 +2267,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
           <h4>Price provider</h4>
           <div class="frm">
             <label>Online lookup</label><div class="inp chipset"><span class="chip type">on</span><span class="chip">off</span></div>
-            <label>Endpoint</label><div class="inp ph">disabled</div>
+            <label>Provider</label><div class="inp ph">built in — not configurable</div>
           </div>
           <div class="warnline">
             <span class="neg">▲</span>
-            <span>With this on, <b>ISIN and ticker</b> are sent to the endpoint when you press
-            <em>Update prices</em>, and nothing else ever leaves this machine — no amounts, no
+            <span>With this on, <b>ISIN and ticker</b> are sent to the built-in provider when you
+            press <em>Update prices</em>, and nothing else ever leaves this machine — no amounts, no
             quantities, no account names. It is never contacted on its own.</span>
           </div>
         </div>
@@ -2247,8 +2295,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>tradeMatchWindowDays</td><td>5</td><td>§12.6, checks 6 and 7</td></tr>
       <tr><td>backupCount</td><td>10</td><td>§13</td></tr>
       <tr><td>priceProviderEnabled</td><td>off</td><td>§8.6. Shows the <em>Update prices</em> button.</td></tr>
-      <tr><td>priceProviderEndpoint</td><td>empty</td><td>§8.6. Which provider identifiers are sent to; the screen states what leaves the machine.</td></tr>
-    </tbody>
+          </tbody>
   </table></div>
   <p class="body">Formats are a <b>user preference, not a hard-coded locale</b>. Changing one
   re-renders every figure in the application immediately.</p>
@@ -2288,6 +2335,13 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <b>One exception to the no-intermediate-rounding rule:</b> the amount comparisons of §12.6 are
     made on totals rounded to 2 decimals, because the figure on the other side of the comparison is
     a bank transaction that was itself rounded to the cent.</p>
+    <p><b>“Today” is the computer's own clock</b> — its current local date, read at the moment a
+    figure is computed and never cached. Every age in the application rests on it: the staleness of a
+    price, the months since a pension revaluation, how long a receipt has been pending. One
+    consequence is worth stating: checks run at startup and after every change (§10), so a session
+    left open across midnight goes on reporting yesterday's ages until something changes or the
+    application is restarted. There is no timer and no midnight refresh — for a ledger measuring
+    ages in weeks and months, a day of lag on an idle window is not worth a background process.</p>
     <p><b>A formula that would divide by zero produces <em>undefined</em>, not zero and not
     blank.</b> Hourly pay for a year whose working days were never entered, a net-to-gross ratio on
     a gross of zero, a percentage gain on a position that cost nothing: each reads
@@ -2684,8 +2738,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>transferMatchWindowDays, tradeMatchWindowDays</td><td>Integer 0 – 31. Zero means same day only.</td></tr>
       <tr><td>backupCount</td><td>Integer 1 – 100.</td></tr>
       <tr><td>defaultTaxRate</td><td>0 – 100, at most 1 decimal.</td></tr>
-      <tr><td>priceProviderEndpoint</td><td>Required, and a well-formed URL, <b>while the provider is enabled</b>. Turning the provider on with no endpoint is refused; turning it off leaves whatever was there.</td></tr>
-      <tr><td>separators</td><td>Decimal and thousands separators must differ.</td></tr>
+            <tr><td>separators</td><td>Decimal and thousands separators must differ.</td></tr>
       <tr class="grp"><td colspan="2"><b>Bulk import</b></td></tr>
       <tr><td>account</td><td>Required before anything can be imported.</td></tr>
       <tr><td>selection</td><td><em>Import</em> is disabled until at least one readable, non-duplicate row is ticked (§6).</td></tr>
