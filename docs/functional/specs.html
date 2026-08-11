@@ -1318,7 +1318,6 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <tr><td class="cat">Securities purchase</td><td class="n r neg">− € 8.400,00</td><td class="n r neg">− € 9.200,00</td><td class="n r neg">− € 11.000,00</td><td class="n r neg">− € 6.407,20</td><td class="n r neg">− € 9.605,90</td><td class="n r neg">− € 44.613,10</td></tr>
             <tr><td class="cat">Securities sale</td><td class="n r pos">+ € 1.189,33</td><td class="n r dim">—</td><td class="n r pos">+ € 3.323,23</td><td class="n r dim">—</td><td class="n r pos">+ € 2.039,79</td><td class="n r pos">+ € 6.552,35</td></tr>
             <tr><td class="cat">Value adjustment</td><td class="n r pos">+ € 840,00</td><td class="n r pos">+ € 1.420,00</td><td class="n r pos">+ € 1.960,00</td><td class="n r pos">+ € 2.280,00</td><td class="n r pos">+ € 1.180,00</td><td class="n r pos">+ € 7.680,00</td></tr>
-            <tr class="sum"><td class="cat">Total investments</td><td class="n r neg">− € 6.370,67</td><td class="n r neg">− € 7.780,00</td><td class="n r neg">− € 5.716,77</td><td class="n r neg">− € 4.127,20</td><td class="n r neg">− € 6.386,11</td><td class="n r neg">− € 30.380,75</td></tr>
           </tbody>
         </table></div>
       </div>
@@ -1333,7 +1332,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <code>Investment</code>, <code>Divestment</code> and <code>Revaluation</code> types together,
     because buying, selling and revaluing are one activity to a reader and three types only to the
     model — and because three groups of one category each, stacked, would have been three headings
-    and three subtotals carrying three numbers.</li>
+    for three rows.</li>
     <li><b>The order never moves.</b> Sorting by total would have put the biggest number at the top
     of each group, which reads well once and badly forever: change the year filter and every row
     jumps, so the eye has to find <i>Groceries</i> again instead of going straight to where it was
@@ -1349,8 +1348,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>Four groups, and every category appears in exactly one of them.</b> <i>Income</i>,
     <i>Expense</i> and <i>Internal</i> each list their categories and end in a subtotal;
     <b>Net</b> is the sum of those three subtotals and is the emphasised line the table exists to
-    produce. <i>Investments</i> follows below it, listing the remaining three categories with a
-    subtotal of its own, and is excluded from Net. Seven plus sixteen plus one plus three is
+    produce. <i>Investments</i> follows below it, listing the remaining three categories and
+    <b>ending in nothing</b>, and is excluded from Net. Seven plus sixteen plus one plus three is
     twenty-seven (§6.3): the report accounts for the whole taxonomy, once each, which is what makes
     “the money is not in this table” a statement about the file rather than about the report.</li>
     <li><b>Internal belongs above the line, not beside it.</b> Unfiltered it is zero — both legs of
@@ -1370,20 +1369,24 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     spendable side of the portfolio and the invested side, or revalue what is already there. It sits
     below Net because none of it is income or expenditure: a purchase is not a cost, it is the same
     money in a different shape.</li>
-    <li><b>What its subtotal mixes, said plainly.</b> Securities purchase and sale are cash that
-    moved through a bank account; a value adjustment is not — it is the pension fund being marked to
-    its real value, and no money changed hands. The subtotal therefore reads as <i>the net movement
-    into the invested side of the portfolio, revaluation included</i>, and it is smaller than the cash
-    actually invested by exactly the revaluation. Both figures are one click away in the rows above
-    it, which is why the mixed one is tolerable as a summary and would not be tolerable as the only
-    thing shown.</li>
+    <li><b>Investments carries no subtotal, and that is the point of it.</b> Securities purchase and
+    sale are cash that moved through a bank account; a value adjustment is not — it is the pension
+    fund being marked to its real value, and no money changed hands. Adding the three together would
+    produce a figure that is neither the cash invested nor the change in what the investments are
+    worth, and it would be smaller than the cash invested by exactly the revaluation — a number
+    nobody asked for, wrong for both questions anyone would ask of it. The three rows answer those
+    questions separately and are each a link; a summary line here would only be read as though it
+    meant something.</li>
+    <li><b>A subtotal exists where something is built out of it.</b> Income, Expense and Internal
+    have one because <i>Net</i> is their sum and the reader needs to see the three figures it is made
+    of. Nothing is built out of Investments, so nothing is added up.</li>
     <li><b>Every figure in a category row is a link.</b> Clicking a cell opens Transactions
     filtered to that category and that year — plus whatever account filter the report already has —
     and clicking the row total drops the year. It is the answer to the question the table always
     provokes: <i>what is in there?</i> Without it the matrix reports a number and leaves the user to
     reconstruct the filter by hand on another screen, which is the sort of small friction that ends
     with a spreadsheet being opened instead.</li>
-    <li><b>The four subtotals and Net are not links</b>, because no filter expresses them: the
+    <li><b>The three subtotals and Net are not links</b>, because no filter expresses them: the
     category filter takes one category, and <i>Net</i> is a sum of sums rather than a selection.
     Nothing is offered that cannot then be shown. <b>Every other row in the table is a category, and
     therefore is a link</b> — transfers, purchases, sales and revaluations included, which is the
