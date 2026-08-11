@@ -568,12 +568,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
           </div>
           <div class="breakdown">
             <div class="brk"><i style="background:var(--c-setf)"></i><span>Stock ETF</span><span class="amt">€ 65.955,05</span><span class="pct">35,7%</span></div>
-            <div class="brk"><i style="background:var(--c-betf)"></i><span>Bond ETF</span><span class="amt">€ 18.911,60</span><span class="pct">10,2%</span></div>
             <div class="brk"><i style="background:var(--c-liq)"></i><span>Liquidity</span><span class="amt">€ 34.185,22</span><span class="pct">18,5%</span></div>
-            <div class="brk"><i style="background:var(--c-dep)"></i><span>Deposit account</span><span class="amt">€ 12.500,00</span><span class="pct">6,8%</span></div>
             <div class="brk"><i style="background:var(--c-term)"></i><span>Term deposit</span><span class="amt">€ 25.000,00</span><span class="pct">13,5%</span></div>
-            <div class="brk"><i style="background:var(--c-stock)"></i><span>Stock</span><span class="amt">€ 4.747,70</span><span class="pct">2,6%</span></div>
             <div class="brk"><i style="background:var(--c-pens)"></i><span>Pension fund</span><span class="amt">€ 22.640,75</span><span class="pct">12,3%</span></div>
+            <div class="brk"><i style="background:var(--c-betf)"></i><span>Bond ETF</span><span class="amt">€ 18.911,60</span><span class="pct">10,2%</span></div>
+            <div class="brk"><i style="background:var(--c-dep)"></i><span>Deposit account</span><span class="amt">€ 12.500,00</span><span class="pct">6,8%</span></div>
+            <div class="brk"><i style="background:var(--c-stock)"></i><span>Stock</span><span class="amt">€ 4.747,70</span><span class="pct">2,6%</span></div>
             <div class="brk"><i style="background:var(--c-etc)"></i><span>ETC</span><span class="amt">€ 614,69</span><span class="pct">0,3%</span></div>
             <div class="brk"><i style="background:var(--c-vou)"></i><span>Voucher</span><span class="amt">€ 260,00</span><span class="pct">0,1%</span></div>
           </div>
@@ -659,8 +659,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     slice count at its centre and the same colour keying the list beside it. It exists to make the
     shape of the portfolio readable at a glance; the list beside it carries the amounts and
     percentages.</li>
+    <li><b>Both are ordered by share, largest first</b>, and in the same order — the list reads down
+    in the order the slices are drawn clockwise, so finding a slice in the legend is following a line
+    rather than searching. This is the one table in the application ordered by its own amounts
+    (compare §7.1): there are nine rows, they are a shape rather than a ledger, and the shape is the
+    entire point of drawing them.</li>
     <li><b>Net worth over time</b>, monthly points from the earliest transaction to today, §12.5.
-    The stretch before the first recorded price is drawn dashed and labelled as cost-based.</li>
+    Any month in which at least one holding had to be valued at cost is drawn dashed and labelled as
+    cost-based; the line goes solid at the first month in which every holding had a price.</li>
     <li><b>Accounts table</b> lists open accounts with computed balances, brokerage accounts among
     them; its total is the headline net worth. Read-only — accounts are created, edited and closed
     on the Accounts screen (§4.1).</li>
@@ -1288,7 +1294,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     </aside>
     <main class="view">
       <div class="viewhead">
-        <div><h3>Categories</h3><div class="sub">9 rules · first match wins · case and accent insensitive</div></div>
+        <div><h3>Categories</h3><div class="sub">11 rules · first match wins · case and accent insensitive</div></div>
         <div class="actions"><button class="btn primary">Add rule</button></div>
       </div>
       <nav class="tabs"><a href="#">Report</a><a class="on" href="#">Rules</a><a href="#">Category list</a></nav>
@@ -1306,6 +1312,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
               <tr><td class="grab">⣿</td><td class="ruleno">7</td><td class="desc">FASTWEB</td><td><span class="chip auto">Home internet</span></td><td class="n r dim">98</td><td class="rowact">···</td></tr>
               <tr><td class="grab">⣿</td><td class="ruleno">8</td><td class="desc">BOLLO CONTO</td><td><span class="chip auto">Wealth tax</span></td><td class="n r dim">42</td><td class="rowact">···</td></tr>
               <tr><td class="grab">⣿</td><td class="ruleno">9</td><td class="desc">ESEGUITO ACQUISTO</td><td><span class="chip auto">Securities purchase</span></td><td class="n r dim">41</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">10</td><td class="desc">AFFITTO</td><td><span class="chip auto">Rent &amp; condominium fees</span></td><td class="n r dim">128</td><td class="rowact">···</td></tr>
+              <tr><td class="grab">⣿</td><td class="ruleno">11</td><td class="desc">COMMISSIONI</td><td><span class="chip auto">Bank fees</span></td><td class="n r dim">96</td><td class="rowact">···</td></tr>
             </tbody>
           </table></div>
         </div>
@@ -1314,7 +1322,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
           <div class="figs">
             <div class="fig"><span>Contains</span><b>CANONE</b></div>
             <div class="fig"><span>Category</span><b>Bank fees</b></div>
-            <div class="fig"><span>Position</span><b>5 of 9</b></div>
+            <div class="fig"><span>Position</span><b>5 of 11</b></div>
           </div>
           <hr class="sep">
           <h4 class="subhead">Test against existing data</h4>
@@ -1330,7 +1338,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <tbody>
               <tr><td class="desc dim">CANONE MENSILE CONTO</td></tr>
               <tr><td class="desc dim">CANONE CARTA DI CREDITO</td></tr>
-              <tr><td class="desc dim">CANONE FASTWEB CASA</td></tr>
+              <tr><td class="desc dim">CANONE ANNUO DEPOSITO TITOLI</td></tr>
             </tbody>
           </table></div>
         </div>
@@ -1357,7 +1365,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     than a surprise, and it is what the tester's counts are for reading before deleting. Rows set by
     hand keep their category regardless.</li>
     <li>The <em>Applies to</em> counts are computed against current data, so they never go stale.</li>
-    <li><b>Nine rules is the mockup, not the expectation.</b> A real file runs to several dozen, and
+    <li><b>Eleven rules is the mockup, not the expectation.</b> A real file runs to several dozen, and
     the target is that <b>the rules categorise about 95% of transactions</b> and the remaining
     twentieth is set by hand — one-off transfers, gifts, the payment whose description is a reference
     number. That ratio is what makes the absence of a bulk edit tolerable (§5.6): if a quarter of the
@@ -1771,7 +1779,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <h5>Add purchase</h5>
       <div class="dsub">a sale is the same form, with a taxes field and proceeds instead of cost</div>
       <div class="frm">
-        <label>Date</label><div class="inp">06/08/2026</div>
+        <label>Date</label><div class="inp">08/08/2026</div>
         <label>Account</label><div class="inp sel">Fineco · Dossier Titoli</div>
         <label>Security</label><div class="inp ph">IE00BFY0GT14 — not found</div>
       </div>
@@ -1787,11 +1795,11 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         </div>
       </div>
       <div class="frm">
-        <label>Quantity</label><div class="inp ph">25</div>
-        <label>Unit price</label><div class="inp ph">91,6600</div>
+        <label>Quantity</label><div class="inp ph">30</div>
+        <label>Unit price</label><div class="inp ph">41,2500</div>
         <label>Fees</label><div class="inp">19,00</div>
         <label>Notes</label><div class="inp ph">optional</div>
-        <label>Total cost</label><div class="inp" style="border-style:dashed;color:var(--brass)">€ 2.310,50</div>
+        <label>Total cost</label><div class="inp" style="border-style:dashed;color:var(--brass)">€ 1.256,50</div>
       </div>
       <div class="dlgfoot">
         <button class="btn ghost">Cancel</button>
@@ -1907,7 +1915,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <div class="card">
         <h4>Per year</h4>
         <div class="tblwrap"><table>
-          <thead><tr><th>Year</th><th class="r">Payslips</th><th class="r">Contract gross</th><th class="r">Total gross</th><th class="r">Total net salary</th><th class="r">Net/Gross</th><th class="r">Working days</th><th class="r">Gross / hour</th><th class="r">Net / hour</th></tr></thead>
+          <thead><tr><th>Year</th><th class="r">Payslips</th><th class="r">Annual contract gross</th><th class="r">Total gross</th><th class="r">Total net salary</th><th class="r">Net/Gross</th><th class="r">Working days</th><th class="r">Gross / hour</th><th class="r">Net / hour</th></tr></thead>
           <tbody>
             <tr><td class="n">2017</td><td class="n r">5</td><td class="n r">€ 27.950,00</td><td class="n r">€ 10.750,00</td><td class="n r">€ 7.095,00</td><td class="n r">66,0%</td><td class="n r">251</td><td class="n r">€ 5,35</td><td class="n r">€ 3,53</td></tr>
             <tr><td class="n">2018</td><td class="n r">13</td><td class="n r">€ 28.730,00</td><td class="n r">€ 29.860,00</td><td class="n r">€ 19.520,00</td><td class="n r">65,4%</td><td class="n r">251</td><td class="n r">€ 14,87</td><td class="n r">€ 9,72</td></tr>
@@ -2391,8 +2399,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     not yet closed at <code>d</code>: <code>Σ (openingBalance + Σ transactions ≤ d)</code> plus, per
     holding, <code>quantity(d) × price</code> where price is the <b>most recent Price record dated
     ≤ d</b>. An account contributes nothing before it existed.</li>
-    <li>If no price is known at <code>d</code>, the holding is valued at <code>avgCost(d)</code>.
-    That stretch of the line is drawn dashed and labelled cost-based. <b>This is the one place a
+    <li>If no price is known at <code>d</code>, that holding is valued at <code>avgCost(d)</code>.
+    <b>The dash is per point, not per stretch:</b> a month is dashed when <i>any</i> holding open in
+    it fell back to cost, and solid when every one of them had a price. In practice that produces a
+    single dashed prefix and a solid remainder, because prices start being recorded and then keep
+    being recorded — but the rule is stated per point so that a security bought later and never
+    priced dashes the segment it affects instead of quietly passing as measured. <b>This is the one place a
     missing price is not zero</b> (§12.3), and the reason is what the chart is for: it shows the
     shape of ten years, not a figure anyone acts on, and a decade of holdings collapsing to zero
     would have said something false about the past rather than something true about the data.</li>
