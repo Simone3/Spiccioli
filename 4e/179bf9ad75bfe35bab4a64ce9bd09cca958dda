@@ -1,0 +1,71 @@
+docs/functional/mockups/_mockups.css
+  s_e4b0cebd64cee4::t_d35728a8043d4c 1-196
+docs/functional/specs/01-premise-and-constraints.md
+  s_e4b0cebd64cee4::t_8e8bc01b79efdb 1-42
+docs/functional/specs/02-domain-model.md
+  s_e4b0cebd64cee4::t_8430246ce87b68 1-235
+docs/functional/specs/03-portfolio.md
+  s_e4b0cebd64cee4::t_b49467e8ba317d 1-63
+docs/functional/specs/04-accounts.md
+  s_e4b0cebd64cee4::t_5cd7282c7fd798 1-95
+docs/functional/specs/05-transactions.md
+  s_e4b0cebd64cee4::t_cdb99239a981b9 1-220
+docs/functional/README.md
+  s_e4b0cebd64cee4::t_aae707578526a1 1-62
+docs/functional/mockups/03-portfolio.html
+  s_e4b0cebd64cee4::t_99489379232552 1-138
+docs/functional/mockups/04-accounts.html
+  s_e4b0cebd64cee4::t_94d3fb8dd51923 1-149
+docs/functional/mockups/05-transactions.html
+  s_e4b0cebd64cee4::t_d332a665daf027 1-207
+docs/functional/mockups/06-categories.html
+  s_e4b0cebd64cee4::t_f4e01681879615 1-208
+docs/functional/mockups/07-investments.html
+  s_e4b0cebd64cee4::t_9bd442d31d26bc 6-7,14-18,22,24-28,32,34-35,92,94-98,133,135-139,174,176-180,242,244-248
+docs/functional/mockups/08-salaries.html
+  s_e4b0cebd64cee4::t_957a3e435ffa9e 1-175
+docs/functional/mockups/09-checks.html
+  s_e4b0cebd64cee4::t_f376a9f7f39f6a 1-66
+docs/functional/mockups/10-settings.html
+  s_e4b0cebd64cee4::t_0d903996cbe8e2 1-92
+docs/functional/mockups/12-storage.html
+  s_e4b0cebd64cee4::t_a914ddd2d74e58 1-113
+docs/functional/mockups/index.html
+  s_e4b0cebd64cee4::t_1aaf0d53f3829e 1-139
+docs/functional/specs/06-categories.md
+  s_e4b0cebd64cee4::t_e49f8fff6bf29b 1-216
+docs/functional/specs/07-investments.md
+  s_e4b0cebd64cee4::t_322b84e89be70e 1-170
+docs/functional/specs/08-salaries.md
+  s_e4b0cebd64cee4::t_d4ffb1845db8f0 1-68
+docs/functional/specs/09-checks.md
+  s_e4b0cebd64cee4::t_eda5e54f2a35b7 1-87
+docs/functional/specs/10-settings.md
+  s_e4b0cebd64cee4::t_edc7311e088748 1-70
+docs/functional/specs/11-calculations.md
+  s_e4b0cebd64cee4::t_8f4c25ff6715cd 1-217
+docs/functional/specs/12-storage.md
+  s_e4b0cebd64cee4::t_29e4afe6cc10ee 1-122
+docs/functional/specs/13-validation.md
+  s_e4b0cebd64cee4::t_aafab4b7e41e57 1-152
+docs/functional/specs/14-empty-and-error-states.md
+  s_e4b0cebd64cee4::t_3b301ba9aebaab 1-46
+docs/functional/specs/15-out-of-scope.md
+  s_e4b0cebd64cee4::t_b811ab0152101c 1-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4e179bf9ad75bfe35bab4a64ce9bd09cca958dda",
+  "prompts": {},
+  "sessions": {
+    "s_e4b0cebd64cee4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5b54e2a5-364f-46bc-8b4c-b2ad60516af8",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
