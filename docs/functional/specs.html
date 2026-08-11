@@ -213,8 +213,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <h1><em>Spiccioli</em><br>a private ledger for one person</h1>
   <p>Everything needed to build the application: the domain model, every screen with its mockup,
   the forms behind each action, the calculations, the consistency checks, and what is deliberately
-  left out. Self-contained — no other document is required to implement it. Sections 3 to 11 are the
-  eight sidebar items in sidebar order, one subsection per tab.</p>
+  left out. Self-contained — no other document is required to implement it. Sections 3 to 10 are the
+  eight sidebar items, in sidebar order; where a screen has tabs, each tab is one of its
+  subsections.</p>
   <div class="rule"></div>
 </header>
 
@@ -224,17 +225,16 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <a href="#s3"><b>3</b> Portfolio</a>
   <a href="#s4"><b>4</b> Accounts</a>
   <a href="#s5"><b>5</b> Transactions</a>
-  <a href="#s6"><b>6</b> Bulk import</a>
-  <a href="#s7"><b>7</b> Categories</a>
-  <a href="#s8"><b>8</b> Investments</a>
-  <a href="#s9"><b>9</b> Salaries</a>
-  <a href="#s10"><b>10</b> Checks</a>
-  <a href="#s11"><b>11</b> Settings</a>
-  <a href="#s12"><b>12</b> Calculations</a>
-  <a href="#s13"><b>13</b> Storage</a>
-  <a href="#s14"><b>14</b> Validation</a>
-  <a href="#s15"><b>15</b> Empty and error states</a>
-  <a href="#s16"><b>16</b> Out of scope</a>
+  <a href="#s6"><b>6</b> Categories</a>
+  <a href="#s7"><b>7</b> Investments</a>
+  <a href="#s8"><b>8</b> Salaries</a>
+  <a href="#s9"><b>9</b> Checks</a>
+  <a href="#s10"><b>10</b> Settings</a>
+  <a href="#s11"><b>11</b> Calculations</a>
+  <a href="#s12"><b>12</b> Storage</a>
+  <a href="#s13"><b>13</b> Validation</a>
+  <a href="#s14"><b>14</b> Empty and error states</a>
+  <a href="#s15"><b>15</b> Out of scope</a>
 </nav>
 
 <!-- ================= 1 ================= -->
@@ -245,18 +245,22 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </header>
 
   <ul class="body">
-    <li><b>One user, one machine, one file.</b> No accounts, no server, no sync logic.</li>
+    <li><b>One user, one file.</b> No accounts, no server, no sync logic of its own. The file may
+    sit in any folder — including one a cloud client is syncing — and the application neither knows
+    nor cares which (§12). What it does not do is <b>coordinate two of itself</b>: there is no
+    locking, no merge and no live collaboration, so two machines editing the same synced file at
+    once is a situation it detects and reports rather than one it resolves (§12).</li>
     <li><b>A desktop application on macOS, Windows and Linux.</b> All three are first-class: the
     same build behaves identically on each, and nothing may depend on a platform-specific path,
-    filesystem behaviour or system service. No mobile, no web deployment (§16).</li>
-    <li><b>Nothing leaves the machine</b> except, optionally and only when explicitly triggered,
-    security identifiers sent to a price provider (§8.6).</li>
+    filesystem behaviour or system service. No mobile, no web deployment (§15).</li>
+    <li><b>Nothing leaves the machine</b> except security identifiers sent to a price provider, and
+    only in the moment the user presses <em>Update prices</em> (§7.6).</li>
     <li><b>Euro only.</b> Currency is recorded on accounts and securities but every computation
     assumes EUR. No exchange rates, no conversion.</li>
     <li><b>English only.</b> The interface ships in one language and there is no language
     selector. Nothing user-facing may be hard-coded in a way that would make a second language a
     rewrite: strings stay separable from the code, and dates, decimal separators and currency
-    already come from preferences rather than a system locale (§11).</li>
+    already come from preferences rather than a system locale (§10).</li>
     <li><b>Dark theme only.</b></li>
     <li><b>The application replaces a spreadsheet</b> holding ten years of history. Data entry speed
     and the ability to spot a mistake matter more than features.</li>
@@ -270,7 +274,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <b>The organising principle.</b> Two independent sources of truth are kept deliberately
     unlinked — bank transactions come from account exports, trades and payslips are entered by
     hand — and the application's job is to tell you when they disagree. That is why nothing is
-    auto-generated from anything else, and why §10 exists.
+    auto-generated from anything else, and why §9 exists.
   </div>
 </section>
 
@@ -288,7 +292,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <tbody>
       <tr><td>id</td><td>id</td><td></td></tr>
       <tr><td>name</td><td>text</td><td>Fineco, ING, Amundi, Edenred…</td></tr>
-      <tr><td>defaultSellFee</td><td>amount</td><td>Flat. Used only for hypothetical liquidation figures (§12.3).</td></tr>
+      <tr><td>defaultSellFee</td><td>amount</td><td>Flat. Used only for hypothetical liquidation figures (§11.3).</td></tr>
       <tr><td>notes</td><td>text</td><td></td></tr>
     </tbody>
   </table></div>
@@ -307,7 +311,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>closingDate</td><td>date?</td><td>Empty means open. An account is closed by editing it and setting this date; there is no other retirement mechanism.</td></tr>
       <tr><td>notes</td><td>text</td><td></td></tr>
       <tr><td class="d">status</td><td class="d">enum</td><td class="d"><code>closed</code> when <code>closingDate</code> is set, <code>open</code> otherwise. Closed accounts keep their history and leave the portfolio breakdown.</td></tr>
-      <tr><td class="d">balance</td><td class="d">amount</td><td class="d">Cash accounts: openingBalance + Σ transaction amounts. Brokerage: Σ holding <code>netValue</code> — net of the hypothetical tax and sell fee of §12.3, per §12.4.</td></tr>
+      <tr><td class="d">balance</td><td class="d">amount</td><td class="d">Cash accounts: openingBalance + Σ transaction amounts. Brokerage: Σ holding <code>netProceeds</code> — net of the hypothetical tax and sell fee of §11.3, per §11.4.</td></tr>
     </tbody>
   </table></div>
   <p class="body"><b>Cash and securities never live in the same account.</b> The five cash types hold
@@ -327,7 +331,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>name</td><td>text</td><td></td></tr>
       <tr><td>type</td><td>enum</td><td><code>Stock</code> · <code>Bond</code> · <code>Stock ETF</code> · <code>Bond ETF</code> · <code>ETC</code>. Five, and each one is a slice of the portfolio breakdown (§3.1).</td></tr>
       <tr><td>currency</td><td>enum</td><td>EUR in v1.</td></tr>
-      <tr><td>taxRate</td><td>%</td><td>Capital-gains rate this instrument would be taxed at, used only by §12.3. Defaults to <code>defaultTaxRate</code> (§11); set to 12,5% on a whitelist government bond.</td></tr>
+      <tr><td>taxRate</td><td>%</td><td>Capital-gains rate this instrument would be taxed at, used only by §11.3. Defaults to <code>defaultTaxRate</code> (§10); set to 12,5% on a whitelist government bond.</td></tr>
       <tr><td>notes</td><td>text</td><td></td></tr>
     </tbody>
   </table></div>
@@ -353,7 +357,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <p class="body"><b>Every day is kept; a day is overwritten.</b> Recording a price for a date that
   already has one replaces that value — the last word on a day wins, and correcting a typo does not
   leave a second record to disambiguate. Prices for other days are never touched, and that history
-  is what makes the net worth chart possible (§12.5).</p>
+  is what makes the net worth chart possible (§11.5).</p>
 
   <h4 class="subsub">Transaction</h4>
   <div class="specwrap"><table class="spec">
@@ -366,7 +370,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>amount</td><td>amount</td><td>Signed. Negative is money out.</td></tr>
       <tr><td>categoryId</td><td>ref?</td><td>Empty is legal and reported by check 2.</td></tr>
       <tr><td>categorySource</td><td>enum</td><td><code>automatic</code> · <code>manual</code>. Never empty. Reversible — see §5.4.</td></tr>
-      <tr><td>receiptState</td><td>enum</td><td><code>pending</code> · <code>checked</code> · <code>na</code>. <b>Always <code>na</code> on creation</b>, however the row was created, and moved only by hand (§7.3).</td></tr>
+      <tr><td>receiptState</td><td>enum</td><td><code>pending</code> · <code>checked</code> · <code>na</code>. <b>Always <code>na</code> on creation</b>, however the row was created, and moved only by hand (§6.3).</td></tr>
       <tr><td>notes</td><td>text</td><td>User-owned. Never written by the application.</td></tr>
       <tr><td>insertionSeq</td><td>int</td><td>Monotonic <b>per entity</b> — transactions and trades count separately, and neither ever reuses a value. Second sort key (§5.2).</td></tr>
     </tbody>
@@ -381,8 +385,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   disagree with what the rule list would produce for it, so it is recomputed the moment either side
   of that equation moves: when a transaction is created or imported, when its description is edited,
   when a row is switched back to <code>automatic</code> (§5.4), and when any rule is added, edited,
-  deleted or reordered (§7.2). There is no button to press and no state in which the file holds an
-  automatic category no rule would assign — which is what lets §7.1 and §10 read the stored value
+  deleted or reordered (§6.2). There is no button to press and no state in which the file holds an
+  automatic category no rule would assign — which is what lets §6.1 and §9 read the stored value
   instead of re-deriving it behind every total.</p>
 
   <h4 class="subsub">Trade</h4>
@@ -404,13 +408,13 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     </tbody>
   </table></div>
   <p class="body"><b>A trade never generates a transaction, and a transaction never generates a
-  trade.</b> Both are recorded independently; §10 compares them.</p>
+  trade.</b> Both are recorded independently; §9 compares them.</p>
   <p class="body"><b>Why a sale carries taxes.</b> Under the Italian <i>regime amministrato</i> the
   broker withholds the tax at the moment of the sale, so the amount that reaches the account is
   already net of it. Recording it is what lets the sale's <code>total</code> equal the bank
   transaction it is compared against in check 7, and what makes realised gain a real figure rather
   than a pre-tax one. It is entered from the trade confirmation, never computed — the hypothetical
-  rate of §12.3 is an estimate and has no bearing on a sale that actually happened.</p>
+  rate of §11.3 is an estimate and has no bearing on a sale that actually happened.</p>
 
   <h4 class="subsub">Contract</h4>
   <div class="specwrap"><table class="spec">
@@ -455,7 +459,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <p class="body"><b>A payslip for month M is often paid in month M+1.</b> There is no payment-date
   field: the bank transaction already carries the real date, and duplicating it here would create a
   second figure to keep in step. Checks 4 and 5 therefore look for their counterpart in month M
-  <i>or</i> M+1 (§12.6).</p>
+  <i>or</i> M+1 (§11.6).</p>
 
   <h4 class="subsub">Category</h4>
   <div class="specwrap"><table class="spec">
@@ -463,19 +467,19 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <tbody>
       <tr><td>id</td><td>id</td><td>Stable. Referenced by every transaction and never reused.</td></tr>
       <tr><td>name</td><td>text</td><td></td></tr>
-      <tr><td>type</td><td>enum</td><td><code>Income</code> · <code>Expense</code> · <code>Investment</code> · <code>Divestment</code> · <code>Internal</code> · <code>Revaluation</code>. Drives the grouping in §7.1.</td></tr>
+      <tr><td>type</td><td>enum</td><td><code>Income</code> · <code>Expense</code> · <code>Investment</code> · <code>Divestment</code> · <code>Internal</code> · <code>Revaluation</code>. Drives the grouping in §6.1.</td></tr>
       <tr><td>role</td><td>enum</td><td><code>none</code> · <code>salary</code> · <code>pension contribution</code> · <code>securities purchase</code> · <code>securities sale</code> · <code>internal transfer</code> · <code>value adjustment</code> · <code>bank fees</code> · <code>wealth tax</code> · <code>interest and dividends</code>. <b>What the checks and the Portfolio all-time card key off</b> — never a name.</td></tr>
       <tr><td>receiptTracked</td><td>bool</td><td>Its transactions are expected to carry a receipt state other than <code>na</code> — checks 13 and 14.</td></tr>
-      <tr><td>order</td><td>int</td><td>Display order within a type. <b>It decides the order everywhere a category appears</b> — the report, the list, every picker — and nothing anywhere sorts categories by their amounts (§7.1).</td></tr>
+      <tr><td>order</td><td>int</td><td>Display order within a type. <b>It decides the order everywhere a category appears</b> — the report, the list, every picker — and nothing anywhere sorts categories by their amounts (§6.1).</td></tr>
     </tbody>
   </table></div>
   <p class="body"><b>Categories are stored, but not editable in v1.</b> The application seeds the
-  list of §7.3 into every new file and offers no way to add, rename or remove one — that remains a
-  code change (§16). They are records rather than constants for two reasons. Transactions reference
+  list of §6.3 into every new file and offers no way to add, rename or remove one — that remains a
+  code change (§15). They are records rather than constants for two reasons. Transactions reference
   a stable <code>id</code>, so the migration script and the file format have something durable to
   point at; and every check that concerns a particular kind of money keys off <code>role</code>
   rather than off a name, so nothing breaks when a label is reworded and a future version can add,
-  say, a second salary-like category without touching §10.</p>
+  say, a second salary-like category without touching §9.</p>
 
   <h4 class="subsub">Rule</h4>
   <div class="specwrap"><table class="spec">
@@ -495,13 +499,13 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <tbody>
       <tr><td>key</td><td>(securityId, accountId) — the account is always a <code>Brokerage</code> one</td></tr>
       <tr><td>quantity</td><td>Σ purchases − Σ sales</td></tr>
-      <tr><td>avgCost</td><td>Weighted average, §12.1</td></tr>
+      <tr><td>avgCost</td><td>Weighted average, §11.1</td></tr>
       <tr><td>invested</td><td>quantity × avgCost</td></tr>
-      <tr><td>price, priceDate</td><td>The Price record with the latest date for the security. <b>No Price record at all: price is 0</b> and check 3 fails (§12.3)</td></tr>
+      <tr><td>price, priceDate</td><td>The Price record with the latest date for the security. <b>No Price record at all: price is 0</b> and check 3 fails (§11.3)</td></tr>
       <tr><td>marketValue</td><td>quantity × price</td></tr>
       <tr><td>gain</td><td>marketValue − invested</td></tr>
       <tr><td>gainPct</td><td>gain ÷ invested</td></tr>
-      <tr><td>netValue, netGain</td><td>marketValue and gain after the hypothetical tax and sell fee of §12.3</td></tr>
+      <tr><td>netProceeds, netGain</td><td>marketValue and gain after the hypothetical tax and sell fee of §11.3</td></tr>
     </tbody>
   </table></div>
   <p class="body">A holding exists while quantity &gt; 0. It is never edited; it changes only by
@@ -625,10 +629,10 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <h3 class="sub">3.1 Behaviour</h3>
   <ul class="body">
     <li><b>Failing-check banner.</b> Shown whenever any check fails, above everything else, naming
-    each failing check in one line and linking to §10. Absent when all pass.</li>
-    <li><b>Net worth is what the portfolio is worth in hand</b> (§12.4): cash at its balance,
+    each failing check in one line and linking to §9. Absent when all pass.</li>
+    <li><b>Net worth is what the portfolio is worth in hand</b> (§11.4): cash at its balance,
     holdings at their latest known price <i>less</i> the hypothetical capital-gains tax and sell fee
-    of §12.3. It is the sum of the two figures beneath it, and those two are the only decomposition
+    of §11.3. It is the sum of the two figures beneath it, and those two are the only decomposition
     offered.</li>
     <li><b>Total at cost</b> is the same total with holdings valued at what they were paid for
     instead — Σ cash balances + Σ holdings at cost. <b>Unrealised net investment gain</b> is exactly
@@ -636,16 +640,16 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <i>sum of all transactions</i>, which was wrong twice over: it includes opening balances, which
     are not transactions, and it values holdings at their cost basis, which is not a transaction
     either.</li>
-    <li><b>The headline figure is therefore an estimate</b>, and must carry the §12.3 caveat on
+    <li><b>The headline figure is therefore an estimate</b>, and must carry the §11.3 caveat on
     hover: it rests on average-cost lot matching and moves if a security's <code>taxRate</code> or
     an institution's sell fee changes. The gross, untaxed picture is one screen away, on Investments
-    (§8.1), where the per-holding breakdown lives.</li>
+    (§7.1), where the per-holding breakdown lives.</li>
     <li><b>All-time figures</b> are lifetime sums of the categories carrying the roles
     <code>bank fees</code>, <code>wealth tax</code> and <code>interest and dividends</code>, plus
-    realised gain from sales (§12.2). Unlike net worth, realised gain is a recorded fact, not an
+    realised gain from sales (§11.2). Unlike net worth, realised gain is a recorded fact, not an
     estimate.</li>
     <li><b>Those three roles exist for this card and nothing else.</b> The category list is fixed
-    (§7.3), so the card could have named its three categories directly and been correct forever —
+    (§6.3), so the card could have named its three categories directly and been correct forever —
     but every other part of the application that cares about a particular kind of money keys off
     <code>role</code>, and one screen quietly matching on names would have been the exception that
     made the rule untrue. Roles cost nothing and keep the promise whole.</li>
@@ -663,9 +667,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>Both are ordered by share, largest first</b>, and in the same order — the list reads down
     in the order the slices are drawn clockwise, so finding a slice in the legend is following a line
     rather than searching. This is the one table in the application ordered by its own amounts
-    (compare §7.1): there are nine rows, they are a shape rather than a ledger, and the shape is the
+    (compare §6.1): there are nine rows, they are a shape rather than a ledger, and the shape is the
     entire point of drawing them.</li>
-    <li><b>Net worth over time</b>, monthly points from the earliest transaction to today, §12.5.
+    <li><b>Net worth over time</b>, monthly points from the earliest transaction to today, §11.5.
     Any month in which at least one holding had to be valued at cost is drawn dashed and labelled as
     cost-based; the line goes solid at the first month in which every holding had a price.</li>
     <li><b>Accounts table</b> lists open accounts with computed balances, brokerage accounts among
@@ -702,22 +706,22 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <nav class="tabs"><a class="on" href="#">Accounts</a><a href="#">Institutions</a></nav>
       <div class="card" style="padding-top:14px">
         <div class="tblwrap"><table>
-          <thead><tr><th>Name</th><th>Institution</th><th>Type</th><th>Currency</th><th class="r">Opening balance</th><th class="r">Opened</th><th class="r">Closed</th><th class="r">Transactions</th><th></th></tr></thead>
+          <thead><tr><th>Name</th><th>Institution</th><th>Type</th><th>Currency</th><th class="r">Opening balance</th><th class="r">Opened</th><th class="r">Closed</th><th class="r">Transactions</th><th>Notes</th><th></th></tr></thead>
           <tbody>
-            <tr class="sel"><td class="desc">Conto Corrente</td><td class="dim">Fineco</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/01/2016</td><td class="n r dim">—</td><td class="n r dim">2.302</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Conto Titoli</td><td class="dim">Fineco</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">14/03/2018</td><td class="n r dim">—</td><td class="n r dim">208</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Dossier Titoli</td><td class="dim">Fineco</td><td><span class="chip type">Brokerage</span></td><td class="n">EUR</td><td class="n r dim">—</td><td class="n r">14/03/2018</td><td class="n r dim">—</td><td class="n r dim">—</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Conto Corrente</td><td class="dim">Intesa Sanpaolo</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/01/2016</td><td class="n r dim">—</td><td class="n r dim">906</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Wallet</td><td class="dim">—</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 120,00</td><td class="n r">01/01/2016</td><td class="n r dim">—</td><td class="n r dim">341</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Conto Arancio</td><td class="dim">ING</td><td><span class="chip type">Deposit account</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">08/06/2019</td><td class="n r dim">—</td><td class="n r dim">96</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Deposito Vincolato 24m</td><td class="dim">Banca Sella</td><td><span class="chip type">Term deposit</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">4</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Conto Titoli</td><td class="dim">Banca Sella</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">31</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Dossier Titoli</td><td class="dim">Banca Sella</td><td><span class="chip type">Brokerage</span></td><td class="n">EUR</td><td class="n r dim">—</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">—</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Fondo Pensione</td><td class="dim">Amundi</td><td><span class="chip type">Pension fund</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/09/2017</td><td class="n r dim">—</td><td class="n r dim">250</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Buoni Pasto</td><td class="dim">Edenred</td><td><span class="chip type">Voucher</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/09/2017</td><td class="n r dim">—</td><td class="n r dim">418</td><td class="rowact">···</td></tr>
-            <tr><td class="desc dim">Conto Corrente</td><td class="dim">Unicredit</td><td><span class="chip type">Liquidity</span></td><td class="n dim">EUR</td><td class="n r dim">€ 0,00</td><td class="n r dim">01/01/2016</td><td class="n r dim">30/06/2021</td><td class="n r dim">256</td><td class="rowact">···</td></tr>
+            <tr class="sel"><td class="desc">Conto Corrente</td><td class="dim">Fineco</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/01/2016</td><td class="n r dim">—</td><td class="n r dim">2.302</td><td class="dim">main account</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Conto Titoli</td><td class="dim">Fineco</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">14/03/2018</td><td class="n r dim">—</td><td class="n r dim">208</td><td class="dim">uninvested, awaiting next purchase</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Dossier Titoli</td><td class="dim">Fineco</td><td><span class="chip type">Brokerage</span></td><td class="n">EUR</td><td class="n r dim">—</td><td class="n r">14/03/2018</td><td class="n r dim">—</td><td class="n r dim">—</td><td class="dim">3 holdings, net of tax and fees</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Conto Corrente</td><td class="dim">Intesa Sanpaolo</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/01/2016</td><td class="n r dim">—</td><td class="n r dim">906</td><td class="dim">household bills</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Wallet</td><td class="dim">—</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 120,00</td><td class="n r">01/01/2016</td><td class="n r dim">—</td><td class="n r dim">341</td><td class="dim">physical cash</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Conto Arancio</td><td class="dim">ING</td><td><span class="chip type">Deposit account</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">08/06/2019</td><td class="n r dim">—</td><td class="n r dim">96</td><td class="dim">2,00%</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Deposito Vincolato 24m</td><td class="dim">Banca Sella</td><td><span class="chip type">Term deposit</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">4</td><td class="dim">matures 03/2027</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Conto Titoli</td><td class="dim">Banca Sella</td><td><span class="chip type">Liquidity</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">31</td><td class="dim">uninvested</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Dossier Titoli</td><td class="dim">Banca Sella</td><td><span class="chip type">Brokerage</span></td><td class="n">EUR</td><td class="n r dim">—</td><td class="n r">02/03/2025</td><td class="n r dim">—</td><td class="n r dim">—</td><td class="dim">2 holdings, net of tax and fees</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Fondo Pensione</td><td class="dim">Amundi</td><td><span class="chip type">Pension fund</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/09/2017</td><td class="n r dim">—</td><td class="n r dim">250</td><td class="dim">revalued 31/07/2026</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Buoni Pasto</td><td class="dim">Edenred</td><td><span class="chip type">Voucher</span></td><td class="n">EUR</td><td class="n r">€ 0,00</td><td class="n r">01/09/2017</td><td class="n r dim">—</td><td class="n r dim">418</td><td class="dim">26 × € 10,00</td><td class="rowact">···</td></tr>
+            <tr><td class="desc dim">Conto Corrente</td><td class="dim">Unicredit</td><td><span class="chip type">Liquidity</span></td><td class="n dim">EUR</td><td class="n r dim">€ 0,00</td><td class="n r dim">01/01/2016</td><td class="n r dim">30/06/2021</td><td class="n r dim">256</td><td class="dim">moved everything to Fineco</td><td class="rowact">···</td></tr>
           </tbody>
-          <tfoot><tr><td colspan="7">12 accounts · 11 open · 7 institutions</td><td class="r tot">4.812</td><td></td></tr></tfoot>
+          <tfoot><tr><td colspan="7">12 accounts · 11 open · 7 institutions</td><td class="r tot">4.812</td><td></td><td></td></tr></tfoot>
         </table></div>
       </div>
     </main>
@@ -730,7 +734,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>No balance column.</b> Balances are what the Portfolio screen is for (§3), and a figure
     that appears twice is a figure that can disagree with itself.</li>
     <li>A <code>Brokerage</code> account shows an em dash for opening balance and for transactions:
-    it can hold neither (§2). The form enforces both (§14).</li>
+    it can hold neither (§2). The form enforces both (§13).</li>
     <li>Ordered by institution, then opening date. Closed accounts sort last regardless.</li>
   </ul>
 
@@ -755,12 +759,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <div class="tblwrap"><table>
           <thead><tr><th>Name</th><th class="r">Default sell fee</th><th class="r">Accounts</th><th>Notes</th><th></th></tr></thead>
           <tbody>
-            <tr class="sel"><td class="desc">Fineco</td><td class="n r">€ 19,00</td><td class="n r">3</td><td class="dim">main broker</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Banca Sella</td><td class="n r">€ 12,00</td><td class="n r">3</td><td class="dim">second broker, term deposit</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">Intesa Sanpaolo</td><td class="n r">€ 0,00</td><td class="n r">1</td><td class="dim">no securities held here</td><td class="rowact">···</td></tr>
-            <tr><td class="desc">ING</td><td class="n r">€ 0,00</td><td class="n r">1</td><td class="dim"></td><td class="rowact">···</td></tr>
             <tr><td class="desc">Amundi</td><td class="n r">€ 0,00</td><td class="n r">1</td><td class="dim">pension fund</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Banca Sella</td><td class="n r">€ 12,00</td><td class="n r">3</td><td class="dim">second broker, term deposit</td><td class="rowact">···</td></tr>
             <tr><td class="desc">Edenred</td><td class="n r">€ 0,00</td><td class="n r">1</td><td class="dim">meal vouchers</td><td class="rowact">···</td></tr>
+            <tr class="sel"><td class="desc">Fineco</td><td class="n r">€ 19,00</td><td class="n r">3</td><td class="dim">main broker</td><td class="rowact">···</td></tr>
+            <tr><td class="desc">ING</td><td class="n r">€ 0,00</td><td class="n r">1</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="desc">Intesa Sanpaolo</td><td class="n r">€ 0,00</td><td class="n r">1</td><td class="dim">no securities held here</td><td class="rowact">···</td></tr>
             <tr><td class="desc dim">Unicredit</td><td class="n r dim">€ 0,00</td><td class="n r dim">1</td><td class="dim">account closed 06/2021</td><td class="rowact">···</td></tr>
           </tbody>
           <tfoot><tr><td colspan="2">7 institutions</td><td class="r tot">11</td><td colspan="2">Wallet has none — physical cash</td></tr></tfoot>
@@ -775,15 +779,15 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     than beside them.</li>
     <li><b>Accounts</b> counts the accounts pointing at it, open and closed alike, and is the column
     that says whether an institution can be deleted: at zero it can, otherwise it cannot.</li>
-    <li><b>Default sell fee</b> is the flat fee §12.3 charges once per holding when estimating what a
+    <li><b>Default sell fee</b> is the flat fee §11.3 charges once per holding when estimating what a
     position would leave you with. It is not a fee anyone was charged — real fees sit on each trade
-    (§8.2, §8.3). An institution that never sells anything can leave it at zero, and an institution
+    (§7.2, §7.3). An institution that never sells anything can leave it at zero, and an institution
     with no fee recorded behaves as zero.</li>
     <li>An institution is <b>never retired</b>. It has no closing date and no status: when its last
     account closes it simply stops appearing anywhere that matters, and it stays in this list because
     the closed account still points at it (§4.3).</li>
-    <li>The list is ordered by <b>number of accounts descending, then name</b>; there is no other
-    order and no filter. Seven rows do not need one.</li>
+    <li>The list is ordered <b>by name</b>; there is no other order and no filter. Seven rows do not
+    need one, and a name is what you look one up by.</li>
   </ul>
 
   <h3 class="sub">4.3 Creating and editing</h3>
@@ -817,7 +821,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     </div>
   </div>
   <ul class="body">
-    <li><b>Default sell fee</b> is a flat amount, used only for the “if sold today” figures of §12.3
+    <li><b>Default sell fee</b> is a flat amount, used only for the “if sold today” figures of §11.3
     and therefore for net worth itself (§3.1). Fees actually charged are recorded on each trade.
     Leave it at zero to see gross figures; an account with no institution — physical cash — is
     treated as zero too.</li>
@@ -829,10 +833,10 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>Closing date</b> is how an account is retired: fill it in and the account leaves the
     portfolio, keeping its history. The form does not require the account to be empty first — check
     11 reports a closed account that still holds something, and check 12 the records dated outside
-    the two dates. Both name the situation; neither refuses the edit (§10).</li>
+    the two dates. Both name the situation; neither refuses the edit (§9).</li>
     <li>Contracts are created the same way, on the Salaries screen, with the fields listed in §2:
     name, months per year, hours per day, start and end date. Securities are normally created inline
-    while recording a purchase (§8.5); the Securities tab on Investments exists to correct and manage
+    while recording a purchase (§7.5); the Securities tab on Investments exists to correct and manage
     them afterwards.</li>
   </ul>
 
@@ -912,18 +916,18 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <ul class="body">
     <li><b>Account</b> names the account, not the institution — <i>Fineco · Conto Corrente</i>, never
     <i>Fineco</i>. One institution routinely holds several accounts, and which one a row belongs to
-    is what the matching of §12.6 turns on. The same rule holds everywhere an account is shown.</li>
+    is what the matching of §11.6 turns on. The same rule holds everywhere an account is shown.</li>
     <li><b>Category</b> chip is violet when <code>categorySource = automatic</code> and a rule
     matched, neutral when <code>manual</code>, red when no category was assigned. Violet denotes
     provenance, not correctness — deliberately not green.</li>
     <li><b>Matched</b> is derived and read-only: the counterpart account for a paired internal
     transfer, the security for a trade-matched securities transaction, an em dash otherwise
-    (§12.6).</li>
+    (§11.6).</li>
     <li><b>Notes</b> is free text the user owns. <b>The application never writes to it.</b></li>
     <li><b>Receipt</b> is a picker with three values — <code>pending</code>, <code>checked</code>,
     <code>na</code> — chosen directly. It is not a cycle and there is no order to work through: a
     transaction is not on its way anywhere, it simply has one of three states and the user says which
-    (§7.3).</li>
+    (§6.3).</li>
     <li>The footer sums the filtered rows, across all pages.</li>
   </ul>
 
@@ -960,7 +964,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     every automatic re-categorisation.</li>
     <li><b>The picker has no way to choose nothing.</b> It offers <em>Automatic</em> and the
     twenty-seven categories, and no clearing entry: a row the user has touched always ends up with a
-    category or back under the rules (§14). The only empty category in the file is therefore one no
+    category or back under the rules (§13). The only empty category in the file is therefore one no
     rule matched, which is exactly what check 2 is counting.</li>
     <li><b>This is reversible.</b> The category picker offers a special entry — <em>Automatic (let
     rules decide)</em> — at the top of the list. Choosing it sets <code>categorySource</code> back to
@@ -1000,12 +1004,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>Account</b> defaults to the one last used, and lists cash accounts only. <b>Date</b> is a
     date picker defaulting to today; <b>amount</b> is a validated numeric field, signed, negative
     being money out. Neither can hold text that would have to be interpreted: nothing invalid can be
-    entered, so nothing invalid has to be rejected on save, and the display preferences of §11
+    entered, so nothing invalid has to be rejected on save, and the display preferences of §10
     never enter into data entry.</li>
     <li><b>Category</b> defaults to <em>Automatic</em>, so a manually added row is categorised by the
     same rules as an imported one.</li>
     <li><b>Receipt</b> defaults to <em>n/a</em> and stays there unless the user says otherwise, on
-    this form as everywhere else (§7.3). Nothing about the category the row ends up with changes
+    this form as everywhere else (§6.3). Nothing about the category the row ends up with changes
     it.</li>
     <li><b>Save and add another</b> keeps the dialog open with account and date retained and the
     other fields cleared — the shape of manual entry is several rows in one sitting.</li>
@@ -1019,24 +1023,21 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     import that went into the wrong account.</li>
     <li>The only bulk action is <b>delete</b>. It confirms once, stating the count and the total
     amount about to disappear — <em>Delete 214 transactions totalling − € 8.412,90?</em> — because
-    there is no undo (§13) and the count alone does not tell you whether you selected the right
+    there is no undo (§12) and the count alone does not tell you whether you selected the right
     fortnight.</li>
-    <li><b>There is no bulk edit.</b> Changing many categories at once is what rules are for (§7.2),
+    <li><b>There is no bulk edit.</b> Changing many categories at once is what rules are for (§6.2),
     and they do it repeatably and leave a reason behind; a bulk edit does it once and leaves
     nothing. Everything else worth changing on many rows at once is a mistake better deleted and
     re-imported.</li>
     <li>Selection is cleared by any change to the filters, so a selection can never contain rows that
     are no longer on screen.</li>
   </ul>
-</section>
 
-<!-- ================= 6 IMPORT ================= -->
-<section class="doc" id="s6">
-  <header>
-    <div class="num">06</div>
-    <h2>Bulk import</h2>
-    <p>One screen. One job: get raw rows in without duplicating anything.</p>
-  </header>
+  <h3 class="sub">5.7 Bulk import</h3>
+  <p class="body">One screen. One job: get raw rows in without duplicating anything. It is
+  reached from the <em>Bulk import</em> button above and the sidebar stays on Transactions,
+  because transactions are what it produces — it is a mode of this screen rather than a
+  destination of its own.</p>
 
   <div class="scroller"><div class="app">
     <aside class="side">
@@ -1093,7 +1094,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
           </div>
           <p class="detail note">Every import uses this order; rearrange the export before pasting if
           your bank produces something else, and extra columns are ignored. The formats above are
-          inferred from the pasted rows themselves, never from the display preferences of §11 —
+          inferred from the pasted rows themselves, never from the display preferences of §10 —
           each chip is overridable, and changing one re-parses the preview immediately.</p>
         </div>
       </div>
@@ -1141,7 +1142,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <h4 class="subsub">Formats</h4>
   <ul class="body">
     <li>Date order and decimal and thousands separators are <b>inferred from the pasted rows
-    themselves</b>, never from the display preferences of §11 — the file came from a bank and has
+    themselves</b>, never from the display preferences of §10 — the file came from a bank and has
     no reason to match how you like to read numbers.</li>
     <li>Each is shown as a chip and <b>each is overridable</b>; changing one re-parses every row
     immediately. When a format cannot be inferred — no row carries a thousands separator, or every
@@ -1156,7 +1157,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       2 · Otherwise, with only one kind of separator present, it is the <b>decimal separator</b> —
       <code>12345.67</code> and <code>1234,50</code> mean what they look like.<br>
       3 · <b>Except</b> when that separator is followed by exactly three digits in every row it
-      appears in, in which case it is thousands. An amount never carries three decimals (§14), so
+      appears in, in which case it is thousands. An amount never carries three decimals (§13), so
       <code>1.234</code> is one thousand two hundred and thirty-four euros — reading it as
       <code>€ 1,23</code> would be off by a factor of a thousand, silently, on a row that looks
       ordinary.<br>
@@ -1200,16 +1201,16 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   typed by hand, which is correct — they are the same kind of record.</p>
 </section>
 
-<!-- ================= 7 CATEGORIES ================= -->
-<section class="doc" id="s7">
+<!-- ================= 6 CATEGORIES ================= -->
+<section class="doc" id="s6">
   <header>
-    <div class="num">07</div>
+    <div class="num">06</div>
     <h2>Categories</h2>
     <p>Three tabs: Report, Rules, Category list. The report answers where the money goes, the rules
     put it there, and the list is what both are made of.</p>
   </header>
 
-  <h3 class="sub">7.1 Report</h3>
+  <h3 class="sub">6.1 Report</h3>
   <p class="body">The categories × years matrix — the one screen that answers where the money
   goes.</p>
   <div class="scroller"><div class="app">
@@ -1272,7 +1273,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
 
   <ul class="body">
     <li>Rows are categories grouped under their type, <b>in the fixed order of the category list</b>
-    (§7.3) — never by amount. Columns are calendar years plus a total. <b>The whole table is shown;
+    (§6.3) — never by amount. Columns are calendar years plus a total. <b>The whole table is shown;
     there is no paging.</b></li>
     <li><b>The order never moves.</b> Sorting by total would have put the biggest number at the top
     of each group, which reads well once and badly forever: change the year filter and every row
@@ -1305,24 +1306,24 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>A cell with no transactions shows an em dash, not <code>€ 0,00</code>, so a real zero stays
     distinguishable from nothing recorded — and an em dash is not a link.</li>
     <li>Filters: year range, accounts. A partial year is labelled with the months it covers.</li>
-    <li>The screen carries three tabs: this report, the categorisation rules (§7.2), and a read-only
-    list of the twenty-seven categories with their types and roles (§7.3). Rules sit here because the
+    <li>The screen carries three tabs: this report, the categorisation rules (§6.2), and a read-only
+    list of the twenty-seven categories with their types and roles (§6.3). Rules sit here because the
     tester's counts only mean something next to the report they change.</li>
     <li>Uncategorised transactions appear in no row. Their existence is a failing check, not a
     silent omission.</li>
     <li><b>Total income is money that arrived, not money that was earned.</b> It adds net salary,
     the employer's pension contributions and meal-voucher top-ups, which are three different things
     with one property in common: each increased what the portfolio is worth. It is therefore not
-    comparable to gross pay, not a tax base, and not what anyone means by an annual salary — §9.1 is
+    comparable to gross pay, not a tax base, and not what anyone means by an annual salary — §8.1 is
     the screen for those. The line is the top of a cash-flow statement, and the figure it exists to
     produce is <b>Net</b>, further down.</li>
     <li><b>Salary</b> here is the sum of <em>Salary</em> transactions, i.e. net payments received —
-    not gross pay. Gross figures live on the Salaries screen (§9.1). Because a payslip for December is
+    not gross pay. Gross figures live on the Salaries screen (§8.1). Because a payslip for December is
     typically paid in January, a calendar year of Salary transactions need not line up exactly with
-    that year's payslips; §9.1 is the screen that reads payslip by payslip.</li>
+    that year's payslips; §8.1 is the screen that reads payslip by payslip.</li>
   </ul>
 
-  <h3 class="sub">7.2 Rules</h3>
+  <h3 class="sub">6.2 Rules</h3>
 
   <div class="scroller"><div class="app">
     <aside class="side">
@@ -1422,9 +1423,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   produced when it was last run”. That is a worse specification and it is not the one being built; it
   is written down so the trade is made deliberately rather than discovered.</div>
 
-  <h3 class="sub">7.3 Category list</h3>
+  <h3 class="sub">6.3 Category list</h3>
   <p class="body">Twenty-seven, seeded into every new file and not editable at runtime. Adding one is
-  a change to the application. <b>Role</b> is what §10 keys off; a blank one means no check cares
+  a change to the application. <b>Role</b> is what §9 keys off; a blank one means no check cares
   about the category. <b>Was</b> records the old Italian label for reference only — the migration
   script maps the two lists by hand, and the application stores no alias.</p>
 
@@ -1451,8 +1452,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <tr><td class="desc">Voucher top-up</td><td><span class="chip type">Income</span></td><td class="dim">—</td><td class="rc na">–</td><td class="n r dim">106</td></tr>
             <tr><td class="desc">Securities purchase</td><td><span class="chip type">Investment</span></td><td class="dim">securities purchase</td><td class="rc na">–</td><td class="n r dim">41</td></tr>
             <tr><td class="desc">Securities sale</td><td><span class="chip type">Divestment</span></td><td class="dim">securities sale</td><td class="rc na">–</td><td class="n r dim">6</td></tr>
-            <tr><td class="desc">Rent &amp; condominium fees</td><td><span class="chip type">Expense</span></td><td class="dim">—</td><td class="rc done">✓</td><td class="n r dim">128</td></tr>
             <tr><td class="desc">Groceries</td><td><span class="chip type">Expense</span></td><td class="dim">—</td><td class="rc na">–</td><td class="n r dim">1.204</td></tr>
+            <tr><td class="desc">Rent &amp; condominium fees</td><td><span class="chip type">Expense</span></td><td class="dim">—</td><td class="rc done">✓</td><td class="n r dim">128</td></tr>
             <tr class="sel"><td class="desc">Internal transfer</td><td><span class="chip type">Internal</span></td><td class="dim">internal transfer</td><td class="rc na">–</td><td class="n r dim">312</td></tr>
             <tr><td class="desc">Value adjustment</td><td><span class="chip type">Revaluation</span></td><td class="dim">value adjustment</td><td class="rc na">–</td><td class="n r dim">36</td></tr>
           </tbody>
@@ -1468,13 +1469,13 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     reading this document is worth a tab even though nothing on it can be changed.</li>
     <li><b>The order of this list is the order of everything.</b> Its <code>order</code> field
     (§2) fixes where a category sits in the report, in this list and in every picker, and no screen
-    ever re-sorts by amount (§7.1).</li>
+    ever re-sorts by amount (§6.1).</li>
     <li>The <b>Transactions</b> column is a live count and the reason the tab is more than
     decoration: a category with none is one the rules never reach, and the total across all 27 is
     every categorised transaction in the file — 4.811 of 4.812 here, the missing one being the
     failure of check 2.</li>
     <li>Adding, renaming or removing a category is a change to the application, not a setting
-    (§16).</li>
+    (§15).</li>
   </ul>
 
   <div class="specwrap"><table class="spec">
@@ -1519,7 +1520,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>The <b>receipt tracked</b> column marks categories whose transactions are <i>expected</i> to
     carry a receipt state other than <code>na</code> — the document that ought to exist somewhere for
     that payment: the invoice for the electricity, the contract for the rent, and for <i>Salary</i>
-    the payslip itself, which is also the record §9.1 is built from. It changes nothing about what gets recorded:
+    the payslip itself, which is also the record §8.1 is built from. It changes nothing about what gets recorded:
     <b>receipt state is entered by hand and by nothing else</b>. Every transaction is created
     <code>na</code> — typed, imported, duplicated, however it arrived — and moves only when the user
     moves it (§5.1).</li>
@@ -1534,16 +1535,16 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </ul>
 </section>
 
-<!-- ================= 8 INVESTMENTS ================= -->
-<section class="doc" id="s8">
+<!-- ================= 7 INVESTMENTS ================= -->
+<section class="doc" id="s7">
   <header>
-    <div class="num">08</div>
+    <div class="num">07</div>
     <h2>Investments</h2>
     <p>Four tabs: Holdings, Purchases, Sales, Securities. Holdings is entirely derived from the
     middle two; Securities is what all three point at.</p>
   </header>
 
-  <h3 class="sub">8.1 Holdings</h3>
+  <h3 class="sub">7.1 Holdings</h3>
 
   <div class="scroller"><div class="app">
     <aside class="side">
@@ -1607,25 +1608,26 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>This is where prices are kept up to date.</b> Clicking the price cell opens an inline
     editor — a value and an as-of date defaulting to today — and saving writes a Price record,
     replacing whatever that day already held (§2). The whole editable history of a security lives on
-    the Securities tab of this same screen (§8.4); Holdings is the fast path for the one thing done
+    the Securities tab of this same screen (§7.4); Holdings is the fast path for the one thing done
     weekly, that tab is where a past mistake is repaired.</li>
-    <li><b>Update prices</b> fetches from the provider (§8.6). The button is present only
-    when <code>priceProviderEnabled</code> is on; with the feature off, the inline editor is the
-    only way in, and that is a complete way to use the application.</li>
+    <li><b>Update prices</b> fetches from the provider (§7.6). It is a button and nothing else —
+    there is no setting behind it, and pressing it is the only thing that ever contacts the network.
+    Never press it and the inline editor is the only way in, which is a complete way to use the
+    application.</li>
     <li>A price older than <code>priceStalenessDays</code> is marked on the row itself, not only in
-    §10. <b>A security with no price at all is marked more loudly</b>: its price cell reads
+    §9. <b>A security with no price at all is marked more loudly</b>: its price cell reads
     <em>none</em>, its value and gain read <code>€ 0,00</code>, and check 3 fails. Valuing it at cost
     instead would have hidden the omission inside a plausible number, and a holding worth nothing is
-    the one wrong answer nobody mistakes for the right one (§12.3).</li>
+    the one wrong answer nobody mistakes for the right one (§11.3).</li>
     <li>The table carries <b>gross</b> value and gain — market price, no tax, no fees. This is the
     counterpart to the Portfolio headline, which is net (§3.1); one screen shows what the positions
     are worth, the other what they would leave you with.</li>
     <li>Selecting a row opens the detail panel: lots purchased and sold, weighted average cost,
-    invested total, and the full hypothetical liquidation breakdown (§12.3).</li>
+    invested total, and the full hypothetical liquidation breakdown (§11.3).</li>
     <li>The caveat about lot matching is shown in the panel, next to the number it qualifies.</li>
   </ul>
 
-  <h3 class="sub">8.2 Purchases</h3>
+  <h3 class="sub">7.2 Purchases</h3>
 
   <div class="scroller"><div class="app">
     <aside class="side">
@@ -1667,18 +1669,18 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <i>Total cost</i> and <i>Matched</i> is editable.</li>
     <li><b>Account</b> is the brokerage account the security sits in. The cash for the trade moved
     through a different account — a cash one at the same institution — and pairing the two is what
-    §12.6 does.</li>
+    §11.6 does.</li>
     <li><b>Total cost</b> is <code>qty × price + fees</code>, derived, never entered. It is the
-    figure §12.6 pairs against the bank transaction.</li>
+    figure §11.6 pairs against the bank transaction.</li>
     <li><b>Matched</b> shows the date of the bank transaction the application paired the trade with
-    (§12.6). A dash is what check 6 reports.</li>
+    (§11.6). A dash is what check 6 reports.</li>
     <li>Recording a trade <b>does not</b> create a transaction.</li>
     <li>Ordering: <code>date ASC, insertionSeq ASC</code> — the same direction as Transactions, so
     both ledgers read the same way. No paging; filters narrow the list instead.</li>
     <li>Filters: security, account, period.</li>
   </ul>
 
-  <h3 class="sub">8.3 Sales</h3>
+  <h3 class="sub">7.3 Sales</h3>
 
   <div class="scroller"><div class="app">
     <aside class="side">
@@ -1700,16 +1702,16 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       </div>
       <div class="card" style="padding-top:14px">
         <div class="tblwrap"><table>
-          <thead><tr><th>Date</th><th>Security</th><th>Account</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Fees</th><th class="r">Taxes</th><th class="r">Net proceeds</th><th class="r">Realised gain</th><th>Matched</th><th></th></tr></thead>
+          <thead><tr><th>Date</th><th>Security</th><th>Account</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Fees</th><th class="r">Taxes</th><th class="r">Net proceeds</th><th class="r">Realised gain</th><th>Matched</th><th>Notes</th><th></th></tr></thead>
           <tbody>
-            <tr><td class="n">12/06/2018</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">40</td><td class="n r">€ 25,4000</td><td class="n r">€ 19,00</td><td class="n r">€ 28,86</td><td class="n r">€ 968,14</td><td class="n r pos">+ € 82,14</td><td class="link">⇄ 12/06</td><td class="rowact">···</td></tr>
-            <tr><td class="n">03/03/2020</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">60</td><td class="n r">€ 21,8000</td><td class="n r">€ 19,00</td><td class="n r">€ 0,00</td><td class="n r">€ 1.289,00</td><td class="n r neg">− € 169,00</td><td class="link">⇄ 03/03</td><td class="rowact">···</td></tr>
-            <tr><td class="n">19/11/2020</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">80</td><td class="n r">€ 29,7500</td><td class="n r">€ 19,00</td><td class="n r">€ 108,42</td><td class="n r">€ 2.252,58</td><td class="n r pos">+ € 308,58</td><td class="link">⇄ 19/11</td><td class="rowact">···</td></tr>
-            <tr><td class="n">08/07/2022</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">45</td><td class="n r">€ 27,6000</td><td class="n r">€ 19,00</td><td class="n r">€ 33,67</td><td class="n r">€ 1.189,33</td><td class="n r pos">+ € 95,83</td><td class="link">⇄ 08/07</td><td class="rowact">···</td></tr>
-            <tr><td class="n">22/05/2024</td><td class="desc">VUSA</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">45</td><td class="n r">€ 78,4000</td><td class="n r">€ 19,00</td><td class="n r">€ 185,77</td><td class="n r">€ 3.323,23</td><td class="n r pos">+ € 528,73</td><td class="link">⇄ 22/05</td><td class="rowact">···</td></tr>
-            <tr class="sel"><td class="n">14/04/2026</td><td class="desc">VUSA</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">25</td><td class="n r">€ 89,2000</td><td class="n r">€ 19,00</td><td class="n r">€ 171,21</td><td class="n r">€ 2.039,79</td><td class="n r pos">+ € 487,29</td><td class="link">⇄ 14/04</td><td class="rowact">···</td></tr>
+            <tr><td class="n">12/06/2018</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">40</td><td class="n r">€ 25,4000</td><td class="n r">€ 19,00</td><td class="n r">€ 28,86</td><td class="n r">€ 968,14</td><td class="n r pos">+ € 82,14</td><td class="link">⇄ 12/06</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">03/03/2020</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">60</td><td class="n r">€ 21,8000</td><td class="n r">€ 19,00</td><td class="n r">€ 0,00</td><td class="n r">€ 1.289,00</td><td class="n r neg">− € 169,00</td><td class="link">⇄ 03/03</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">19/11/2020</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">80</td><td class="n r">€ 29,7500</td><td class="n r">€ 19,00</td><td class="n r">€ 108,42</td><td class="n r">€ 2.252,58</td><td class="n r pos">+ € 308,58</td><td class="link">⇄ 19/11</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">08/07/2022</td><td class="desc">EIMI</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">45</td><td class="n r">€ 27,6000</td><td class="n r">€ 19,00</td><td class="n r">€ 33,67</td><td class="n r">€ 1.189,33</td><td class="n r pos">+ € 95,83</td><td class="link">⇄ 08/07</td><td class="dim">rebalancing</td><td class="rowact">···</td></tr>
+            <tr><td class="n">22/05/2024</td><td class="desc">VUSA</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">45</td><td class="n r">€ 78,4000</td><td class="n r">€ 19,00</td><td class="n r">€ 185,77</td><td class="n r">€ 3.323,23</td><td class="n r pos">+ € 528,73</td><td class="link">⇄ 22/05</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr class="sel"><td class="n">14/04/2026</td><td class="desc">VUSA</td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">25</td><td class="n r">€ 89,2000</td><td class="n r">€ 19,00</td><td class="n r">€ 171,21</td><td class="n r">€ 2.039,79</td><td class="n r pos">+ € 487,29</td><td class="link">⇄ 14/04</td><td class="dim">closed the position</td><td class="rowact">···</td></tr>
           </tbody>
-          <tfoot><tr><td colspan="5">6 sales · 2 securities</td><td class="r">€ 114,00</td><td class="r">€ 527,93</td><td class="r tot">€ 11.062,07</td><td class="r pos">+ € 1.333,57</td><td colspan="2"></td></tr></tfoot>
+          <tfoot><tr><td colspan="5">6 sales · 2 securities</td><td class="r">€ 114,00</td><td class="r">€ 527,93</td><td class="r tot">€ 11.062,07</td><td class="r pos">+ € 1.333,57</td><td colspan="3"></td></tr></tfoot>
         </table></div>
       </div>
     </main>
@@ -1719,7 +1721,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>The same table as Purchases with <b>three columns it does not have</b>. <i>Taxes</i> is the
     capital-gains tax the broker actually withheld, entered from the trade confirmation.
     <i>Net proceeds</i> replaces <i>Total cost</i> — <code>qty × price − taxes − fees</code>, what
-    actually reached the account. <i>Realised gain</i> is derived per §12.2 and is the only figure
+    actually reached the account. <i>Realised gain</i> is derived per §11.2 and is the only figure
     on either tab that is neither entered nor a restatement of what was.</li>
     <li><b>Taxes is zero, not blank, when nothing was withheld</b> — a sale at a loss, as in March
     2020 above, or one whose gain the broker offset against a carried-forward loss. Blank would be
@@ -1730,10 +1732,10 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>The footer sums fees, taxes, net proceeds and realised gain. It is the only place the tax
     actually paid over ten years is visible as one figure.</li>
     <li>Everything else — ordering, filters, editing, matching, the fact that a sale creates no
-    transaction — is exactly as §8.2.</li>
+    transaction — is exactly as §7.2.</li>
   </ul>
 
-  <h3 class="sub">8.4 Securities</h3>
+  <h3 class="sub">7.4 Securities</h3>
 
   <div class="scroller"><div class="app">
     <aside class="side">
@@ -1771,8 +1773,11 @@ table.spec td.d{color:var(--faint);font-style:italic;}
           <div class="frm">
             <label>ISIN</label><div class="inp">IE00BDBRDM35</div>
             <label>Ticker</label><div class="inp">AGGH</div>
+            <label>Name</label><div class="inp">iShares Core Global Aggregate Bond</div>
             <label>Type</label><div class="inp sel">Bond ETF</div>
+            <label>Currency</label><div class="inp sel">EUR</div>
             <label>Tax rate</label><div class="inp">26,0%</div>
+            <label>Notes</label><div class="inp ph">optional</div>
           </div>
           <hr class="sep">
           <h4 class="subhead">Price history — 42 records</h4>
@@ -1796,27 +1801,27 @@ table.spec td.d{color:var(--faint);font-style:italic;}
 
   <ul class="body">
     <li><b>Not where securities are created</b> — that happens inline while recording the first
-    trade (§8.5). This tab is where one is corrected afterwards: a mistyped ISIN, a renamed
+    trade (§7.5). This tab is where one is corrected afterwards: a mistyped ISIN, a renamed
     instrument, the wrong type, the tax rate on a whitelist government bond.</li>
     <li><b>Held</b> is the quantity across every brokerage account, an em dash when the position is
     closed. <b>Trades</b> is what decides whether the security can be deleted; <b>Prices</b> does
     not. A price is part of a security rather than a reference to one, so deleting a security deletes
     its history with it and the confirmation says how many records that is — a fully sold instrument
-    entered by mistake goes away in one action (§14).</li>
+    entered by mistake goes away in one action (§13).</li>
     <li><b>The full price history lives here, and every record in it can be edited or deleted.</b>
-    Holdings (§8.1) is the fast path for the one price recorded weekly; this is where a value typed
+    Holdings (§7.1) is the fast path for the one price recorded weekly; this is where a value typed
     into the wrong day is repaired. Editing a record's value replaces it; editing its date moves it,
     replacing whatever occupied the day it lands on (§2). Deleting removes the day entirely, which is
     the only way to undo a price recorded against a date that never had one.</li>
     <li>The history is <b>newest first</b> — the opposite of every other table in the application,
     and deliberately so: the reason to open it is almost always the most recent value, and the
     ten-year tail is reached by scrolling rather than by paging.</li>
-    <li>Changing a security's <b>tax rate</b> changes the §12.3 estimate for it and therefore net
+    <li>Changing a security's <b>tax rate</b> changes the §11.3 estimate for it and therefore net
     worth, and changes nothing that was ever recorded — a sale carries the tax the broker actually
-    withheld (§8.3).</li>
+    withheld (§7.3).</li>
   </ul>
 
-  <h3 class="sub">8.5 Recording a trade, and where securities come from</h3>
+  <h3 class="sub">7.5 Recording a trade, and where securities come from</h3>
   <div class="dlgrow">
     <div class="dlg">
       <h5>Add purchase</h5>
@@ -1854,25 +1859,25 @@ table.spec td.d{color:var(--faint);font-style:italic;}
 
   <ul class="body">
     <li><b>Total cost</b> is computed and shown live as quantity, price and fees are typed — never
-    entered. It is the figure §12.6 pairs against the bank transaction.</li>
+    entered. It is the figure §11.6 pairs against the bank transaction.</li>
     <li><b>Account</b> lists brokerage accounts only, and defaults to the one last used.</li>
     <li><b>Securities are created inline, here.</b> Typing an ISIN or ticker searches existing
     securities; if none matches, the form expands with the fields needed to create one, and it is
     saved together with the trade. There is no separate “create a security first” step.</li>
     <li><b>Tax rate</b> is pre-filled from <code>defaultTaxRate</code> and only needs touching for a
-    whitelist government bond. It affects the §12.3 estimate and nothing that is ever recorded.</li>
-    <li><b>The Securities tab covers everything afterwards</b> (§8.4): correcting the security,
+    whitelist government bond. It affects the §11.3 estimate and nothing that is ever recorded.</li>
+    <li><b>The Securities tab covers everything afterwards</b> (§7.4): correcting the security,
     and its whole price history. Inline creation covers the common path; the tab covers the rest.</li>
     <li><b>The sale form adds a Taxes field</b> below Fees, and shows <b>net proceeds</b>
     — <code>qty × price − taxes − fees</code> — live in place of total cost. It defaults to zero and
-    is never pre-filled from the hypothetical rate of §12.3: an estimate silently becoming a recorded
-    figure is exactly the kind of thing §10 exists to catch, and it would defeat check 7.</li>
+    is never pre-filled from the hypothetical rate of §11.3: an estimate silently becoming a recorded
+    figure is exactly the kind of thing §9 exists to catch, and it would defeat check 7.</li>
   </ul>
 
-  <h3 class="sub">8.6 Prices</h3>
+  <h3 class="sub">7.6 Prices</h3>
   <ul class="body">
-    <li>Prices are entered per security with an <b>as-of date</b>, inline on Holdings (§8.1) or on
-    the Securities tab (§8.4), and every day is kept as history. Recording a price for a day that
+    <li>Prices are entered per security with an <b>as-of date</b>, inline on Holdings (§7.1) or on
+    the Securities tab (§7.4), and every day is kept as history. Recording a price for a day that
     already has one replaces that day and leaves the rest of the history alone.</li>
     <li><b>A price belongs to the security, not to a holding.</b> The same instrument held at two
     institutions is two holdings and one price, so editing the price on either row moves both. The
@@ -1886,37 +1891,39 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     with its own ISIN and its own holding — which the model already supports and which is what the
     difference is telling you.</li>
     <li><b>A security with no price at all values at zero</b>, everywhere a current figure is shown,
-    and fails check 3 by name. The one exception is the historical chart of §12.5, which values a
+    and fails check 3 by name. The one exception is the historical chart of §11.5, which values a
     holding at cost for the stretch before its first recorded price and draws it dashed — a chart
     that exists to show shape can afford an approximation that a figure on the home screen
     cannot.</li>
-    <li><b>Optional online lookup is disabled by default.</b> When enabled in Settings, it is
-    triggered only by the explicit <em>Update prices</em> button. Never automatic, never on load.</li>
+    <li><b>Online lookup has no setting: it is the <em>Update prices</em> button (§7.1) and nothing
+    else.</b> Pressing it is the only thing that ever contacts the network — never automatic, never
+    on load, never in the background. A switch in Settings would have been a second way to express
+    what the button already expresses by not being pressed, and a state in which the button is
+    present but refuses is worse than no state at all.</li>
     <li>It sends security identifiers — ISIN or ticker — to the provider. <b>No amounts, quantities
-    or account data ever leave the machine.</b> The application must state this where the feature is
-    enabled.</li>
+    or account data ever leave the machine.</b> The application must state this <b>next to the
+    button</b>, which is the moment it matters and now the only place the feature is visible.</li>
     <li><b>Which provider is built in, not chosen.</b> There is one, named in the application, with
-    no endpoint or credential to configure — the only preference is whether it is used at all. A
-    setting for the URL would have implied the application can talk to whatever is put in it, which
-    is not true: a price provider has a response shape, and reading it is code. When the provider has
-    to change, that is a new version, and §1's promise about what leaves the machine stays something
-    this document can actually make.</li>
+    no endpoint or credential to configure. A setting for the URL would have implied the application
+    can talk to whatever is put in it, which is not true: a price provider has a response shape, and
+    reading it is code. When the provider has to change, that is a new version, and §1's promise
+    about what leaves the machine stays something this document can actually make.</li>
     <li>Fetched values are shown for confirmation before being written as
     <code>source = fetched</code> Price records.</li>
-    <li>The application is fully usable with the feature off. A provider failure is a message, never
-    a blocked screen.</li>
+    <li>The application is fully usable without ever pressing the button. A provider failure is a
+    message, never a blocked screen.</li>
   </ul>
 </section>
 
-<!-- ================= 9 SALARIES ================= -->
-<section class="doc" id="s9">
+<!-- ================= 8 SALARIES ================= -->
+<section class="doc" id="s8">
   <header>
-    <div class="num">09</div>
+    <div class="num">08</div>
     <h2>Salaries</h2>
     <p>Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.</p>
   </header>
 
-  <h3 class="sub">9.1 Payslips</h3>
+  <h3 class="sub">8.1 Payslips</h3>
   <div class="scroller"><div class="app">
     <aside class="side">
       <div class="brand"><b>Spiccioli</b></div>
@@ -1982,23 +1989,23 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <div class="card">
         <h4>2025 payslips</h4>
         <div class="tblwrap"><table>
-          <thead><tr><th>Month</th><th>Label</th><th class="r">Contract gross</th><th class="r">Gross</th><th class="r">Net payment</th><th class="r">Refunds</th><th class="r">Car</th><th class="r">Net salary</th><th class="r">Net/Gross</th><th class="r">Pension</th><th></th></tr></thead>
+          <thead><tr><th>Month</th><th>Label</th><th class="r">Contract gross</th><th class="r">Gross</th><th class="r">Net payment</th><th class="r">Refunds</th><th class="r">Car</th><th class="r">Net salary</th><th class="r">Net/Gross</th><th class="r">Pension</th><th>Notes</th><th></th></tr></thead>
           <tbody>
-            <tr><td class="n">01/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr><td class="n">02/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 2.172,50</td><td class="n r">€ 182,50</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr><td class="n">03/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 4.180,00</td><td class="n r">€ 2.555,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.735,00</td><td class="n r">65,4%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr><td class="n">04/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr><td class="n">05/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr><td class="n">06/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr><td class="n">07/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.850,00</td><td class="n r">€ 2.340,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.520,00</td><td class="n r">65,5%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr><td class="n">08/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr><td class="n">09/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr><td class="n">10/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr><td class="n">11/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr><td class="n">12/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="rowact">···</td></tr>
-            <tr class="sel"><td class="n">12/2025</td><td><span class="chip">13th</span></td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 2.396,00</td><td class="n r">€ 0,00</td><td class="n r">€ 0,00</td><td class="n r">€ 2.396,00</td><td class="n r">72,6%</td><td class="n r">€ 0,00</td><td class="rowact">···</td></tr>
+            <tr><td class="n">01/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">02/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 2.172,50</td><td class="n r">€ 182,50</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="dim">travel expenses refunded</td><td class="rowact">···</td></tr>
+            <tr><td class="n">03/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 4.180,00</td><td class="n r">€ 2.555,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.735,00</td><td class="n r">65,4%</td><td class="n r">€ 155,00</td><td class="dim">annual bonus</td><td class="rowact">···</td></tr>
+            <tr><td class="n">04/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">05/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">06/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">07/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.850,00</td><td class="n r">€ 2.340,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.520,00</td><td class="n r">65,5%</td><td class="n r">€ 155,00</td><td class="dim">one-off payment</td><td class="rowact">···</td></tr>
+            <tr><td class="n">08/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">09/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">10/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">11/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td class="n">12/2025</td><td class="dim">—</td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 1.990,00</td><td class="n r">€ 0,00</td><td class="n r">€ 180,00</td><td class="n r">€ 2.170,00</td><td class="n r">65,8%</td><td class="n r">€ 155,00</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr class="sel"><td class="n">12/2025</td><td><span class="chip">13th</span></td><td class="n r">€ 3.300,00</td><td class="n r">€ 3.300,00</td><td class="n r">€ 2.396,00</td><td class="n r">€ 0,00</td><td class="n r">€ 0,00</td><td class="n r">€ 2.396,00</td><td class="n r">72,6%</td><td class="n r">€ 0,00</td><td class="dim"></td><td class="rowact">···</td></tr>
           </tbody>
-          <tfoot><tr><td colspan="3">13 payslips</td><td class="r tot">€ 44.330,00</td><td class="r">€ 27.373,50</td><td class="r">€ 182,50</td><td class="r">€ 2.160,00</td><td class="r tot">€ 29.351,00</td><td class="r">66,2%</td><td class="r">€ 1.860,00</td><td></td></tr></tfoot>
+          <tfoot><tr><td colspan="3">13 payslips</td><td class="r tot">€ 44.330,00</td><td class="r">€ 27.373,50</td><td class="r">€ 182,50</td><td class="r">€ 2.160,00</td><td class="r tot">€ 29.351,00</td><td class="r">66,2%</td><td class="r">€ 1.860,00</td><td></td><td></td></tr></tfoot>
         </table></div>
       </div>
     </main>
@@ -2017,7 +2024,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     hourly columns read <em>undefined</em> rather than zero or a dash. The empty cell is the
     invitation: type the number and the row completes itself. Nothing is invented and nothing is
     hidden — a year whose denominator is missing has no hourly pay, and saying so is more use than a
-    plausible figure computed from a guess (§12.7).</li>
+    plausible figure computed from a guess (§11.7).</li>
     <li><b>Working days is always the whole calendar year</b>, never the part worked. In a partial
     first or last year the hourly figures are consequently understated — 2017 and 2026 in the table
     above — and that is accepted rather than corrected: a year-to-date denominator would have to be
@@ -2030,7 +2037,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     is why its net/gross ratio is higher.</li>
     <li>A payslip's money often reaches the bank the following month. The screen does not care —
     every figure here comes from the payslips — but checks 4 and 5 do, and they look one month ahead
-    (§12.6).</li>
+    (§11.6).</li>
     <li>Charts cover all years of the contract. <em>Contract × months</em> uses the contract's own
     <code>monthsPerYear</code>. A partial first or last year shows visibly below the contract line —
     that is correct, not a defect.</li>
@@ -2039,7 +2046,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <code>carPayment</code> from the previous month.</li>
   </ul>
 
-  <h3 class="sub">9.2 Contracts</h3>
+  <h3 class="sub">8.2 Contracts</h3>
 
   <div class="scroller"><div class="app">
     <aside class="side">
@@ -2090,7 +2097,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     denominator, that is the numerator.</li>
     <li><b>A contract is never retired, only ended.</b> Filling in <code>endDate</code> records when
     it finished; it stays in the selector, keeps its payslips and keeps its years. There is nothing
-    to exclude from a total, because no figure in the application sums across contracts (§9.1).</li>
+    to exclude from a total, because no figure in the application sums across contracts (§8.1).</li>
     <li><b>Payslips</b> counts what points at the contract, and is what decides whether it can be
     deleted: at zero it can, otherwise it cannot (§4.3). Its ContractYear records go with it.</li>
     <li>Changing <code>monthsPerYear</code> or <code>hoursPerDay</code> re-computes every derived
@@ -2100,10 +2107,10 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </ul>
 </section>
 
-<!-- ================= 10 CHECKS ================= -->
-<section class="doc" id="s10">
+<!-- ================= 9 CHECKS ================= -->
+<section class="doc" id="s9">
   <header>
-    <div class="num">10</div>
+    <div class="num">09</div>
     <h2>Checks</h2>
     <p>Fourteen checks. Each passes or names the exact records that made it fail. No tabs.</p>
   </header>
@@ -2127,12 +2134,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
           <div class="chk"><span class="st no">✕</span><span class="name">Every transaction has a category<em>Uncategorised transactions are excluded from every total, silently.</em><span class="det">08/08/2026 · Intesa Sanpaolo · Conto Corrente · ADDEBITO DIVERSI 4471 · − € 41,20</span></span><span class="res no">1 of 4.812</span></div>
           <div class="chk"><span class="st no">✕</span><span class="name">Prices are recent<em>A stale price quietly misstates net worth.</em><span class="det">AGGH · iShares Core Global Aggregate Bond · € 4,8540 on 07/06/2026 — 62 days ago</span></span><span class="res no">1 of 5</span></div>
           <div class="chk"><span class="st ok">✓</span><span class="name">Payslips match salary transactions<em>Net payment on each payslip against a Salary transaction in the same month or the next.</em></span><span class="res">117 payslips</span></div>
-          <div class="chk"><span class="st ok">✓</span><span class="name">Payslip pension contributions match pension transactions<em>Monthly totals, same window, against the pension fund account.</em></span><span class="res">109 months</span></div>
-          <div class="chk"><span class="st ok">✓</span><span class="name">Purchase transactions match recorded purchases<em>Securities purchase transactions against the purchases on the Investments screen.</em></span><span class="res">41 purchases</span></div>
-          <div class="chk"><span class="st ok">✓</span><span class="name">Sale transactions match recorded sales<em>Securities sale transactions against the sales on the Investments screen.</em></span><span class="res">6 sales</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Payslip pension contributions match transactions<em>Monthly totals, same window, against the pension fund account.</em></span><span class="res">109 months</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Purchase transactions match purchases<em>Securities purchase transactions against the purchases on the Investments screen.</em></span><span class="res">41 purchases</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Sale transactions match sales<em>Securities sale transactions against the sales on the Investments screen.</em></span><span class="res">6 sales</span></div>
           <div class="chk"><span class="st ok">✓</span><span class="name">No holding has gone negative<em>More sold than ever bought means a missing purchase.</em></span><span class="res">5 holdings</span></div>
           <div class="chk"><span class="st ok">✓</span><span class="name">No sale precedes its purchase<em>A sale with nothing bought before it in the same account.</em></span><span class="res">6 sales</span></div>
-          <div class="chk"><span class="st ok">✓</span><span class="name">The pension fund has been revalued recently<em>Its balance only moves when a value adjustment is recorded.</em></span><span class="res">8 days ago</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Pension fund revalued recently<em>Its balance only moves when a value adjustment is recorded.</em></span><span class="res">8 days ago</span></div>
           <div class="chk"><span class="st ok">✓</span><span class="name">Closed accounts are empty<em>A closed account leaves net worth, so anything left in it would vanish silently.</em></span><span class="res">1 closed</span></div>
           <div class="chk"><span class="st ok">✓</span><span class="name">Records fall within their account's life<em>A transaction or trade dated before the account opened, or after it closed, is a typo or the wrong account.</em></span><span class="res">4.812 + 47</span></div>
           <div class="chk"><span class="st ok">✓</span><span class="name">Receipt-tracked transactions carry a state<em>A category that expects a receipt should never read n/a.</em></span><span class="res">623 tracked</span></div>
@@ -2145,12 +2152,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <div class="specwrap"><table class="spec">
     <thead><tr><th>#</th><th>Check</th><th>Definition</th><th>Failure output</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td>Internal transfers balance out</td><td>Every transaction in a category with role <code>internal transfer</code> pairs with an opposite leg (§12.6).</td><td>Each unpaired leg, with date, account, description, amount.</td></tr>
+      <tr><td>1</td><td>Internal transfers balance out</td><td>Every transaction in a category with role <code>internal transfer</code> pairs with an opposite leg (§11.6).</td><td>Each unpaired leg, with date, account, description, amount.</td></tr>
       <tr><td>2</td><td>Every transaction has a category</td><td><code>categoryId</code> is set.</td><td>Each uncategorised transaction.</td></tr>
-      <tr><td>3</td><td>Prices are recent</td><td>Every security with an open holding has at least one Price record, and its latest one is dated within <code>priceStalenessDays</code>. <b>No price at all fails too</b>, and is the more serious of the two: that holding is valued at zero everywhere (§12.3).</td><td>Security, price, date, age — or “no price recorded”.</td></tr>
-      <tr><td>4</td><td>Payslips match salary transactions</td><td>Every payslip pairs one-to-one with a transaction in a role <code>salary</code> category, of equal <code>netPayment</code>, dated in the payslip's month or the one after — and every such transaction pairs with a payslip (§12.6).</td><td>Unmatched payslips and unmatched transactions, listed separately, with amounts.</td></tr>
-      <tr><td>5</td><td>Payslip pension contributions match transactions</td><td><b>Monthly totals, not record by record.</b> For each month, Σ <code>pensionContribution</code> over that month's payslips = Σ of the role <code>pension contribution</code> transactions attributed to it (§12.6). A month's contribution reaches the fund as two or three separate credits — employee share, employer share, TFR — so pairing them one to one could never have worked. Months whose payslips total zero are out of scope.</td><td>The month, the payslip total, the transaction total, and the difference.</td></tr>
-      <tr><td>6</td><td>Purchase transactions match purchases</td><td>Every transaction in a role <code>securities purchase</code> category pairs with a purchase trade, and vice versa (§12.6).</td><td>Unmatched transactions and unmatched trades, listed separately.</td></tr>
+      <tr><td>3</td><td>Prices are recent</td><td>Every security with an open holding has at least one Price record, and its latest one is dated within <code>priceStalenessDays</code>. <b>No price at all fails too</b>, and is the more serious of the two: that holding is valued at zero everywhere (§11.3).</td><td>Security, price, date, age — or “no price recorded”.</td></tr>
+      <tr><td>4</td><td>Payslips match salary transactions</td><td>Every payslip pairs one-to-one with a transaction in a role <code>salary</code> category, of equal <code>netPayment</code>, dated in the payslip's month or the one after — and every such transaction pairs with a payslip (§11.6).</td><td>Unmatched payslips and unmatched transactions, listed separately, with amounts.</td></tr>
+      <tr><td>5</td><td>Payslip pension contributions match transactions</td><td><b>Monthly totals, not record by record.</b> For each month, Σ <code>pensionContribution</code> over that month's payslips = Σ of the role <code>pension contribution</code> transactions attributed to it (§11.6). A month's contribution reaches the fund as two or three separate credits — employee share, employer share, TFR — so pairing them one to one could never have worked. Months whose payslips total zero are out of scope.</td><td>The month, the payslip total, the transaction total, and the difference.</td></tr>
+      <tr><td>6</td><td>Purchase transactions match purchases</td><td>Every transaction in a role <code>securities purchase</code> category pairs with a purchase trade, and vice versa (§11.6).</td><td>Unmatched transactions and unmatched trades, listed separately.</td></tr>
       <tr><td>7</td><td>Sale transactions match sales</td><td>As above for role <code>securities sale</code> and sale trades. The trade side is net proceeds — after tax and fees — so it can equal what the bank credited.</td><td>As above.</td></tr>
       <tr><td>8</td><td>No holding has gone negative</td><td>For every (security, account), running quantity in date order never drops below 0.</td><td>Security, account, the trade that took it negative.</td></tr>
       <tr><td>9</td><td>No sale precedes its purchase</td><td>Every sale has at least one earlier purchase of that security in that account.</td><td>The offending sale.</td></tr>
@@ -2186,7 +2193,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     stale enough to need one would not be worth showing in a badge.</li>
     <li>Each failing entry links to the record it names.</li>
     <li><b>Checks 13 and 14 fail immediately after an import, by design.</b> Receipt state is never
-    set by the application (§7.3): every row arrives <code>na</code>, so the rent, the electricity
+    set by the application (§6.3): every row arrives <code>na</code>, so the rent, the electricity
     and the salary that just came in are all reported as untracked until the user goes through them.
     That is the to-do list working, not a defect — the alternative was an application that quietly
     marked a receipt as expected and let the user believe someone had looked at it.</li>
@@ -2203,14 +2210,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </ul>
 </section>
 
-<!-- ================= 11 SETTINGS ================= -->
-<section class="doc" id="s11">
+<!-- ================= 10 SETTINGS ================= -->
+<section class="doc" id="s10">
   <header>
-    <div class="num">11</div>
+    <div class="num">10</div>
     <h2>Settings</h2>
     <p>Preferences, and nothing else. Every kind of reference data lives on the screen that consumes
-    it — accounts and institutions on Accounts (§4), securities and prices on Investments (§8.4),
-    contracts on Salaries (§9.2), rules and the category list on Categories (§7.2, §7.3) — so that
+    it — accounts and institutions on Accounts (§4), securities and prices on Investments (§7.4),
+    contracts on Salaries (§8.2), rules and the category list on Categories (§6.2, §6.3) — so that
     editing a thing and seeing what it does are the same trip. What is left here belongs to no screen
     in particular.</p>
   </header>
@@ -2252,7 +2259,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <label>Trade match window</label><div class="inp">5 days</div>
           </div>
           <p class="hint">Every one of these is the parameter of a named check or of the matching of
-          §12.6. Changing one re-runs the checks before the field loses focus.</p>
+          §11.6. Changing one re-runs the checks before the field loses focus.</p>
         </div>
       </div>
       <div class="cols a">
@@ -2262,19 +2269,6 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <label>Backups kept</label><div class="inp">10</div>
             <label>Data file</label><div class="inp ph">~/Documents/finances.spiccioli</div>
             <label>Backup folder</label><div class="inp ph">~/Documents/finances.backups</div>
-          </div>
-        </div>
-        <div class="card">
-          <h4>Price provider</h4>
-          <div class="frm">
-            <label>Online lookup</label><div class="inp chipset"><span class="chip type">on</span><span class="chip">off</span></div>
-            <label>Provider</label><div class="inp ph">built in — not configurable</div>
-          </div>
-          <div class="warnline">
-            <span class="neg">▲</span>
-            <span>With this on, <b>ISIN and ticker</b> are sent to the built-in provider when you
-            press <em>Update prices</em>, and nothing else ever leaves this machine — no amounts, no
-            quantities, no account names. It is never contacted on its own.</span>
           </div>
         </div>
       </div>
@@ -2287,21 +2281,21 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>dateFormat</td><td>DD/MM/YYYY</td><td>Display only</td></tr>
       <tr><td>decimalSeparator</td><td>,</td><td>Display only</td></tr>
       <tr><td>thousandsSeparator</td><td>.</td><td>Display only</td></tr>
-      <tr><td>currencySymbol, position</td><td>€, before</td><td>Every monetary figure — <b>all of them carry it</b></td></tr>
+      <tr><td>currencySymbol</td><td>€</td><td>Every monetary figure — <b>all of them carry it</b></td></tr>
+      <tr><td>currencyPosition</td><td>before</td><td>As above</td></tr>
       <tr><td>defaultTaxRate</td><td>26%</td><td>Initial value of <code>Security.taxRate</code> (§2). Changing it does not touch securities that already exist.</td></tr>
       <tr><td>priceStalenessDays</td><td>30</td><td>Check 3, holdings marker</td></tr>
       <tr><td>pensionRevaluationMonths</td><td>3</td><td>Check 10</td></tr>
       <tr><td>receiptPendingMonths</td><td>3</td><td>Check 14</td></tr>
-      <tr><td>transferMatchWindowDays</td><td>5</td><td>§12.6, check 1</td></tr>
-      <tr><td>tradeMatchWindowDays</td><td>5</td><td>§12.6, checks 6 and 7</td></tr>
-      <tr><td>backupCount</td><td>10</td><td>§13</td></tr>
-      <tr><td>priceProviderEnabled</td><td>off</td><td>§8.6. Shows the <em>Update prices</em> button.</td></tr>
-          </tbody>
+      <tr><td>transferMatchWindowDays</td><td>5</td><td>§11.6, check 1</td></tr>
+      <tr><td>tradeMatchWindowDays</td><td>5</td><td>§11.6, checks 6 and 7</td></tr>
+      <tr><td>backupCount</td><td>10</td><td>§12</td></tr>
+    </tbody>
   </table></div>
   <p class="body">Formats are a <b>user preference, not a hard-coded locale</b>. Changing one
   re-renders every figure in the application immediately.</p>
   <p class="body"><b>They are display-only, and importing ignores them.</b> A pasted export is
-  parsed by detecting its own date order and separators from the rows themselves (§6), because the
+  parsed by detecting its own date order and separators from the rows themselves (§5.7), because the
   file came from a bank and has no reason to match how you like to read numbers. The two are kept
   apart deliberately: changing how dates are displayed must never change how a paste is
   interpreted.</p>
@@ -2314,18 +2308,18 @@ table.spec td.d{color:var(--faint);font-style:italic;}
 
   <ul class="body">
     <li><b>No save button.</b> A preference applies as it is changed and the file is written by the
-    ordinary autosave (§13); a value that cannot be applied is refused in place and the previous one
-    stays in force (§14).</li>
-    <li>The three <b>path</b> rows are read-only facts about the session, shown because the sidebar
+    ordinary autosave (§12); a value that cannot be applied is refused in place and the previous one
+    stays in force (§13).</li>
+    <li>The two <b>path</b> rows are read-only facts about the session, shown because the sidebar
     only has room for a file name and the backup folder is otherwise invisible. Changing which file
-    is open is done by opening another one (§13).</li>
+    is open is done by opening another one (§12).</li>
   </ul>
 </section>
 
-<!-- ================= 12 CALCULATIONS ================= -->
-<section class="doc" id="s12">
+<!-- ================= 11 CALCULATIONS ================= -->
+<section class="doc" id="s11">
   <header>
-    <div class="num">12</div>
+    <div class="num">11</div>
     <h2>Calculations</h2>
     <p>Every formula in one place. All amounts are EUR; rounding is to 2 decimals at display, never
     in intermediate steps. <b>Every monetary figure carries exactly two decimals</b> — single
@@ -2333,13 +2327,13 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <code>€ 21.900,00</code> and never <code>€ 21.900</code>, and a column of figures always aligns
     on the same decimal place. Quantities and unit prices carry four; percentages carry one. The
     only figures written short are the axis labels on a chart, where <code>100k</code> is the point.
-    <b>One exception to the no-intermediate-rounding rule:</b> the amount comparisons of §12.6 are
+    <b>One exception to the no-intermediate-rounding rule:</b> the amount comparisons of §11.6 are
     made on totals rounded to 2 decimals, because the figure on the other side of the comparison is
     a bank transaction that was itself rounded to the cent.</p>
     <p><b>“Today” is the computer's own clock</b> — its current local date, read at the moment a
     figure is computed and never cached. Every age in the application rests on it: the staleness of a
     price, the months since a pension revaluation, how long a receipt has been pending. One
-    consequence is worth stating: checks run at startup and after every change (§10), so a session
+    consequence is worth stating: checks run at startup and after every change (§9), so a session
     left open across midnight goes on reporting yesterday's ages until something changes or the
     application is restarted. There is no timer and no midnight refresh — for a ledger measuring
     ages in weeks and months, a day of lag on an idle window is not worth a background process.</p>
@@ -2347,11 +2341,11 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     blank.</b> Hourly pay for a year whose working days were never entered, a net-to-gross ratio on
     a gross of zero, a percentage gain on a position that cost nothing: each reads
     <code>undefined</code> where the figure would go, and the input that would make it computable is
-    the one left visibly empty (§9.1, §14). Zero would be a lie and a dash would look like “none
+    the one left visibly empty (§8.1, §13). Zero would be a lie and a dash would look like “none
     recorded”.</p>
   </header>
 
-  <h3 class="sub">12.1 Weighted average cost</h3>
+  <h3 class="sub">11.1 Weighted average cost</h3>
   <ul class="body">
     <li>Per (security, account), walking trades in date order.</li>
     <li><b>Purchase:</b> <code>quantity += q</code>, <code>costBasis += q × price + fees</code>,
@@ -2366,7 +2360,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     from a cost basis of half a cent — small enough never to be noticed and wrong from then on.</li>
   </ul>
 
-  <h3 class="sub">12.2 Realised gain on a sale</h3>
+  <h3 class="sub">11.2 Realised gain on a sale</h3>
   <ul class="body">
     <li><code>netProceeds = q × price − taxes − fees</code> — the trade's <code>total</code>, and
     the figure compared against the bank transaction by check 7.</li>
@@ -2374,18 +2368,18 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     everything the broker took, so it is what the sale actually added to net worth.</li>
     <li>Summed across all sales for the Portfolio all-time figure.</li>
     <li>The gross counterpart, <code>q × price − fees − (q × avgCost)</code>, is what the tax was
-    computed on — the same shape as <code>taxableGain</code> in §12.3, fee first, which is why the
+    computed on — the same shape as <code>taxableGain</code> in §11.3, fee first, which is why the
     estimate and the record are comparable at all. It is not displayed: the tax on a real sale is a
     recorded fact, so there is nothing to reconcile it against.</li>
   </ul>
 
-  <h3 class="sub">12.3 Hypothetical liquidation</h3>
+  <h3 class="sub">11.3 Hypothetical liquidation</h3>
   <ul class="body">
     <li><code>grossProceeds = quantity × price</code>, where <code>price</code> is the value of the
     security's latest Price record, <b>or 0 when it has none</b>.</li>
     <li><b>A holding with no price is worth 0</b>, its gain is minus its cost, its tax is 0 and
     <b>no sell fee is charged</b> — what nothing would leave you with is nothing, not minus a
-    commission. Check 3 names the security, and §8.1 marks the row. This is deliberate: valuing an
+    commission. Check 3 names the security, and §7.1 marks the row. This is deliberate: valuing an
     unpriced holding at cost would have buried a missing price inside a number that looks
     right.</li>
     <li><code>fee = institution.defaultSellFee</code> of the holding's account, or 0 when the account
@@ -2398,7 +2392,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><code>netGain = netProceeds − (quantity × avgCost)</code></li>
     <li><b>The fee comes out before the tax, not after it.</b> A selling commission is a cost of the
     disposal and reduces the gain the tax is computed on — which is how the broker computes it, and
-    the only ordering under which this estimate and the recorded figures of §12.2 mean the same thing
+    the only ordering under which this estimate and the recorded figures of §11.2 mean the same thing
     by the same arithmetic. It is worth a quarter of the fee, and it is worth being right about.</li>
     <li><b>Tax is rounded to the cent</b> before it is subtracted — the one place a figure is rounded
     mid-calculation. It is an amount of money that a broker would withhold in cents, and leaving it
@@ -2414,7 +2408,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     and tax rate. It is the <i>unrealised net investment gain</i> line on Portfolio, and, added to
     the cost-based total, the headline net worth itself (§3.1).</li>
     <li><b>Applies only to open holdings.</b> A sale that has happened carries the tax the broker
-    actually withheld (§2, §12.2); this section never restates it.</li>
+    actually withheld (§2, §11.2); this section never restates it.</li>
   </ul>
   <div class="callout">Weighted average is an approximation. A broker may match lots differently
   when computing the taxable gain, so the tax figure is an estimate. <b>The application must say so
@@ -2429,10 +2423,10 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   relief, loss carry-forward, a personal allowance — is a change to this section alone, not to the
   domain model, and is not designed for now.</div>
 
-  <h3 class="sub">12.4 Balances and net worth</h3>
+  <h3 class="sub">11.4 Balances and net worth</h3>
   <ul class="body">
     <li>Cash account: <code>accountBalance = openingBalance + Σ transaction amounts</code></li>
-    <li>Brokerage account: <code>accountBalance = Σ netProceeds of its holdings</code> (§12.3)</li>
+    <li>Brokerage account: <code>accountBalance = Σ netProceeds of its holdings</code> (§11.3)</li>
     <li><code>netWorth = Σ accountBalance</code> over open accounts — which, holdings being held in
     accounts of their own, is the whole of it.</li>
     <li><code>totalAtCost = Σ cash accountBalance + Σ holding invested</code>, the same total with
@@ -2441,13 +2435,13 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>Securities purchases already reduce the cash account through their transaction, so holdings
     are added, not double-counted.</li>
     <li><b>Closed accounts are excluded</b> — and nothing stops an account being closed with money
-    still in it, since checks report rather than block (§10). The exclusion can therefore move net
+    still in it, since checks report rather than block (§9). The exclusion can therefore move net
     worth on its own, which is exactly what check 11 exists to say out loud: it fails naming the
     account and the balance left in it, and the Portfolio banner carries it until the account is
     emptied or its closing date removed. The money is never quietly gone; it is gone and named.</li>
   </ul>
 
-  <h3 class="sub">12.5 Net worth over time</h3>
+  <h3 class="sub">11.5 Net worth over time</h3>
   <ul class="body">
     <li>Monthly points at each month end, from the earliest transaction to today.</li>
     <li>At date <code>d</code>, over every account whose <code>openingDate ≤ d</code> and which was
@@ -2460,7 +2454,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     single dashed prefix and a solid remainder, because prices start being recorded and then keep
     being recorded — but the rule is stated per point so that a security bought later and never
     priced dashes the segment it affects instead of quietly passing as measured. <b>This is the one place a
-    missing price is not zero</b> (§12.3), and the reason is what the chart is for: it shows the
+    missing price is not zero</b> (§11.3), and the reason is what the chart is for: it shows the
     shape of ten years, not a figure anyone acts on, and a decade of holdings collapsing to zero
     would have said something false about the past rather than something true about the data.</li>
     <li><b>The chart is gross</b> — no hypothetical tax or fee, unlike the headline figure it sits
@@ -2469,7 +2463,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     slightly above the headline net worth; the legend says so.</li>
   </ul>
 
-  <h3 class="sub">12.6 Derived matching</h3>
+  <h3 class="sub">11.6 Derived matching</h3>
   <p class="body">Records that ought to correspond are paired heuristically, with <b>no linking
   effort from the user</b>. Matching is recomputed, never stored.</p>
   <ul class="body">
@@ -2507,31 +2501,31 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     disagree, with the difference.</li>
   </ul>
 
-  <h3 class="sub">12.7 Salary figures</h3>
+  <h3 class="sub">11.7 Salary figures</h3>
   <ul class="body">
     <li><code>netSalary = netPayment − refunds + carPayment</code></li>
     <li><code>netGrossPct = netSalary ÷ gross</code></li>
     <li><code>yearContractGross = max(contractGross in year) × contract.monthsPerYear</code></li>
     <li><code>grossPerHour = Σ gross in year ÷ (workingDays × contract.hoursPerDay)</code>, and the
     same with <code>Σ netSalary</code>. <code>workingDays</code> is the whole calendar year (§2), so
-    a partial year understates both — accepted, see §9.1.</li>
+    a partial year understates both — accepted, see §8.1.</li>
     <li>Per-year <code>netGrossPct = Σ netSalary in year ÷ Σ gross in year</code>, not the average of
     the monthly percentages.</li>
     <li>All of the above are computed within the selected contract only.</li>
   </ul>
 </section>
 
-<!-- ================= 13 STORAGE ================= -->
-<section class="doc" id="s13">
+<!-- ================= 12 STORAGE ================= -->
+<section class="doc" id="s12">
   <header>
-    <div class="num">13</div>
+    <div class="num">12</div>
     <h2>Storage</h2>
   </header>
 
   <ul class="body">
     <li><b>One file</b> holding everything: institutions, accounts, securities, prices, transactions,
     trades, contracts, contract years, payslips, categories, rules, preferences. All eleven stored
-    entities of §2 and the preferences of §11 — nothing about the file lives outside it, and the
+    entities of §2 and the preferences of §10 — nothing about the file lives outside it, and the
     only thing not in it is the list of recently opened locations.</li>
     <li><b>The file lives wherever the user puts it</b> — a plain local folder, a cloud-synced
     folder, or an encrypted vault inside one. The application makes no assumption about the
@@ -2545,12 +2539,13 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     copy means the other version is recoverable if the overwrite turns out to be the wrong call.</li>
     <li><b>The user is told, in those terms, and not with a question.</b> A line appears on the
     screen they are on — <em>“This file was changed by something else while you had it open. That
-    version has been saved to the backup folder as finances-2026-08-11-1432-external.spiccioli, and
+    version has been saved to the backup folder as finances-2026-08-08-1432-external.spiccioli, and
     your work has been kept.”</em> — and it stays until dismissed. It is not a modal and it is not a
     choice between two versions: the user has one of them in front of them and has no way to judge
     the other from a dialog, so the application does the safe thing and tells them precisely where to
-    find what it displaced. This is the routine two-machine case, not an exotic one — §1 puts the
-    file wherever the user likes, which includes a synced folder.</li>
+    find what it displaced. This is what §1 means by not coordinating two of itself: the folder is
+    allowed to be a synced one, so the situation is ordinary rather than exotic, and detecting it and
+    saying so is the whole of the application's answer to it.</li>
     <li><b>Ten rolling timestamped backups</b> in a folder beside the data file, count configurable.
     One is taken <b>when the application quits after a session in which anything changed</b>, and one
     <b>when a file is opened</b> — not per save. Autosave fires every few seconds while typing;
@@ -2566,7 +2561,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     sitting in the folder.</li>
     <li><b>On launch the application always asks which file to open</b>, offering the recently opened
     locations, a browse option, and <b>New file…</b> — which writes a fresh file with the categories
-    of §7.3 seeded and nothing else. It never reopens the last file automatically.</li>
+    of §6.3 seeded and nothing else. It never reopens the last file automatically.</li>
     <li><b>No undo/redo</b> in v1. This is why every delete confirms.</li>
     <li><b>The format must be documented</b> well enough for an external script to write it — the
     ten years of historical data will be loaded by a one-off migration script, not by the
@@ -2595,7 +2590,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     application does not care where the file is.
   </div>
 
-  <h3 class="sub">13.1 The launch screen</h3>
+  <h3 class="sub">12.1 The launch screen</h3>
 
   <div class="dlgrow">
     <div class="dlg">
@@ -2634,7 +2629,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
 
   <ul class="body">
     <li>The application <b>always</b> opens here — recent locations, <em>Open…</em>, and
-    <em>New file…</em>, which writes a fresh file with the categories of §7.3 seeded and nothing
+    <em>New file…</em>, which writes a fresh file with the categories of §6.3 seeded and nothing
     else. It never reopens the last file on its own.</li>
     <li>A recent entry whose file has moved or been deleted is shown struck through with the reason,
     and stays in the list until it is dismissed: a file that has vanished from a synced folder is
@@ -2643,41 +2638,41 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     the sentence rather than a footnote, and says plainly what stops working afterwards. Cancelling
     writes nothing at all.</li>
     <li>This is the <b>only</b> screen in the application where an error can prevent you from getting
-    to the rest of it (§15).</li>
+    to the rest of it (§14).</li>
   </ul>
 </section>
 
-<!-- ================= 14 VALIDATION ================= -->
-<section class="doc" id="s14">
+<!-- ================= 13 VALIDATION ================= -->
+<section class="doc" id="s13">
   <header>
-    <div class="num">14</div>
+    <div class="num">13</div>
     <h2>Validation</h2>
     <p>What the forms refuse. Everything here is enforced at the point of entry, by the field or by
-    the save; nothing here is a check (§10). The division is deliberate: a <b>rule about one record
+    the save; nothing here is a check (§9). The division is deliberate: a <b>rule about one record
     in isolation</b> is a validation and is prevented, while a <b>rule about how two records relate</b>
     is a check and is reported. That is why a trade cannot have a negative quantity but can sell more
     than was ever bought.</p>
   </header>
 
-  <h3 class="sub">14.1 How it behaves</h3>
+  <h3 class="sub">13.1 How it behaves</h3>
   <ul class="body">
     <li><b>Invalid input is refused as it is typed</b>, not on save, wherever the field can tell:
     letters in an amount, a thirteenth month, a fifth decimal. What cannot be judged until the whole
     form is known — a required field left empty, a duplicate name — marks the field and disables the
     save button, with the reason beside the field.</li>
-    <li><b>Never a modal.</b> The message sits where the offending value is (§15).</li>
+    <li><b>Never a modal.</b> The message sits where the offending value is (§14).</li>
     <li>In an <b>inline edit</b>, a refused value keeps the cell open and the previous value in
     force. The row is never left half-changed.</li>
     <li><b>Text is trimmed on save</b>, everywhere, and a field that trims to nothing counts as
     empty. Interior whitespace is left alone — bank descriptions carry it and rules match on it.</li>
     <li><b>The file is not re-validated on open.</b> These rules exist to stop a person mistyping,
     not to defend against a malformed file: the ten years of history arrive through a one-off
-    migration script written for this file alone (§13), and a script that writes something the forms
+    migration script written for this file alone (§12), and a script that writes something the forms
     would have refused has produced data the application will show faithfully and the checks will
     complain about. That is the intended outcome.</li>
   </ul>
 
-  <h3 class="sub">14.2 The rules</h3>
+  <h3 class="sub">13.2 The rules</h3>
   <div class="specwrap"><table class="spec">
     <thead><tr><th>Field</th><th>Rule</th></tr></thead>
     <tbody>
@@ -2690,7 +2685,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>type</td><td>Required. <b>Locked once the account holds anything</b> — a transaction or a trade. Changing a cash account into a brokerage one would orphan every row on it.</td></tr>
       <tr><td>openingBalance</td><td>Required, any sign. <b>Forced to 0 and disabled on <code>Brokerage</code></b> (§2).</td></tr>
       <tr><td>openingDate</td><td>Required.</td></tr>
-      <tr><td>closingDate</td><td>Optional; must be ≥ <code>openingDate</code>. Nothing else is required to close an account — check 11 reports what was left in it (§10).</td></tr>
+      <tr><td>closingDate</td><td>Optional; must be ≥ <code>openingDate</code>. Nothing else is required to close an account — check 11 reports what was left in it (§9).</td></tr>
       <tr><td>delete</td><td>Refused while any transaction or trade points at it. Closing is what retiring looks like (§4.3).</td></tr>
       <tr class="grp"><td colspan="2"><b>Transaction</b></td></tr>
       <tr><td>accountId</td><td>Required. The picker lists <b>cash accounts only</b>; a brokerage account can never be chosen, here or on an import.</td></tr>
@@ -2698,15 +2693,15 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>description</td><td>Required, trimmed, non-empty. It is the only thing a rule matches on.</td></tr>
       <tr><td>amount</td><td>Required, non-zero, at most 2 decimals, either sign. Empty blocks the save; zero is refused as a typo for a real amount.</td></tr>
       <tr><td>categoryId</td><td><b>Either a category or <em>Automatic</em> — never nothing.</b> The picker offers no clearing entry, so a <code>manual</code> row always carries a category and the only empty category in the file is one no rule matched (§2).</td></tr>
-      <tr><td>receiptState</td><td>One of the three values, <code>na</code> on creation, changed only by hand (§7.3).</td></tr>
+      <tr><td>receiptState</td><td>One of the three values, <code>na</code> on creation, changed only by hand (§6.3).</td></tr>
       <tr class="grp"><td colspan="2"><b>Trade</b></td></tr>
       <tr><td>accountId</td><td>Required. The picker lists <b>brokerage accounts only</b>.</td></tr>
-      <tr><td>securityId</td><td>Required — chosen from the existing list or created inline (§8.5).</td></tr>
+      <tr><td>securityId</td><td>Required — chosen from the existing list or created inline (§7.5).</td></tr>
       <tr><td>quantity</td><td>Required, &gt; 0, at most 4 decimals. Direction is <code>kind</code>, never a negative quantity.</td></tr>
       <tr><td>unitPrice</td><td>Required, &gt; 0, at most 4 decimals.</td></tr>
       <tr><td>fees</td><td>Required, ≥ 0.</td></tr>
-      <tr><td>taxes</td><td>Required on a sale, ≥ 0. <b>Forced to 0 and disabled on a purchase.</b> Never pre-filled from the estimate of §12.3.</td></tr>
-      <tr><td>oversell</td><td><b>Not validated.</b> A sale of more than has been bought is saved and reported by checks 8 and 9 — during entry, a sale recorded before its purchase is the ordinary case (§10).</td></tr>
+      <tr><td>taxes</td><td>Required on a sale, ≥ 0. <b>Forced to 0 and disabled on a purchase.</b> Never pre-filled from the estimate of §11.3.</td></tr>
+      <tr><td>oversell</td><td><b>Not validated.</b> A sale of more than has been bought is saved and reported by checks 8 and 9 — during entry, a sale recorded before its purchase is the ordinary case (§9).</td></tr>
       <tr class="grp"><td colspan="2"><b>Security</b></td></tr>
       <tr><td>isin</td><td>Required, unique, 12 characters, two letters then nine alphanumerics then a digit. The format is checked; the check digit is not recomputed.</td></tr>
       <tr><td>ticker, name</td><td>Required, trimmed.</td></tr>
@@ -2715,7 +2710,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr class="grp"><td colspan="2"><b>Price</b></td></tr>
       <tr><td>date</td><td>Required. <b>Not in the future</b> — a price is a fact about a day that has happened.</td></tr>
       <tr><td>value</td><td>Required, &gt; 0, at most 4 decimals.</td></tr>
-      <tr><td>collision</td><td>Saving onto a day that already has a price <b>asks first</b>, naming the value being replaced. Moving a record onto an occupied day does the same (§8.4).</td></tr>
+      <tr><td>collision</td><td>Saving onto a day that already has a price <b>asks first</b>, naming the value being replaced. Moving a record onto an occupied day does the same (§7.4).</td></tr>
       <tr class="grp"><td colspan="2"><b>Contract</b></td></tr>
       <tr><td>name</td><td>Required, trimmed, unique.</td></tr>
       <tr><td>monthsPerYear</td><td>Required, integer, 1 – 24.</td></tr>
@@ -2723,15 +2718,15 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>startDate / endDate</td><td>Start required; end optional and ≥ start.</td></tr>
       <tr><td>delete</td><td>Refused while any payslip points at it. Its ContractYear records go with it when it is deleted.</td></tr>
       <tr class="grp"><td colspan="2"><b>ContractYear</b></td></tr>
-      <tr><td>workingDays</td><td>Integer 1 – 366, <b>or empty</b>. Empty is a legitimate state meaning “not entered yet”, and is what makes the hourly columns read <em>undefined</em> rather than wrong (§12.7). Zero is refused — it is not a year, it is a division by zero spelled differently.</td></tr>
+      <tr><td>workingDays</td><td>Integer 1 – 366, <b>or empty</b>. Empty is a legitimate state meaning “not entered yet”, and is what makes the hourly columns read <em>undefined</em> rather than wrong (§11.7). Zero is refused — it is not a year, it is a division by zero spelled differently.</td></tr>
       <tr class="grp"><td colspan="2"><b>Payslip</b></td></tr>
       <tr><td>contractId</td><td>Required.</td></tr>
       <tr><td>year, month</td><td>Required; month 1 – 12. The month must fall <b>within the contract's start and end dates</b> — a payslip from before you were hired is always a typo.</td></tr>
       <tr><td>gross, contractGross</td><td>Required, &gt; 0.</td></tr>
       <tr><td>netPayment</td><td>Required, ≥ 0.</td></tr>
-      <tr><td>refunds, carPayment, pensionContribution</td><td>Required, ≥ 0. These are magnitudes; the formula of §12.7 applies their signs.</td></tr>
+      <tr><td>refunds, carPayment, pensionContribution</td><td>Required, ≥ 0. These are magnitudes; the formula of §11.7 applies their signs.</td></tr>
       <tr class="grp"><td colspan="2"><b>Rule</b></td></tr>
-      <tr><td>substring</td><td>Required, trimmed, at least 2 characters. A one-character rule would match most of the file on its first commit, and re-categorisation is immediate (§7.2).</td></tr>
+      <tr><td>substring</td><td>Required, trimmed, at least 2 characters. A one-character rule would match most of the file on its first commit, and re-categorisation is immediate (§6.2).</td></tr>
       <tr><td>categoryId</td><td>Required, and a real category — <em>Automatic</em> is not offered, since a rule that assigns nothing is not a rule.</td></tr>
       <tr><td>duplicates</td><td>A substring already used by an earlier rule is <b>allowed but flagged</b> in the tester: the later rule can never fire, and saying so is more useful than refusing it.</td></tr>
       <tr class="grp"><td colspan="2"><b>Preferences</b></td></tr>
@@ -2742,22 +2737,22 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <tr><td>separators</td><td>Decimal and thousands separators must differ.</td></tr>
       <tr class="grp"><td colspan="2"><b>Bulk import</b></td></tr>
       <tr><td>account</td><td>Required before anything can be imported.</td></tr>
-      <tr><td>selection</td><td><em>Import</em> is disabled until at least one readable, non-duplicate row is ticked (§6).</td></tr>
+      <tr><td>selection</td><td><em>Import</em> is disabled only while nothing is ticked. An unreadable row can never be ticked; <b>every other row is freely selectable</b>, a flagged duplicate included — the flag unselects it, it does not lock it (§5.7).</td></tr>
     </tbody>
   </table></div>
 </section>
 
-<!-- ================= 15 EMPTY AND ERROR STATES ================= -->
-<section class="doc" id="s15">
+<!-- ================= 14 EMPTY AND ERROR STATES ================= -->
+<section class="doc" id="s14">
   <header>
-    <div class="num">15</div>
+    <div class="num">14</div>
     <h2>Empty and error states</h2>
     <p>A file starts empty and stays that way for a while. Every screen therefore has a state with
     no data behind it, and every one of them must say what to do next rather than showing a blank
     card.</p>
   </header>
 
-  <h3 class="sub">15.1 The rules</h3>
+  <h3 class="sub">14.1 The rules</h3>
   <ul class="body">
     <li><b>An empty screen names the action that fills it</b>, as a sentence and a button that goes
     there — never an empty table with headers, never the word “No data”.</li>
@@ -2770,34 +2765,34 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     before the application can be used. Nothing except an unreadable file blocks a screen.</li>
   </ul>
 
-  <h3 class="sub">15.2 Per screen</h3>
+  <h3 class="sub">14.2 Per screen</h3>
   <div class="specwrap"><table class="spec">
     <thead><tr><th>Screen</th><th>Empty state</th><th>Error state</th></tr></thead>
     <tbody>
       <tr><td>Portfolio</td><td>No accounts: “Nothing here yet — add the accounts you want to track.” with a button to Accounts. Accounts but no transactions: the table renders with opening balances and the charts say they need history.</td><td>—</td></tr>
-      <tr><td>Accounts</td><td>No accounts: “Add the first account — a current account is the usual place to start,” with the button.</td><td>A delete refused because something depends on the record says what depends on it (§14).</td></tr>
+      <tr><td>Accounts</td><td>No accounts: “Add the first account — a current account is the usual place to start,” with the button.</td><td>A delete refused because something depends on the record says what depends on it (§13).</td></tr>
       <tr><td>Accounts › Institutions</td><td>No institutions: “An account can have none — that is what physical cash is. Add one when a bank turns up.”</td><td>—</td></tr>
       <tr><td>Transactions</td><td>No transactions: “Import a bank export, or add a row by hand,” with both buttons. Filtered to nothing: “No transaction matches these filters,” with <em>Clear filters</em>.</td><td>An edit that cannot be saved keeps the cell open and states why; the row is never left half-changed.</td></tr>
-      <tr><td>Bulk import</td><td>Empty paste: the screen explains the three expected columns and shows the account picker; <em>Import</em> stays disabled while nothing is selected.</td><td>Rows that cannot be read are marked in the preview with the reason and cannot be ticked; the readable rows around them import normally (§6). No cash account to import into: the screen points at Accounts.</td></tr>
+      <tr><td>Bulk import</td><td>Empty paste: the screen explains the three expected columns and shows the account picker; <em>Import</em> stays disabled while nothing is selected.</td><td>Rows that cannot be read are marked in the preview with the reason and cannot be ticked; the readable rows around them import normally (§5.7). No cash account to import into: the screen points at Accounts.</td></tr>
       <tr><td>Categories › Report</td><td>No categorised transactions: the matrix is replaced by a line saying it fills as transactions are categorised.</td><td>—</td></tr>
       <tr><td>Categories › Rules</td><td>No rules: “Nothing is categorised automatically yet — add a rule and watch what it would catch,” with the button. A rule that matches nothing shows <em>0 transactions</em> in the tester, which is a result, not an empty state.</td><td>—</td></tr>
-      <tr><td>Categories › Category list</td><td>Never empty; the twenty-seven are seeded into every new file (§7.3).</td><td>—</td></tr>
-      <tr><td>Investments › Holdings</td><td>No trades: “Record a purchase to start tracking holdings,” with the button. Trades but no prices: holdings render at <code>€ 0,00</code> with the price cell reading <em>none</em> and inviting a value, and check 3 says why (§12.3).</td><td>Provider unreachable or unknown identifier: a line on the screen naming the securities that could not be fetched. The rest of the screen works; already-known prices stay.</td></tr>
+      <tr><td>Categories › Category list</td><td>Never empty; the twenty-seven are seeded into every new file (§6.3).</td><td>—</td></tr>
+      <tr><td>Investments › Holdings</td><td>No trades: “Record a purchase to start tracking holdings,” with the button. Trades but no prices: holdings render at <code>€ 0,00</code> with the price cell reading <em>none</em> and inviting a value, and check 3 says why (§11.3).</td><td>Provider unreachable or unknown identifier: a line on the screen naming the securities that could not be fetched. The rest of the screen works; already-known prices stay.</td></tr>
       <tr><td>Investments › Sales</td><td>No sales: “Nothing has been sold yet,” and the tab keeps its count at zero rather than disappearing.</td><td>—</td></tr>
-      <tr><td>Investments › Securities</td><td>No securities: “A security is created while recording the first purchase,” with a button to the Purchases tab. A security with no prices: the history panel says so and offers the first one.</td><td>A delete refused because trades or prices point at the security names how many of each (§14).</td></tr>
-      <tr><td>Salaries › Payslips</td><td>No contract: “Add the contract first,” with a button to the Contracts tab. Contract but no payslips: the tables render with headers and a prompt to add one. A year with no working days: an empty cell and two <em>undefined</em> hourly figures (§12.7).</td><td>—</td></tr>
+      <tr><td>Investments › Securities</td><td>No securities: “A security is created while recording the first purchase,” with a button to the Purchases tab. A security with no prices: the history panel says so and offers the first one.</td><td>A delete refused because trades or prices point at the security names how many of each (§13).</td></tr>
+      <tr><td>Salaries › Payslips</td><td>No contract: “Add the contract first,” with a button to the Contracts tab. Contract but no payslips: the tables render with headers and a prompt to add one. A year with no working days: an empty cell and two <em>undefined</em> hourly figures (§11.7).</td><td>—</td></tr>
       <tr><td>Salaries › Contracts</td><td>No contracts: “Add the employer, its months per year and its hours per day — everything on the other tab divides by them.”</td><td>—</td></tr>
-      <tr><td>Checks</td><td>Never empty. A check with nothing to examine <b>passes and says so</b> — “0 payslips” — which is why every passing check states its reach (§10).</td><td>—</td></tr>
-      <tr><td>Settings</td><td>Never empty; every preference has a default (§11).</td><td>A value that cannot be applied is rejected in place, leaving the previous one in force.</td></tr>
-      <tr><td>Launch</td><td>No recent files: only <em>New file…</em> and <em>Open…</em>.</td><td>File missing, unreadable, written by a newer schema version, or carrying something unrecognised: stated on the launch screen, with the other files still openable. A file written by an <em>older</em> version is not an error — it asks for confirmation to upgrade, naming both versions and the backup taken first (§13.1). This is the one place an error blocks a screen.</td></tr>
+      <tr><td>Checks</td><td>Never empty. A check with nothing to examine <b>passes and says so</b> — “0 payslips” — which is why every passing check states its reach (§9).</td><td>—</td></tr>
+      <tr><td>Settings</td><td>Never empty; every preference has a default (§10).</td><td>A value that cannot be applied is rejected in place, leaving the previous one in force.</td></tr>
+      <tr><td>Launch</td><td>No recent files: only <em>New file…</em> and <em>Open…</em>.</td><td>File missing, unreadable, written by a newer schema version, or carrying something unrecognised: stated on the launch screen, with the other files still openable. A file written by an <em>older</em> version is not an error — it asks for confirmation to upgrade, naming both versions and the backup taken first (§12.1). This is the one place an error blocks a screen.</td></tr>
     </tbody>
   </table></div>
 </section>
 
-<!-- ================= 16 OUT OF SCOPE ================= -->
-<section class="doc" id="s16">
+<!-- ================= 15 OUT OF SCOPE ================= -->
+<section class="doc" id="s15">
   <header>
-    <div class="num">16</div>
+    <div class="num">15</div>
     <h2>Out of scope for v1</h2>
     <p>Each of these was raised and deliberately declined. They are listed so they are not
     reintroduced by accident.</p>
@@ -2808,8 +2803,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <tbody>
       <tr><td>Multi-currency conversion</td><td>Everything is EUR. Currency is recorded, never converted.</td></tr>
       <tr><td>A second interface language</td><td>English only, no language selector. Strings stay separable so it remains possible (§1).</td></tr>
-      <tr><td>Tax systems other than the Italian one</td><td>Rate per security is a parameter, not a constant; anything more is future work (§12.3).</td></tr>
-      <tr><td>Export in any format</td><td>The file is the data, and §13 documents it well enough to read with a script. No CSV, no report export.</td></tr>
+      <tr><td>Tax systems other than the Italian one</td><td>Rate per security is a parameter, not a constant; anything more is future work (§11.3).</td></tr>
+      <tr><td>Export in any format</td><td>The file is the data, and §12 documents it well enough to read with a script. No CSV, no report export.</td></tr>
       <tr><td>Accessibility work and keyboard shortcuts</td><td>Not designed for v1. Dark theme, mouse-first, one user.</td></tr>
       <tr><td>Editing the category list at runtime</td><td>Categories are stored records with stable ids (§2), but the application seeds them and offers no editor.</td></tr>
       <tr><td>Undo / redo</td><td>Backups and delete confirmation cover it for now.</td></tr>
@@ -2819,7 +2814,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>Monthly reports</td><td>Yearly only.</td></tr>
       <tr><td>Voucher expiry</td><td>Not tracked.</td></tr>
       <tr><td>Automatic transaction generation from trades, or paired transfer entry</td><td>The independence of the two sources is what makes the checks meaningful.</td></tr>
-      <tr><td>A warning tier on checks</td><td>Pass or fail only (§10). A middle state becomes a place for things to sit unfixed.</td></tr>
+      <tr><td>A warning tier on checks</td><td>Pass or fail only (§9). A middle state becomes a place for things to sit unfixed.</td></tr>
       <tr><td>Mobile or web deployment</td><td>Desktop on macOS, Windows and Linux (§1), single machine.</td></tr>
       <tr><td>Percentage or tiered sell fees</td><td>Flat per institution.</td></tr>
       <tr><td>Sortable columns</td><td>Fixed chronological order everywhere; filters narrow instead.</td></tr>
@@ -2827,8 +2822,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>Transferring a position between brokers</td><td>Not modelled. Recorded as a sale and a purchase, which invents a realised gain and leaves checks 6 and 7 with no bank transaction to pair — both failures are visible and are the price of not building it.</td></tr>
       <tr><td>Corporate actions — splits, mergers, ISIN changes</td><td>Not modelled. A split is entered by hand as an adjusting trade, or the security is replaced and the history restarted.</td></tr>
       <tr><td>Attributing dividends and coupons to a holding</td><td>They arrive as ordinary transactions under <em>Interest, dividends &amp; bonuses</em> and stay there. A holding's gain is therefore price only, never total return — the income is counted, just not against the instrument that produced it.</td></tr>
-      <tr><td>Merging two securities</td><td>A mistyped ISIN entered twice produces two securities and two half-holdings. The fix is to correct one, move its trades by editing them, and delete the other (§8.4) — a handful of edits for something that happens once.</td></tr>
-      <tr><td>Re-validating a file on open</td><td>Validation is for the forms (§14). The migration script is written once, for one file, by the one person who will run it.</td></tr>
+      <tr><td>Merging two securities</td><td>A mistyped ISIN entered twice produces two securities and two half-holdings. The fix is to correct one, move its trades by editing them, and delete the other (§7.4) — a handful of edits for something that happens once.</td></tr>
+      <tr><td>Re-validating a file on open</td><td>Validation is for the forms (§13). The migration script is written once, for one file, by the one person who will run it.</td></tr>
     </tbody>
   </table></div>
 </section>
