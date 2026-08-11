@@ -251,8 +251,11 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     locking, no merge and no live collaboration, so two machines editing the same synced file at
     once is a situation it detects and reports rather than one it resolves (§12).</li>
     <li><b>A desktop application on macOS, Windows and Linux.</b> All three are first-class: the
-    same build behaves identically on each, and nothing may depend on a platform-specific path,
-    filesystem behaviour or system service. No mobile, no web deployment (§15).</li>
+    same build behaves identically on each, and no <i>behaviour</i> may depend on a platform-specific
+    path, filesystem behaviour or system service. Two things are platform-shaped and neither is
+    behaviour: where preferences are kept, which is each platform's own application-data location
+    (§10), and where the menu bar is drawn (§12.2). The user is never asked about either. No mobile,
+    no web deployment (§15).</li>
     <li><b>Nothing leaves the machine</b> except security identifiers sent to a price provider, and
     only in the moment the user presses <em>Update prices</em> (§7.6).</li>
     <li><b>Euro only.</b> Currency is recorded on accounts and securities but every computation
@@ -425,6 +428,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>monthsPerYear</td><td>int</td><td>13 today. 14 exists in other contracts.</td></tr>
       <tr><td>hoursPerDay</td><td>decimal(2)</td><td>8 today.</td></tr>
       <tr><td>startDate / endDate</td><td>date / date?</td><td></td></tr>
+      <tr><td>notes</td><td>text</td><td></td></tr>
     </tbody>
   </table></div>
 
@@ -527,7 +531,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a class="on" href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="alert">
@@ -696,7 +700,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a class="on" href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -747,7 +751,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a class="on" href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -834,8 +838,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     portfolio, keeping its history. The form does not require the account to be empty first — check
     11 reports a closed account that still holds something, and check 12 the records dated outside
     the two dates. Both name the situation; neither refuses the edit (§9).</li>
+    <li><b>A closed account stays in every picker</b>, marked as closed and sorted after the open
+    ones. Closing says a balance no longer counts towards net worth; it does not say the account has
+    become unmentionable. Its rows still have to be editable — a miscategorised payment from 2019 is
+    found long after the account it sat on was shut — and a row can only be edited if its own account
+    is among the choices. It is also the only way check 12's second half is reachable by hand: a
+    record dated after the closing date has to be enterable before it can be reported.</li>
     <li>Contracts are created the same way, on the Salaries screen, with the fields listed in §2:
-    name, months per year, hours per day, start and end date. Securities are normally created inline
+    name, months per year, hours per day, start and end date, notes. Securities are normally created inline
     while recording a purchase (§7.5); the Securities tab on Investments exists to correct and manage
     them afterwards.</li>
   </ul>
@@ -845,7 +855,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     deletion stays available only while nothing points at it. Every delete asks for confirmation:
     there is no undo.<br><br>
     <b>Only accounts can be retired.</b> Setting an account's <code>closingDate</code> keeps its
-    history and drops it out of the portfolio and out of every picker. There is no equivalent for
+    history and drops it out of the portfolio — but <b>not</b> out of the pickers, where it stays
+    marked and last, because its rows remain editable. There is no equivalent for
     institutions, securities, contracts or rules — a contract has an <code>endDate</code> that says
     when it ended, and everything else stays in the list. One retirement mechanism, on the one
     entity whose balance would otherwise distort net worth, beats a status flag on everything.
@@ -867,7 +878,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -1001,7 +1012,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     </div>
   </div>
   <ul class="body">
-    <li><b>Account</b> defaults to the one last used, and lists cash accounts only. <b>Date</b> is a
+    <li><b>Account</b> defaults to the one last used, and lists cash accounts only — closed ones
+    among them, marked and last (§4.3). <b>Date</b> is a
     date picker defaulting to today; <b>amount</b> is a validated numeric field, signed, negative
     being money out. Neither can hold text that would have to be interpreted: nothing invalid can be
     entered, so nothing invalid has to be rejected on save, and the display preferences of §10
@@ -1046,7 +1058,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a class="on" href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -1169,9 +1181,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
 
   <h4 class="subsub">Rows that cannot be read</h4>
   <ul class="body">
-    <li>A row with fewer than three columns, or whose date or amount does not parse under the current
-    formats, appears in the preview <b>marked with the reason, and cannot be ticked</b>. It is
-    excluded from the count on the <em>Import</em> button and from the import.</li>
+    <li>A row with fewer than three columns, whose date or amount does not parse under the current
+    formats, or <b>whose description is empty</b> once trimmed, appears in the preview <b>marked with
+    the reason, and cannot be ticked</b>. It is excluded from the count on the <em>Import</em> button
+    and from the import. These are the transaction rules of §13 and nothing more — an import cannot
+    write a row the form would have refused.</li>
+    <li><b>An amount of <code>0,00</code> reads fine and is imported.</b> It is a legal amount (§13),
+    banks post them, and a row is unreadable only when the amount cannot be understood — not when it
+    is understood to be nothing.</li>
     <li><b>An unreadable row never blocks the rows around it.</b> Import what is good, fix the rest,
     paste again — the duplicate detection below is what makes re-pasting safe.</li>
     <li><em>Import</em> is disabled only while nothing is selected.</li>
@@ -1220,7 +1237,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a class="on" href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -1332,7 +1349,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a class="on" href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -1436,7 +1453,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a class="on" href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -1553,7 +1570,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -1636,7 +1653,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -1689,7 +1706,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -1744,7 +1761,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a class="on" href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -1931,7 +1948,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a class="on" href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -2055,7 +2072,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a class="on" href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -2066,11 +2083,11 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <div class="cols c">
         <div class="card">
           <div class="tblwrap"><table>
-            <thead><tr><th>Employer</th><th class="r">Months / year</th><th class="r">Hours / day</th><th class="r">Start</th><th class="r">End</th><th class="r">Payslips</th><th></th></tr></thead>
+            <thead><tr><th>Employer</th><th class="r">Months / year</th><th class="r">Hours / day</th><th class="r">Start</th><th class="r">End</th><th class="r">Payslips</th><th>Notes</th><th></th></tr></thead>
             <tbody>
-              <tr class="sel"><td class="desc">Acme S.p.A.</td><td class="n r">13</td><td class="n r">8</td><td class="n r">01/08/2017</td><td class="n r dim">—</td><td class="n r dim">117</td><td class="rowact">···</td></tr>
+              <tr class="sel"><td class="desc">Acme S.p.A.</td><td class="n r">13</td><td class="n r">8</td><td class="n r">01/08/2017</td><td class="n r dim">—</td><td class="n r dim">117</td><td class="dim">full time, permanent</td><td class="rowact">···</td></tr>
             </tbody>
-            <tfoot><tr><td colspan="5">1 contract · none ended</td><td class="r tot">117</td><td></td></tr></tfoot>
+            <tfoot><tr><td colspan="5">1 contract · none ended</td><td class="r tot">117</td><td></td><td></td></tr></tfoot>
           </table></div>
         </div>
         <div class="dlg" style="box-shadow:none">
@@ -2081,6 +2098,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <label>Hours per day</label><div class="inp">8</div>
             <label>Start date</label><div class="inp ph">01/08/2017</div>
             <label>End date</label><div class="inp ph">empty while current</div>
+            <label>Notes</label><div class="inp ph">optional</div>
           </div>
           <p class="hint">Working days are not here. They belong to a <b>year</b> of a contract, not
           to the contract, and are typed into the per-year table on the Payslips tab where the
@@ -2122,7 +2140,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a class="on" href="#">Checks <span class="badge">3</span></a><a href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
@@ -2229,11 +2247,18 @@ table.spec td.d{color:var(--faint);font-style:italic;}
         <a href="#">Portfolio</a><a href="#">Accounts</a><a href="#">Transactions</a><a href="#">Categories</a>
         <a href="#">Investments</a><a href="#">Salaries</a><a href="#">Checks <span class="badge">3</span></a><a class="on" href="#">Settings</a>
       </nav>
-      <div class="filecard"><span>finances.spiccioli</span><span class="ok">Saved 14:32</span></div>
+      <div class="filecard"><span class="ok">Saved 14:32</span></div>
     </aside>
     <main class="view">
       <div class="viewhead">
         <div><h3>Settings</h3><div class="sub">12 preferences · applied as they change · no save button</div></div>
+      </div>
+      <div class="warnline">
+        <span style="color:var(--brass-dim)">●</span>
+        <span><b>These settings belong to Spiccioli, not to the open file.</b> They are stored with
+        the application and apply to <b>every</b> file you open — change a separator here and the
+        ledger you open tomorrow is written the same way. Nothing on this screen travels with
+        <i>finances.spiccioli</i> if you send it to someone.</span>
       </div>
       <div class="cols a">
         <div class="card">
@@ -2307,12 +2332,25 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   and only one of them involves guessing.</p>
 
   <ul class="body">
-    <li><b>No save button.</b> A preference applies as it is changed and the file is written by the
-    ordinary autosave (§12); a value that cannot be applied is refused in place and the previous one
-    stays in force (§13).</li>
-    <li>The two <b>path</b> rows are read-only facts about the session, shown because the sidebar
-    only has room for a file name and the backup folder is otherwise invisible. Changing which file
-    is open is done by opening another one (§12).</li>
+    <li><b>Preferences are global, and are not stored in the data file.</b> They live with the
+    application, in the platform's own application-data location, together with the list of recently
+    opened files (§12) — so they survive switching files, apply to every file opened afterwards, and
+    do not travel with a ledger that is copied or sent to someone else. The screen says so in a line
+    at the top, because a settings screen inside a file-based application is otherwise assumed to be
+    part of the file.</li>
+    <li><b>That is a deliberate trade and it points one way.</b> Formats and thresholds describe the
+    person reading, not the money recorded: the same user wants the same date order in every file
+    they open, and the alternative — preferences inside each file — means opening a second ledger
+    silently repaints the first one's conventions and two files can disagree about how to print a
+    date. The cost is that a file handed to someone else arrives with their formats, not yours, which
+    is the correct outcome for everything on this screen.</li>
+    <li><b>No save button.</b> A preference applies as it is changed and is written to that store
+    immediately; a value that cannot be applied is refused in place and the previous one stays in
+    force (§13). Nothing here ever marks the data file as modified.</li>
+    <li>The two <b>path</b> rows are read-only facts about the session, shown because the window
+    title carries only the file's name and the backup folder is otherwise invisible. This is where
+    you come to find out <em>where</em> the open file is; <b>File › Open…</b> in the menu bar
+    (§12.2) is how you open a different one.</li>
   </ul>
 </section>
 
@@ -2472,6 +2510,13 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <code>internal transfer</code>. Greedy one-to-one, nearest date first, and ties broken by
     <code>insertionSeq</code> so the result never depends on iteration order. Unpaired legs are
     listed by check 1.</li>
+    <li><b>The two legs carry the same amount, and a transfer fee is never netted into one of
+    them.</b> If the sending bank takes € 1,00 to make the wire, that euro is <b>its own
+    transaction</b> on the sending account, in a category with role <code>bank fees</code> — never
+    subtracted from the leg. Netting it would leave € 501,00 out against € 500,00 in, which is not a
+    pair by any definition the application could be given, and check 1 would report it for as long as
+    the file existed. Splitting it also puts the fee where the rest of the year's bank charges are,
+    which is where anyone would look for it.</li>
     <li><b>Trades against transactions:</b> a transaction whose category role is
     <code>securities purchase</code> / <code>securities sale</code> pairs with a trade of the
     matching kind when the absolute amount equals the trade total, dates are within
@@ -2482,6 +2527,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     the money in a cash one — so the pairing keys off the institution they share rather than off the
     account. An account with no institution can therefore never pair, which is correct: physical cash
     does not buy securities.</li>
+    <li><b>A purchase is funded from the broker's own cash account, and that is a rule about how to
+    record, not a preference.</b> Money wired straight from another bank into a trade has no leg at
+    the institution the trade sits in, so nothing can pair it and check 6 fails for as long as it
+    stays that way. The way to record it is the way it actually happened: an <b>internal transfer</b>
+    from the other bank into the broker's cash account, then the purchase out of that account. Two
+    legs and a trade, each paired, instead of one row that cannot be.</li>
     <li>The trade total is the one from §2 — <code>qty × price + fees</code> on a purchase,
     <code>qty × price − taxes − fees</code> on a sale. Both are the figure that moved through the
     account, which is why the comparison is an exact match on the cent-rounded total rather than a
@@ -2492,6 +2543,10 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     rule pairs <code>pensionContribution</code> against role <code>pension contribution</code>
     transactions. <b>The window is a whole month, not a number of days</b>, because what varies is
     which month the employer pays in, not by how many days it slips. Check 4 reports both sides.</li>
+    <li><b>A <code>netPayment</code> of zero pairs like any other figure</b>, against a transaction
+    of <code>0,00</code>. A payslip that paid out nothing — everything withheld, or a correction that
+    cancelled itself — is a real payslip and the bank has a real row for it, so both sides are legal
+    amounts (§13) and the ordinary equality finds them. Nothing special-cases zero on this path.</li>
     <li><b>Pension contributions are compared as monthly totals, not paired.</b> A month's
     contribution reaches the fund as two or three credits — employee share, employer share, TFR —
     against one figure on the payslip, so there is nothing to pair one to one. Months are walked in
@@ -2523,10 +2578,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </header>
 
   <ul class="body">
-    <li><b>One file</b> holding everything: institutions, accounts, securities, prices, transactions,
-    trades, contracts, contract years, payslips, categories, rules, preferences. All eleven stored
-    entities of §2 and the preferences of §10 — nothing about the file lives outside it, and the
-    only thing not in it is the list of recently opened locations.</li>
+    <li><b>One file</b> holding all the data: institutions, accounts, securities, prices,
+    transactions, trades, contracts, contract years, payslips, categories, rules. All eleven stored
+    entities of §2 and nothing else — the file is the ledger, whole and portable.</li>
+    <li><b>Preferences are not in it.</b> They belong to the installation, not to the ledger, and
+    live in the platform's own application-data location alongside the list of recently opened files
+    (§10). A format you like reading is a fact about you; carrying it inside the file would mean two
+    files disagreeing about how to print a date, and opening one of them silently changing the
+    other's appearance.</li>
     <li><b>The file lives wherever the user puts it</b> — a plain local folder, a cloud-synced
     folder, or an encrypted vault inside one. The application makes no assumption about the
     location and requires nothing of it.</li>
@@ -2539,8 +2598,10 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     copy means the other version is recoverable if the overwrite turns out to be the wrong call.</li>
     <li><b>The user is told, in those terms, and not with a question.</b> A line appears on the
     screen they are on — <em>“This file was changed by something else while you had it open. That
-    version has been saved to the backup folder as finances-2026-08-08-1432-external.spiccioli, and
-    your work has been kept.”</em> — and it stays until dismissed. It is not a modal and it is not a
+    version has been saved to the backup folder as finances-2026-08-08-1432-external.spiccioli,
+    and your work has been kept. That copy is one of the ten backups kept there, so it will be
+    rotated out in time — move it somewhere else if you want to keep it.”</em> — and it stays until
+    dismissed. It is not a modal and it is not a
     choice between two versions: the user has one of them in front of them and has no way to judge
     the other from a dialog, so the application does the safe thing and tells them precisely where to
     find what it displaced. This is what §1 means by not coordinating two of itself: the folder is
@@ -2551,6 +2612,15 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <b>when a file is opened</b> — not per save. Autosave fires every few seconds while typing;
     backing up on each would cycle all ten away within a minute and leave nothing older than
     lunchtime.</li>
+    <li><b>Every copy the application writes there is one of the ten.</b> The routine backups, the
+    version displaced by an external modification, and the pre-upgrade copy all go into the same
+    folder and the same rotation, and all of them can be pushed out by later ones. There is no
+    protected shelf: a second class of backup that never expires would fill the folder with the
+    files nobody chose to keep, and <code>backupCount</code> would stop meaning what it says. <b>Both
+    the moments that produce an unusual copy say so at the time</b> — the external-modification line
+    above and the upgrade dialog (§12.1) each state that the copy is part of the rotation and will
+    eventually be rotated out, because that is precisely when the user can still decide to move it
+    somewhere safe.</li>
     <li><b>The backup on open is skipped when the file is byte-for-byte the newest backup already
     held.</b> Otherwise opening the application ten times on a quiet week would fill the folder with
     ten identical copies and push out the one version that was actually worth keeping. Backups exist
@@ -2618,8 +2688,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       </div>
       <hr class="sep">
       <p class="hint">Opening it will convert it to schema 5. <b>A copy of the file as it stands is
-      written to the backup folder first.</b> After the upgrade, Spiccioli 1.2 and earlier will no
-      longer be able to open it.</p>
+      written to the backup folder first</b>, as one of the ten kept there — it will be rotated out
+      in time, so move it elsewhere if you want to keep it. After the upgrade, Spiccioli 1.2 and
+      earlier will no longer be able to open it.</p>
       <div class="dlgfoot">
         <button class="btn ghost">Cancel</button>
         <button class="btn primary">Back up and upgrade</button>
@@ -2639,6 +2710,59 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     writes nothing at all.</li>
     <li>This is the <b>only</b> screen in the application where an error can prevent you from getting
     to the rest of it (§14).</li>
+  </ul>
+
+  <h3 class="sub">12.2 The menu bar, and which file is open</h3>
+
+  <div class="dlgrow">
+    <div class="dlg">
+      <h5>File</h5>
+      <div class="dsub">the whole menu</div>
+      <div class="tblwrap"><table class="spec">
+        <tbody>
+          <tr><td>New…</td><td class="d">a fresh file, categories seeded</td></tr>
+          <tr><td>Open…</td><td class="d">browse for one</td></tr>
+          <tr><td>Open Recent ▸</td><td class="d">the same list the launch screen offers</td></tr>
+          <tr><td>Quit</td><td class="d">takes the closing backup</td></tr>
+        </tbody>
+      </table></div>
+      <p class="hint">Everything else the application does, it does on a screen. There is no Edit
+      menu because there is no undo (§12), and no View menu because there is nothing to configure
+      about the view.</p>
+    </div>
+
+    <div class="dlg">
+      <h5>Switching files</h5>
+      <div class="dsub">Open… or Open Recent, mid-session</div>
+      <div class="figs">
+        <div class="fig"><span>1 · the open file</span><b>autosaved and closed</b></div>
+        <div class="fig"><span>2 · the new file</span><b>backed up on open</b></div>
+        <div class="fig"><span>3 · schema</span><b>checked as at launch</b></div>
+        <div class="fig"><span>4 · the screen</span><b>Portfolio, filters cleared</b></div>
+      </div>
+      <p class="hint">A file opened from the menu goes through <b>exactly</b> what a file opened from
+      the launch screen goes through — the same backup, the same upgrade prompt, the same refusal if
+      it cannot be understood. If it is refused, the file you had stays open and the message says
+      why; the launch screen is not brought back mid-session.</p>
+    </div>
+  </div>
+
+  <ul class="body">
+    <li><b>The window title is where the current file is named.</b> It carries the file's name and
+    nothing else — <i>finances — Spiccioli</i> — and it is the one place that answers “which file am
+    I in?” at a glance. The full path is on Settings (§10), a click away, because a path is too long
+    to read at a glance and too useful to hide.</li>
+    <li><b>The sidebar carries only the save state</b> — <i>Saved 14:32</i>. It used to carry the
+    file name as well, which put the answer in two places and meant the sidebar had to be wide enough
+    for the longer of them. The window title already had the job.</li>
+    <li><b>Opening another file is a menu action, not a restart.</b> The launch screen (§12.1) is
+    what the application opens <em>with</em>; the File menu is how you leave one file for another
+    once it is running. Both reach the same code, so there is nothing you can do at launch that you
+    cannot do afterwards.</li>
+    <li>The menu bar is <b>native on each platform</b> — in the macOS menu bar, in the window on
+    Windows and Linux — and carries the platform's own <em>About</em> and <em>Quit</em> conventions.
+    That is presentation; the four actions above are the same three files and one exit everywhere
+    (§1).</li>
   </ul>
 </section>
 
@@ -2665,6 +2789,13 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     force. The row is never left half-changed.</li>
     <li><b>Text is trimmed on save</b>, everywhere, and a field that trims to nothing counts as
     empty. Interior whitespace is left alone — bank descriptions carry it and rules match on it.</li>
+    <li><b>An imported row is validated exactly as a typed one.</b> Bulk import is another way into
+    the same record, not a side door around these rules: a pasted row whose date does not parse,
+    whose amount does not parse, or whose description is empty after trimming <b>cannot be read</b>,
+    is marked with the reason and cannot be ticked (§5.7). The two paths agree field by field, so
+    there is no value the form refuses that a paste can nevertheless put in the file. <b>A zero
+    amount is not one of them</b> — it is legal on both paths, and an import that met one would bring
+    it in.</li>
     <li><b>The file is not re-validated on open.</b> These rules exist to stop a person mistyping,
     not to defend against a malformed file: the ten years of history arrive through a one-off
     migration script written for this file alone (§12), and a script that writes something the forms
@@ -2688,14 +2819,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>closingDate</td><td>Optional; must be ≥ <code>openingDate</code>. Nothing else is required to close an account — check 11 reports what was left in it (§9).</td></tr>
       <tr><td>delete</td><td>Refused while any transaction or trade points at it. Closing is what retiring looks like (§4.3).</td></tr>
       <tr class="grp"><td colspan="2"><b>Transaction</b></td></tr>
-      <tr><td>accountId</td><td>Required. The picker lists <b>cash accounts only</b>; a brokerage account can never be chosen, here or on an import.</td></tr>
+      <tr><td>accountId</td><td>Required. The picker lists <b>cash accounts only</b>; a brokerage account can never be chosen, here or on an import. <b>Closed accounts are listed</b>, marked and after the open ones (§4.3).</td></tr>
       <tr><td>date</td><td>Required, date picker. No bound against the account's dates — check 12 reports those.</td></tr>
       <tr><td>description</td><td>Required, trimmed, non-empty. It is the only thing a rule matches on.</td></tr>
-      <tr><td>amount</td><td>Required, non-zero, at most 2 decimals, either sign. Empty blocks the save; zero is refused as a typo for a real amount.</td></tr>
+      <tr><td>amount</td><td>Required, at most 2 decimals, either sign. <b>Zero is legal</b> — a card verification, a reversed charge and a fee waived to nothing all post as <code>0,00</code>, and refusing them would send the user to invent a figure the bank did not use. Empty still blocks the save: zero is a value that was typed, empty is a field that was not.</td></tr>
       <tr><td>categoryId</td><td><b>Either a category or <em>Automatic</em> — never nothing.</b> The picker offers no clearing entry, so a <code>manual</code> row always carries a category and the only empty category in the file is one no rule matched (§2).</td></tr>
       <tr><td>receiptState</td><td>One of the three values, <code>na</code> on creation, changed only by hand (§6.3).</td></tr>
       <tr class="grp"><td colspan="2"><b>Trade</b></td></tr>
-      <tr><td>accountId</td><td>Required. The picker lists <b>brokerage accounts only</b>.</td></tr>
+      <tr><td>accountId</td><td>Required. The picker lists <b>brokerage accounts only</b>, closed ones included and marked (§4.3).</td></tr>
       <tr><td>securityId</td><td>Required — chosen from the existing list or created inline (§7.5).</td></tr>
       <tr><td>quantity</td><td>Required, &gt; 0, at most 4 decimals. Direction is <code>kind</code>, never a negative quantity.</td></tr>
       <tr><td>unitPrice</td><td>Required, &gt; 0, at most 4 decimals.</td></tr>
@@ -2778,6 +2909,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>Categories › Rules</td><td>No rules: “Nothing is categorised automatically yet — add a rule and watch what it would catch,” with the button. A rule that matches nothing shows <em>0 transactions</em> in the tester, which is a result, not an empty state.</td><td>—</td></tr>
       <tr><td>Categories › Category list</td><td>Never empty; the twenty-seven are seeded into every new file (§6.3).</td><td>—</td></tr>
       <tr><td>Investments › Holdings</td><td>No trades: “Record a purchase to start tracking holdings,” with the button. Trades but no prices: holdings render at <code>€ 0,00</code> with the price cell reading <em>none</em> and inviting a value, and check 3 says why (§11.3).</td><td>Provider unreachable or unknown identifier: a line on the screen naming the securities that could not be fetched. The rest of the screen works; already-known prices stay.</td></tr>
+      <tr><td>Investments › Purchases</td><td>No purchases: “Record the first purchase — the security is created with it,” with the button. This is where holdings and securities both begin, so it is the one Investments tab whose empty state is an instruction rather than a statement.</td><td>An edit that cannot be saved keeps the cell open and states why (§13).</td></tr>
       <tr><td>Investments › Sales</td><td>No sales: “Nothing has been sold yet,” and the tab keeps its count at zero rather than disappearing.</td><td>—</td></tr>
       <tr><td>Investments › Securities</td><td>No securities: “A security is created while recording the first purchase,” with a button to the Purchases tab. A security with no prices: the history panel says so and offers the first one.</td><td>A delete refused because trades or prices point at the security names how many of each (§13).</td></tr>
       <tr><td>Salaries › Payslips</td><td>No contract: “Add the contract first,” with a button to the Contracts tab. Contract but no payslips: the tables render with headers and a prompt to add one. A year with no working days: an empty cell and two <em>undefined</em> hourly figures (§11.7).</td><td>—</td></tr>
@@ -2809,6 +2941,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>Editing the category list at runtime</td><td>Categories are stored records with stable ids (§2), but the application seeds them and offers no editor.</td></tr>
       <tr><td>Undo / redo</td><td>Backups and delete confirmation cover it for now.</td></tr>
       <tr><td>Bank-specific import profiles</td><td>One fixed column order; the user pre-formats the export. Explicitly future work.</td></tr>
+      <tr><td>Bank exports in any other shape</td><td>Trailing-sign negatives (<code>54,80-</code>), parenthesised negatives, a separate debit/credit column pair, a <code>D</code>/<code>C</code> marker and a header row are none of them parsed. Three columns, fixed order, one signed amount (§5.7): reshape the export before pasting, and anything that does not fit is reported as a row that cannot be read rather than guessed at.</td></tr>
+      <tr><td>Term-deposit maturity</td><td>Not tracked. A term deposit carries no maturity date and nothing announces one — the date goes in the account's notes if it is wanted, and the bank is what tells you the money has moved.</td></tr>
       <tr><td>A migration importer</td><td>A one-off custom script will load the Excel history.</td></tr>
       <tr><td>Category groups</td><td>The list is readable flat; grouping adds a concept for no gain.</td></tr>
       <tr><td>Monthly reports</td><td>Yearly only.</td></tr>
