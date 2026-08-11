@@ -1,0 +1,27 @@
+docs/functional/specs/02-domain-model.md
+  s_c77999c2e05b06::t_926e521053c2c4 222-224,232,236-241
+docs/functional/specs/05-transactions.md
+  s_c77999c2e05b06::t_6f173b3ed141a5 151-160
+docs/functional/specs/07-investments.md
+  s_c77999c2e05b06::t_f8fd374ae2a058 34-41
+docs/functional/specs/08-salaries.md
+  s_c77999c2e05b06::t_f6222e2b2edbef 19-22,41-50
+docs/functional/specs/11-calculations.md
+  s_c77999c2e05b06::t_97215e2de81506 72-76,213-223
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "0a388579a322325adcd99998bb42ca229914f2cd",
+  "prompts": {},
+  "sessions": {
+    "s_c77999c2e05b06": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4a025e85-d241-416c-bcc6-3242b674d183",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
