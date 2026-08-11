@@ -1,0 +1,47 @@
+docs/functional/mockups/05-transactions.html
+  s_5a167a284d1491::t_a1c75fe2b3bcf3 141,148-149,173-177,189
+docs/functional/mockups/06-categories.html
+  s_5a167a284d1491::t_0166bc6b68a73a 112-113,125-130,132,134,138,140-143,146,148,150-152,155-160
+docs/functional/mockups/07-investments.html
+  s_5a167a284d1491::t_55d3af4d0164cc 51-56
+docs/functional/mockups/10-settings.html
+  s_5a167a284d1491::t_39b150f996990b 58-62
+docs/functional/specs/02-domain-model.md
+  s_5a167a284d1491::t_c35f0e53295067 108-121
+docs/functional/specs/05-transactions.md
+  s_5a167a284d1491::t_6aa60bc6fcdbbb 90-93,99-102,167-169,173-213,217-219
+docs/functional/specs/06-categories.md
+  s_5a167a284d1491::t_2b4534091e3864 89-90,111-151,159-164
+docs/functional/specs/07-investments.md
+  s_5a167a284d1491::t_be9d4c38407452 21-25,172-189,199-200
+docs/functional/specs/08-salaries.md
+  s_5a167a284d1491::t_e59cdac83d2964 23-28,44-47
+docs/functional/specs/09-checks.md
+  s_5a167a284d1491::t_61b48cee74c8bf 22,69-81
+docs/functional/specs/10-settings.md
+  s_5a167a284d1491::t_924d82fd379f66 17-40,45-46
+docs/functional/specs/12-storage.md
+  s_5a167a284d1491::t_e6bbf690ac9899 116-129
+docs/functional/specs/13-validation.md
+  s_5a167a284d1491::t_33c93823faba7e 28-49,63,73-74,86,98-99,108,142-144,152-153,163-166
+docs/functional/specs/14-empty-and-error-states.md
+  s_5a167a284d1491::t_6e1248aebd1468 32,34
+docs/functional/specs/15-out-of-scope.md
+  s_5a167a284d1491::t_6b31da032db69c 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "2b4e208e60d634c7e09b1360b5eda36ad43f6a4d",
+  "prompts": {},
+  "sessions": {
+    "s_5a167a284d1491": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a170dfea-4d38-4e64-9afb-63293d986bce",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
