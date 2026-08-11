@@ -324,7 +324,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>isin</td><td>text</td><td>Unique. Used to recognise an existing security during trade entry.</td></tr>
       <tr><td>ticker</td><td>text</td><td></td></tr>
       <tr><td>name</td><td>text</td><td></td></tr>
-      <tr><td>type</td><td>enum</td><td><code>Stock</code> · <code>Stock ETF</code> · <code>Bond ETF</code> · <code>ETC</code></td></tr>
+      <tr><td>type</td><td>enum</td><td><code>Stock</code> · <code>Bond</code> · <code>Stock ETF</code> · <code>Bond ETF</code> · <code>ETC</code>. Five, and each one is a slice of the portfolio breakdown (§3.1).</td></tr>
       <tr><td>currency</td><td>enum</td><td>EUR in v1.</td></tr>
       <tr><td>taxRate</td><td>%</td><td>Capital-gains rate this instrument would be taxed at, used only by §12.3. Defaults to <code>defaultTaxRate</code> (§11); set to 12,5% on a whitelist government bond.</td></tr>
       <tr><td>notes</td><td>text</td><td></td></tr>
@@ -333,10 +333,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <p class="body">A security belongs to no institution — it is the same instrument everywhere. The
   <em>holding</em> belongs to one, through its account, so the same security held at two
   institutions produces two holdings.</p>
-  <p class="body"><b>The tax rate is per security, not per type.</b> Whether a bond is on the
-  whitelist that earns the reduced Italian rate is a fact about that bond, not about a category of
-  instrument, so it cannot be derived from <code>type</code>. The field is filled once when the
-  security is created and rarely touched again.</p>
+  <p class="body"><b>The tax rate is per security, not per type.</b> <code>Bond</code> exists as a
+  type and still settles nothing: a BTP is on the whitelist that earns the reduced Italian rate and a
+  corporate bond beside it in the same portfolio is not, so two securities of one type carry two
+  rates. The rate is therefore a fact about the instrument, filled in once when the security is
+  created and rarely touched again — and <code>type</code> is left to do the one job it is good at,
+  which is grouping the portfolio into slices a person recognises (§3.1).</p>
 
   <h4 class="subsub">Price</h4>
   <div class="specwrap"><table class="spec">
@@ -461,9 +463,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>id</td><td>id</td><td>Stable. Referenced by every transaction and never reused.</td></tr>
       <tr><td>name</td><td>text</td><td></td></tr>
       <tr><td>type</td><td>enum</td><td><code>Income</code> · <code>Expense</code> · <code>Investment</code> · <code>Divestment</code> · <code>Internal</code> · <code>Revaluation</code>. Drives the grouping in §7.1.</td></tr>
-      <tr><td>role</td><td>enum</td><td><code>none</code> · <code>salary</code> · <code>pension contribution</code> · <code>securities purchase</code> · <code>securities sale</code> · <code>internal transfer</code> · <code>value adjustment</code>. <b>What the checks key off.</b></td></tr>
+      <tr><td>role</td><td>enum</td><td><code>none</code> · <code>salary</code> · <code>pension contribution</code> · <code>securities purchase</code> · <code>securities sale</code> · <code>internal transfer</code> · <code>value adjustment</code> · <code>bank fees</code> · <code>wealth tax</code> · <code>interest and dividends</code>. <b>What the checks and the Portfolio all-time card key off</b> — never a name.</td></tr>
       <tr><td>receiptTracked</td><td>bool</td><td>Its transactions are expected to carry a receipt state other than <code>na</code> — checks 13 and 14.</td></tr>
-      <tr><td>order</td><td>int</td><td>Display order within a type where totals do not decide it.</td></tr>
+      <tr><td>order</td><td>int</td><td>Display order within a type. <b>It decides the order everywhere a category appears</b> — the report, the list, every picker — and nothing anywhere sorts categories by their amounts (§7.1).</td></tr>
     </tbody>
   </table></div>
   <p class="body"><b>Categories are stored, but not editable in v1.</b> The application seeds the
@@ -530,11 +532,11 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       </div>
       <div class="cols a">
         <div class="card">
-          <div class="hero"><span class="label">Net worth</span><span class="val">€ 184.799,03</span></div>
+          <div class="hero"><span class="label">Net worth</span><span class="val">€ 184.815,01</span></div>
           <hr class="sep">
           <div class="figs">
-            <div class="fig"><span>Sum of all transactions</span><b>€ 177.524,83</b></div>
-            <div class="fig"><span>Unrealised net investment gain</span><b class="pos">+ € 7.274,20</b></div>
+            <div class="fig"><span>Total at cost</span><b>€ 177.524,54</b></div>
+            <div class="fig"><span>Unrealised net investment gain</span><b class="pos">+ € 7.290,47</b></div>
           </div>
         </div>
         <div class="card">
@@ -565,14 +567,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <div class="center"><b>9</b><small>types</small></div>
           </div>
           <div class="breakdown">
-            <div class="brk"><i style="background:var(--c-setf)"></i><span>Stock ETF</span><span class="amt">€ 65.945,24</span><span class="pct">35,7%</span></div>
+            <div class="brk"><i style="background:var(--c-setf)"></i><span>Stock ETF</span><span class="amt">€ 65.955,05</span><span class="pct">35,7%</span></div>
             <div class="brk"><i style="background:var(--c-betf)"></i><span>Bond ETF</span><span class="amt">€ 18.911,60</span><span class="pct">10,2%</span></div>
             <div class="brk"><i style="background:var(--c-liq)"></i><span>Liquidity</span><span class="amt">€ 34.185,22</span><span class="pct">18,5%</span></div>
             <div class="brk"><i style="background:var(--c-dep)"></i><span>Deposit account</span><span class="amt">€ 12.500,00</span><span class="pct">6,8%</span></div>
             <div class="brk"><i style="background:var(--c-term)"></i><span>Term deposit</span><span class="amt">€ 25.000,00</span><span class="pct">13,5%</span></div>
-            <div class="brk"><i style="background:var(--c-stock)"></i><span>Stock</span><span class="amt">€ 4.744,65</span><span class="pct">2,6%</span></div>
+            <div class="brk"><i style="background:var(--c-stock)"></i><span>Stock</span><span class="amt">€ 4.747,70</span><span class="pct">2,6%</span></div>
             <div class="brk"><i style="background:var(--c-pens)"></i><span>Pension fund</span><span class="amt">€ 22.640,75</span><span class="pct">12,3%</span></div>
-            <div class="brk"><i style="background:var(--c-etc)"></i><span>ETC</span><span class="amt">€ 611,57</span><span class="pct">0,3%</span></div>
+            <div class="brk"><i style="background:var(--c-etc)"></i><span>ETC</span><span class="amt">€ 614,69</span><span class="pct">0,3%</span></div>
             <div class="brk"><i style="background:var(--c-vou)"></i><span>Voucher</span><span class="amt">€ 260,00</span><span class="pct">0,1%</span></div>
           </div>
         </div>
@@ -603,17 +605,17 @@ table.spec td.d{color:var(--faint);font-style:italic;}
           <tbody>
             <tr><td>Fineco</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.840,55</td><td class="dim">main account</td></tr>
             <tr><td>Fineco</td><td class="desc">Conto Titoli</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.800,00</td><td class="dim">uninvested, awaiting next purchase</td></tr>
-            <tr><td>Fineco</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 84.856,84</td><td class="dim">3 holdings, net of tax and fees</td></tr>
+            <tr><td>Fineco</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 84.866,65</td><td class="dim">3 holdings, net of tax and fees</td></tr>
             <tr><td>Intesa Sanpaolo</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 8.204,10</td><td class="dim">household bills</td></tr>
             <tr><td class="dim">—</td><td class="desc">Wallet</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 340,57</td><td class="dim">physical cash</td></tr>
             <tr><td>ING</td><td class="desc">Conto Arancio</td><td><span class="chip type">Deposit account</span></td><td class="n r">€ 12.500,00</td><td class="dim">2,00%</td></tr>
             <tr><td>Banca Sella</td><td class="desc">Deposito Vincolato 24m</td><td><span class="chip type">Term deposit</span></td><td class="n r">€ 25.000,00</td><td class="dim">matures 03/2027</td></tr>
             <tr><td>Banca Sella</td><td class="desc">Conto Titoli</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 0,00</td><td class="dim">uninvested</td></tr>
-            <tr><td>Banca Sella</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 5.356,22</td><td class="dim">2 holdings, net of tax and fees</td></tr>
+            <tr><td>Banca Sella</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 5.362,39</td><td class="dim">2 holdings, net of tax and fees</td></tr>
             <tr><td>Amundi</td><td class="desc">Fondo Pensione</td><td><span class="chip type">Pension fund</span></td><td class="n r">€ 22.640,75</td><td class="dim">revalued 31/07/2026</td></tr>
             <tr><td>Edenred</td><td class="desc">Buoni Pasto</td><td><span class="chip type">Voucher</span></td><td class="n r">€ 260,00</td><td class="dim">26 × € 10,00</td></tr>
           </tbody>
-          <tfoot><tr><td colspan="3">11 open accounts · 6 institutions</td><td class="r tot">€ 184.799,03</td><td></td></tr></tfoot>
+          <tfoot><tr><td colspan="3">11 open accounts · 6 institutions</td><td class="r tot">€ 184.815,01</td><td></td></tr></tfoot>
         </table></div>
       </div>
     </main>
@@ -627,20 +629,32 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     holdings at their latest known price <i>less</i> the hypothetical capital-gains tax and sell fee
     of §12.3. It is the sum of the two figures beneath it, and those two are the only decomposition
     offered.</li>
-    <li><b>Sum of all transactions</b> is the same total with holdings valued at what they cost
-    instead — Σ account balances + Σ holdings at cost. <b>Unrealised net investment gain</b> is
-    exactly the difference, so the two lines add up to the headline by construction.</li>
+    <li><b>Total at cost</b> is the same total with holdings valued at what they were paid for
+    instead — Σ cash balances + Σ holdings at cost. <b>Unrealised net investment gain</b> is exactly
+    the difference, so the two lines add up to the headline by construction. It was once labelled
+    <i>sum of all transactions</i>, which was wrong twice over: it includes opening balances, which
+    are not transactions, and it values holdings at their cost basis, which is not a transaction
+    either.</li>
     <li><b>The headline figure is therefore an estimate</b>, and must carry the §12.3 caveat on
     hover: it rests on average-cost lot matching and moves if a security's <code>taxRate</code> or
     an institution's sell fee changes. The gross, untaxed picture is one screen away, on Investments
     (§8.1), where the per-holding breakdown lives.</li>
-    <li><b>All-time figures</b> are lifetime sums of the named categories, plus realised gain from
-    sales (§12.2). Unlike net worth, realised gain is a recorded fact, not an estimate.</li>
+    <li><b>All-time figures</b> are lifetime sums of the categories carrying the roles
+    <code>bank fees</code>, <code>wealth tax</code> and <code>interest and dividends</code>, plus
+    realised gain from sales (§12.2). Unlike net worth, realised gain is a recorded fact, not an
+    estimate.</li>
+    <li><b>Those three roles exist for this card and nothing else.</b> The category list is fixed
+    (§7.3), so the card could have named its three categories directly and been correct forever —
+    but every other part of the application that cares about a particular kind of money keys off
+    <code>role</code>, and one screen quietly matching on names would have been the exception that
+    made the rule untrue. Roles cost nothing and keep the promise whole.</li>
     <li><b>Breakdown by type.</b> Cash accounts contribute under the account's type; holdings
     contribute under their <em>security's</em> type, at the same net value used for net worth. A
     brokerage account never appears as a slice of its own — it is entirely its holdings — so the
-    types present are the five cash types plus the four security types. Closed accounts and their
-    holdings are excluded.</li>
+    types available are the five cash types plus the five security types. Closed accounts and their
+    holdings are excluded. <b>Only types actually present get a slice</b>: the ten are the ceiling,
+    the nine above are what this portfolio happens to hold, and a <code>Bond</code> bought tomorrow
+    makes ten.</li>
     <li><b>The pie</b> carries one slice per type present, sized by its share of net worth, with the
     slice count at its centre and the same colour keying the list beside it. It exists to make the
     shape of the portfolio readable at a glance; the list beside it carries the amounts and
@@ -897,7 +911,10 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     transfer, the security for a trade-matched securities transaction, an em dash otherwise
     (§12.6).</li>
     <li><b>Notes</b> is free text the user owns. <b>The application never writes to it.</b></li>
-    <li><b>Receipt</b> cycles <code>pending → checked → na</code>.</li>
+    <li><b>Receipt</b> is a picker with three values — <code>pending</code>, <code>checked</code>,
+    <code>na</code> — chosen directly. It is not a cycle and there is no order to work through: a
+    transaction is not on its way anywhere, it simply has one of three states and the user says which
+    (§7.3).</li>
     <li>The footer sums the filtered rows, across all pages.</li>
   </ul>
 
@@ -1184,30 +1201,30 @@ table.spec td.d{color:var(--faint);font-style:italic;}
           <tbody>
             <tr class="grp"><td colspan="7">Income</td></tr>
             <tr><td class="cat">Salary</td><td class="n r pos">+ € 21.900,00</td><td class="n r pos">+ € 23.710,00</td><td class="n r pos">+ € 25.390,00</td><td class="n r pos">+ € 27.373,50</td><td class="n r pos">+ € 18.416,00</td><td class="n r pos">+ € 116.789,50</td></tr>
-            <tr><td class="cat">Voucher top-up</td><td class="n r pos">+ € 2.420,00</td><td class="n r pos">+ € 2.420,00</td><td class="n r pos">+ € 2.530,00</td><td class="n r pos">+ € 2.640,00</td><td class="n r pos">+ € 1.540,00</td><td class="n r pos">+ € 11.550,00</td></tr>
             <tr><td class="cat">Pension fund contribution</td><td class="n r pos">+ € 1.716,00</td><td class="n r pos">+ € 1.716,00</td><td class="n r pos">+ € 1.780,00</td><td class="n r pos">+ € 1.860,00</td><td class="n r pos">+ € 1.184,00</td><td class="n r pos">+ € 8.256,00</td></tr>
-            <tr><td class="cat">Interest, dividends &amp; bonuses</td><td class="n r pos">+ € 412,00</td><td class="n r pos">+ € 688,00</td><td class="n r pos">+ € 940,00</td><td class="n r pos">+ € 1.204,00</td><td class="n r pos">+ € 674,00</td><td class="n r pos">+ € 3.918,00</td></tr>
             <tr><td class="cat">Reimbursement</td><td class="n r pos">+ € 420,00</td><td class="n r pos">+ € 380,00</td><td class="n r pos">+ € 512,00</td><td class="n r pos">+ € 610,00</td><td class="n r pos">+ € 182,00</td><td class="n r pos">+ € 2.104,00</td></tr>
             <tr><td class="cat">Gift received</td><td class="n r pos">+ € 250,00</td><td class="n r pos">+ € 400,00</td><td class="n r pos">+ € 150,00</td><td class="n r pos">+ € 300,00</td><td class="n r pos">+ € 250,00</td><td class="n r pos">+ € 1.350,00</td></tr>
             <tr><td class="cat">Other income</td><td class="n r dim">—</td><td class="n r pos">+ € 120,00</td><td class="n r dim">—</td><td class="n r pos">+ € 85,00</td><td class="n r dim">—</td><td class="n r pos">+ € 205,00</td></tr>
+            <tr><td class="cat">Interest, dividends &amp; bonuses</td><td class="n r pos">+ € 412,00</td><td class="n r pos">+ € 688,00</td><td class="n r pos">+ € 940,00</td><td class="n r pos">+ € 1.204,00</td><td class="n r pos">+ € 674,00</td><td class="n r pos">+ € 3.918,00</td></tr>
+            <tr><td class="cat">Voucher top-up</td><td class="n r pos">+ € 2.420,00</td><td class="n r pos">+ € 2.420,00</td><td class="n r pos">+ € 2.530,00</td><td class="n r pos">+ € 2.640,00</td><td class="n r pos">+ € 1.540,00</td><td class="n r pos">+ € 11.550,00</td></tr>
             <tr class="sum"><td class="cat">Total income</td><td class="n r pos">+ € 27.118,00</td><td class="n r pos">+ € 29.434,00</td><td class="n r pos">+ € 31.302,00</td><td class="n r pos">+ € 34.072,50</td><td class="n r pos">+ € 22.246,00</td><td class="n r pos">+ € 144.172,50</td></tr>
             <tr class="grp"><td colspan="7">Expense</td></tr>
-            <tr><td class="cat">Rent &amp; condominium fees</td><td class="n r neg">− € 5.400,00</td><td class="n r neg">− € 5.400,00</td><td class="n r neg">− € 5.700,00</td><td class="n r neg">− € 5.700,00</td><td class="n r neg">− € 3.800,00</td><td class="n r neg">− € 26.000,00</td></tr>
-            <tr><td class="cat">Groceries</td><td class="n r neg">− € 2.090,00</td><td class="n r neg">− € 2.260,00</td><td class="n r neg">− € 2.380,00</td><td class="n r neg">− € 2.490,00</td><td class="n r neg">− € 1.560,00</td><td class="n r neg">− € 10.780,00</td></tr>
             <tr><td class="cat">Restaurants &amp; bars</td><td class="n r neg">− € 1.320,00</td><td class="n r neg">− € 1.490,00</td><td class="n r neg">− € 1.605,00</td><td class="n r neg">− € 1.710,00</td><td class="n r neg">− € 1.090,00</td><td class="n r neg">− € 7.215,00</td></tr>
+            <tr><td class="cat">Groceries</td><td class="n r neg">− € 2.090,00</td><td class="n r neg">− € 2.260,00</td><td class="n r neg">− € 2.380,00</td><td class="n r neg">− € 2.490,00</td><td class="n r neg">− € 1.560,00</td><td class="n r neg">− € 10.780,00</td></tr>
             <tr><td class="cat">Travel</td><td class="n r neg">− € 925,00</td><td class="n r neg">− € 1.200,00</td><td class="n r neg">− € 1.550,00</td><td class="n r neg">− € 1.380,00</td><td class="n r neg">− € 970,00</td><td class="n r neg">− € 6.025,00</td></tr>
-            <tr><td class="cat">Technology &amp; devices</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 240,00</td><td class="n r neg">− € 1.050,00</td><td class="n r neg">− € 310,00</td><td class="n r neg">− € 690,00</td><td class="n r neg">− € 2.910,00</td></tr>
-            <tr><td class="cat">Income &amp; other taxes</td><td class="n r neg">− € 550,00</td><td class="n r neg">− € 590,00</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 655,00</td><td class="n r neg">− € 320,00</td><td class="n r neg">− € 2.735,00</td></tr>
             <tr><td class="cat">Home &amp; household</td><td class="n r neg">− € 490,00</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 430,00</td><td class="n r neg">− € 755,00</td><td class="n r neg">− € 360,00</td><td class="n r neg">− € 2.655,00</td></tr>
-            <tr><td class="cat">Health &amp; personal care</td><td class="n r neg">− € 440,00</td><td class="n r neg">− € 560,00</td><td class="n r neg">− € 480,00</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 320,00</td><td class="n r neg">− € 2.420,00</td></tr>
+            <tr><td class="cat">Rent &amp; condominium fees</td><td class="n r neg">− € 5.400,00</td><td class="n r neg">− € 5.400,00</td><td class="n r neg">− € 5.700,00</td><td class="n r neg">− € 5.700,00</td><td class="n r neg">− € 3.800,00</td><td class="n r neg">− € 26.000,00</td></tr>
             <tr><td class="cat">Electricity</td><td class="n r neg">− € 360,00</td><td class="n r neg">− € 470,00</td><td class="n r neg">− € 440,00</td><td class="n r neg">− € 405,00</td><td class="n r neg">− € 260,00</td><td class="n r neg">− € 1.935,00</td></tr>
-            <tr><td class="cat">Entertainment</td><td class="n r neg">− € 320,00</td><td class="n r neg">− € 360,00</td><td class="n r neg">− € 405,00</td><td class="n r neg">− € 380,00</td><td class="n r neg">− € 240,00</td><td class="n r neg">− € 1.705,00</td></tr>
             <tr><td class="cat">Home internet</td><td class="n r neg">− € 359,40</td><td class="n r neg">− € 359,40</td><td class="n r neg">− € 359,40</td><td class="n r neg">− € 359,40</td><td class="n r neg">− € 239,60</td><td class="n r neg">− € 1.677,20</td></tr>
-            <tr><td class="cat">Other expense</td><td class="n r neg">− € 210,00</td><td class="n r neg">− € 190,00</td><td class="n r neg">− € 255,00</td><td class="n r neg">− € 230,00</td><td class="n r neg">− € 140,00</td><td class="n r neg">− € 1.025,00</td></tr>
-            <tr><td class="cat">Culture &amp; education</td><td class="n r neg">− € 155,00</td><td class="n r neg">− € 140,00</td><td class="n r neg">− € 210,00</td><td class="n r neg">− € 195,00</td><td class="n r neg">− € 105,00</td><td class="n r neg">− € 805,00</td></tr>
-            <tr><td class="cat">Bank fees</td><td class="n r neg">− € 142,00</td><td class="n r neg">− € 148,00</td><td class="n r neg">− € 156,00</td><td class="n r neg">− € 162,00</td><td class="n r neg">− € 98,00</td><td class="n r neg">− € 706,00</td></tr>
-            <tr><td class="cat">Wealth tax</td><td class="n r neg">− € 118,00</td><td class="n r neg">− € 132,00</td><td class="n r neg">− € 148,00</td><td class="n r neg">− € 164,00</td><td class="n r neg">− € 92,00</td><td class="n r neg">− € 654,00</td></tr>
             <tr><td class="cat">Mobile &amp; phone</td><td class="n r neg">− € 120,00</td><td class="n r neg">− € 120,00</td><td class="n r neg">− € 132,00</td><td class="n r neg">− € 132,00</td><td class="n r neg">− € 88,00</td><td class="n r neg">− € 592,00</td></tr>
+            <tr><td class="cat">Entertainment</td><td class="n r neg">− € 320,00</td><td class="n r neg">− € 360,00</td><td class="n r neg">− € 405,00</td><td class="n r neg">− € 380,00</td><td class="n r neg">− € 240,00</td><td class="n r neg">− € 1.705,00</td></tr>
+            <tr><td class="cat">Other expense</td><td class="n r neg">− € 210,00</td><td class="n r neg">− € 190,00</td><td class="n r neg">− € 255,00</td><td class="n r neg">− € 230,00</td><td class="n r neg">− € 140,00</td><td class="n r neg">− € 1.025,00</td></tr>
+            <tr><td class="cat">Bank fees</td><td class="n r neg">− € 142,00</td><td class="n r neg">− € 148,00</td><td class="n r neg">− € 156,00</td><td class="n r neg">− € 162,00</td><td class="n r neg">− € 98,00</td><td class="n r neg">− € 706,00</td></tr>
+            <tr><td class="cat">Income &amp; other taxes</td><td class="n r neg">− € 550,00</td><td class="n r neg">− € 590,00</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 655,00</td><td class="n r neg">− € 320,00</td><td class="n r neg">− € 2.735,00</td></tr>
+            <tr><td class="cat">Wealth tax</td><td class="n r neg">− € 118,00</td><td class="n r neg">− € 132,00</td><td class="n r neg">− € 148,00</td><td class="n r neg">− € 164,00</td><td class="n r neg">− € 92,00</td><td class="n r neg">− € 654,00</td></tr>
+            <tr><td class="cat">Culture &amp; education</td><td class="n r neg">− € 155,00</td><td class="n r neg">− € 140,00</td><td class="n r neg">− € 210,00</td><td class="n r neg">− € 195,00</td><td class="n r neg">− € 105,00</td><td class="n r neg">− € 805,00</td></tr>
+            <tr><td class="cat">Health &amp; personal care</td><td class="n r neg">− € 440,00</td><td class="n r neg">− € 560,00</td><td class="n r neg">− € 480,00</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 320,00</td><td class="n r neg">− € 2.420,00</td></tr>
+            <tr><td class="cat">Technology &amp; devices</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 240,00</td><td class="n r neg">− € 1.050,00</td><td class="n r neg">− € 310,00</td><td class="n r neg">− € 690,00</td><td class="n r neg">− € 2.910,00</td></tr>
             <tr class="sum"><td class="cat">Total expense</td><td class="n r neg">− € 13.619,40</td><td class="n r neg">− € 14.279,40</td><td class="n r neg">− € 15.920,40</td><td class="n r neg">− € 15.647,40</td><td class="n r neg">− € 10.372,60</td><td class="n r neg">− € 69.839,20</td></tr>
             <tr class="net"><td class="cat">Net</td><td class="n r pos">+ € 13.498,60</td><td class="n r pos">+ € 15.154,60</td><td class="n r pos">+ € 15.381,60</td><td class="n r pos">+ € 18.425,10</td><td class="n r pos">+ € 11.873,40</td><td class="n r pos">+ € 74.333,30</td></tr>
             <tr class="grp"><td colspan="7">Other types</td></tr>
@@ -1222,9 +1239,15 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </div></div>
 
   <ul class="body">
-    <li>Rows are categories grouped under their type, ordered by absolute total descending within
-    each group. Columns are calendar years plus a total. <b>The whole table is shown; there is no
-    paging.</b></li>
+    <li>Rows are categories grouped under their type, <b>in the fixed order of the category list</b>
+    (§7.3) — never by amount. Columns are calendar years plus a total. <b>The whole table is shown;
+    there is no paging.</b></li>
+    <li><b>The order never moves.</b> Sorting by total would have put the biggest number at the top
+    of each group, which reads well once and badly forever: change the year filter and every row
+    jumps, so the eye has to find <i>Groceries</i> again instead of going straight to where it was
+    last time. A table read every month is worth more when its shape is memorised, and that is only
+    possible if the shape is a constant. The same order is used on the list tab and in every category
+    picker, so a category is always in the same place wherever it appears.</li>
     <li>Amounts <b>carry the sign and colour of the transactions behind them</b> — income green and
     positive, expense red and negative — exactly as on the Transactions screen. Absolute values with
     the direction implied by the group header would have read fine for Income and Expense and lied
@@ -1394,6 +1417,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>Read-only, and the only place the whole taxonomy is visible at once.</b> Its types and
     roles decide how every other screen adds things up, so being able to look at them without
     reading this document is worth a tab even though nothing on it can be changed.</li>
+    <li><b>The order of this list is the order of everything.</b> Its <code>order</code> field
+    (§2) fixes where a category sits in the report, in this list and in every picker, and no screen
+    ever re-sorts by amount (§7.1).</li>
     <li>The <b>Transactions</b> column is a live count and the reason the tab is more than
     decoration: a category with none is one the rules never reach, and the total across all 27 is
     every categorised transaction in the file — 4.811 of 4.812 here, the missing one being the
@@ -1410,7 +1436,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>Reimbursement</td><td>Income</td><td class="d">—</td><td>Rimborso</td><td></td></tr>
       <tr><td>Gift received</td><td>Income</td><td class="d">—</td><td>Regalo</td><td></td></tr>
       <tr><td>Other income</td><td>Income</td><td class="d">—</td><td>Altra entrata</td><td></td></tr>
-      <tr><td>Interest, dividends &amp; bonuses</td><td>Income</td><td class="d">—</td><td>Interessi, dividendi e bonus</td><td></td></tr>
+      <tr><td>Interest, dividends &amp; bonuses</td><td>Income</td><td>interest and dividends</td><td>Interessi, dividendi e bonus</td><td></td></tr>
       <tr><td>Voucher top-up</td><td>Income</td><td class="d">—</td><td>Aggiunta voucher</td><td></td></tr>
       <tr><td>Securities purchase</td><td>Investment</td><td>securities purchase</td><td>Acquisto titoli</td><td></td></tr>
       <tr><td>Securities sale</td><td>Divestment</td><td>securities sale</td><td>Vendita titoli</td><td></td></tr>
@@ -1424,9 +1450,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>Mobile &amp; phone</td><td>Expense</td><td class="d">—</td><td>Internet telefono</td><td>✓</td></tr>
       <tr><td>Entertainment</td><td>Expense</td><td class="d">—</td><td>Intrattenimento</td><td></td></tr>
       <tr><td>Other expense</td><td>Expense</td><td class="d">—</td><td>Altro pagamento</td><td></td></tr>
-      <tr><td>Bank fees</td><td>Expense</td><td class="d">—</td><td>Costo banca</td><td></td></tr>
+      <tr><td>Bank fees</td><td>Expense</td><td>bank fees</td><td>Costo banca</td><td></td></tr>
       <tr><td>Income &amp; other taxes</td><td>Expense</td><td class="d">—</td><td>Tassa non patrimoniale</td><td>✓</td></tr>
-      <tr><td>Wealth tax</td><td>Expense</td><td class="d">—</td><td>Tassa patrimoniale</td><td></td></tr>
+      <tr><td>Wealth tax</td><td>Expense</td><td>wealth tax</td><td>Tassa patrimoniale</td><td></td></tr>
       <tr><td>Culture &amp; education</td><td>Expense</td><td class="d">—</td><td>Cultura</td><td></td></tr>
       <tr><td>Health &amp; personal care</td><td>Expense</td><td class="d">—</td><td>Salute e persona</td><td></td></tr>
       <tr><td>Technology &amp; devices</td><td>Expense</td><td class="d">—</td><td>Tecnologia e devices</td><td></td></tr>
@@ -1489,12 +1515,12 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <thead><tr><th>Security</th><th>Type</th><th>Where</th><th class="r">Qty</th><th class="r">Avg cost</th><th class="r">Price</th><th class="r">Value</th><th class="r">Gain</th></tr></thead>
             <tbody>
               <tr class="sel"><td class="desc">VWCE <span class="dim">Vanguard FTSE All-World</span></td><td><span class="chip type">Stock ETF</span></td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">338</td><td class="n r">€ 108,2150</td><td class="n r">€ 124,8600</td><td class="n r">€ 42.202,68</td><td class="n r pos">+15,4%</td></tr>
-              <tr><td class="desc">SWDA <span class="dim">iShares Core MSCI World</span></td><td><span class="chip type">Stock ETF</span></td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">285</td><td class="n r">€ 78,4210</td><td class="n r">€ 92,1400</td><td class="n r">€ 26.259,90</td><td class="n r pos">+17,5%</td></tr>
+              <tr><td class="desc">SWDA <span class="dim">iShares Core MSCI World</span></td><td><span class="chip type">Stock ETF</span></td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">285</td><td class="n r">€ 78,4200</td><td class="n r">€ 92,1400</td><td class="n r">€ 26.259,90</td><td class="n r pos">+17,5%</td></tr>
               <tr><td class="desc">AGGH <span class="dim">iShares Core Global Aggregate Bond</span></td><td><span class="chip type">Bond ETF</span></td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">3.900</td><td class="n r">€ 4,8620</td><td class="n r" style="color:var(--brass)">€ 4,8540 ▲</td><td class="n r">€ 18.930,60</td><td class="n r neg">−0,2%</td></tr>
-              <tr><td class="desc">ENI <span class="dim">Eni S.p.A.</span></td><td><span class="chip type">Stock</span></td><td class="dim">Banca Sella · Dossier Titoli</td><td class="n r">320</td><td class="n r">€ 13,9800</td><td class="n r">€ 15,1753</td><td class="n r">€ 4.856,10</td><td class="n r pos">+8,5%</td></tr>
+              <tr><td class="desc">ENI <span class="dim">Eni S.p.A.</span></td><td><span class="chip type">Stock</span></td><td class="dim">Banca Sella · Dossier Titoli</td><td class="n r">320</td><td class="n r">€ 13,9800</td><td class="n r">€ 15,1750</td><td class="n r">€ 4.856,00</td><td class="n r pos">+8,5%</td></tr>
               <tr><td class="desc">PHAU <span class="dim">WisdomTree Physical Gold</span></td><td><span class="chip type">ETC</span></td><td class="dim">Banca Sella · Dossier Titoli</td><td class="n r">8</td><td class="n r">€ 72,1000</td><td class="n r">€ 80,0000</td><td class="n r">€ 640,00</td><td class="n r pos">+11,0%</td></tr>
             </tbody>
-            <tfoot><tr><td colspan="6">5 holdings · gross of tax and fees · ▲ price older than 30 days</td><td class="r tot">€ 92.889,28</td><td class="r pos">+ € 9.950,42</td></tr></tfoot>
+            <tfoot><tr><td colspan="6">5 holdings · gross of tax and fees · ▲ price older than <code>priceStalenessDays</code></td><td class="r tot">€ 92.889,18</td><td class="r pos">+ € 9.950,61</td></tr></tfoot>
           </table></div>
         </div>
         <div class="detail">
@@ -1509,11 +1535,11 @@ table.spec td.d{color:var(--faint);font-style:italic;}
           <h4 class="subhead">If sold today</h4>
           <div class="figs">
             <div class="fig"><span>Gross proceeds</span><b>€ 42.202,68</b></div>
-            <div class="fig"><span>Gain before tax</span><b class="pos">+ € 5.626,01</b></div>
-            <div class="fig"><span>Tax, 26,0% — VWCE rate</span><b class="neg">− € 1.462,76</b></div>
             <div class="fig"><span>Sell fee, Fineco default</span><b class="neg">− € 19,00</b></div>
-            <div class="fig"><span>Net proceeds</span><b>€ 40.720,92</b></div>
-            <div class="fig"><span>Net gain</span><b class="pos">+ € 4.144,25 · +11,3%</b></div>
+            <div class="fig"><span>Taxable gain</span><b class="pos">+ € 5.607,01</b></div>
+            <div class="fig"><span>Tax, 26,0% — VWCE rate</span><b class="neg">− € 1.457,82</b></div>
+            <div class="fig"><span>Net proceeds</span><b>€ 40.725,86</b></div>
+            <div class="fig"><span>Net gain</span><b class="pos">+ € 4.149,19 · +11,3%</b></div>
           </div>
           <hr class="sep">
           <p class="note">Average cost is an approximation. Your broker may match lots differently
@@ -1722,8 +1748,10 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     trade (§8.5). This tab is where one is corrected afterwards: a mistyped ISIN, a renamed
     instrument, the wrong type, the tax rate on a whitelist government bond.</li>
     <li><b>Held</b> is the quantity across every brokerage account, an em dash when the position is
-    closed. <b>Trades</b> and <b>Prices</b> count what points at the security, and between them say
-    whether it can be deleted: only a security with neither can (§4.3).</li>
+    closed. <b>Trades</b> is what decides whether the security can be deleted; <b>Prices</b> does
+    not. A price is part of a security rather than a reference to one, so deleting a security deletes
+    its history with it and the confirmation says how many records that is — a fully sold instrument
+    entered by mistake goes away in one action (§14).</li>
     <li><b>The full price history lives here, and every record in it can be edited or deleted.</b>
     Holdings (§8.1) is the fast path for the one price recorded weekly; this is where a value typed
     into the wrong day is repaired. Editing a record's value replaces it; editing its date moves it,
@@ -1798,6 +1826,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li><b>A price belongs to the security, not to a holding.</b> The same instrument held at two
     institutions is two holdings and one price, so editing the price on either row moves both. The
     inline editor says so.</li>
+    <li><b>That is a simplification, and a safe one.</b> Two brokers quote the same instrument within
+    a fraction of a percent of each other at any moment, and the difference between them is a spread,
+    not a value — but it is not literally one number: an ETF cross-listed on Borsa Italiana and Xetra
+    has two quotes, and a broker's screen is a snapshot of a different second. None of it survives
+    the only use this figure has, which is valuing a position to the euro once a week. <b>If two
+    quotes ever differ enough to matter, they are two listings and belong to two securities</b>, each
+    with its own ISIN and its own holding — which the model already supports and which is what the
+    difference is telling you.</li>
     <li><b>A security with no price at all values at zero</b>, everywhere a current figure is shown,
     and fails check 3 by name. The one exception is the historical chart of §12.5, which values a
     holding at cost for the stretch before its first recorded price and draws it dashed — a chart
@@ -2041,7 +2077,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
           <div class="chk"><span class="st ok">✓</span><span class="name">No sale precedes its purchase<em>A sale with nothing bought before it in the same account.</em></span><span class="res">6 sales</span></div>
           <div class="chk"><span class="st ok">✓</span><span class="name">The pension fund has been revalued recently<em>Its balance only moves when a value adjustment is recorded.</em></span><span class="res">8 days ago</span></div>
           <div class="chk"><span class="st ok">✓</span><span class="name">Closed accounts are empty<em>A closed account leaves net worth, so anything left in it would vanish silently.</em></span><span class="res">1 closed</span></div>
-          <div class="chk"><span class="st ok">✓</span><span class="name">Nothing predates its account<em>A transaction or trade dated before the account was opened is a typo or the wrong account.</em></span><span class="res">4.812 + 47</span></div>
+          <div class="chk"><span class="st ok">✓</span><span class="name">Records fall within their account's life<em>A transaction or trade dated before the account opened, or after it closed, is a typo or the wrong account.</em></span><span class="res">4.812 + 47</span></div>
           <div class="chk"><span class="st ok">✓</span><span class="name">Receipt-tracked transactions carry a state<em>A category that expects a receipt should never read n/a.</em></span><span class="res">1.284 tracked</span></div>
           <div class="chk"><span class="st ok">✓</span><span class="name">No receipt has been pending too long<em>Pending is a to-do; after three months it is an oversight.</em></span><span class="res">6 pending</span></div>
         </div>
@@ -2052,7 +2088,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   <div class="specwrap"><table class="spec">
     <thead><tr><th>#</th><th>Check</th><th>Definition</th><th>Failure output</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td>Internal transfers balance out</td><td>Σ of all amounts in categories with role <code>internal transfer</code> = 0, and every leg pairs (§12.6).</td><td>Each unpaired leg, with date, account, description, amount.</td></tr>
+      <tr><td>1</td><td>Internal transfers balance out</td><td>Every transaction in a category with role <code>internal transfer</code> pairs with an opposite leg (§12.6).</td><td>Each unpaired leg, with date, account, description, amount.</td></tr>
       <tr><td>2</td><td>Every transaction has a category</td><td><code>categoryId</code> is set.</td><td>Each uncategorised transaction.</td></tr>
       <tr><td>3</td><td>Prices are recent</td><td>Every security with an open holding has at least one Price record, and its latest one is dated within <code>priceStalenessDays</code>. <b>No price at all fails too</b>, and is the more serious of the two: that holding is valued at zero everywhere (§12.3).</td><td>Security, price, date, age — or “no price recorded”.</td></tr>
       <tr><td>4</td><td>Payslips match salary transactions</td><td>Every payslip pairs one-to-one with a transaction in a role <code>salary</code> category, of equal <code>netPayment</code>, dated in the payslip's month or the one after — and every such transaction pairs with a payslip (§12.6).</td><td>Unmatched payslips and unmatched transactions, listed separately, with amounts.</td></tr>
@@ -2063,7 +2099,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>9</td><td>No sale precedes its purchase</td><td>Every sale has at least one earlier purchase of that security in that account.</td><td>The offending sale.</td></tr>
       <tr><td>10</td><td>Pension fund revalued recently</td><td>Latest transaction in a role <code>value adjustment</code> category, in each pension fund account, within <code>pensionRevaluationMonths</code>.</td><td>Account and date of the last adjustment.</td></tr>
       <tr><td>11</td><td>Closed accounts are empty</td><td>Every account with a <code>closingDate</code> has a balance of exactly 0 and no holding with quantity &gt; 0.</td><td>Account, closing date, the balance or holdings left in it.</td></tr>
-      <tr><td>12</td><td>Nothing predates its account</td><td>No transaction or trade is dated before its account's <code>openingDate</code>, or after its <code>closingDate</code>.</td><td>The record, its date, and the account's opening or closing date.</td></tr>
+      <tr><td>12</td><td>Records fall within their account's life</td><td>No transaction or trade is dated before its account's <code>openingDate</code> or after its <code>closingDate</code>. Both ends, not just the near one.</td><td>The record, its date, and the account's opening or closing date.</td></tr>
       <tr><td>13</td><td>Receipt-tracked transactions carry a state</td><td>No transaction in a category with <code>receiptTracked</code> has <code>receiptState = na</code>.</td><td>Each such transaction.</td></tr>
       <tr><td>14</td><td>No receipt has been pending too long</td><td>Every transaction with <code>receiptState = pending</code> is dated within <code>receiptPendingMonths</code> of today.</td><td>Each overdue transaction, with its age.</td></tr>
     </tbody>
@@ -2275,8 +2311,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     everything the broker took, so it is what the sale actually added to net worth.</li>
     <li>Summed across all sales for the Portfolio all-time figure.</li>
     <li>The gross counterpart, <code>q × price − fees − (q × avgCost)</code>, is what the tax was
-    computed on. It is not displayed: the tax on a real sale is a recorded fact, so there is nothing
-    to reconcile it against.</li>
+    computed on — the same shape as <code>taxableGain</code> in §12.3, fee first, which is why the
+    estimate and the record are comparable at all. It is not displayed: the tax on a real sale is a
+    recorded fact, so there is nothing to reconcile it against.</li>
   </ul>
 
   <h3 class="sub">12.3 Hypothetical liquidation</h3>
@@ -2288,14 +2325,28 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     commission. Check 3 names the security, and §8.1 marks the row. This is deliberate: valuing an
     unpriced holding at cost would have buried a missing price inside a number that looks
     right.</li>
-    <li><code>gainBeforeTax = grossProceeds − (quantity × avgCost)</code></li>
-    <li><code>tax = gainBeforeTax &gt; 0 ? gainBeforeTax × security.taxRate : 0</code> —
-    <b>never negative</b>; a loss produces no rebate.</li>
     <li><code>fee = institution.defaultSellFee</code> of the holding's account, or 0 when the account
     has no institution. <b>Charged once per holding</b>, so liquidating three positions at one broker
     is estimated with three fees — which is what the broker would in fact charge.</li>
-    <li><code>netProceeds = grossProceeds − tax − fee</code></li>
+    <li><code>taxableGain = grossProceeds − fee − (quantity × avgCost)</code></li>
+    <li><code>tax = taxableGain &gt; 0 ? round(taxableGain × security.taxRate) : 0</code> —
+    <b>never negative</b>; a loss produces no rebate.</li>
+    <li><code>netProceeds = grossProceeds − fee − tax</code></li>
     <li><code>netGain = netProceeds − (quantity × avgCost)</code></li>
+    <li><b>The fee comes out before the tax, not after it.</b> A selling commission is a cost of the
+    disposal and reduces the gain the tax is computed on — which is how the broker computes it, and
+    the only ordering under which this estimate and the recorded figures of §12.2 mean the same thing
+    by the same arithmetic. It is worth a quarter of the fee, and it is worth being right about.</li>
+    <li><b>Tax is rounded to the cent</b> before it is subtracted — the one place a figure is rounded
+    mid-calculation. It is an amount of money that a broker would withhold in cents, and leaving it
+    unrounded would make the per-holding net values fail to add up to the portfolio total by a
+    fraction of a cent.</li>
+    <li><b>netProceeds can be negative, and that is correct.</b> A position worth less than the fee
+    to sell it would cost money to close, and net worth says so. The fee is charged whatever the
+    position is worth — a smaller gain does not buy a smaller commission — and a holding whose whole
+    value is a rounding error is a thing worth seeing rather than a thing worth flattening to zero.
+    The one holding valued at exactly zero is the one with no price at all, above, where no fee is
+    charged because nothing is being sold.</li>
     <li>The portfolio-level figure is the sum across all holdings, each with its own institution fee
     and tax rate. It is the <i>unrealised net investment gain</i> line on Portfolio, and, added to
     the cost-based total, the headline net worth itself (§3.1).</li>
@@ -2310,8 +2361,8 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   the security (§2), not a constant; the gain it applies to is computed separately from the rate
   applied to it; and tax appears in exactly two places — this hypothetical, and the recorded figure
   on a sale. Whitelist government bonds already exercise the mechanism at 12,5%, and they are why
-  the rate sits on the instrument rather than on its type: whether a bond is on the list is a fact
-  about that bond. Anything a future regime needs beyond a rate per instrument — holding-period
+  the rate sits on the instrument rather than on its type even now that <code>Bond</code> is a type:
+  a BTP and a corporate bond are both bonds and are taxed differently. Anything a future regime needs beyond a rate per instrument — holding-period
   relief, loss carry-forward, a personal allowance — is a change to this section alone, not to the
   domain model, and is not designed for now.</div>
 
@@ -2321,9 +2372,9 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>Brokerage account: <code>accountBalance = Σ netProceeds of its holdings</code> (§12.3)</li>
     <li><code>netWorth = Σ accountBalance</code> over open accounts — which, holdings being held in
     accounts of their own, is the whole of it.</li>
-    <li><code>sumOfTransactions = Σ cash accountBalance + Σ holding invested</code>, the same total
-    with holdings at cost. <code>netWorth − sumOfTransactions</code> is the unrealised net gain, and
-    the two are the decomposition shown on Portfolio (§3.1).</li>
+    <li><code>totalAtCost = Σ cash accountBalance + Σ holding invested</code>, the same total with
+    holdings at cost. <code>netWorth − totalAtCost</code> is the unrealised net gain, and the two are
+    the decomposition shown on Portfolio (§3.1).</li>
     <li>Securities purchases already reduce the cash account through their transaction, so holdings
     are added, not double-counted.</li>
     <li><b>Closed accounts are excluded</b> — and nothing stops an account being closed with money
@@ -2422,14 +2473,30 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     directory, then rename — so an interrupted write cannot truncate it.</li>
     <li><b>External modification detection.</b> Before writing, the application verifies the file has
     not changed on disk since it last read it. If it has, it <b>copies the version found on disk into
-    the backup folder</b>, tells the user it did, and carries on with the session in memory — whose
-    next save overwrites it. The session in front of the user is the one being worked on and is never
-    silently discarded; the copy means the other version is recoverable if the overwrite turns out to
-    be the wrong call.</li>
+    the backup folder</b> and carries on with the session in memory — whose next save overwrites it.
+    The session in front of the user is the one being worked on and is never silently discarded; the
+    copy means the other version is recoverable if the overwrite turns out to be the wrong call.</li>
+    <li><b>The user is told, in those terms, and not with a question.</b> A line appears on the
+    screen they are on — <em>“This file was changed by something else while you had it open. That
+    version has been saved to the backup folder as finances-2026-08-11-1432-external.spiccioli, and
+    your work has been kept.”</em> — and it stays until dismissed. It is not a modal and it is not a
+    choice between two versions: the user has one of them in front of them and has no way to judge
+    the other from a dialog, so the application does the safe thing and tells them precisely where to
+    find what it displaced. This is the routine two-machine case, not an exotic one — §1 puts the
+    file wherever the user likes, which includes a synced folder.</li>
     <li><b>Ten rolling timestamped backups</b> in a folder beside the data file, count configurable.
-    One is taken <b>when the application quits after a session in which anything changed</b> — not
-    per save. Autosave fires every few seconds while typing; backing up on each would cycle all ten
-    away within a minute and leave nothing older than lunchtime.</li>
+    One is taken <b>when the application quits after a session in which anything changed</b>, and one
+    <b>when a file is opened</b> — not per save. Autosave fires every few seconds while typing;
+    backing up on each would cycle all ten away within a minute and leave nothing older than
+    lunchtime.</li>
+    <li><b>The backup on open is skipped when the file is byte-for-byte the newest backup already
+    held.</b> Otherwise opening the application ten times on a quiet week would fill the folder with
+    ten identical copies and push out the one version that was actually worth keeping. Backups exist
+    to hold <i>different</i> states, so an identical one is not a backup, it is a leak in the
+    rotation.</li>
+    <li>Between them the two moments cover the case the quit-only rule missed: a session that ends in
+    a crash, or one that ruins the file and is closed in a hurry, still has the state it started from
+    sitting in the folder.</li>
     <li><b>On launch the application always asks which file to open</b>, offering the recently opened
     locations, a browse option, and <b>New file…</b> — which writes a fresh file with the categories
     of §7.3 seeded and nothing else. It never reopens the last file automatically.</li>
@@ -2577,7 +2644,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>isin</td><td>Required, unique, 12 characters, two letters then nine alphanumerics then a digit. The format is checked; the check digit is not recomputed.</td></tr>
       <tr><td>ticker, name</td><td>Required, trimmed.</td></tr>
       <tr><td>taxRate</td><td>Required, 0 – 100, at most 1 decimal.</td></tr>
-      <tr><td>delete</td><td>Refused while any trade <b>or any price</b> points at it. Delete the price history first, deliberately, or keep the security.</td></tr>
+      <tr><td>delete</td><td>Refused while any <b>trade</b> points at it. Prices are not dependent data — they are part of the security, not references to it, and they go with it. Deleting a security therefore deletes its price history in the same breath, and the confirmation says how many records that is.</td></tr>
       <tr class="grp"><td colspan="2"><b>Price</b></td></tr>
       <tr><td>date</td><td>Required. <b>Not in the future</b> — a price is a fact about a day that has happened.</td></tr>
       <tr><td>value</td><td>Required, &gt; 0, at most 4 decimals.</td></tr>
@@ -2694,6 +2761,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
       <tr><td>Transferring a position between brokers</td><td>Not modelled. Recorded as a sale and a purchase, which invents a realised gain and leaves checks 6 and 7 with no bank transaction to pair — both failures are visible and are the price of not building it.</td></tr>
       <tr><td>Corporate actions — splits, mergers, ISIN changes</td><td>Not modelled. A split is entered by hand as an adjusting trade, or the security is replaced and the history restarted.</td></tr>
       <tr><td>Attributing dividends and coupons to a holding</td><td>They arrive as ordinary transactions under <em>Interest, dividends &amp; bonuses</em> and stay there. A holding's gain is therefore price only, never total return — the income is counted, just not against the instrument that produced it.</td></tr>
+      <tr><td>Merging two securities</td><td>A mistyped ISIN entered twice produces two securities and two half-holdings. The fix is to correct one, move its trades by editing them, and delete the other (§8.4) — a handful of edits for something that happens once.</td></tr>
       <tr><td>Re-validating a file on open</td><td>Validation is for the forms (§14). The migration script is written once, for one file, by the one person who will run it.</td></tr>
     </tbody>
   </table></div>
