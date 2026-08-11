@@ -1,0 +1,31 @@
+docs/functional/specs/03-portfolio.md
+  s_5a167a284d1491::t_f8dd9aca8f35d6 34-39,49-50
+docs/functional/specs/04-accounts.md
+  s_5a167a284d1491::t_5c51b2cbcf4b1e 57-59
+docs/functional/specs/05-transactions.md
+  s_5a167a284d1491::t_83d4fa4c856ffe 45,76-80,136-146,151
+docs/functional/specs/06-categories.md
+  s_5a167a284d1491::t_ce25a935e336fa 87-92,158,196
+docs/functional/specs/07-investments.md
+  s_5a167a284d1491::t_606ecbdae50f53 18-21,64-67,79-80,115-118
+docs/functional/specs/08-salaries.md
+  s_5a167a284d1491::t_149a504d13378c 35
+docs/functional/specs/13-validation.md
+  s_5a167a284d1491::t_72141158470583 50-58,126
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "048394ce45b7efb240f1d9c1c720697d9c4a5489",
+  "prompts": {},
+  "sessions": {
+    "s_5a167a284d1491": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a170dfea-4d38-4e64-9afb-63293d986bce",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
