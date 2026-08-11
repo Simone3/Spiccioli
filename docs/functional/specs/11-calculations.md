@@ -69,6 +69,11 @@ look like “none recorded”.
   produces no rebate.
 - `netProceeds = grossProceeds − fee − tax`
 - `netGain = netProceeds − (quantity × avgCost)`
+- `netGainPct = netGain ÷ (quantity × avgCost)` — the net counterpart of the holding's gross
+  `gainPct` ([§2](02-domain-model.md)), shown beside `netGain` in the detail panel of
+  [§7.1](07-investments.md#71-holdings) and *undefined* on a position that cost nothing. It is the
+  percentage worth quoting about a holding, because it is the one the tax and the fee have been
+  taken out of.
 - **The fee comes out before the tax, not after it.** A selling commission is a cost of the disposal
   and reduces the gain the tax is computed on — which is how the broker computes it, and the only
   ordering under which this estimate and the recorded figures of
@@ -205,6 +210,17 @@ Matching is recomputed, never stored.
 - `netSalary = netPayment − refunds + carPayment`
 - `netGrossPct = netSalary ÷ gross`
 - `yearContractGross = max(contractGross in year) × contract.monthsPerYear`
+- `yearAvgGross = Σ gross in year ÷ count of payslips in year`, and the same over `netSalary` for
+  `yearAvgNet`. **The divisor is the payslips there were**, not twelve and not `monthsPerYear`: a
+  year with five payslips averages over five, which is what makes these the only salary figures a
+  partial year does not understate ([§8.1](08-salaries.md#81-payslips)). A year carrying a
+  tredicesima averages over thirteen rows, so strictly the figure is the average **payslip** rather
+  than the average calendar month — which is the intended reading, a thirteenth month of pay being
+  pay, and spreading it over twelve would flatter every month by a thirteenth. The payslip count in
+  the per-year table is what makes the divisor visible.
+- Both feed the averages chart of [§8.1](08-salaries.md#81-payslips) and appear nowhere else. The
+  per-year table carries totals and rates, so no figure in the application is an average and a total
+  of the same thing sitting two columns apart.
 - `grossPerHour = Σ gross in year ÷ (workingDays × contract.hoursPerDay)`, and the same with
   `Σ netSalary`. `workingDays` is the whole calendar year ([§2](02-domain-model.md)), so a partial
   year understates both — accepted, see [§8.1](08-salaries.md#81-payslips).

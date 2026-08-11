@@ -16,8 +16,10 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
 - The **Contracts tab** beside it is where contracts are created and edited
   ([§4.3](04-accounts.md#43-creating-and-editing)) — the same place their terms are read all day.
 - **Per-year table** is always visible and complete; selecting a row swaps the payslip table below
-  it. `Working days` is editable here — it is the ContractYear record, created by typing into the
-  cell.
+  it. Its columns are the year, its **payslip count**, annual contract gross, total gross, total net
+  salary, net/gross, working days and the two hourly figures
+  ([§11.7](11-calculations.md#117-salary-figures)) — totals and rates, never averages. `Working
+  days` is editable here — it is the ContractYear record, created by typing into the cell.
 - **A year with no ContractYear record shows an empty working-days cell**, and the two hourly
   columns read *undefined* rather than zero or a dash. The empty cell is the invitation: type the
   number and the row completes itself. Nothing is invented and nothing is hidden — a year whose
@@ -36,9 +38,16 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
 - A payslip's money often reaches the bank the following month. The screen does not care — every
   figure here comes from the payslips — but checks 4 and 5 do, and they look one month ahead
   ([§11.6](11-calculations.md#116-derived-matching)).
-- Charts cover all years of the contract. *Contract × months* uses the contract's own
-  `monthsPerYear`. A partial first or last year shows visibly below the contract line — that is
-  correct, not a defect.
+- **Two charts, side by side, covering every year of the contract.** *Average per month, per year*
+  plots `yearAvgGross` and `yearAvgNet` ([§11.7](11-calculations.md#117-salary-figures)); *Totals
+  per year* plots total gross, total net salary and the contract line, *contract × months*, which
+  uses the contract's own `monthsPerYear` and is drawn dashed because it is a term rather than a
+  measurement.
+- **The two answer different questions and neither replaces the other.** The averages say what a
+  month of that year was worth and are the only salary figures a partial year does not distort,
+  because they divide by the payslips there actually were. The totals say what the year paid, which
+  is the figure the contract line can be read against — and a partial first or last year shows
+  visibly below that line, which is correct, not a defect.
 - Payslips are edited in place; the row menu holds **Duplicate** and **Delete**. Duplicate copies
   every field including `year`, `month` and `label` — a month may legitimately hold more than one
   payslip ([§2](02-domain-model.md)), so the copy is valid where it lands and the tredicesima is the

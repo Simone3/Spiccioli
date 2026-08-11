@@ -148,8 +148,16 @@ produces — it is a mode of this screen rather than a destination of its own.
   that fixes it on the next.
 - The **account is chosen once** for the whole paste, not per row. It defaults to the account last
   imported into, and lists cash accounts only — a brokerage account holds no transactions to import.
-- **Fixed column order: date · description · amount.** A single signed amount column; debit/credit
-  pairs are not supported. Bank-specific import profiles are future work.
+- **Fixed column order: date · description · amount**, one row per line, **columns separated by
+  tabs**. A tab is what a spreadsheet puts on the clipboard, so a range copied out of an opened bank
+  export arrives in the right shape without being reformatted. It is also the one separator that
+  cannot occur inside a field: commas and semicolons both turn up in bank descriptions and in
+  amounts, and either as a column boundary would split rows that are perfectly good.
+- A line is split on tabs and each field trimmed; **a line that is empty or all whitespace is
+  skipped silently**, not reported as unreadable, since a trailing newline is what every paste ends
+  with.
+- A single signed amount column; debit/credit pairs are not supported. Bank-specific import profiles
+  are future work.
 
 ### Formats
 

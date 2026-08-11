@@ -219,7 +219,9 @@ Rules are global. They are not scoped to an account.
 | Field | Derivation |
 | --- | --- |
 | key | (securityId, accountId) — the account is always a `Brokerage` one |
-| quantity | Σ purchases − Σ sales |
+| purchasedQuantity | Σ purchases, carrying the **lot count** — how many purchase trades it came from |
+| soldQuantity | Σ sales |
+| quantity | purchasedQuantity − soldQuantity |
 | avgCost | Weighted average, [§11.1](11-calculations.md#111-weighted-average-cost) |
 | invested | quantity × avgCost |
 | price, priceDate | The Price record with the latest date for the security. **No Price record at all: price is 0** and check 3 fails ([§11.3](11-calculations.md#113-hypothetical-liquidation)) |
@@ -227,8 +229,15 @@ Rules are global. They are not scoped to an account.
 | gain | marketValue − invested |
 | gainPct | gain ÷ invested |
 | netProceeds, netGain | marketValue and gain after the hypothetical tax and sell fee of [§11.3](11-calculations.md#113-hypothetical-liquidation) |
+| netGainPct | netGain ÷ invested |
 
 A holding exists while quantity > 0. It is never edited; it changes only by recording a trade.
+
+**All three quantities are kept, and all three are shown** ([§7.1](07-investments.md#71-holdings)).
+`quantity` is the position and is what every valuation multiplies, but it is a difference and a
+difference forgets: 338 bought and none sold and 900 bought and 562 sold are the same position and
+not the same history, and the second is the one where the weighted average is worth reading twice.
+The table column is the net figure; the two it is made of sit in the detail panel beside it.
 
 ---
 

@@ -31,9 +31,14 @@ Securities is what all three point at.
 - The table carries **gross** value and gain — market price, no tax, no fees. This is the
   counterpart to the Portfolio headline, which is net ([§3.1](03-portfolio.md#31-behaviour)); one
   screen shows what the positions are worth, the other what they would leave you with.
-- Selecting a row opens the detail panel: lots purchased and sold, weighted average cost, invested
-  total, and the full hypothetical liquidation breakdown
-  ([§11.3](11-calculations.md#113-hypothetical-liquidation)).
+- Selecting a row opens the detail panel: **quantity purchased with the number of lots it came
+  from**, **quantity sold**, weighted average cost, invested total including fees, and then the full
+  hypothetical liquidation breakdown ([§11.3](11-calculations.md#113-hypothetical-liquidation)) —
+  gross proceeds, the sell fee with the institution whose default it is, taxable gain, tax with the
+  rate and the security it belongs to, net proceeds, and net gain **with its percentage**.
+- **The two quantities are the position's whole history**, which the *Qty* column cannot be: that
+  column is their difference ([§2](02-domain-model.md)), and a holding never sold and one bought
+  twice over and half sold reach it by different routes. This is the panel that says which.
 - The caveat about lot matching is shown in the panel, next to the number it qualifies.
 
 ## 7.2 Purchases
