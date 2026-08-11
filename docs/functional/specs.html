@@ -479,7 +479,7 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <tbody>
       <tr><td>id</td><td>id</td><td>Stable. Referenced by every transaction and never reused.</td></tr>
       <tr><td>name</td><td>text</td><td></td></tr>
-      <tr><td>type</td><td>enum</td><td><code>Income</code> · <code>Expense</code> · <code>Investment</code> · <code>Divestment</code> · <code>Internal</code> · <code>Revaluation</code>. Drives the grouping in §6.1.</td></tr>
+      <tr><td>type</td><td>enum</td><td><code>Income</code> · <code>Expense</code> · <code>Investment</code> · <code>Divestment</code> · <code>Internal</code> · <code>Revaluation</code>. Drives the grouping in §6.1, where <code>Income</code>, <code>Expense</code> and <code>Internal</code> are a group each and the other three share one.</td></tr>
       <tr><td>role</td><td>enum</td><td><code>none</code> · <code>salary</code> · <code>pension contribution</code> · <code>securities purchase</code> · <code>securities sale</code> · <code>internal transfer</code> · <code>value adjustment</code> · <code>bank fees</code> · <code>wealth tax</code> · <code>interest and dividends</code>. <b>What the checks and the Portfolio all-time card key off</b> — never a name.</td></tr>
       <tr><td>receiptTracked</td><td>bool</td><td>Its transactions are expected to carry a receipt state other than <code>na</code> — checks 13 and 14.</td></tr>
       <tr><td>order</td><td>int</td><td>Display order within a type. <b>It decides the order everywhere a category appears</b> — the report, the list, every picker — and nothing anywhere sorts categories by their amounts (§6.1).</td></tr>
@@ -1310,12 +1310,15 @@ table.spec td.d{color:var(--faint);font-style:italic;}
             <tr><td class="cat">Health &amp; personal care</td><td class="n r neg">− € 440,00</td><td class="n r neg">− € 560,00</td><td class="n r neg">− € 480,00</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 320,00</td><td class="n r neg">− € 2.420,00</td></tr>
             <tr><td class="cat">Technology &amp; devices</td><td class="n r neg">− € 620,00</td><td class="n r neg">− € 240,00</td><td class="n r neg">− € 1.050,00</td><td class="n r neg">− € 310,00</td><td class="n r neg">− € 690,00</td><td class="n r neg">− € 2.910,00</td></tr>
             <tr class="sum"><td class="cat">Total expense</td><td class="n r neg">− € 13.619,40</td><td class="n r neg">− € 14.279,40</td><td class="n r neg">− € 15.920,40</td><td class="n r neg">− € 15.647,40</td><td class="n r neg">− € 10.372,60</td><td class="n r neg">− € 69.839,20</td></tr>
+            <tr class="grp"><td colspan="7">Internal</td></tr>
+            <tr><td class="cat">Internal transfer</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td></tr>
+            <tr class="sum"><td class="cat">Total internal</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td></tr>
             <tr class="net"><td class="cat">Net</td><td class="n r pos">+ € 13.498,60</td><td class="n r pos">+ € 15.154,60</td><td class="n r pos">+ € 15.381,60</td><td class="n r pos">+ € 18.425,10</td><td class="n r pos">+ € 11.873,40</td><td class="n r pos">+ € 74.333,30</td></tr>
-            <tr class="grp"><td colspan="7">Other types</td></tr>
-            <tr class="sum"><td class="cat">Investment</td><td class="n r neg">− € 8.400,00</td><td class="n r neg">− € 9.200,00</td><td class="n r neg">− € 11.000,00</td><td class="n r neg">− € 6.407,20</td><td class="n r neg">− € 9.605,90</td><td class="n r neg">− € 44.613,10</td></tr>
-            <tr class="sum"><td class="cat">Divestment</td><td class="n r pos">+ € 1.189,33</td><td class="n r dim">—</td><td class="n r pos">+ € 3.323,23</td><td class="n r dim">—</td><td class="n r pos">+ € 2.039,79</td><td class="n r pos">+ € 6.552,35</td></tr>
-            <tr class="sum"><td class="cat">Revaluation</td><td class="n r pos">+ € 840,00</td><td class="n r pos">+ € 1.420,00</td><td class="n r pos">+ € 1.960,00</td><td class="n r pos">+ € 2.280,00</td><td class="n r pos">+ € 1.180,00</td><td class="n r pos">+ € 7.680,00</td></tr>
-            <tr class="sum"><td class="cat">Internal</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td><td class="n r dim">€ 0,00</td></tr>
+            <tr class="grp"><td colspan="7">Investments</td></tr>
+            <tr><td class="cat">Securities purchase</td><td class="n r neg">− € 8.400,00</td><td class="n r neg">− € 9.200,00</td><td class="n r neg">− € 11.000,00</td><td class="n r neg">− € 6.407,20</td><td class="n r neg">− € 9.605,90</td><td class="n r neg">− € 44.613,10</td></tr>
+            <tr><td class="cat">Securities sale</td><td class="n r pos">+ € 1.189,33</td><td class="n r dim">—</td><td class="n r pos">+ € 3.323,23</td><td class="n r dim">—</td><td class="n r pos">+ € 2.039,79</td><td class="n r pos">+ € 6.552,35</td></tr>
+            <tr><td class="cat">Value adjustment</td><td class="n r pos">+ € 840,00</td><td class="n r pos">+ € 1.420,00</td><td class="n r pos">+ € 1.960,00</td><td class="n r pos">+ € 2.280,00</td><td class="n r pos">+ € 1.180,00</td><td class="n r pos">+ € 7.680,00</td></tr>
+            <tr class="sum"><td class="cat">Total investments</td><td class="n r neg">− € 6.370,67</td><td class="n r neg">− € 7.780,00</td><td class="n r neg">− € 5.716,77</td><td class="n r neg">− € 4.127,20</td><td class="n r neg">− € 6.386,11</td><td class="n r neg">− € 30.380,75</td></tr>
           </tbody>
         </table></div>
       </div>
@@ -1323,9 +1326,14 @@ table.spec td.d{color:var(--faint);font-style:italic;}
   </div></div>
 
   <ul class="body">
-    <li>Rows are categories grouped under their type, <b>in the fixed order of the category list</b>
-    (§6.3) — never by amount. Columns are calendar years plus a total. <b>The whole table is shown;
-    there is no paging.</b></li>
+    <li>Rows are categories, <b>in the fixed order of the category list</b> (§6.3) — never by amount.
+    Columns are calendar years plus a total. <b>The whole table is shown; there is no paging.</b></li>
+    <li><b>Three of the four groups are a single type; the fourth is three.</b> Income, Expense and
+    Internal each hold the categories of the type they are named after. <i>Investments</i> holds the
+    <code>Investment</code>, <code>Divestment</code> and <code>Revaluation</code> types together,
+    because buying, selling and revaluing are one activity to a reader and three types only to the
+    model — and because three groups of one category each, stacked, would have been three headings
+    and three subtotals carrying three numbers.</li>
     <li><b>The order never moves.</b> Sorting by total would have put the biggest number at the top
     of each group, which reads well once and badly forever: change the year filter and every row
     jumps, so the eye has to find <i>Groceries</i> again instead of going straight to where it was
@@ -1335,32 +1343,52 @@ table.spec td.d{color:var(--faint);font-style:italic;}
     <li>Amounts <b>carry the sign and colour of the transactions behind them</b> — income green and
     positive, expense red and negative — exactly as on the Transactions screen. Absolute values with
     the direction implied by the group header would have read fine for Income and Expense and lied
-    about the two groups that have no fixed direction: a pension fund that lost value produces a
-    negative Revaluation, and a Divestment is money coming back in.</li>
-    <li><b>Net</b> — income plus expense, the two carrying their own signs — is the emphasised line
-    the table exists to produce. Investment, Divestment, Revaluation and Internal appear as type
-    subtotals only, below it, and are excluded from it.</li>
-    <li><b>Those four rows are named after their type, never after the category inside it.</b> Each
-    of the four holds exactly one category today — <i>Securities purchase</i>, <i>Securities
-    sale</i>, <i>Value adjustment</i>, <i>Internal transfer</i> — so either name would identify the
-    same money, and naming three of them after the type and the fourth after its category would have
-    made the odd one look like a category row that had wandered under the wrong heading. They are
-    subtotals of a type, they sit under a heading that says <i>Other types</i>, and a second category
-    added to any of them later changes what the row sums without changing what it is called.</li>
-    <li><b>Internal reads zero when every account is in scope.</b> It is shown rather than
-    hidden because a non-zero value means a leg is missing. <b>Filter to a subset of accounts and it
-    stops being zero by design</b> — the transfers crossing the boundary of the selection no longer
-    have both legs in view — so with an account filter active the row is labelled as scoped and its
-    value is not evidence of anything.</li>
+    about the two groups that have no fixed direction: inside <i>Investments</i> a purchase goes out
+    and a sale comes back, and a pension fund that lost value produces a negative value adjustment;
+    inside <i>Internal</i> the two legs are a plus and a minus by definition.</li>
+    <li><b>Four groups, and every category appears in exactly one of them.</b> <i>Income</i>,
+    <i>Expense</i> and <i>Internal</i> each list their categories and end in a subtotal;
+    <b>Net</b> is the sum of those three subtotals and is the emphasised line the table exists to
+    produce. <i>Investments</i> follows below it, listing the remaining three categories with a
+    subtotal of its own, and is excluded from Net. Seven plus sixteen plus one plus three is
+    twenty-seven (§6.3): the report accounts for the whole taxonomy, once each, which is what makes
+    “the money is not in this table” a statement about the file rather than about the report.</li>
+    <li><b>Internal belongs above the line, not beside it.</b> Unfiltered it is zero — both legs of
+    every transfer are in scope and cancel — so folding it into Net changes nothing, which is
+    precisely why it is safe. <b>Filtered to a subset of accounts it stops being zero by design</b>,
+    because the transfers crossing the boundary of the selection no longer have both legs in view;
+    and that is exactly when you want it in Net, because then Net reads as what actually happened to
+    the money in the accounts you selected. A year filtered to one savings account should say the
+    balance went up by what arrived, and most of what arrives in a savings account is a transfer.</li>
+    <li><b>A non-zero Internal with no account filter means a leg is missing</b>, and now it moves
+    Net by that amount instead of sitting harmlessly to one side. That is not a new risk: the same
+    condition fails check 1 by name, so the Portfolio banner is already up and the Checks screen
+    already names the unpaired leg (§9). The row stays visible for the same reason it always was —
+    it is the one place the damage is quantified.</li>
+    <li><b>Investments is a section, not a leftover.</b> It answers the question Net provokes —
+    <i>where did the surplus go?</i> — with the three categories that move money between the
+    spendable side of the portfolio and the invested side, or revalue what is already there. It sits
+    below Net because none of it is income or expenditure: a purchase is not a cost, it is the same
+    money in a different shape.</li>
+    <li><b>What its subtotal mixes, said plainly.</b> Securities purchase and sale are cash that
+    moved through a bank account; a value adjustment is not — it is the pension fund being marked to
+    its real value, and no money changed hands. The subtotal therefore reads as <i>the net movement
+    into the invested side of the portfolio, revaluation included</i>, and it is smaller than the cash
+    actually invested by exactly the revaluation. Both figures are one click away in the rows above
+    it, which is why the mixed one is tolerable as a summary and would not be tolerable as the only
+    thing shown.</li>
     <li><b>Every figure in a category row is a link.</b> Clicking a cell opens Transactions
     filtered to that category and that year — plus whatever account filter the report already has —
     and clicking the row total drops the year. It is the answer to the question the table always
     provokes: <i>what is in there?</i> Without it the matrix reports a number and leaves the user to
     reconstruct the filter by hand on another screen, which is the sort of small friction that ends
     with a spreadsheet being opened instead.</li>
-    <li><b>The subtotal, Net and type rows are not links</b>, because no filter expresses them: the
-    category filter takes one category, and <i>Net</i> is a subtraction rather than a selection.
-    Nothing is offered that cannot then be shown.</li>
+    <li><b>The four subtotals and Net are not links</b>, because no filter expresses them: the
+    category filter takes one category, and <i>Net</i> is a sum of sums rather than a selection.
+    Nothing is offered that cannot then be shown. <b>Every other row in the table is a category, and
+    therefore is a link</b> — transfers, purchases, sales and revaluations included, which is the
+    other thing listing them as categories buys: the whole table is navigable, not just the top two
+    thirds of it.</li>
     <li>A cell with no transactions shows an em dash, not <code>€ 0,00</code>, so a real zero stays
     distinguishable from nothing recorded — and an em dash is not a link.</li>
     <li>Filters: year range, accounts — <b>cash accounts only</b>, since a brokerage account holds no
