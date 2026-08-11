@@ -49,7 +49,8 @@ sell more than was ever bought.
 
 | Field | Rule |
 | --- | --- |
-| name | Required, trimmed, unique **within its institution**. Two *Conto Corrente* at different banks are fine and normal; two at the same bank are a mistake. |
+| name | Required, trimmed, unique **within its institution**, and unique among the accounts that have none. Two *Conto Corrente* at different banks are fine and normal; two at the same bank are a mistake. |
+| institutionId | **Required on every type but `Liquidity`**, where *None* is offered and means physical cash. A deposit, a term deposit, a pension fund, a voucher balance and a securities dossier are all held *by* somebody, and a brokerage account with no institution could never pair a trade with the money that paid for it ([§11.6](11-calculations.md#116-derived-matching), checks 6 and 7). Switching the type to one that requires it marks the field. |
 | type | Required. **Locked once the account holds anything** — a transaction or a trade. Changing a cash account into a brokerage one would orphan every row on it. |
 | openingBalance | Required, any sign. **Forced to 0 and disabled on `Brokerage`** ([§2](02-domain-model.md)). |
 | openingDate | Required. |

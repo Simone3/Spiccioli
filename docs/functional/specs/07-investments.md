@@ -85,10 +85,19 @@ Securities is what all three point at.
 
 > **Mockup —** [Securities tab](../mockups/07-investments.html#securities)
 
-- **Not where securities are created** — that happens inline while recording the first trade
-  ([§7.5](#75-recording-a-trade-and-where-securities-come-from)). This tab is where one is corrected
-  afterwards: a mistyped ISIN, a renamed instrument, the wrong type, the tax rate on a whitelist
-  government bond.
+- **One of the two places a security is created**, and the place one is corrected. *Add security*
+  here creates it on its own; the purchase form creates it inline while recording the first trade
+  that needs it ([§7.5](#75-recording-a-trade-and-where-securities-come-from)). The fields are the
+  same either way and so is the record — there is no such thing as a security that came in by one
+  path rather than the other.
+- **Two paths, because they answer two moments.** A new instrument usually first appears as
+  something being bought, and stopping to create it before the trade can be recorded is a detour out
+  of the form you are in. But a security is a thing in its own right — the tab that lists them,
+  corrects them and holds their prices has no business refusing to add one, and a security is
+  occasionally wanted before any trade exists, to carry a price history that starts before the first
+  purchase.
+- Correcting is the rest of the tab's job: a mistyped ISIN, a renamed instrument, the wrong type,
+  the tax rate on a whitelist government bond.
 - **Held** is the quantity across every brokerage account, an em dash when the position is closed.
   **Trades** is what decides whether the security can be deleted; **Prices** does not. A price is
   part of a security rather than a reference to one, so deleting a security deletes its history with
@@ -116,15 +125,16 @@ Securities is what all three point at.
   It is the figure [§11.6](11-calculations.md#116-derived-matching) pairs against the bank
   transaction.
 - **Account** lists brokerage accounts only, and defaults to the one last used.
-- **Securities are created inline, here.** Typing an ISIN or ticker searches existing securities; if
-  none matches, the form expands with the fields needed to create one, and it is saved together with
-  the trade. There is no separate “create a security first” step.
+- **A security can be created inline, here.** Typing an ISIN or ticker searches existing securities;
+  if none matches, the form expands with the fields needed to create one, and it is saved together
+  with the trade. No “create a security first” step is *required* — the Securities tab has *Add
+  security* for when it is wanted anyway ([§7.4](#74-securities)).
 - **Tax rate** is pre-filled from `defaultTaxRate` and only needs touching for a whitelist
   government bond. It affects the [§11.3](11-calculations.md#113-hypothetical-liquidation) estimate
   and nothing that is ever recorded.
 - **The Securities tab covers everything afterwards** ([§7.4](#74-securities)): correcting the
-  security, and its whole price history. Inline creation covers the common path; the tab covers the
-  rest.
+  security, and its whole price history. Inline creation covers the common path — the security that
+  exists because something was bought; the tab covers the rest.
 - **The sale form adds a Taxes field** below Fees, and shows **net proceeds** —
   `qty × price − taxes − fees` — live in place of total cost. It defaults to zero and is never
   pre-filled from the hypothetical rate of [§11.3](11-calculations.md#113-hypothetical-liquidation):

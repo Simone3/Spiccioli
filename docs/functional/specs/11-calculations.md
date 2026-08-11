@@ -69,9 +69,10 @@ look like “none recorded”.
   is charged** — what nothing would leave you with is nothing, not minus a commission. Check 3 names
   the security, and [§7.1](07-investments.md#71-holdings) marks the row. This is deliberate: valuing
   an unpriced holding at cost would have buried a missing price inside a number that looks right.
-- `fee = institution.defaultSellFee` of the holding's account, or 0 when the account has no
-  institution. **Charged once per holding**, so liquidating three positions at one broker is
-  estimated with three fees — which is what the broker would in fact charge.
+- `fee = institution.defaultSellFee` of the holding's account, which always has one: a `Brokerage`
+  account cannot exist without an institution ([§13](13-validation.md)), so the fee is always
+  defined, though it may well be zero. **Charged once per holding**, so liquidating three positions
+  at one broker is estimated with three fees — which is what the broker would in fact charge.
 - `taxableGain = grossProceeds − fee − (quantity × avgCost)`
 - `tax = taxableGain > 0 ? round(taxableGain × security.taxRate) : 0` — **never negative**; a loss
   produces no rebate.
@@ -139,28 +140,50 @@ look like “none recorded”.
 
 ## 11.5 Net worth over time
 
-- Monthly points at each month end, from the month of the earliest transaction up to the last month
-  end before today — **plus one final point at today itself**, which is the only point not on a
-  month end. Ending on the last completed month would leave the chart short of the headline figure
-  above it by however far into the month it happens to be, and the line would appear to stop growing
-  for a few weeks every month. The final point is the same date every other figure on the screen is
+- Monthly points at each month end, from **the month the file starts in** up to the last month end
+  before today — **plus one final point at today itself**, which is the only point not on a month
+  end. Ending on the last completed month would leave the chart short of the headline figure above
+  it by however far into the month it happens to be, and the line would appear to stop growing for a
+  few weeks every month. The final point is the same date every other figure on the screen is
   computed at ([§11](#11--calculations)).
+- **The file starts at the earliest of any account's `openingDate`, any transaction's date and any
+  trade's date** — not at the earliest transaction. Opening balances are money that was there before
+  the first row was recorded, an account whose whole history is an opening balance has no
+  transactions at all, and a file whose investing predates its bank exports would otherwise begin
+  after its own first purchase. Whichever of the three is earliest is where the line begins.
 - At date `d`, over every account whose `openingDate ≤ d` and which was not yet closed at `d`:
-  `Σ (openingBalance + Σ transactions ≤ d)` plus, per holding, `quantity(d) × price` where price is
-  the **most recent Price record dated ≤ d**. An account contributes nothing before it existed.
-- If no price is known at `d`, that holding is valued at `avgCost(d)`. **The dash is per point, not
-  per stretch:** a month is dashed when *any* holding open in it fell back to cost, and solid when
-  every one of them had a price. In practice that produces a single dashed prefix and a solid
-  remainder, because prices start being recorded and then keep being recorded — but the rule is
-  stated per point so that a security bought later and never priced dashes the segment it affects
-  instead of quietly passing as measured. **This is the one place a missing price is not zero**
-  ([§11.3](#113-hypothetical-liquidation)), and the reason is what the chart is for: it shows the
-  shape of ten years, not a figure anyone acts on, and a decade of holdings collapsing to zero would
-  have said something false about the past rather than something true about the data.
-- **The chart is gross** — no hypothetical tax or fee, unlike the headline figure it sits under.
-  Applying today's tax rates to a position held eight years ago would be inventing history, and the
-  chart is there for shape, not for a number to quote. The final point therefore sits slightly above
-  the headline net worth; the legend says so.
+  `Σ (openingBalance + Σ transactions ≤ d)` plus, per holding in those accounts, that holding's
+  **net proceeds at `d`** — `quantity(d) × price`, less the institution's sell fee and the tax on the
+  gain over `avgCost(d)`, by the arithmetic of [§11.3](#113-hypothetical-liquidation) — where price
+  is the **most recent Price record dated ≤ d**. An account contributes nothing before it existed.
+- **The line is net worth, the same quantity as the headline above it**, computed at each date
+  instead of only at today's. The final point therefore *is* the headline figure, to the cent, which
+  is the property that makes the chart worth putting on the same screen: a line that ended somewhere
+  near but not at the number printed above it would raise a question at every reading and answer it
+  at none.
+- **The rate and the fee applied at every point are today's**, because they are the only ones the
+  file records — a security carries one `taxRate` and an institution one `defaultSellFee`, with no
+  history behind either ([§2](02-domain-model.md)). A past point is therefore what that portfolio
+  would have been worth in hand *on today's terms*, not what it would have fetched at the time. The
+  alternative was a chart in a different unit from the figure above it, and of the two
+  approximations this is the one that makes the two numbers on the screen comparable. It is also the
+  same caveat the headline already carries ([§11.3](#113-hypothetical-liquidation)) rather than a
+  new one.
+- If no price is known at `d`, that holding contributes **its cost** — `quantity(d) × avgCost(d)`,
+  with no sell fee and no tax, since nothing has been valued and a gain of nothing is taxed at
+  nothing. **The dash is per point, not per stretch:** a month is dashed when *any* holding open in
+  it fell back to cost, and solid when every one of them had a price. In practice that produces a
+  single dashed prefix and a solid remainder, because prices start being recorded and then keep
+  being recorded — but the rule is stated per point so that a security bought later and never priced
+  dashes the segment it affects instead of quietly passing as measured. **This is the one place a
+  missing price is not zero** ([§11.3](#113-hypothetical-liquidation)), and the reason is what the
+  dashed stretch is for: it shows the shape of the years before anyone was recording prices, and a
+  decade of holdings collapsing to zero would have said something false about the past rather than
+  something true about the data. A dashed point is the only part of the line that is not net worth
+  as [§11.4](#114-balances-and-net-worth) computes it — which is precisely what the dashing says.
+- **The legend carries the two things that are not obvious from the line**: which stretch was drawn
+  from prices and which from cost, and that the tax and the fee taken out at every point are today's
+  ones. The final point needs no note at all: it is the figure printed at the top of the screen.
 
 ## 11.6 Derived matching
 
@@ -185,8 +208,11 @@ Matching is recomputed, never stored.
   either side are listed by checks 6 and 7.
 - The two sides sit in different accounts by construction — the trade in a brokerage account, the
   money in a cash one — so the pairing keys off the institution they share rather than off the
-  account. An account with no institution can therefore never pair, which is correct: physical cash
-  does not buy securities.
+  account. **The trade side always has one**: a `Brokerage` account cannot be created without an
+  institution ([§13](13-validation.md)), precisely so that this pairing is always expressible. The
+  only account that can lack one is a `Liquidity` account, and the only such account in practice is
+  physical cash, which therefore never pairs — which is correct, because physical cash does not buy
+  securities.
 - **A purchase is funded from the broker's own cash account, and that is a rule about how to record,
   not a preference.** Money wired straight from another bank into a trade has no leg at the
   institution the trade sits in, so nothing can pair it and check 6 fails for as long as it stays
@@ -213,6 +239,14 @@ Matching is recomputed, never stored.
   order; each claims the role `pension contribution` transactions dated in it or the month after
   that no earlier month has claimed, and its total is compared with the sum of `pensionContribution`
   over that month's payslips. Check 5 reports the months that disagree, with the difference.
+- **The walk covers every month either side has something in**, which is what makes the comparison
+  symmetric. A month with payslips is walked whether or not they contribute anything; and a credit
+  that no month with payslips has claimed — one arriving where there are no payslips at all, after a
+  contract ended or before one began — is attributed to its own month, which then reports a payslip
+  total of zero against it. **No month is exempt**, so there is no month that can quietly claim a
+  transaction and then decline to report on it: a month that claims something is a month that gets
+  compared. Months where both sides are zero produce nothing, being months in which nothing
+  happened.
 
 ## 11.7 Salary figures
 

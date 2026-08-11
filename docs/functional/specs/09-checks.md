@@ -14,7 +14,7 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 | 2 | Every transaction has a category | `categoryId` is set. | Each uncategorised transaction. |
 | 3 | Prices are recent | Every security with an open holding has at least one Price record, and its latest one is dated within `priceStalenessDays`. **No price at all fails too**, and is the more serious of the two: that holding is valued at zero everywhere ([§11.3](11-calculations.md#113-hypothetical-liquidation)). | Security, price, date, age — or “no price recorded”. |
 | 4 | Payslips match salary transactions | Every payslip pairs one-to-one with a transaction in a role `salary` category, of equal `netPayment`, dated in the payslip's month or the one after — and every such transaction pairs with a payslip ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched payslips and unmatched transactions, listed separately, with amounts. |
-| 5 | Payslip pension contributions match transactions | **Monthly totals, not record by record.** For each month, Σ `pensionContribution` over that month's payslips = Σ of the role `pension contribution` transactions attributed to it ([§11.6](11-calculations.md#116-derived-matching)). A month's contribution reaches the fund as two or three separate credits — employee share, employer share, TFR — so pairing them one to one could never have worked. Months whose payslips total zero are out of scope. | The month, the payslip total, the transaction total, and the difference. |
+| 5 | Payslip pension contributions match transactions | **Monthly totals, not record by record.** For each month, Σ `pensionContribution` over that month's payslips = Σ of the role `pension contribution` transactions attributed to it ([§11.6](11-calculations.md#116-derived-matching)). A month's contribution reaches the fund as two or three separate credits — employee share, employer share, TFR — so pairing them one to one could never have worked. **Both directions**: a month that expected nothing and received something fails exactly as a month that expected something and received nothing. Only months where both totals are zero are silent. | The month, the payslip total, the transaction total, and the difference. |
 | 6 | Purchase transactions match purchases | Every transaction in a role `securities purchase` category pairs with a purchase trade, and vice versa ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched transactions and unmatched trades, listed separately. |
 | 7 | Sale transactions match sales | As above for role `securities sale` and sale trades. The trade side is net proceeds — after tax and fees — so it can equal what the bank credited. | As above. |
 | 8 | No holding has gone negative | For every (security, account), running quantity in date order never drops below 0. | Security, account, the trade that took it negative. |
@@ -23,7 +23,7 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 | 11 | Closed accounts are empty | Every account with a `closingDate` has a balance of exactly 0 and no holding with quantity > 0. | Account, closing date, the balance or holdings left in it. |
 | 12 | Records fall within their account's life | No transaction or trade is dated before its account's `openingDate` or after its `closingDate`. Both ends, not just the near one. | The record, its date, and the account's opening or closing date. |
 | 13 | Receipt-tracked transactions carry a state | No transaction in a category with `receiptTracked` has `receiptState = na`. | Each such transaction. |
-| 14 | No receipt has been pending too long | Every transaction with `receiptState = pending` is dated within `receiptPendingMonths` of today. | Each overdue transaction, with its age. |
+| 14 | No receipt has been pending too long | Every transaction with `receiptState = pending` is dated **within `receiptPendingMonths` of today** — the transaction's own date, not the moment the state was set. | Each overdue transaction, with its age. |
 
 **Checks 8 and 9 overlap on purpose.** Any sale with no purchase before it also drives the running
 quantity below zero, so 9 never fails alone — but the two say different things when you read the
@@ -57,6 +57,13 @@ thinking about it.
   **Check 14 cannot fail then, and the two are not a pair**: it examines only rows already moved to
   `pending`, and an imported row is `na`. 13 is the list of what has not been looked at; 14 is the
   list of what was looked at, marked as awaiting a document, and then left.
+- **Check 14 ages the transaction, not the flag, and there is no “pending since” field.** A row from
+  2019 marked `pending` this morning is overdue this morning. That is the intended reading rather
+  than an oversight: what the check asks is whether a document that ought to exist is still
+  outstanding, and a payment from three years ago has no business waiting on one whenever somebody
+  got round to marking it. Dating the flag instead would let an old row be marked and then sit for
+  another three months before anything said so, and would put a second date in the file to keep in
+  step with the first.
 - Checks key off category **roles** ([§2](02-domain-model.md)), never off category names, so
   rewording a label never silently switches a check off.
 

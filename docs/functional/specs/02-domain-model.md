@@ -21,7 +21,7 @@ Eleven stored entities and one derived one. *Italic* marks a derived field.
 | --- | --- | --- |
 | id | id | |
 | name | text | |
-| institutionId | ref? | Optional — physical cash has none. |
+| institutionId | ref? | **Required on every type but `Liquidity`** ([§13](13-validation.md)). Physical cash is the account that has none, and it is a `Liquidity` one. |
 | type | enum | `Liquidity` · `Deposit account` · `Term deposit` · `Pension fund` · `Voucher` · `Brokerage` |
 | currency | enum | EUR in v1. |
 | openingBalance | amount | Default 0. For accounts whose history starts mid-life. Always 0 on a `Brokerage` account. |
@@ -232,6 +232,16 @@ Rules are global. They are not scoped to an account.
 | netGainPct | netGain ÷ invested |
 
 A holding exists while quantity > 0. It is never edited; it changes only by recording a trade.
+
+**A quantity that has gone below 0 produces no holding and no figures, and that is the whole of the
+answer.** More sold than was ever bought is not a position that can be valued — there is no
+meaningful average cost, no invested total and no gain to derive from it — so nothing is derived:
+the row is absent from [§7.1](07-investments.md#71-holdings) and checks 8 and 9 name the trade that
+did it ([§9](09-checks.md)). That is what those two checks are *for*, and during data entry the
+usual cause is a sale typed before its purchase, which stops being true as soon as the purchase is
+recorded. Presenting an impossible position in the tables would mean inventing a reading for every
+figure on the screen, in the service of a state whose only correct next step is to fix it
+([§15](15-out-of-scope.md)).
 
 **All three quantities are kept, and all three are shown** ([§7.1](07-investments.md#71-holdings)).
 `quantity` is the position and is what every valuation multiplies, but it is a difference and a

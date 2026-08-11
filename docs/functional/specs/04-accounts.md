@@ -48,8 +48,9 @@ hang off an account, so it sits second in the sidebar and everything else refers
   anyone was charged — real fees sit on each trade ([§7.2](07-investments.md#72-purchases),
   [§7.3](07-investments.md#73-sales)). An institution that never sells anything is given a zero: the
   field is required and empty is not a value, so a fee of nothing is a fee that was typed
-  ([§13](13-validation.md)). The only thing that behaves as zero without one being entered is an
-  account with no institution at all ([§11.3](11-calculations.md#113-hypothetical-liquidation)).
+  ([§13](13-validation.md)). Nothing supplies a zero on an institution's behalf, and nothing needs
+  to: every account that can hold a security has an institution behind it
+  ([§11.3](11-calculations.md#113-hypothetical-liquidation)).
 - An institution is **never retired**. It has no closing date and no status: when its last account
   closes it simply stops appearing anywhere that matters, and it stays in this list because the
   closed account still points at it ([§4.3](#43-creating-and-editing)).
@@ -71,10 +72,15 @@ great deal of machinery for a keystroke saved twice a decade. Add the bank first
   [§11.3](11-calculations.md#113-hypothetical-liquidation) and therefore for net worth itself
   ([§3.1](03-portfolio.md#31-behaviour)). Fees actually charged are recorded on each trade. Type a
   zero to see gross figures — the field is required and has no empty state
-  ([§13](13-validation.md)); an account with no institution — physical cash — is treated as zero
-  without one.
-- **Institution** offers *None*, for physical cash, and the institutions already recorded. There is
-  no *New institution…* entry ([§4.2](#42-institutions)).
+  ([§13](13-validation.md)).
+- **Institution** offers the institutions already recorded, and *None* — but *None* only while the
+  type is `Liquidity`. **Every other type requires one** ([§13](13-validation.md)): a deposit, a
+  term deposit, a pension fund and a voucher balance are all held by somebody, and a `Brokerage`
+  account without an institution could never pair a trade against the money that paid for it, since
+  that pairing is the institution the two accounts share
+  ([§11.6](11-calculations.md#116-derived-matching)). The one account that legitimately belongs to
+  no one is physical cash, and physical cash is `Liquidity`. There is no *New institution…* entry
+  ([§4.2](#42-institutions)).
 - **Opening balance** is the balance on the opening date, before any recorded transaction. Leave it
   at zero when the account’s full history is being imported; a *Brokerage* account has none, its
   value being entirely its holdings.
@@ -90,9 +96,10 @@ great deal of machinery for a keystroke saved twice a decade. Add the bank first
   dated after the closing date has to be enterable before it can be reported.
 - Contracts are created the same way, on the Salaries screen, with the fields listed in
   [§2](02-domain-model.md): name, months per year, hours per day, start and end date, notes.
-  Securities are normally created inline while recording a purchase
-  ([§7.5](07-investments.md#75-recording-a-trade-and-where-securities-come-from)); the Securities tab
-  on Investments exists to correct and manage them afterwards.
+  Securities are created either inline while recording a purchase
+  ([§7.5](07-investments.md#75-recording-a-trade-and-where-securities-come-from)) or on the
+  Securities tab on Investments, which is also where they are corrected and their prices kept
+  ([§7.4](07-investments.md#74-securities)).
 
 > **Deletion rule, wherever reference data is edited.** A record with dependent data cannot be
 > deleted; deletion stays available only while nothing points at it. Every delete asks for
