@@ -31,6 +31,12 @@ The home screen. No tabs.
   `wealth tax` and `interest and dividends`, plus realised gain from sales
   ([§11.2](11-calculations.md#112-realised-gain-on-a-sale)). Unlike net worth, realised gain is a
   recorded fact, not an estimate.
+- **They include closed accounts, and that is what “all-time” means.** Net worth excludes a closed
+  account because its balance is no longer yours ([§11.4](11-calculations.md#114-balances-and-net-worth));
+  but the bank charged those fees, that interest was received and that sale really was made, and a
+  card that quietly dropped them the day an account was shut would report a smaller lifetime than
+  the one that happened. The rule is the same one the report follows
+  ([§6.1](06-categories.md#61-report)): a balance can be retired, a history cannot.
 - **Those three roles exist for this card and nothing else.** The category list is fixed
   ([§6.3](06-categories.md#63-category-list)), so the card could have named its three categories
   directly and been correct forever — but every other part of the application that cares about a
@@ -40,8 +46,8 @@ The home screen. No tabs.
   under their *security's* type, at the same net value used for net worth. A brokerage account never
   appears as a slice of its own — it is entirely its holdings — so the types available are the five
   cash types plus the five security types. Closed accounts and their holdings are excluded. **Only
-  types actually present get a slice**: the ten are the ceiling, the nine above are what this
-  portfolio happens to hold, and a `Bond` bought tomorrow makes ten.
+  types actually present get a slice**: the ten are the ceiling, and the nine in the mockup are
+  what that portfolio happens to hold — a `Bond` bought tomorrow would make ten.
 - **The pie** carries one slice per type present, sized by its share, with the slice count at its
   centre and the same colour keying the list beside it. It exists to make the shape of the portfolio
   readable at a glance; the list beside it carries the amounts and percentages.

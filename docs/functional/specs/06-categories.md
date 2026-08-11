@@ -84,6 +84,12 @@ The categories × years matrix — the one screen that answers where the money g
 - Filters: year range, accounts — **cash accounts only**, since a brokerage account holds no
   transactions to report ([§2](02-domain-model.md)). A partial year is labelled with the months it
   covers.
+- **Closed accounts are in the report and in its account filter**, marked and last like everywhere
+  else ([§4.3](04-accounts.md#43-creating-and-editing)). The report is a history of where the money
+  went, and the money that went through an account shut in 2021 went somewhere: leaving it out would
+  make every year before that one disagree with itself depending on what has been closed since.
+  Closing an account takes its balance out of net worth
+  ([§11.4](11-calculations.md#114-balances-and-net-worth)) and takes nothing out of its past.
 - The screen carries three tabs: this report, the categorisation rules ([§6.2](#62-rules)), and a
   read-only list of the twenty-seven categories with their types and roles
   ([§6.3](#63-category-list)). Rules sit here because what a rule change does is move figures in
@@ -149,7 +155,7 @@ The categories × years matrix — the one screen that answers where the money g
 - **Deleting a rule un-categorises the rows only it matched**, unless a rule further down the list
   picks them up. That is arithmetic, not a surprise, and it is the second figure in the summary —
   which is the number to read before confirming a delete.
-- **Eleven rules is the mockup, not the expectation.** A real file runs to several dozen, and the
+- **The mockup's eleven rules are not the expectation.** A real file runs to several dozen, and the
   target is that **the rules categorise about 95% of transactions** and the remaining twentieth is
   set by hand — one-off transfers, gifts, the payment whose description is a reference number. That
   ratio is what makes the absence of a bulk edit tolerable
@@ -187,7 +193,7 @@ the two lists by hand, and the application stores no alias.
   [§5.4](05-transactions.md#54-editing)).
 - The **Transactions** column is a live count and the reason the tab is more than decoration: a
   category with none is one the rules never reach, and the total across all 27 is every categorised
-  transaction in the file — 4.811 of 4.812 here, the missing one being the failure of check 2.
+  transaction in the file — 4.811 of 4.812 in the mockup, the missing one being the failure of check 2.
 - Adding, renaming or removing a category is a change to the application, not a setting
   ([§15](15-out-of-scope.md)).
 

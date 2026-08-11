@@ -15,7 +15,10 @@ Securities is what all three point at.
   column is read-only **except the price**.
 - **This is where prices are kept up to date.** Clicking the price cell opens an inline editor — a
   value and an as-of date defaulting to today — and saving writes a Price record, replacing whatever
-  that day already held ([§2](02-domain-model.md)). The whole editable history of a security lives
+  that day already held ([§2](02-domain-model.md)). **Nothing is confirmed**: the editor shows the
+  value the chosen day currently holds, if it holds one, so what is about to be replaced is on
+  screen while the new figure is typed, and a weekly correction does not cost a dialog
+  ([§13](13-validation.md)). The whole editable history of a security lives
   on the Securities tab of this same screen ([§7.4](#74-securities)); Holdings is the fast path for
   the one thing done weekly, that tab is where a past mistake is repaired.
 - **Update prices** fetches today's quote for **every security in the file** and writes what comes
@@ -58,8 +61,10 @@ Securities is what all three point at.
 - **Matched** shows the date of the bank transaction the application paired the trade with
   ([§11.6](11-calculations.md#116-derived-matching)). A dash is what check 6 reports.
 - Recording a trade **does not** create a transaction.
-- Ordering: `date ASC, insertionSeq ASC` — the same direction as Transactions, so both ledgers read
-  the same way. No paging; filters narrow the list instead.
+- Ordering: `date ASC, insertionSeq ASC, id ASC` — the same three keys and the same direction as
+  Transactions ([§5.2](05-transactions.md#52-ordering-and-paging)), so both ledgers read the same
+  way and neither can rearrange itself between two openings. No paging; filters narrow the list
+  instead.
 - Filters: security, account — **brokerage accounts only** ([§2](02-domain-model.md)) — and period.
 
 ## 7.3 Sales
@@ -71,8 +76,8 @@ Securities is what all three point at.
   *Total cost* — `qty × price − taxes − fees`, what actually reached the account. *Realised gain* is
   derived per [§11.2](11-calculations.md#112-realised-gain-on-a-sale) and is the only figure on
   either tab that is neither entered nor a restatement of what was.
-- **Taxes is zero, not blank, when nothing was withheld** — a sale at a loss, as in March 2020
-  above, or one whose gain the broker offset against a carried-forward loss. Blank would be
+- **Taxes is zero, not blank, when nothing was withheld** — a sale at a loss, like the March 2020
+  row in the mockup, or one whose gain the broker offset against a carried-forward loss. Blank would be
   indistinguishable from “not filled in yet”, and the figure feeds check 7.
 - **Realised gain is net of everything the broker took**, so a sale can show a gain before tax and a
   loss after it. It is summed into the all-time figure on Portfolio ([§3](03-portfolio.md)), where
@@ -107,9 +112,10 @@ Securities is what all three point at.
 - **The full price history lives here, and every record in it can be edited or deleted.** Holdings
   ([§7.1](#71-holdings)) is the fast path for the one price recorded weekly; this is where a value
   typed into the wrong day is repaired. Editing a record's value replaces it; editing its date moves
-  it, replacing whatever occupied the day it lands on ([§2](02-domain-model.md)). Deleting removes
-  the day entirely, which is the only way to undo a price recorded against a date that never had
-  one.
+  it, replacing whatever occupied the day it lands on ([§2](02-domain-model.md)) — **and neither is
+  confirmed**, one price per day being the model rather than an accident to warn about
+  ([§13](13-validation.md)). **Deleting is confirmed**, like every delete in the application, and it
+  is the only way to undo a price recorded against a date that never had one.
 - The history is **newest first** — the opposite of every other table in the application, and
   deliberately so: the reason to open it is almost always the most recent value, and the ten-year
   tail is reached by scrolling rather than by paging.

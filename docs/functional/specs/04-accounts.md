@@ -54,8 +54,9 @@ hang off an account, so it sits second in the sidebar and everything else refers
 - An institution is **never retired**. It has no closing date and no status: when its last account
   closes it simply stops appearing anywhere that matters, and it stays in this list because the
   closed account still points at it ([§4.3](#43-creating-and-editing)).
-- The list is ordered **by name**; there is no other order and no filter. Seven rows do not need
-  one, and a name is what you look one up by.
+- The list is ordered **by name**; there is no other order and no filter. A list this short — one
+  row per bank the user has ever held an account with — does not need one, and a name is what you
+  look an institution up by.
 
 ## 4.3 Creating and editing
 

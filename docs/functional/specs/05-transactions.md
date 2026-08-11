@@ -42,7 +42,7 @@ The screen with the most hours on it. No tabs.
 Account · period · category · **set by** · amount range · receipt state · free-text search on
 description. **The account filter lists cash accounts only** ([§2](02-domain-model.md)). Combined
 with AND. Filters affect the footer totals and the page count. **No filter is applied by default** —
-the screen opens on the whole history — and the mockup above shows a user-applied period filter. The
+the screen opens on the whole history, and the period filter in the mockup is one the user set. The
 category filter lists the twenty-seven categories **alphabetically**, with an *Uncategorised* entry
 above them ([§6.3](06-categories.md#63-category-list)).
 
@@ -73,10 +73,11 @@ that will survive every future rule change, which is the set worth keeping small
   rules produce, and the row follows ([§2](02-domain-model.md)). A `manual` row keeps its category
   whatever its description becomes.
 - Row menu: **Duplicate**, **Delete**. Delete asks for confirmation — there is no undo.
-- **Duplicate copies the record and opens the copy for editing**, on the same row position the
-  original occupies. It carries over account, date, description, amount, category and notes; it
-  takes a new `id` and a new `insertionSeq`, so the copy sorts after the original on the same day
-  ([§5.2](#52-ordering-and-paging)). Two fields do not come across as-is. `receiptState` resets to
+- **Duplicate copies the record and opens the copy for editing, immediately below the original.** It
+  carries over account, date, description, amount, category and notes; it takes a new `id` and a new
+  `insertionSeq`, which is what puts it there — same date, higher sequence, so the ordering of
+  [§5.2](#52-ordering-and-paging) lands it in the next row down without anything having to place it.
+  Change the date and it moves to where that date belongs, on the next redraw. Two fields do not come across as-is. `receiptState` resets to
   `na`, because a duplicate is a new row and every new row starts there whatever made it
   ([§6.3](06-categories.md#63-category-list)). `categorySource` is preserved: a copy of a hand-set
   row is itself hand-set and keeps the category, a copy of an automatic row is automatic and is
@@ -132,15 +133,22 @@ that will survive every future rule change, which is the set worth keeping small
   and the count in the header and the footer is the whole of it, not the part in view — which is the
   only reading under which the header checkbox means what [§5.6](#56-selecting-and-deleting-in-bulk)
   says it means. Coming back to a page shows the ticks still there.
-- **Selection is cleared by any change to the filters**, and by nothing else. A filter change is the
-  one action that can put a selected row somewhere the user cannot see or reach it, so it is the one
-  action that discards the selection rather than carrying an invisible one forward. Paging does not,
-  because the pager can always take you back.
+- **Selection is cleared by any change to the filters, and by the bulk delete itself** — and by
+  nothing else. A filter change is the one action that can put a selected row somewhere the user
+  cannot see or reach it, so it is the one action that discards the selection rather than carrying
+  an invisible one forward; and after a delete there is nothing left to have selected. Paging does
+  not clear it, because the pager can always take you back.
+- **A row edited out of the current filter keeps its tick and stays in the count.** Re-dating a
+  selected transaction outside the period filter takes it off the screen, not out of the selection:
+  it was chosen deliberately, one edit later it is still the same row, and silently dropping it
+  would make the count in the header mean something different from what the user built. It is the
+  same reading as paging — the row is out of view, not out of the set — and the way to let go of it
+  is to touch the filters, which is the action that says so.
 
 ## 5.7 Bulk import
 
 One screen. One job: get raw rows in without duplicating anything. It is reached from the *Bulk
-import* button above and the sidebar stays on Transactions, because transactions are what it
+import* button on the Transactions screen, and the sidebar stays on Transactions, because transactions are what it
 produces — it is a mode of this screen rather than a destination of its own.
 
 > **Mockup —** [Bulk import](../mockups/05-transactions.html#bulk-import)

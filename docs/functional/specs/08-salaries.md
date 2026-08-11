@@ -32,7 +32,7 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
   denominator is missing has no hourly pay, and saying so is more use than a plausible figure
   computed from a guess ([§11.7](11-calculations.md#117-salary-figures)).
 - **Working days is always the whole calendar year**, never the part worked. In a partial first or
-  last year the hourly figures are consequently understated — 2017 and 2026 in the table above — and
+  last year the hourly figures are consequently understated — 2017 and 2026 in the mockup — and
   that is accepted rather than corrected: a year-to-date denominator would have to be re-entered
   every month to stay true, and the years that matter for comparison are the complete ones. Full
   years carry the tredicesima in the numerator and no extra hours in the denominator, so hourly pay

@@ -47,7 +47,15 @@ sell more than was ever bought.
   appears it must be a value that was always stored, not a column added to ten years of records that
   never had it. It is not disabled — a picker with one choice reads as a fact about the file, and a
   greyed one reads as something broken.
-- **The file is not re-validated on open.** These rules exist to stop a person mistyping, not to
+- **The rules on this page are not re-applied on open**, and that is not the same thing as opening a
+  file without looking at it. Two different questions are asked at two different moments. **Is this
+  file something the application understands?** — its schema version, its shape, whether it holds a
+  category, role or field this version has never heard of — is asked on open, and a file that fails
+  it is not opened at all ([§12](12-storage.md)). **Is this value one a person could have typed?** is
+  the subject of this section, and it is asked at the point of entry and nowhere else. A file may
+  therefore be perfectly readable and still hold a payslip with a gross of zero: the application
+  shows it faithfully and the checks complain about it.
+- **The field rules are not re-run on open.** They exist to stop a person mistyping, not to
   defend against a malformed file: the ten years of history arrive through a one-off migration
   script written for this file alone ([§12](12-storage.md)), and a script that writes something the
   forms would have refused has produced data the application will show faithfully and the checks
@@ -115,7 +123,7 @@ sell more than was ever bought.
 | --- | --- |
 | date | Required. **Not in the future** — a price is a fact about a day that has happened. |
 | value | Required, > 0, at most 4 decimals. |
-| collision | Saving onto a day that already has a price **asks first**, naming the value being replaced. Moving a record onto an occupied day does the same ([§7.4](07-investments.md#74-securities)). |
+| collision | **Never asked about.** Saving onto a day that already has a price replaces it, and moving a record onto an occupied day does the same ([§2](02-domain-model.md), [§7.4](07-investments.md#74-securities)). One price per security per day is the model, the last word on a day wins, and a confirmation would ask about it every week — most often when a fetch replaces a value it wrote itself an hour earlier. **The editor shows the value the day currently holds while it is open**, so the replacement is visible before it happens rather than queried after. |
 
 ### Contract
 
