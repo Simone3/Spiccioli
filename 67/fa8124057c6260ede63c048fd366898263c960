@@ -1,0 +1,47 @@
+docs/functional/specs/02-domain-model.md
+  s_527ec0f8568c91::t_d561376744ef94 31,94,134,202,204
+docs/functional/specs/03-portfolio.md
+  s_527ec0f8568c91::t_af39d792e6bf37 18-31,43-56,65-68,109-114
+docs/functional/specs/04-accounts.md
+  s_527ec0f8568c91::t_afeb7c7b5816aa 92-103,105,121-136
+docs/functional/specs/05-transactions.md
+  s_527ec0f8568c91::t_7e564a6e219a9b 126-127,240-244,271-273
+docs/functional/specs/06-categories.md
+  s_527ec0f8568c91::t_227baeb1706086 16-23,33-34,97-99,195-208,215-251
+docs/functional/specs/07-investments.md
+  s_527ec0f8568c91::t_9bb7d4fe3d6897 86-93,95-98
+docs/functional/mockups/03-portfolio.html
+  s_527ec0f8568c91::t_66611fd7d131db 127,129
+docs/functional/mockups/06-categories.html
+  s_527ec0f8568c91::t_163bad0be23dcb 188,190-198,200
+docs/functional/mockups/09-checks.html
+  s_527ec0f8568c91::t_9ab2014636e2ff 53
+docs/functional/mockups/12-storage.html
+  s_527ec0f8568c91::t_2beaa0bd1e43d1 87,90-94
+docs/functional/specs/09-checks.md
+  s_527ec0f8568c91::t_7cfc18993d11ac 13,16-19,79-92,94-98
+docs/functional/specs/11-calculations.md
+  s_527ec0f8568c91::t_a375defddbd8f2 39-50,81-91,161-167,170-178,195-197,231-239,258-276,286-287,298-300,327-334
+docs/functional/specs/12-storage.md
+  s_527ec0f8568c91::t_c0d109bc768d28 46-59,165-168
+docs/functional/specs/13-validation.md
+  s_527ec0f8568c91::t_76a7f02340ddd2 11-34,53-56,120,133
+docs/functional/specs/15-out-of-scope.md
+  s_527ec0f8568c91::t_81d62d227bec2a 38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "67fa8124057c6260ede63c048fd366898263c960",
+  "prompts": {},
+  "sessions": {
+    "s_527ec0f8568c91": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e9d9e74c-6911-4661-983f-2ea340bee5e5",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
