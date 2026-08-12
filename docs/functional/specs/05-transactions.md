@@ -8,6 +8,31 @@ The screen with the most hours on it. No tabs.
 
 ---
 
+## In brief
+
+- Always ordered `date ASC, insertionSeq ASC, id ASC`. **Not sortable, not configurable.** 50 rows a
+  page — the only paginated table in the application — and the screen **opens on the last page**.
+- **Filters**: account (cash only), period, category, set by, amount range, receipt state, search.
+  Combined with AND, affecting the footer total and the page count. **None is applied by default.**
+  Period is two inclusive date pickers; the amount range is on the signed amount and inclusive; the
+  search is case- and accent-insensitive.
+- **Every cell is editable in place.** Setting a category by hand makes the row `manual`; the picker's
+  *Automatic* entry puts it back under the rules; editing an `automatic` row's description re-runs
+  them. There is **no way to choose no category** and **no *apply rules* action**.
+- Row menu: **Duplicate** and **Delete**. A duplicate lands below the original, keeps
+  `categorySource`, and resets `receiptState` to `na`.
+- **Bulk delete is the only bulk action**, over everything the filters match across pages. The
+  selection survives paging and nothing else. **There is no bulk edit.**
+- **Add transaction** takes seven fields. The date cannot be in the future, the account starts empty,
+  the category defaults to *Automatic*, and this is **the one place a receipt state can be set as a
+  row is created**.
+- **Bulk import** is one screen: one account for the whole paste, three tab-separated columns —
+  date, description, amount — a date-order chip inferred from the rows, amounts carrying exactly two
+  decimals, duplicates flagged and unselected, unreadable rows marked with the reason and unticked.
+  Imported rows arrive `automatic` and `na`, and carry no trace of having been imported.
+
+---
+
 ## 5.1 Columns
 
 - **Account** names the account, not the institution — *Fineco · Conto Corrente*, never *Fineco*.
@@ -205,9 +230,9 @@ produces — it is a mode of this screen rather than a destination of its own.
   formats, preview, duplicate flags and the count on the *Import* button all update live as text is
   pasted or edited. There is no *Continue*, no review step and no way back: a mis-shaped paste is
   corrected where it was made, and the correction is visible without leaving the screen.
-- This is the reason the two steps became one. A row that will not parse is almost always a format
-  chip set wrongly, and a gate that refused to advance put the diagnosis on one screen and the chip
-  that fixes it on the next.
+- **That is why pasting and reviewing are one screen rather than two.** A row that will not parse is
+  almost always a format chip set wrongly, and a gate that refused to advance would put the diagnosis
+  on one screen and the control that fixes it on the other.
 - The **account is chosen once** for the whole paste, not per row. It **starts empty and is the first
   thing to pick** ([§5.5](#55-add-transaction)), and lists cash accounts only — a brokerage account
   holds no transactions to import. It is the field a remembered default would do the most damage in:
@@ -298,8 +323,9 @@ produces — it is a mode of this screen rather than a destination of its own.
   ([§1](01-premise-and-constraints.md)), and stripping a marker that can only mean the one currency
   there is cannot misread anything. **Those two spellings and no others** — this is not a general
   rule that ignores whatever letters sit beside the digits, which is exactly how a trailing `D`/`C`
-  marker would get swallowed and a debit read as a credit. The `currencySymbol` preference plays no
-  part here: it is display-only and the paste came from a bank ([§10](10-settings.md)).
+  marker would get swallowed and a debit read as a credit. Nothing about this is configurable: there
+  is no currency setting anywhere in the application ([§10](10-settings.md)), and `€` is simply what
+  the amounts in this file are ([§1](01-premise-and-constraints.md)).
 - **A bank export that writes whole euros as `1234` is reshaped before pasting, not guessed at.**
   Two decimals is what a statement prints, it costs one spreadsheet column to produce, and requiring
   it buys a column that is never wrong instead of one that is nearly always right.

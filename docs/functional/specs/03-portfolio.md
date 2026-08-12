@@ -8,6 +8,27 @@ The home screen. No tabs.
 
 ---
 
+## In brief
+
+- A **failing-check banner** sits above everything whenever any check fails, naming each one and
+  linking to [§9](09-checks.md). Nothing is shown when all pass.
+- **Net worth** is the headline: cash at its balance, holdings at their latest price less the
+  hypothetical tax and sell fee of [§11.3](11-calculations.md#113-hypothetical-liquidation).
+- Beneath it, **total at cost** and **unrealised net investment gain**, in that order. They add to
+  the headline. No other decomposition is shown.
+- **All-time card**: lifetime sums of the `bank fees`, `wealth tax` and `interest and dividends`
+  roles, plus realised gain — which covers the sales that have one and says how many it left out.
+- **Every figure on the screen counts closed accounts.**
+- **Breakdown by type**: the five cash types and the five security types, only those present. A
+  negative or zero type keeps its row and its amount, reads 0,0% and gets no slice. Shares are
+  computed against the total of the positive types. Ordered by share, then by amount descending.
+- **Net worth over time**: monthly points plus one at today, plotting the same quantity as the
+  headline and ending on it to the cent. Months where a holding fell back to cost are dashed.
+- **Accounts table**: every account with its balance, closed ones dimmed and last, totalling to the
+  headline. Read-only.
+
+---
+
 ## 3.1 Behaviour
 
 - **Failing-check banner.** Shown whenever any check fails, above everything else, naming each
@@ -28,9 +49,9 @@ The home screen. No tabs.
 - **That is the only decomposition offered, and it splits net worth by what is measured rather than
   by where the money sits.** Cash and holdings are deliberately not shown as two totals here: a split
   by kind of asset is the breakdown further down the same screen, and one figure appearing twice on
-  one screen is a figure that can disagree with itself. *Total at cost* was once labelled *sum of all
-  transactions*, which was wrong twice over: it includes opening balances, which are not
-  transactions, and it values holdings at their cost basis, which is not a transaction either.
+  one screen is a figure that can disagree with itself. **The line is not a sum of transactions**, and
+  must not be labelled as one: it includes opening balances, which are not transactions, and it
+  values holdings at their cost basis, which is not a transaction either.
 - **The headline figure is therefore an estimate**, and must carry the
   [§11.3](11-calculations.md#113-hypothetical-liquidation) caveat on hover: it rests on average-cost
   lot matching and moves if a security's `taxRate` or an institution's sell fee changes. The gross,

@@ -195,8 +195,8 @@
   ([§12](#12--storage)). There is no third state and no spinner for the ordinary debounced write: a
   save takes no perceptible time, and an indicator that flickered on every keystroke would train the
   user to stop reading the one line that will one day carry bad news. **What it does not carry is the
-  file name.** It used to, which put the answer in two places and meant the sidebar had to be wide enough
-  for the longer of them. The window title already had the job.
+  file name**, which would put the answer in two places and make the sidebar as wide as the longer of
+  them. The window title has that job.
 - **Opening another file is a menu action, not a restart.** The launch screen
   ([§12.1](#121-the-launch-screen)) is what the application opens *with*; the File menu is how you
   leave one file for another once it is running. Both reach the same code, so there is nothing you

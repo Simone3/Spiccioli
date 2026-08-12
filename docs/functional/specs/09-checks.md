@@ -8,6 +8,25 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 
 ---
 
+## In brief
+
+- **Two states only**, pass or fail. There is no warning tier.
+- **A check never prevents anything.** Checks report; they never validate, refuse or roll back. Where
+  a rule has to be enforced it is enforced by the form ([§13](13-validation.md)).
+- **A failing check suspends the promise that the figures are right**, and nothing is designed around
+  that — the remedy is to fix the records it names. See the note below the table.
+- Each failing check **names the exact records**, and each entry links to the record. A passing check
+  **states its reach**, so one that passed on nothing is distinguishable from one that passed.
+- They run **at startup and after every change, debounced**, and there is **no manual re-run**.
+- The **sidebar badge counts failing checks**, never the records they name; nothing is shown when all
+  pass.
+- Checks key off category **roles**, never names, and **read the whole file including closed
+  accounts** — check 10 excepted, which reads open pension fund accounts only.
+- **No check compares absolute values**; each states whether the two amounts are equal or exactly
+  opposite ([§11.6](11-calculations.md#116-derived-matching)).
+
+---
+
 | # | Check | Definition | Failure output |
 | --- | --- | --- | --- |
 | 1 | Internal transfers balance out | Every transaction in a category with role `internal transfer` pairs with a leg of the **exactly opposite amount** — `a.amount = − b.amount` — on another account ([§11.6](11-calculations.md#116-derived-matching)). | Each unpaired leg, with date, account, description, amount. |

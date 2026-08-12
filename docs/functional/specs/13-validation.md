@@ -16,7 +16,7 @@ check.
 | --- | --- |
 | **Uniqueness** — institution name, account name within its institution, contract name, security ISIN | The damage is to the pickers, and it is immediate: two identical entries in a list the user is about to choose from cannot be told apart, so the next record is misfiled by a form that offered no way to get it right. A check would report the collision after everything chosen in between had already gone to the wrong one of the two. |
 | **Deletion refused while something points at the record** | The alternative is not a reported inconsistency but a dangling reference — a transaction on an account that no longer exists. The file has no state for that and no screen could render it. |
-| **The two locks** — an account's `type` once it holds anything, a trade's `kind` once it exists | Both would silently restate records already written rather than correct the one in front of the user: a cash account turned brokerage orphans every row on it, a purchase turned sale reverses a position. Deleting and re-entering is the honest way to do either, and it is available. |
+| **The two locks** — an account's `type` **across the cash/brokerage boundary** once it holds anything, a trade's `kind` once it exists | Both would silently restate records already written rather than correct the one in front of the user: a cash account turned brokerage orphans every row on it, a purchase turned sale reverses a position. Deleting and re-entering is the honest way to do either, and it is available. Note how narrow the first one is — the five cash types stay interchangeable forever, because nothing is derived from which of them an account is. |
 | **A contract's dates and its payslips must agree, and it is enforced from both sides** — a payslip's month must fall inside the contract's life, and the contract's dates cannot be narrowed past a payslip or a ContractYear that already exists | Both records are on screen as it is typed — the contract is the selector scoping the whole screen ([§8.1](08-salaries.md#81-payslips)) — so this is not a rule about a record the user has not reached yet. A payslip from before you were hired is always a typo, never a half-entered state on the way to something. Enforcing only the first direction would have left the second as the way around it: the same file state, reached by editing the contract instead of the payslip, and reached silently, since the per-year table is built from the contract's dates and would simply stop showing the years it had orphaned. |
 
 The thread through all four is that the counterpart record is **already chosen, already on screen,
@@ -69,12 +69,12 @@ is instead an absence.
   Whether it accepts a sign and whether zero is allowed vary by field and are stated below; the
   shape never does. A price and a quantity are the two exceptions and carry **four** decimals
   ([§11](11-calculations.md)).
-- **`currency` is a picker with one entry.** It is required, present on the account and security
-  forms, and offers `EUR` and nothing else in v1 ([§1](01-premise-and-constraints.md)). It exists as
-  a field because the model records it ([§2](02-domain-model.md)) and because the day a second one
-  appears it must be a value that was always stored, not a column added to ten years of records that
-  never had it. It is not disabled — a picker with one choice reads as a fact about the file, and a
-  greyed one reads as something broken.
+- **There is no currency field, on any form or in any record.** Every amount is EUR
+  ([§1](01-premise-and-constraints.md)), so there is nothing to choose, nothing to validate and
+  nothing that could be set wrong. A picker with one entry would have been a control that can only be
+  confirmed, on two forms, read by nothing — and the version that adds a second currency has to
+  revisit every total in [§11](11-calculations.md) regardless, which a field stored in advance does
+  not help with ([§15](15-out-of-scope.md)).
 - **The rules on this page are not re-applied on open**, and that is not the same thing as opening a
   file without looking at it. Two different questions are asked at two different moments. **Is this
   file something the application understands?** — its schema version, its shape, whether it holds a
@@ -105,9 +105,8 @@ is instead an absence.
 | --- | --- |
 | name | Required, trimmed, unique **within its institution**, and unique among the accounts that have none. Two *Conto Corrente* at different banks are fine and normal; two at the same bank are a mistake. |
 | institutionId | **Required on every type but `Liquidity`**, where *None* is offered and means physical cash. A deposit, a term deposit, a pension fund, a voucher balance and a securities dossier are all held *by* somebody, and a brokerage account with no institution could never pair a trade with the money that paid for it ([§11.6](11-calculations.md#116-derived-matching), checks 6 and 7). Switching the type to one that requires it marks the field. |
-| type | Required. **Locked once the account holds anything** — a transaction or a trade. Changing a cash account into a brokerage one would orphan every row on it. |
+| type | Required. **The five cash types are freely interchangeable at any time**; only the boundary between them and `Brokerage` is locked, and only once the account holds a transaction or a trade. A current account recorded as `Liquidity` that should have been a `Deposit account` is a slice in the wrong place on one screen ([§3.1](03-portfolio.md#31-behaviour)) and nothing else — no figure is derived from which cash type an account is, so correcting it restates a colour and orphans nothing. Turning either kind into the other is what cannot be done: a cash account made `Brokerage` orphans every transaction on it and a brokerage one made cash orphans every trade, and neither is a state the model has. Empty the account, or delete it and record it again. |
 | openingBalance | Amount field, required, any sign. **Forced to 0 and disabled on `Brokerage`** ([§2](02-domain-model.md)). |
-| currency | Required. `EUR` only in v1 ([§13.1](#131-how-it-behaves)). |
 | openingDate | Required. **Not in the future** — an account is opened before it is recorded, not after. |
 | closingDate | Optional; must be ≥ `openingDate` and, like it, **not in the future**. An account closing next month is an account that is still open. Nothing else is required to close one — check 11 reports what was left in it ([§9](09-checks.md)). |
 | delete | Refused while any transaction or trade points at it. Closing is what retiring looks like ([§4.3](04-accounts.md#43-creating-and-editing)). |
@@ -144,7 +143,6 @@ is instead an absence.
 | isin | Required, unique, 12 characters, two letters then nine alphanumerics then a digit. The format is checked; the check digit is not recomputed. |
 | ticker, name | Required, trimmed. |
 | type | Required, one of the five of [§2](02-domain-model.md). Freely editable afterwards — it groups the portfolio breakdown ([§3.1](03-portfolio.md#31-behaviour)) and nothing is derived from it, so correcting one restates a slice and no recorded figure. |
-| currency | Required. `EUR` only in v1 ([§13.1](#131-how-it-behaves)). **It need not match the currency of the account the security is held in**: both are EUR in v1, and the day a second currency exists an instrument quoted in one and settled through an account in another is an ordinary arrangement, not an error to have designed a refusal for. |
 | taxRate | Required. **Entered and shown as a percentage**, 0 – 100 with at most 1 decimal, and stored as the fraction it names — 12,5 is typed and `0,125` is kept ([§11](11-calculations.md)). |
 | delete | Refused while any **trade** points at it. Prices are not dependent data — they are part of the security, not references to it, and they go with it. Deleting a security therefore deletes its price history in the same breath, and the confirmation says how many records that is. |
 
@@ -201,9 +199,8 @@ is instead an absence.
 | transferMatchWindowDays, tradeMatchWindowDays | Integer 0 – 31. Zero means same day only. |
 | backupCount | Integer 1 – 100. |
 | defaultTaxRate | 0 – 100, at most 1 decimal, entered as a percentage and stored as a fraction, exactly as `Security.taxRate` above. |
-| dateFormat, decimalSeparator, currencyPosition | Pickers over the closed sets of [§10](10-settings.md). There is nothing to reject: the only values offered are the legal ones. |
+| dateFormat, decimalSeparator | Pickers over the closed sets of [§10](10-settings.md). There is nothing to reject: the only values offered are the legal ones. |
 | thousandsSeparator | The same, plus **none**, which is a value rather than an empty field. |
-| currencySymbol | Required, trimmed, 1 – 3 characters. The one free-text preference; empty is refused, since every figure in the application carries it ([§10](10-settings.md)). |
 | separators | Decimal and thousands separators must differ; choosing the decimal separator's character as the thousands one is refused in place, leaving the previous value in force. **None** never collides. |
 
 ### Bulk import

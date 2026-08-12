@@ -23,7 +23,6 @@ Eleven stored entities and one derived one. *Italic* marks a derived field.
 | name | text | |
 | institutionId | ref? | **Required on every type but `Liquidity`** ([§13](13-validation.md)). Physical cash is the account that has none, and it is a `Liquidity` one. |
 | type | enum | `Liquidity` · `Deposit account` · `Term deposit` · `Pension fund` · `Voucher` · `Brokerage` |
-| currency | enum | EUR in v1. |
 | openingBalance | amount | Default 0. For accounts whose history starts mid-life. Always 0 on a `Brokerage` account. |
 | openingDate | date | Records dated before it are reported by check 12, never prevented. |
 | closingDate | date? | Empty means open. An account is closed by editing it and setting this date; there is no other retirement mechanism. |
@@ -58,7 +57,6 @@ filters.
 | ticker | text | |
 | name | text | |
 | type | enum | `Stock` · `Bond` · `Stock ETF` · `Bond ETF` · `ETC`. Five, and each one is a slice of the portfolio breakdown ([§3.1](03-portfolio.md#31-behaviour)). |
-| currency | enum | EUR in v1. |
 | taxRate | fraction | Capital-gains rate this instrument would be taxed at, **stored 0 – 1 and shown as a percentage** ([§11](11-calculations.md)): `0,26` reads 26%. Used only by [§11.3](11-calculations.md#113-hypothetical-liquidation). Defaults to `defaultTaxRate` ([§10](10-settings.md)); `0,125` on a whitelist government bond. |
 | notes | text | |
 

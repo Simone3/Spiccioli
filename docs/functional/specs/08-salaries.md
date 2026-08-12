@@ -6,6 +6,27 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
 
 ---
 
+## In brief
+
+- A **contract selector** scopes the whole screen. **No figure anywhere sums across contracts.**
+- **Per-year table**, always visible: one row per calendar year **from the contract's start year to
+  its end or the current year**, from the contract's own dates rather than from the payslips.
+  Selecting a row swaps the payslip table below it.
+- **Working days is editable in that table and *is* the ContractYear record** — created by typing
+  into the cell, deleted by clearing it, and that delete is the one that is not confirmed.
+- A year with no working days shows an **empty cell and two *undefined* hourly figures**. Working
+  days is always the whole calendar year, so a partial year understates them.
+- **Payslip table**: month, label, then the stored figures — contract gross, gross, net payment,
+  refunds, car — then net salary and net/gross, then pension and notes. **Ordered by month, then by
+  label with the unlabelled row first.**
+- A month may hold **more than one payslip**; the tredicesima is a second December row with a label.
+- **Two charts**: averages per month per year, and totals per year against the contract line.
+- **Contracts tab** holds one row per employer, **ordered by start date then name**. A contract is
+  ended, never retired. Changing its terms re-computes every year, including closed ones. **Its dates
+  cannot be narrowed past a payslip or a working-year that already exists.**
+
+---
+
 ## 8.1 Payslips
 
 > **Mockup —** [Payslips tab](../mockups/08-salaries.html#payslips)

@@ -7,6 +7,27 @@ hang off an account, so it sits second in the sidebar and everything else refers
 
 ---
 
+## In brief
+
+- **Accounts tab** lists every account ever opened, closed ones dimmed and last. Its columns are the
+  stored fields of [§2](02-domain-model.md) plus a **transaction count** and a **trade count**, which
+  together say whether a row can be deleted. **No balance column** — that is Portfolio's job.
+- Ordered by **institution name, then opening date, then account name**; accounts with no institution
+  first; **closed accounts last regardless**.
+- **Institutions tab** is where institutions are created, edited and deleted — the only place. It
+  lists name, **default sell fee** and an account count, ordered by name, with no filter.
+- **Closing an account** is the only retirement mechanism there is. It marks the account and sorts it
+  last; it changes no total ([§11.4](11-calculations.md#114-balances-and-net-worth)), and the form
+  does not require the account to be empty first.
+- A **closed account stays in every picker**, marked and last, because its rows stay editable.
+- **An institution is required on every account type but `Liquidity`**; opening balance is forced to
+  0 on `Brokerage`; the default sell fee is required and may be zero
+  ([§13](13-validation.md)).
+- **Nothing with dependents can be deleted**, and every delete confirms — except the two named in
+  [§4.3](#43-creating-and-editing).
+
+---
+
 ## 4.1 Accounts
 
 > **Mockup —** [Accounts tab](../mockups/04-accounts.html#accounts)

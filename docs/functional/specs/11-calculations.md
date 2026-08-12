@@ -2,8 +2,10 @@
 
 *[Index](../README.md) · no mockups for this section*
 
-Every formula in one place. All amounts are EUR; rounding is to 2 decimals at display, never in
-intermediate steps. **Every monetary figure carries exactly two decimals** — single amounts, column
+Every formula in one place. **All amounts are EUR and every monetary figure is printed with `€`
+before it** — fixed, not a preference, because currency is not something this application has
+([§1](01-premise-and-constraints.md), [§10](10-settings.md)). Rounding is to 2 decimals at display,
+never in intermediate steps. **Every monetary figure carries exactly two decimals** — single amounts, column
 totals, yearly aggregates, hourly rates — so a round thousand reads `€ 21.900,00` and never
 `€ 21.900`, and a column of figures always aligns on the same decimal place. Quantities and unit
 prices carry four; percentages carry one. The only figures written short are the axis labels on a
@@ -303,6 +305,15 @@ that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteratio
   accounts, dates within `transferMatchWindowDays`, both in a category with role `internal transfer`. Greedy
   one-to-one in the order above — legs walked by date, each claiming the nearest-dated unclaimed
   counterpart. Unpaired legs are listed by check 1.
+- **Two transfers of the same amount in the same week can have their links crossed, and it costs
+  nothing.** The conditions above are all a leg has to offer — an amount, a sign, a different
+  account, a date nearby — so moving € 500,00 from A to B and € 500,00 from C to D in the same window
+  may pair A with D and C with B. Every leg still pairs, check 1 still passes, and the only thing
+  that is wrong is which account the *Matched* column names
+  ([§5.1](05-transactions.md#51-columns)). This is the same trade made for payslips below, for the
+  same reason: the alternative is a field on every transaction saying which transfer it belongs to,
+  maintained forever against a coincidence with no consequence. **The ordering rules above are what
+  keep it deterministic** — crossed or not, the same file pairs the same way on every machine.
 - **The two legs carry the same amount, and a transfer fee is never netted into one of them.** If
   the sending bank takes € 1,00 to make the wire, that euro is **its own transaction** on the
   sending account, in a category with role `bank fees` — never subtracted from the leg. Netting it

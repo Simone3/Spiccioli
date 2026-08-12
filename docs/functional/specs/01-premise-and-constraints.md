@@ -18,12 +18,19 @@
   either. No mobile, no web deployment ([§15](15-out-of-scope.md)).
 - **Nothing leaves the machine** except security identifiers sent to a price provider, and only in
   the moment the user presses *Update prices* ([§7.6](07-investments.md#76-prices)).
-- **Euro only.** Currency is recorded on accounts and securities but every computation assumes EUR.
-  No exchange rates, no conversion.
+- **Euro only, and currency is not a concept the application has.** Every amount is EUR, no record
+  carries a currency field, no form asks for one and no preference sets a symbol: figures are printed
+  with `€` because that is what they are ([§11](11-calculations.md)). There are no exchange rates and
+  no conversion, and there is nothing that could be set to another currency and then be wrong. A
+  second currency is a future version's problem and it will be a real one — a field on accounts and
+  securities, a rate table, and a decision at every total about what is being added to what
+  ([§15](15-out-of-scope.md)). Recording a currency now, on the strength of that, would have been
+  one value with one possible setting, present on two forms and read by nothing, and it would not
+  have made the day easier when it comes.
 - **English only.** The interface ships in one language and there is no language selector. Nothing
   user-facing may be hard-coded in a way that would make a second language a rewrite: strings stay
-  separable from the code, and dates, decimal separators and currency already come from preferences
-  rather than a system locale ([§10](10-settings.md)).
+  separable from the code, and dates and decimal separators already come from preferences rather than
+  a system locale ([§10](10-settings.md)).
 - **Dark theme only.**
 - **The application replaces a spreadsheet** holding ten years of history. Data entry speed and the
   ability to spot a mistake matter more than features.

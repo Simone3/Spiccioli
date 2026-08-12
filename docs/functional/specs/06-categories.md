@@ -7,6 +7,28 @@ there, and the list is what both are made of.
 
 ---
 
+## In brief
+
+- **Report** is categories × years. Rows are in the fixed `order` of [§2](02-domain-model.md), never
+  by amount. The whole table is shown, unpaged.
+- **Four groups**: Income, Expense and Internal each end in a subtotal, **Net** is the sum of those
+  three, and **Investments** follows below it with **no subtotal** and is excluded from Net. Every
+  category appears in exactly one group.
+- Amounts **carry the sign and colour of the transactions behind them**. A cell with nothing in it
+  shows an em dash, not `€ 0,00`.
+- **Every category cell and row total is a link** to Transactions with those filters set. The three
+  subtotals and Net are not.
+- Filters: year range and accounts — **cash accounts only**, closed ones included.
+- **Rules** are ordered, draggable and numbered; **first match wins**. The list is edited as a
+  **draft that writes nothing** until *Apply changes*, which reports what it would do and then writes
+  the rules and every affected category **in one step**. A `manual` category is never touched.
+- **Category list** is the twenty-seven seeded categories, **read-only**, **alphabetical**, with
+  `order` as a column. Adding, renaming or removing one is a change to the application.
+- **Every picker and filter of categories is alphabetical**; the report is the only table that reads
+  in `order`.
+
+---
+
 ## 6.1 Report
 
 The categories × years matrix — the one screen that answers where the money goes.
@@ -177,8 +199,7 @@ The categories × years matrix — the one screen that answers where the money g
 > transactions, and the pass that produces the summary is the same pass that produces the result —
 > compute it once, show the figures, and write what was already computed if the user confirms.
 > Nothing is recomputed on confirmation. That is the whole reason the summary is affordable at all,
-> and it is also why the previous design — re-running the list behind every keystroke — is not
-> missed.
+> and the reason the list is applied once at the end rather than re-run behind every keystroke.
 
 ## 6.3 Category list
 
@@ -263,7 +284,10 @@ report sort on a single field and still come out grouped.
   everywhere, and the add-transaction form is the one place it can be given another value as the row
   is created ([§5.5](05-transactions.md#55-add-transaction)) — a row that arrives imported or
   duplicated is created `na` and moved on the row itself
-  ([§5.1](05-transactions.md#51-columns)).
+  ([§5.1](05-transactions.md#51-columns)). **That is a statement about the application, not about the
+  file**: the ten years of history are written by the migration script, which sets each row's state
+  along with everything else it knows ([§12](12-storage.md), [§13.1](13-validation.md#131-how-it-behaves)) — so check 13 on day one reports what
+  is genuinely outstanding rather than the whole decade.
 - **Check 13 therefore fails the moment a receipt-tracked row is imported**, and that is the point.
   The rent that was just imported *is* outstanding until someone has looked for the invoice, and the
   check is the list of what to look for. A row typed by hand can be given its state on the form and

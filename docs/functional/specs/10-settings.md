@@ -14,17 +14,34 @@ particular.
 
 ---
 
-**Every preference is a closed set or a bounded number** — there is no free-text setting on this
-screen except the currency symbol, and nothing here can be given a value the application then has to
-interpret.
+## In brief
+
+- **Preferences only.** Every other kind of reference data lives on the screen that consumes it.
+- **Every preference is a closed set or a bounded number. There is no free text at all**, and
+  **nothing sets a currency** — every figure is EUR and prints with `€`.
+- **Preferences are global and are not in the data file.** They live with the installation, apply to
+  every file opened afterwards, and do not travel with a ledger that is sent to someone else. The
+  screen says so at the top.
+- **No save button.** A preference applies as it is changed and is written immediately; a value that
+  cannot be applied is refused in place, leaving the previous one in force. **Nothing here ever marks
+  the data file as modified.**
+- Formats are **display-only**. Entry uses pickers and validated fields, and an import reads its
+  formats out of the pasted rows — neither consults this screen.
+- The two **path** rows are read-only facts about the session: where the open file is, and where its
+  backups are.
+
+---
+
+**Every preference is a closed set or a bounded number.** There is **no free-text setting at all**,
+and nothing here can be given a value the application then has to interpret. Nothing here sets a
+currency either: every figure is EUR and is printed with `€`
+([§1](01-premise-and-constraints.md), [§11](11-calculations.md)).
 
 | Setting | Values | Default | Used by |
 | --- | --- | --- | --- |
 | dateFormat | `DD/MM/YYYY` · `MM/DD/YYYY` · `YYYY-MM-DD` | `DD/MM/YYYY` | Display only |
 | decimalSeparator | `,` · `.` | `,` | Display only |
 | thousandsSeparator | `.` · `,` · space · **none** | `.` | Display only |
-| currencySymbol | 1 – 3 characters, required | `€` | Every monetary figure — **all of them carry it** |
-| currencyPosition | before · after | before | As above |
 | defaultTaxRate | 0 – 100%, one decimal | 26% | Initial value of `Security.taxRate` ([§2](02-domain-model.md)). Entered as a percentage, **stored as the fraction it names** — 26% is `0,26` ([§11](11-calculations.md)). Changing it does not touch securities that already exist. |
 | priceStalenessDays | integer ≥ 1 | 30 | Check 3, holdings marker |
 | pensionRevaluationMonths | integer ≥ 1 | 3 | Check 10 |

@@ -7,6 +7,29 @@ Securities is what all three point at.
 
 ---
 
+## In brief
+
+- **Holdings** is one row per (security, brokerage account) with a position, entirely derived,
+  **ordered by ticker**. Every column is read-only **except the price**, which opens an inline editor
+  with an as-of date and writes a Price record without confirming.
+- The table shows **gross** value and gain; the detail panel carries the quantities, the weighted
+  average, and the full hypothetical liquidation breakdown
+  ([§11.3](11-calculations.md#113-hypothetical-liquidation)).
+- **A stale price is marked on the row; a security with no price at all reads *none*, values at
+  `€ 0,00`, and shows a gain of minus its whole cost.**
+- **Purchases and Sales** are where trades are created, edited in place and deleted, ordered
+  `date ASC, insertionSeq ASC, id ASC` with no paging, filtered by security, account (brokerage only)
+  and period. Sales carry three extra columns: taxes, net proceeds and realised gain.
+- **Recording a trade never creates a transaction**, and the *Matched* column is what
+  [§11.6](11-calculations.md#116-derived-matching) paired it with.
+- **Securities** are created here or inline on a purchase, corrected here, and **ordered by ticker**.
+  The full price history lives here, **newest first**, and is the only place a price is deleted.
+- **Prices**: one per security per day, the last word on a day winning silently, never dated in the
+  future. **Update prices** is one button, no configuration, and is the only thing in the application
+  that touches the network.
+
+---
+
 ## 7.1 Holdings
 
 > **Mockup —** [Holdings tab](../mockups/07-investments.html#holdings)
@@ -14,12 +37,15 @@ Securities is what all three point at.
 - One row per (security, brokerage account) holding a position — quantity greater than 0, and a
   running quantity that never went below it ([§2](02-domain-model.md)). Every figure is derived, and
   every column is read-only **except the price**.
-- **Ordered by the security's `name`, alphabetically**, then by account name where one security is
+- **Ordered by the security's `ticker`, alphabetically**, then by account name where one security is
   held at two brokers and is therefore two rows ([§2](02-domain-model.md)). Case- and
-  accent-insensitive, like every other comparison of text in the application. Not by value, not by
-  gain: this is a table of positions to be found and priced, and the one thing known before opening
-  it is which instrument is being looked for. Portfolio is where the shape of the money is read, and
-  that is the one table sorted by its own amounts ([§3.1](03-portfolio.md#31-behaviour)).
+  accent-insensitive, like every other comparison of text in the application. The ticker is what the
+  row leads with and what the eye scans, so it is what the rows are sorted on — a table ordered by a
+  field printed in small type beside the one being read looks unsorted, whatever the rule behind it
+  says. Not by value and not by gain: this is a table of positions to be found and priced, and the
+  one thing known before opening it is which instrument is being looked for. Portfolio is where the
+  shape of the money is read, and that is the one table sorted by its own amounts
+  ([§3.1](03-portfolio.md#31-behaviour)).
 - **This is where prices are kept up to date.** Clicking the price cell opens an inline editor — a
   value and an as-of date defaulting to today — and saving writes a Price record, replacing whatever
   that day already held ([§2](02-domain-model.md)). **Nothing is confirmed**: the editor shows the
@@ -123,9 +149,9 @@ Securities is what all three point at.
   purchase.
 - Correcting is the rest of the tab's job: a mistyped ISIN, a renamed instrument, the wrong type,
   the tax rate on a whitelist government bond.
-- **Ordered by `name`, alphabetically**, the same key and the same comparison as Holdings
-  ([§7.1](#71-holdings)) — the two tables list the same instruments and there is no reason for them
-  to disagree about where one sits. Securities no longer held are in the list like everything else,
+- **Ordered by `ticker`, alphabetically**, the same key and the same comparison as Holdings
+  ([§7.1](#71-holdings)) — the two tables list the same instruments, both lead with the ticker, and
+  there is no reason for them to disagree about where one sits. Securities no longer held are in the list like everything else,
   marked by an em dash in *Held*; nothing sorts them apart, since a security is looked up by what it
   is called whether or not there is a position in it today.
 - **Held** is the quantity across every brokerage account, an em dash when the position is closed.

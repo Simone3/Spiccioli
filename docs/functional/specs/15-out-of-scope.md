@@ -9,7 +9,7 @@ accident.
 
 | Not building | Why |
 | --- | --- |
-| Multi-currency conversion | Everything is EUR. Currency is recorded, never converted. |
+| Currency, in any form | Everything is EUR and **nothing records a currency**: no field on accounts or securities, no picker on a form, no symbol in the preferences ([§1](01-premise-and-constraints.md), [§13](13-validation.md)). A second currency needs a rate table and a decision at every total about what is being added to what, so it is a version of its own — and a one-valued field stored in advance would not have bought that version anything. |
 | A second interface language | English only, no language selector. Strings stay separable so it remains possible ([§1](01-premise-and-constraints.md)). |
 | Tax systems other than the Italian one | Rate per security is a parameter, not a constant; anything more is future work ([§11.3](11-calculations.md#113-hypothetical-liquidation)). |
 | Export in any format | The file is the data, and [§12](12-storage.md) documents it well enough to read with a script. No CSV, no report export. |
