@@ -4,6 +4,11 @@
 
 Eleven stored entities and one derived one. *Italic* marks a derived field.
 
+**No `id` is ever shown.** It is how one record points at another and it has no other job: no table
+has a column for one, no form asks for one, and nothing the user reads or types anywhere in the
+application is an id. Where these pages say a screen shows “the stored fields”, `id` is the one they
+never mean ([§4.1](04-accounts.md#41-accounts)).
+
 ---
 
 ## Institution

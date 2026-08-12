@@ -209,8 +209,10 @@ import* button on the Transactions screen, and the sidebar stays on Transactions
   paste may mix rows that use different ones. The control selects the order and nothing else.
 - **The year is always four digits.** A two-digit year cannot be read and the row is marked like any
   other unreadable one.
-- **A field that is not a real date under the chosen order cannot be read** — `31/02/2026` is marked
-  rather than rolled into March, and so is a thirteenth month.
+- **A field that is not a real date under the chosen order cannot be read.** The three parts are
+  taken in the positions the control names and each must be a real one: `31/02/2026` is marked rather
+  than rolled into March, **a month outside 1 – 12 is marked** rather than carried into the next
+  year, and so is a day of 0. Nothing is ever rolled over into a neighbouring month or year.
 - **A date later than today cannot be read either** ([§13](13-validation.md)); the row is marked with
   that reason like any other.
 - Anything else in the date column — a month name, a weekday, a time appended after the date —
@@ -224,6 +226,11 @@ import* button on the Transactions screen, and the sidebar stays on Transactions
 - **Zero, one or two decimals are all read**: `1234`, `1234,5` and `1234,56` are amounts.
   **More than two cannot be read**, exactly as the amount field refuses a third
   ([§13](13-validation.md)).
+- **The decimal separator may appear at most once.** A field carrying two of them cannot be read,
+  and that holds whichever character the control is set to — with the decimal at `.`, `1.234.56` is
+  an unreadable row and not one thousand two hundred and thirty-four euros fifty-six. The character
+  that groups is the thousands one and it is a different key; a field is never asked to work out
+  which of two identical characters was meant as which.
 - **Thousands separators are optional, and where they appear they must group the integer part in
   threes.** `1.234.567,89` reads; `1.2345` does not. **With the control at none, a thousands
   separator anywhere in the field makes the row unreadable** — which is what catches a control left
@@ -258,6 +265,10 @@ import* button on the Transactions screen, and the sidebar stays on Transactions
 
 ### Duplicates
 
+- **Every readable row arrives ticked.** A flagged duplicate is the one thing that arrives unticked,
+  and an unreadable row cannot be ticked at all ([§13](13-validation.md)) — so a paste with nothing
+  wrong in it needs no ticking before *Import*, and the ticks that are missing are the two the screen
+  has just explained.
 - Exact match on **account + date + amount + normalised description** against transactions already
   in the file. Normalisation: trim, collapse whitespace, case-fold.
 - A match is flagged and **unselected**, not removed. The user may re-select it.

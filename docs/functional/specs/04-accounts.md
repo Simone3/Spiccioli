@@ -12,7 +12,9 @@ hang off an account, so it sits second in the sidebar and everything else refers
 > **Mockup —** [Accounts tab](../mockups/04-accounts.html#accounts)
 
 - Every account ever opened, closed ones dimmed and last. The columns are the stored fields of
-  [§2](02-domain-model.md) plus a **transaction count** and a **trade count**.
+  [§2](02-domain-model.md) — name, institution, type, opening balance, opening date, closing date
+  and notes, which is **all of them but `id`**, and no screen anywhere shows one of those
+  ([§2](02-domain-model.md)) — plus a **transaction count** and a **trade count**.
 - **Together those two columns are what says whether a row can be deleted**: a cash account is
   blocked by its transactions, a `Brokerage` one by its trades ([§13](13-validation.md)).
 - **No balance column.** Balances are what the Portfolio screen is for ([§3](03-portfolio.md)).

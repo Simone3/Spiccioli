@@ -127,6 +127,14 @@ the reported state rather than a case to be handled ([§9](09-checks.md)).
 - **Applies only to open holdings.** A sale that has happened carries the tax the broker actually
   withheld ([§2](02-domain-model.md), [§11.2](#112-realised-gain-on-a-sale)); this section never
   restates it.
+- **Tax appears in exactly two places in the application** — the hypothetical figure above, and the
+  amount recorded on a sale ([§11.2](#112-realised-gain-on-a-sale)) — and **only the Italian regime
+  is implemented** ([§15](15-out-of-scope.md)). The shape is the smallest that can hold another one:
+  the rate is a field on the security ([§2](02-domain-model.md)) rather than a constant, and the gain
+  it applies to is computed separately from the rate applied to it. Whitelist government bonds
+  already exercise that at 12,5%. **Anything a different regime needs beyond a rate per instrument**
+  — holding-period relief, loss carry-forward, a personal allowance — **is a change to this section
+  and to no other**, and none of it is designed for now.
 
 > Weighted average is an approximation. A broker may match lots differently when computing the
 > taxable gain, so the tax figure is an estimate. **The application must say so wherever the figure
@@ -366,15 +374,15 @@ that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteratio
   the fee have been taken out of.
 - **A holding whose whole value is a rounding error is worth seeing** rather than flattening to zero:
   a smaller gain does not buy a smaller commission.
-- **Room for another tax system.** Only the Italian one is implemented, and the shape above is
-  deliberately the smallest that can hold a different one: the rate is a field on the security
-  ([§2](02-domain-model.md)), not a constant; the gain it applies to is computed separately from the
-  rate applied to it; and tax appears in exactly two places — the hypothetical, and the recorded
-  figure on a sale. Whitelist government bonds already exercise the mechanism at 12,5%, and they are
-  why the rate sits on the instrument rather than on its type even now that `Bond` is a type.
-  Anything a future regime needs beyond a rate per instrument — holding-period relief, loss
-  carry-forward, a personal allowance — is a change to that section alone, not to the domain model,
-  and is not designed for now.
+- **Room for another tax system was bought cheaply and deliberately**, and it is worth being clear
+  what it did and did not cost. Keeping the rate on the instrument rather than in the code costs one
+  field that has to be filled in on every security; it is paid for twice over by whitelist government
+  bonds, which need a second rate under the *current* regime and are the reason the field is not on
+  the type. Computing the gain separately from the rate applied to it costs nothing at all — it is
+  how the arithmetic reads best anyway. What was declined is everything past that: no relief, no
+  carry-forward, no allowance, and no attempt to guess which of them a future regime would want. A
+  parameter that has one use today is a parameter; a mechanism built for a regime nobody has
+  specified is a liability with a plausible name.
 - **Closed accounts stay in net worth** because a closing date is a label on an account, not a
   subtraction: nothing stops an account being closed with money still in it, since checks report
   rather than block ([§9](09-checks.md)), and an account closed properly was emptied first.

@@ -138,7 +138,7 @@ no invalid choice to reject and no message to write ([§2](02-domain-model.md),
 | --- | --- |
 | date | Required. **Not in the future** — a price is a fact about a day that has happened. |
 | value | Required, > 0, at most 4 decimals. |
-| collision | **Never asked about.** Saving onto a day that already has a price replaces it, and moving a record onto an occupied day does the same ([§2](02-domain-model.md), [§7.4](07-investments.md#74-securities)). **The editor shows the value the day currently holds while it is open.** |
+| collision | **Never asked about in an editor.** Saving onto a day that already has a price replaces it, and moving a record onto an occupied day does the same ([§2](02-domain-model.md), [§7.4](07-investments.md#74-securities)). **The editor shows the value the day currently holds while it is open**, which is what makes the replacement visible without a prompt. A fetch is not an exception to this: it asks nothing per day either, and instead puts **the whole pass** up for one confirmation before writing any of it ([§7.6](07-investments.md#76-prices)). |
 | source | **Not a field on any form.** It is set by whatever wrote the record — `fetched` by *Update prices* ([§7.6](07-investments.md#76-prices)), `manual` by every editor and by every user edit of a fetched record, value or date ([§2](02-domain-model.md)). It is shown in the price history of [§7.4](07-investments.md#74-securities) and read by nothing. |
 
 ### Contract
@@ -273,10 +273,12 @@ no invalid choice to reject and no message to write ([§2](02-domain-model.md),
 - **A security's type stays freely editable** because it groups the portfolio breakdown
   ([§3.1](03-portfolio.md#31-behaviour)) and nothing is derived from it, so correcting one restates a
   slice and no recorded figure.
-- **A price collision is never queried** because one price per security per day is the model, the
-  last word on a day wins, and a confirmation would ask about it every week — most often when a fetch
-  replaces a value it wrote itself an hour earlier. The editor showing the current value makes the
-  replacement visible before it happens rather than queried after.
+- **A price collision is never queried** because one price per security per day is the model and the
+  last word on a day wins. A prompt per collision would fire every week, most often where a fetch
+  replaces a value it wrote itself an hour earlier. What replaces it in each case is *visibility*
+  rather than a question: the editor shows the value it is about to overwrite while the new one is
+  being typed, and a fetch shows every value it would overwrite, once, before writing any
+  ([§7.6](07-investments.md#76-prices)).
 - **Clearing a working-days cell is the one unconfirmed delete** because nothing is lost but the
   number in the cell, it is in front of the user as they clear it, and typing it again is the whole
   of the undo. Zero is refused because it is not a year, it is a division by zero spelled

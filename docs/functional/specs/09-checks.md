@@ -26,6 +26,13 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 | 14 | No receipt has been pending too long | Every transaction with `receiptState = pending` is dated **within `receiptPendingMonths` of today** — the transaction's own date, not the moment the state was set. | Each overdue transaction, with its age. |
 
 - **Two states only**, pass or fail. There is no warning tier.
+- **Checks 8 and 9 overlap, and 9 never fails alone.** A sale with no purchase dated on or before it
+  drives the running quantity below zero as well, so 8 fails wherever 9 does. Both are kept because
+  they name one anomaly from two ends — 8 the arithmetic that broke, 9 the record that broke it — and
+  both turn on the same-day rule the same way: a purchase and a sale on one day satisfy 9, and the
+  walk of [§11.1](11-calculations.md#111-weighted-average-cost) puts the purchase first, which leaves
+  8 passing too. **No other pair of checks implies one another**; every other one can fail on its
+  own.
 - **A check never prevents anything.** Checks report; they do not validate, refuse or roll back. No
   save, close, delete or edit anywhere in the application is blocked because a check would fail
   afterwards — the record is written and the check names it on the next run, which is the same
@@ -124,18 +131,16 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
   reads *undefined* rather than nothing ([§11.2](11-calculations.md#112-realised-gain-on-a-sale)).
   They are examples of refusing to guess, not the beginning of a catalogue: no further case is
   specified, and none should be invented.
-- **Checks 8 and 9 overlap on purpose.** A sale with no purchase dated on or before it also drives
-  the running quantity below zero, so 9 never fails alone — but the two say different things when you
-  read the failure. 8 reports a quantity that cannot exist; 9 reports a sale standing where no
-  purchase precedes it, which is the same anomaly seen from the record that caused it rather than
-  from the arithmetic that broke. **Both turn on the same-day rule, and both take it the same way**:
-  a purchase and a sale on one day is a round trip somebody made, so 9 counts the purchase and the
-  walk of [§11.1](11-calculations.md#111-weighted-average-cost) puts it first, which leaves 8 passing
-  too. Had 9 asked for a *strictly* earlier purchase it would have failed alone on every same-day
-  round trip, and the claim that it never does would have been false. Both are anomalies and neither
-  is a stage of ordinary work: the usual causes are a purchase never entered and a date mistyped, and
-  the position stays underived until one of the two is put right ([§2](02-domain-model.md)). Keeping
-  both costs nothing and names the situation the way the user is thinking about it.
+- **The redundancy between checks 8 and 9 is worth its cost.** One of them could be dropped without
+  losing a single detection, and neither should be: they read as two different sentences about the
+  same file, and which one is useful depends on what went wrong. 8 reports a quantity that cannot
+  exist, which is what you want when the cause is a date mistyped somewhere in a long history; 9
+  reports a sale standing where no purchase precedes it, which is what you want when the cause is a
+  purchase never entered. Both are anomalies rather than stages of ordinary work, and the position
+  stays underived until one of the two is put right ([§2](02-domain-model.md)). **The same-day rule
+  is what keeps the two aligned**: had 9 demanded a *strictly* earlier purchase it would have failed
+  alone on every round trip somebody made in a morning, and the two would have started disagreeing
+  about ordinary files.
 - **Check 5 pairs each contribution separately** because that is how the money moves: employee share,
   employer share and TFR reach the fund as separate credits, so the payslip records three figures
   ([§2](02-domain-model.md)) and each pairs with the credit that carries it — the same one-to-one

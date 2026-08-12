@@ -8,7 +8,11 @@
   folder — including one a cloud client is syncing — and the application neither knows nor cares
   which ([§12](12-storage.md)). It does not **coordinate two of itself**: there is no locking, no
   merge and no live collaboration. Two machines editing the same synced file at once is a situation
-  it detects and reports rather than one it resolves ([§12](12-storage.md)).
+  it **detects, reports, and settles the only way one file allows** — the session in front of the
+  user wins, the version found on disk is copied into the backup folder before it is overwritten, and
+  the user is told in plain words where that copy went ([§12](12-storage.md)). That is last writer
+  wins with the loser kept, and it is deliberately not a merge, not a repair and not a choice put to
+  someone who can only see one of the two versions.
 - **A desktop application on macOS, Windows and Linux.** All three are first-class: the same build
   behaves identically on each, and no *behaviour* depends on a platform-specific path, filesystem
   behaviour or system service. Two things are platform-shaped and neither is behaviour: where

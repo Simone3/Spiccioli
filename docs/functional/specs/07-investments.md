@@ -23,8 +23,9 @@ Securities is what all three point at.
   value the chosen day currently holds, if it holds one ([§13](13-validation.md)). The whole editable
   history of a security lives on the Securities tab of this same screen ([§7.4](#74-securities)).
 - **Update prices** sits on this screen; [§7.6](#76-prices) is what it does. It is a button and
-  nothing else — no selection first, no confirmation after, no setting behind it — and pressing it is
-  the only thing in the application that ever contacts the network. Never press it and the inline
+  nothing else — **no selection first and no setting behind it** — and pressing it is the only thing
+  in the application that ever contacts the network. **What comes back is put to the user in a review
+  panel before a single record is written** ([§7.6](#76-prices)). Never press it and the inline
   editor is the only way a price gets in, which is a complete way to use the application.
 - A price older than `priceStalenessDays` is marked on the row itself, not only in
   [§9](09-checks.md). **A security with no price at all is marked more loudly**: its price cell
@@ -169,6 +170,8 @@ Securities is what all three point at.
 
 ## 7.6 Prices
 
+> **Mockup —** [Update prices · the review panel](../mockups/07-investments.html#fetch-review)
+
 - Prices are entered per security with an **as-of date**, inline on Holdings
   ([§7.1](#71-holdings)) or on the Securities tab ([§7.4](#74-securities)), and every day is kept as
   history. Recording a price for a day that already has one replaces that day and leaves the rest of
@@ -188,37 +191,53 @@ Securities is what all three point at.
   never on load, never in the background.
 - **One press covers every security in the file**, held or fully sold, and asks for one thing: the
   **latest quote the provider has**, whatever day it belongs to. There is no list to tick first.
-- **What comes back is written straight in, dated the day the quote is for** — not the day the
-  button was pressed — as a `fetched` Price record replacing whatever that day already held
-  ([§2](02-domain-model.md)), **a hand-typed value included**. A price the user typed for the same
-  day is replaced like any other, since a day holds one price and the last word on it wins; what the
-  history then shows against that day is *fetched* ([§7.4](#74-securities)), which is the record
-  saying so.
-- **A quote the provider dates in the future is not written**, on the same rule that governs a typed
-  one ([§13](13-validation.md)). It is reported as a security that could not be fetched.
-- **Nothing is shown for confirmation first.**
-- **A security the provider has no quote for at all is left exactly as it is.** No record is
-  written, the price it already had still stands and still ages towards check 3, and nothing is
-  carried forward or invented. The same is true of one the provider does not recognise, or of a
-  fetch that fails outright.
-- **The notice afterwards is the whole report of the pass**: how many prices were written and **what
-  dates they carry** — one line when they all share a date, which is the ordinary case, and the
-  spread with the securities named when they do not — how many securities had no quote, and how many
-  could not be fetched at all, **naming the securities in the last two groups**. Check 3 measures
-  staleness from those dates and not from the moment the button was pressed. The notice sits on the
-  screen until dismissed. Nothing about a failed fetch is recorded in the file — the remedy is to
-  press the button again or to type the price in by hand ([§7.1](#71-holdings)).
+- **What comes back is put to the user before any of it is written.** The fetch runs, the file is not
+  touched, and **a review panel reports the whole pass**:
+  - **every security that got a quote**, with **the value**, **the date the quote belongs to** — the
+    day the quote is *for*, not the day the button was pressed — and **what that day currently
+    holds**: a value it would replace, marked `manual` or `fetched` ([§7.4](#74-securities)), or
+    nothing at all, in which case the day is new;
+  - **the securities the provider had no quote for**, named;
+  - **the securities that could not be fetched at all**, named, each with its reason;
+  - **the provider's own reference date**, where it gives one — the moment its figures are as of,
+    which is not necessarily the date any individual quote carries.
+- **Confirm and everything listed is written**, each as a `fetched` Price record dated the day its
+  quote is for, replacing whatever that day already held ([§2](02-domain-model.md)), **a hand-typed
+  value included**: a day holds one price and the last word on it wins, and what the history then
+  shows against that day is *fetched* ([§7.4](#74-securities)), which is the record saying so.
+- **Cancel and nothing at all is written** — no record, no half-finished pass, every price the file
+  had still standing. Nothing about a cancelled or a failed fetch is recorded in the file, and the
+  remedy for either is to press the button again or to type the price in by hand
+  ([§7.1](#71-holdings)).
+- **One confirmation covers the pass. There is nothing to tick and no row to exclude**: the choice
+  the panel offers is this pass or none of it. A single figure that is wrong afterwards is corrected
+  in the price history like any other ([§7.4](#74-securities)).
+- **A quote the provider dates in the future is neither offered nor written**, on the same rule that
+  governs a typed one ([§13](13-validation.md)). It appears among the securities that could not be
+  fetched, with that as its reason.
+- **A security the provider has no quote for is left exactly as it is.** No record is written, the
+  price it already had still stands and still ages towards check 3, and nothing is carried forward or
+  invented. The same is true of one the provider does not recognise, and of a fetch that fails
+  outright.
+- **A pass with nothing to write still shows its panel** — every security having failed is a report
+  worth reading — and offers only *Close*.
+- **After the write, a line says how many prices were written and what dates they carry**: one line
+  when they all share a date, which is the ordinary case, and the spread with the securities named
+  when they do not. It sits on the screen until dismissed. **Check 3 measures staleness from those
+  dates and not from the moment the button was pressed.**
 - **What leaves the machine is an identifier for a security and nothing else** — whichever of the
   ones the file already holds the provider takes, an ISIN or a ticker — and what comes back is a
   quote and the date it belongs to. **No amounts, quantities, balances or account data ever leave.**
-  The application must state this **next to the button**.
+  The application must state this **next to the button, and again in the review panel** — the panel
+  being the moment the user sees what a request brought back, and therefore the moment the question
+  of what it took occurs to them.
 - **Which provider, and exactly what it is sent, are settled when the application is built, not
   here.** This section fixes the shape of the exchange — identifiers out, latest quote and its date
   back, one press, no configuration. What this document commits to is: **one provider, built in,
   named on screen beside the button**, with **no endpoint, key or credential to configure**, and
   nothing sent beyond an identifier. When the provider has to change, that is a new version.
 - The application is fully usable without ever pressing the button. A provider failure is a line in
-  the notice, never a blocked screen.
+  the review panel, never a blocked screen.
 
 ---
 
@@ -265,10 +284,11 @@ Securities is what all three point at.
   existed, which stretch a provider filled in — and the history is the only place that question is
   asked. Making it govern anything would have been the mistake: a fetch that skipped days the user
   had typed would leave the file quietly out of date on exactly the securities someone had cared
-  enough to price, and a warning before each such overwrite would ask a question every week that the
-  editor already answers by showing the value it is about to replace. An edit resets it to *typed*
-  because a corrected figure is the user's, and a label that still said *fetched* would be pointing
-  at the wrong author.
+  enough to price. What the label does instead is make those overwrites **legible** — the review
+  panel of [§7.6](#76-prices) marks which of the values a pass would replace were typed by hand,
+  which is the case worth a second look — while the decision stays one confirmation for the pass
+  rather than a question per security. An edit resets it to *manual* because a corrected figure is
+  the user's, and a label that still said *fetched* would be pointing at the wrong author.
 - **An oversold security's *Held* is tinted rather than worded** because the column is one figure
   wide and the situation is already named at length by two checks and on the Holdings tab by an
   absent row. What the tint has to do is stop the dash being read as a closed position, which is the
@@ -303,15 +323,28 @@ Securities is what all three point at.
   the weekend, which asking for *today's* quote did not: markets are shut for two days in seven and
   half the times anyone sits down with their accounts, nothing would have been written at all and
   every price would have gone on ageing towards check 3.
-- **Nothing is confirmed before the write** because a confirmation step here would be a list of two
-  dozen numbers nobody can check — the figure being replaced is a session or two old and the one
-  replacing it comes from the same provider — and it would ask the question once per security every
-  week.
-- **The dates in the notice are the part worth reading**: they say whether the file has just been
-  brought up to Friday or up to a fortnight ago.
-- **The privacy statement sits next to the button** because that is the moment it matters and the
-  only place the feature is visible. Nothing about the portfolio is inferable from a request that
-  names an instrument millions of people hold.
+- **The pass is reviewed before it lands because it is the one action in the application that changes
+  many records at once, from outside the file, with nothing on screen showing what is about to go.**
+  Every other overwrite here is a single value with its predecessor visible beside it — the inline
+  price editor is exactly that ([§7.1](#71-holdings)) — and that visibility is what earns those their
+  silence. This one replaces a few dozen figures, some of them typed by hand, on days the provider
+  chose rather than the user. A pass that filed a stale quote under the wrong day, or wrote the same
+  value over a week of hand-kept prices, would be invisible until the net worth chart looked wrong
+  ([§11.5](11-calculations.md#115-net-worth-over-time)), and by then there would be nothing left to
+  compare it against. The panel is also the only moment the two failure groups can be seen before
+  they matter rather than after, and the whole of it costs one click a week.
+- **One confirmation for the pass, rather than a row to tick per security**, because the question
+  worth asking is whether this pass is right, not which quarter of it to keep. A selectable table
+  here would be the bulk-import screen built a second time for a job that runs weekly over two dozen
+  rows, and a user who disagrees with one figure has a price editor two clicks away and a better
+  reason to use it ([§7.4](#74-securities)).
+- **The dates are the part worth reading** — the provider's reference date in the panel and the dates
+  on the quotes themselves: they say whether the file has just been brought up to Friday or up to a
+  fortnight ago, and they are what check 3 will measure from ([§9](09-checks.md)).
+- **The privacy statement sits next to the button and in the panel** because those are the two
+  moments it matters: before, when the user decides to press, and after, when they are looking at
+  what came back and can see for the first time that a request was made at all. Nothing about the
+  portfolio is inferable from a request that names an instrument millions of people hold.
 - **The provider is deliberately not chosen here.** A provider has a request format, a response
   shape, a rate limit and terms of use, and choosing among those is an engineering decision to be
   made against the providers that exist at the time. What is fixed is the part a later choice cannot
