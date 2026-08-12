@@ -17,7 +17,7 @@ accident.
 | Editing the category list at runtime | Categories are stored records with stable ids ([§2](02-domain-model.md)), but the application seeds them and offers no editor. |
 | Undo / redo | Backups and delete confirmation cover it for now. |
 | Bank-specific import profiles | One fixed column order; the user pre-formats the export. Explicitly future work. |
-| Bank exports in any other shape | Trailing-sign negatives (`54,80-`), parenthesised negatives, a separate debit/credit column pair, a `D`/`C` marker, a header row and a space or non-breaking space used as a thousands separator (`1 234,56`) are none of them parsed. A **leading `+`** and a **`€` or `EUR` marker** on the amount *are* read ([§5.7](05-transactions.md#57-bulk-import)); quoted fields and a leading byte-order mark are not handled either. Neither are dates carrying a month name, a weekday, a time or a two-digit year (`11/07/26`), nor amounts written without their two decimals (`1234`). Three columns, fixed order, one signed amount, two decimals ([§5.7](05-transactions.md#57-bulk-import)): reshape the export before pasting, and anything that does not fit is reported as a row that cannot be read rather than guessed at. A fourth column and beyond is the one thing tolerated. |
+| Bank exports in any other shape | Trailing-sign negatives (`54,80-`), parenthesised negatives, a separate debit/credit column pair, a `D`/`C` marker, a header row, a non-breaking space where a thousands separator is expected, quoted fields and a leading byte-order mark are none of them handled. A **leading `+`** and a **`€` or `EUR` marker** on the amount *are* read, as is an ordinary space used as a thousands separator when the control says so ([§5.7](05-transactions.md#57-bulk-import)). Neither are dates carrying a month name, a weekday, a time or a two-digit year (`11/07/26`). Three columns, fixed order, one signed amount, and the three format controls of [§5.7](05-transactions.md#57-bulk-import) saying what its characters mean: reshape the export before pasting, and anything that does not fit is reported as a row that cannot be read rather than guessed at. A fourth column and beyond is the one thing tolerated. |
 | Term-deposit maturity | Not tracked. A term deposit carries no maturity date and nothing announces one — the date goes in the account's notes if it is wanted, and the bank is what tells you the money has moved. |
 | Bulk import of trades | The form of [§7.5](07-investments.md#75-recording-a-trade-and-where-securities-come-from) is the one way in. |
 | Bulk import of payslips | The ten years of history come in with everything else, through the migration script. |
@@ -66,10 +66,12 @@ accident.
   true, and checks 8 and 9 are the report the situation actually calls for.
 - **A file is not re-validated on open** because the migration script is written once, for one file,
   by the one person who will run it.
-- **The import stays strict about shape** because anything that does not fit is reported as a row
-  that cannot be read rather than guessed at; the two decorations that *are* read — a leading `+` and
-  a `€`/`EUR` marker — are the two that cannot be mistaken for anything else, and a fourth column is
-  tolerated because ignoring it cannot misread anything.
+- **The import stays strict about shape, and infers nothing at all.** What a row's characters mean is
+  said by three controls the user can see and move ([§5.7](05-transactions.md#57-bulk-import)), and
+  anything that does not fit what they say is reported as a row that cannot be read rather than
+  guessed at. The two decorations that *are* read — a leading `+` and a `€`/`EUR` marker — are the
+  two that cannot be mistaken for anything else, and a fourth column is tolerated because ignoring it
+  cannot misread anything.
 
 ---
 

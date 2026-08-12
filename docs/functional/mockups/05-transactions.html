@@ -73,13 +73,14 @@
             <tr class="sel"><td><span class="cb"></span></td><td class="n">05/08/2026</td><td class="dim">ING · Conto Arancio</td><td class="desc">BONIFICO DA FINECO</td><td class="n r pos">+ € 2.000,00</td><td><span class="chip">Internal transfer</span></td><td class="link">⇄ Fineco · Conto Corrente</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
             <tr><td><span class="cb off"></span></td><td class="n">06/08/2026</td><td class="dim">Fineco · Conto Titoli</td><td class="desc">ESEGUITO ACQUISTO SWDA 25 PZ</td><td class="n r neg">− € 2.310,50</td><td><span class="chip auto">Securities purchase</span></td><td class="link">⇄ SWDA</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
             <tr><td><span class="cb off"></span></td><td class="n">07/08/2026</td><td class="dim">Fineco · Conto Corrente</td><td class="desc">COMMISSIONI CONTO TRIMESTRE</td><td class="n r neg">− € 3,95</td><td><span class="chip auto">Bank fees</span></td><td class="link none">—</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
-            <tr><td><span class="cb off"></span></td><td class="n">07/08/2026</td><td class="dim">Amundi · Fondo Pensione</td><td class="desc">CONTRIBUTO AZIENDALE LUGLIO</td><td class="n r pos">+ € 86,00</td><td><span class="chip">Pension fund contribution</span></td><td class="link">⇄ July 2026</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
-            <tr><td><span class="cb off"></span></td><td class="n">07/08/2026</td><td class="dim">Amundi · Fondo Pensione</td><td class="desc">CONTRIBUTO DIPENDENTE E TFR LUGLIO</td><td class="n r pos">+ € 62,00</td><td><span class="chip">Pension fund contribution</span></td><td class="link">⇄ July 2026</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td><span class="cb off"></span></td><td class="n">07/08/2026</td><td class="dim">Amundi · Fondo Pensione</td><td class="desc">CONTRIBUTO AZIENDALE LUGLIO</td><td class="n r pos">+ € 51,00</td><td><span class="chip">Pension fund contribution</span></td><td class="link">⇄ July 2026</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td><span class="cb off"></span></td><td class="n">07/08/2026</td><td class="dim">Amundi · Fondo Pensione</td><td class="desc">CONTRIBUTO DIPENDENTE LUGLIO</td><td class="n r pos">+ € 41,00</td><td><span class="chip">Pension fund contribution</span></td><td class="link">⇄ July 2026</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
+            <tr><td><span class="cb off"></span></td><td class="n">07/08/2026</td><td class="dim">Amundi · Fondo Pensione</td><td class="desc">QUOTA TFR LUGLIO</td><td class="n r pos">+ € 56,00</td><td><span class="chip">Pension fund contribution</span></td><td class="link">⇄ July 2026</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
             <tr><td><span class="cb off"></span></td><td class="n">08/08/2026</td><td class="dim">Intesa Sanpaolo · Conto Corrente</td><td class="desc">ADDEBITO DIVERSI 4471</td><td class="n r neg">− € 41,20</td><td><span class="chip miss">no category</span></td><td class="link none">—</td><td class="rc na">– n/a</td><td class="dim"></td><td class="rowact">···</td></tr>
           </tbody>
-          <tfoot><tr><td colspan="4">13 results · 2 selected</td><td class="r tot">− € 805,88</td><td colspan="5"></td></tr></tfoot>
+          <tfoot><tr><td colspan="4">14 results · 2 selected</td><td class="r tot">− € 805,88</td><td colspan="5"></td></tr></tfoot>
         </table></div>
-        <div class="pager"><span class="pg on">1</span><span>of 1 · 50 per page · 13 results</span></div>
+        <div class="pager"><span class="pg on">1</span><span>of 1 · 50 per page · 14 results</span></div>
       </div>
     </main>
   </div></div>
@@ -144,10 +145,18 @@
 <span style="color:var(--brass-dim)">▌</span></div>
           <div class="detect">
             <span class="chip">7 rows read</span>
-            <span class="chip">3 columns detected</span>
-            <span class="chip auto">Date order <b>DMY</b> — overridable</span>
-            <span class="chip">Amounts <b>2 decimals, always</b></span>
+            <span class="chip">3 columns</span>
           </div>
+          <hr class="sep">
+          <h4>Read these rows as</h4>
+          <div class="frm">
+            <label>Date format</label><div class="inp sel">DD/MM/YYYY</div>
+            <label>Decimal separator</label><div class="inp sel">,</div>
+            <label>Thousands separator</label><div class="inp sel">.</div>
+          </div>
+          <p class="detail note" style="background:none;border:none;padding:0">Nothing is guessed.
+          These three start where your Settings have them and apply to this paste only — change one
+          and every row re-parses at once.</p>
         </div>
         <div class="card">
           <h4>Import into</h4>
@@ -170,11 +179,12 @@
             <div class="fig"><span>3</span><b>Amount &nbsp;<span style="color:var(--faint)">signed</span></b></div>
           </div>
           <p class="detail note">Every import uses this order; rearrange the export before pasting if
-          your bank produces something else. A fourth column and beyond is ignored. <b>Only the date
-          order is inferred</b> — from the pasted rows themselves, never from the display preferences
-          of §10 — and its chip is overridable, re-parsing the preview immediately. Nothing about an
-          amount is inferred: it carries two decimals or it cannot be read, and whichever of
-          <code>.</code> or <code>,</code> introduces them is the decimal separator.</p>
+          your bank produces something else. A fourth column and beyond is ignored. <b>Nothing about
+          a row is inferred</b> — the three controls beside the paste box say what its characters
+          mean, opening at your Settings values and changeable for this paste alone. Zero, one or two
+          decimals are all read; a third is not, and a thousands separator that does not fall in
+          threes — or one present at all while the control says <b>none</b> — makes the row
+          unreadable rather than a figure out by a factor of a thousand.</p>
         </div>
       </div>
       <div class="card">

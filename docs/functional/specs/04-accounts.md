@@ -85,10 +85,11 @@ opens the other.
 > deleted; deletion stays available only while nothing points at it. Every delete asks for
 > confirmation: there is no undo.
 >
-> **Two deletions are confirmed somewhere other than at the click, and they are the only two.**
-> Clearing a year's `workingDays` cell deletes its ContractYear record and is **not** confirmed at
-> all ([§13](13-validation.md)). Deleting a **rule** is confirmed once, later, as part of *Apply
-> changes*: a rule removed from a draft has changed nothing in the file yet, and the apply summary
+> **Two deletions are not confirmed at the click, and they are the only two.** Clearing a year's
+> `workingDays` cell deletes its ContractYear record and is **not confirmed at all**
+> ([§13](13-validation.md)) — nothing is lost but the number in the cell, and typing it again is the
+> whole of the undo. Deleting a **rule** *is* confirmed, but later: a rule removed from a draft has
+> changed nothing in the file yet, so the confirmation comes with *Apply changes*, whose summary
 > states how many transactions the deletion un-categorises before anything is written
 > ([§6.2](06-categories.md#62-rules)). Everywhere else the confirmation is the click itself.
 >

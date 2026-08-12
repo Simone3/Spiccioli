@@ -20,9 +20,9 @@ currency either: every figure is EUR and is printed with `€`
 
 | Setting | Values | Default | Used by |
 | --- | --- | --- | --- |
-| dateFormat | `DD/MM/YYYY` · `MM/DD/YYYY` · `YYYY-MM-DD` | `DD/MM/YYYY` | Display only |
-| decimalSeparator | `,` · `.` | `,` | Display only |
-| thousandsSeparator | `.` · `,` · space · **none** | `.` | Display only |
+| dateFormat | `DD/MM/YYYY` · `MM/DD/YYYY` · `YYYY-MM-DD` | `DD/MM/YYYY` | Display; the opening value of the import's date control ([§5.7](05-transactions.md#57-bulk-import)) |
+| decimalSeparator | `,` · `.` | `,` | Display; the opening value of the import's decimal control |
+| thousandsSeparator | `.` · `,` · space · **none** | `.` | Display; the opening value of the import's thousands control |
 | defaultTaxRate | 0 – 100%, one decimal | 26% | Initial value of `Security.taxRate` ([§2](02-domain-model.md)). Entered as a percentage, **stored as the fraction it names** — 26% is `0,26` ([§11](11-calculations.md)). Changing it does not touch securities that already exist. |
 | priceStalenessDays | integer ≥ 1 | 30 | Check 3, holdings marker |
 | pensionRevaluationMonths | integer ≥ 1 | 3 | Check 10 |
@@ -39,14 +39,19 @@ separator may be none**, which prints `21900,00`; the decimal separator may not 
 Formats are a **user preference, not a hard-coded locale**. Changing one re-renders every figure in
 the application immediately.
 
-**They are display-only, and importing ignores them.** A pasted export has its date order detected
-from the rows themselves and its amounts read by a rule that admits of no detection at all
-([§5.7](05-transactions.md#57-bulk-import)).
+**The three format preferences do one other job: they say where the import's own controls start.**
+The bulk-import screen carries a date-format, a decimal-separator and a thousands-separator control
+of its own, over these same closed sets, each opening at the value the preference holds and each
+changeable for that paste alone ([§5.7](05-transactions.md#57-bulk-import)). Changing one there
+writes nothing here and is remembered nowhere. **Nothing about a paste is inferred from its
+contents**, and nothing here is ever applied to a paste behind the user's back: what reads the rows
+is a control on screen, showing what it is doing.
 
 **Nothing the user types is parsed either.** Every date in the application is entered through a date
 picker and every amount through a validated numeric field that accepts one shape and refuses the
 rest as it is typed, so no form holds free text needing interpretation. The only text the
-application parses is a pasted bank export, which carries its own formats.
+application parses is a pasted bank export, and it is parsed to the three controls the import screen
+puts beside it.
 
 - **Preferences are global, and are not stored in the data file.** They live with the application,
   in the platform's own application-data location, together with the list of recently opened files
@@ -66,10 +71,15 @@ application parses is a pasted bank export, which carries its own formats.
 ## Why it is this way
 
 - **The decimal separator cannot be none** because without it two decimals would run into the units.
-- **Display, entry and import are three separate things, and only one of them involves guessing.**
-  Changing how dates are displayed must never change how a paste is interpreted: the pasted file came
-  from a bank and has no reason to match how you like to read numbers. Because entry is all pickers
-  and validated fields, these preferences have no second job anywhere.
+- **Display, entry and import are three separate things, and none of them guesses.** Entry is pickers
+  and validated fields, so nothing typed ever needs interpreting. A paste does need it — the
+  characters in a bank export mean whatever that bank meant by them — so the import screen asks, in
+  three controls, rather than inferring from the rows or reaching in here for an answer. It opens
+  those controls at these values because a person's own bank usually writes numbers the way that
+  person reads them, which makes the defaults right most of the time and visibly wrong the rest.
+  That is a starting position, not an interpretation: the control is on screen and the preview
+  answers it row by row. Nothing an import control is set to is ever written back here, so a paste
+  from someone else's bank cannot change how this application prints a date.
 - **Preferences living with the installation is a deliberate trade and it points one way.** Formats
   and thresholds describe the person reading, not the money recorded: the same user wants the same
   date order in every file they open, and the alternative — preferences inside each file — means

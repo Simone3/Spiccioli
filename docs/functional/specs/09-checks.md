@@ -14,11 +14,11 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 | 2 | Every transaction has a category | `categoryId` is set. | Each uncategorised transaction. |
 | 3 | Prices are recent | Every security with an open holding has at least one Price record, and its latest one is dated within `priceStalenessDays`. **No price at all fails too**, and is the more serious of the two: that holding is valued at zero everywhere ([§11.3](11-calculations.md#113-hypothetical-liquidation)). | Security, price, date, age — or “no price recorded”. |
 | 4 | Payslips match salary transactions | Every payslip pairs one-to-one with a transaction in a role `salary` category whose amount is **`+ netPayment`** — pay arrives, so the transaction is positive and the two are equal as they stand — dated in the payslip's month or the one after; and every such transaction pairs with a payslip ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched payslips and unmatched transactions, listed separately, with amounts. |
-| 5 | Payslip pension contributions match transactions | **Monthly totals, not record by record.** For each month, Σ `pensionContribution` over that month's payslips = Σ of the role `pension contribution` transactions attributed to it — credits into the fund, so both sides are positive and are compared as they stand — each month claiming the credits in its window in date order and **stopping at the first that would take it past its own total**, which is left unclaimed and reported against the month it sits in ([§11.6](11-calculations.md#116-derived-matching)). **Both directions**: a month that expected nothing and received something fails exactly as a month that expected something and received nothing. Only months where both totals are zero are silent. | The month, the payslip total, the transaction total, and the difference — linking to the payslip that carried the contribution, or, for a month that has none, saying so: credits arrived in a month with no payslip to expect them. |
+| 5 | Payslip pension contributions match transactions | Every **non-zero** pension figure on a payslip — employee share, employer share, TFR ([§2](02-domain-model.md)) — pairs one-to-one with a transaction in a role `pension contribution` category of the **same amount** — credits into the fund, so both sides are positive and are compared as they stand — dated in the payslip's month or the one after; and every such transaction pairs with one of those figures ([§11.6](11-calculations.md#116-derived-matching)). A figure of 0 expects no credit and takes no part. | Unmatched contribution figures — the payslip, which of the three, and the amount — and unmatched transactions, listed separately, with amounts. |
 | 6 | Purchase transactions match purchases | Every transaction in a role `securities purchase` category pairs with a purchase trade, and vice versa. The money leaves the account, so the transaction is negative and the trade total positive: **`transaction.amount = − trade.total`** ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched transactions and unmatched trades, listed separately. |
 | 7 | Sale transactions match sales | As above for role `securities sale` and sale trades. The money arrives, so both sides carry the same sign: **`transaction.amount = trade.total`**, the trade side being net proceeds — after tax and fees — so it can equal what the bank credited. | As above. |
-| 8 | No holding has gone negative | For every (security, account), running quantity in date order never drops below 0. | Security, account, the trade that took it negative. |
-| 9 | No sale precedes its purchase | Every sale has at least one earlier purchase of that security in that account. | The offending sale. |
+| 8 | No holding has gone negative | For every (security, account), the running quantity never drops below 0 **in the walk order of [§11.1](11-calculations.md#111-weighted-average-cost)** — by date, purchases before sales on a date they share. | Security, account, the trade that took it negative. |
+| 9 | No sale precedes its purchase | Every sale has at least one purchase of that security in that account dated **on or before it**. **A purchase and a sale on one day satisfy it**: same-day round trips are ordinary, and the walk of [§11.1](11-calculations.md#111-weighted-average-cost) puts the purchase first. | The offending sale. |
 | 10 | Pension fund revalued recently | Latest transaction in a role `value adjustment` category, in each **open** pension fund account, within `pensionRevaluationMonths`. An account that has never had one fails too. | Account and date of the last adjustment, or “never revalued”. |
 | 11 | Closed accounts are empty | Every account with a `closingDate` has a balance of exactly 0 and no holding with quantity > 0. | Account, closing date, the balance or holdings left in it. |
 | 12 | Records fall within their account's life | No transaction or trade is dated before its account's `openingDate` or after its `closingDate`. Both ends, not just the near one. | The record, its date, and the account's opening or closing date. |
@@ -37,10 +37,9 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
   is the state the check exists to report: nothing invents a plausible value to paper over it,
   nothing is recomputed defensively around it, and this document does not enumerate what each failure
   does to each figure. Fix what the check names and the numbers are correct again.
-- Each failing check **names the exact records**, and each entry links to the record it names.
-  **Check 5 is the one entry that is not a record** — it is a month — so it links to the payslip
-  whose contribution it was comparing against; a month that has no payslip at all has nothing to link
-  to and says that instead.
+- Each failing check **names the exact records**, and each entry links to the record it names. Check
+  5's payslip-side entries name a figure on a payslip rather than the payslip as a whole, and say
+  which of the three it is; the link is to the payslip.
 - A passing check **states its reach** (“117 payslips”, “41 purchases”), so a check that passed
   because it examined nothing is distinguishable from one that passed properly.
 - Checks run **at application startup and after every change**, **debounced** — a change schedules a
@@ -74,8 +73,8 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 - **What a run costs, and how it is implemented.** Fourteen checks over ten years is a handful of
   passes over the whole file — a few thousand transactions, a few dozen trades, a hundred-odd
   payslips — plus the greedy one-to-one matchers of
-  [§11.6](11-calculations.md#116-derived-matching): checks 1, 4, 6 and 7 each pair two sets against
-  each other. Every one of those pairings keys off an **amount and a date window**, so **each side is
+  [§11.6](11-calculations.md#116-derived-matching): checks 1, 4, 5, 6 and 7 each pair two sets
+  against each other. Every one of those pairings keys off an **amount and a date window**, so **each side is
   bucketed by amount**, which turns the search for a counterpart into a lookup among the few records
   that could possibly match and keeps the run linear in the size of the file. **That is the intended
   implementation, not an optimisation to reach for later.** If it nevertheless proves too slow, the
@@ -110,17 +109,28 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
   reads *undefined* rather than nothing ([§11.2](11-calculations.md#112-realised-gain-on-a-sale)).
   They are examples of refusing to guess, not the beginning of a catalogue: no further case is
   specified, and none should be invented.
-- **Checks 8 and 9 overlap on purpose.** Any sale with no purchase before it also drives the running
-  quantity below zero, so 9 never fails alone — but the two say different things when you read the
-  failure. 8 reports a quantity that cannot exist; 9 reports a sale standing where no purchase
-  precedes it, which is the same anomaly seen from the record that caused it rather than from the
-  arithmetic that broke. Both are anomalies and neither is a stage of ordinary work: the usual causes
-  are a purchase never entered and a date mistyped, and the position stays underived until one of the
-  two is put right ([§2](02-domain-model.md)). Keeping both costs nothing and names the situation the
-  way the user is thinking about it.
-- **Check 5 compares monthly totals** because a month's contribution reaches the fund as two or three
-  separate credits — employee share, employer share, TFR — so pairing them one to one could never
-  have worked. For a month with no payslip, saying so is the more useful half of the finding anyway.
+- **Checks 8 and 9 overlap on purpose.** A sale with no purchase dated on or before it also drives
+  the running quantity below zero, so 9 never fails alone — but the two say different things when you
+  read the failure. 8 reports a quantity that cannot exist; 9 reports a sale standing where no
+  purchase precedes it, which is the same anomaly seen from the record that caused it rather than
+  from the arithmetic that broke. **Both turn on the same-day rule, and both take it the same way**:
+  a purchase and a sale on one day is a round trip somebody made, so 9 counts the purchase and the
+  walk of [§11.1](11-calculations.md#111-weighted-average-cost) puts it first, which leaves 8 passing
+  too. Had 9 asked for a *strictly* earlier purchase it would have failed alone on every same-day
+  round trip, and the claim that it never does would have been false. Both are anomalies and neither
+  is a stage of ordinary work: the usual causes are a purchase never entered and a date mistyped, and
+  the position stays underived until one of the two is put right ([§2](02-domain-model.md)). Keeping
+  both costs nothing and names the situation the way the user is thinking about it.
+- **Check 5 pairs each contribution separately** because that is how the money moves: employee share,
+  employer share and TFR reach the fund as separate credits, so the payslip records three figures
+  ([§2](02-domain-model.md)) and each pairs with the credit that carries it — the same one-to-one
+  shape as check 4, with nothing to reconcile as a total. One combined figure would have forced a
+  comparison of monthly totals, and there two adjacent months' windows overlap and compete for the
+  same credit: whichever way that is resolved, a credit can end up claimed by one month and expected
+  by the other, and a stray credit in a month that has already been compared has nowhere to be
+  reported. A zero figure takes no part because it is not a credit that failed to arrive — it is a
+  heading the payslip has nothing under, which is the ordinary state of the employer share on a
+  tredicesima. Demanding a `0,00` credit for it would fail on every fund statement ever printed.
 - **The badge counts checks rather than records** because a record count would leap about as one
   import landed and say nothing about how much is wrong. **There is no manual re-run** because a
   result that could be stale enough to need one would not be worth showing in a badge.

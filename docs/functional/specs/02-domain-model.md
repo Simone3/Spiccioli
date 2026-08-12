@@ -169,10 +169,18 @@ already net of it. It is entered from the trade confirmation, never computed.
 | netPayment | amount | What reached the bank. The figure check 4 uses. |
 | refunds | amount | Positive. |
 | carPayment | amount | Positive; withheld from the payment. |
-| pensionContribution | amount | **Everything credited to the fund for that month** as printed on the payslip — employee share, employer share and TFR together, as one figure. Check 5 compares it as a monthly total, never record by record. |
+| employeeContribution | amount | The employee share credited to the pension fund for that month, as printed on the payslip. Positive; **0 where the payslip has nothing under that heading**. |
+| employerContribution | amount | The employer share, on the same terms. |
+| severanceContribution | amount | The TFR credited to the fund, on the same terms. |
 | notes | text | |
 | *netSalary* | *amount* | netPayment − refunds + carPayment |
 | *netGrossPct* | *fraction* | netSalary ÷ gross — a fraction, shown as a percentage ([§11](11-calculations.md)) |
+
+**The three pension figures are recorded separately because they reach the fund separately.**
+Employee share, employer share and TFR are three credits on the fund's statement, so the payslip
+carries three figures and check 5 pairs each one against its own transaction, exactly as check 4
+pairs `netPayment` ([§11.6](11-calculations.md#116-derived-matching)). **A figure of 0 expects no
+credit and is not paired.**
 
 **A payslip for month M is often paid in month M+1.** There is no payment-date field. Checks 4 and 5
 therefore look for their counterpart in month M *or* M+1
@@ -259,9 +267,12 @@ panel beside it.
   one. The hypothetical rate of [§11.3](11-calculations.md#113-hypothetical-liquidation) is an
   estimate and has no bearing on a sale that actually happened.
 - **A payslip carries no payment date** because the bank transaction already carries the real date,
-  and duplicating it here would create a second figure to keep in step. Check 5 compares monthly
-  totals rather than record by record because the three parts of a contribution usually reach the
-  fund as separate credits.
+  and duplicating it here would create a second figure to keep in step. **The three parts of a
+  pension contribution are three fields rather than one** because that is how the money moves: the
+  fund credits them separately, so recording them separately lets check 5 pair each figure with the
+  credit that carries it, on exactly the shape check 4 already uses. One combined figure would have
+  forced a comparison of monthly totals instead, in which two adjacent months' windows overlap and
+  compete for the same credit.
 - **Categories are records rather than constants** for two reasons. Transactions reference a stable
   `id`, so the migration script and the file format have something durable to point at; and every
   check that concerns a particular kind of money keys off `role` rather than off a name, so nothing

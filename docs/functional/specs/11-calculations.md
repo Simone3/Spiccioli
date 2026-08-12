@@ -54,8 +54,17 @@ the reported state rather than a case to be handled ([§9](09-checks.md)).
 
 ## 11.1 Weighted average cost
 
-- Per (security, account), walking trades in date order from `quantity = 0`, `costBasis = 0` and an
-  `avgCost` that is undefined until the first purchase gives it one.
+- Per (security, account), walking trades from `quantity = 0`, `costBasis = 0` and an `avgCost` that
+  is undefined until the first purchase gives it one.
+- **The walk order is `date ASC, purchases before sales, insertionSeq ASC, id ASC`** — a total order,
+  so the walk reaches the same result on every machine and after every re-sort. It is the ordering of
+  the Purchases and Sales tables ([§7.2](07-investments.md#72-purchases)) with one key inserted,
+  because those two tables never hold a purchase and a sale at once and this walk does.
+- **Purchases come first on a date they share with a sale**, so a security bought and sold on one day
+  is an ordinary round trip and not a position that dipped below zero. Nothing else in this section
+  is sensitive to the order of two trades on one day; that one case is, and it decides whether the
+  position is derived at all. It is also what lets check 9 count a same-day purchase
+  ([§9](09-checks.md)).
 - **Purchase:** `quantity += q`, `costBasis += q × price + fees`, `avgCost = costBasis ÷ quantity`.
 - **Sale:** `quantity −= q`, `costBasis −= q × avgCost`. **`avgCost` is unchanged by a sale.**
 - Fees increase the cost basis on purchase and reduce proceeds on sale. **Taxes withheld on a sale
@@ -201,10 +210,11 @@ sign is part of what is being matched, so every pairing below states whether the
 | Purchase transaction ↔ purchase trade, check 6 | `transaction.amount = − trade.total` | The money leaves the cash account; the trade total is what it cost, a positive figure. |
 | Sale transaction ↔ sale trade, check 7 | `transaction.amount = trade.total` | The money arrives; net proceeds is what arrived. |
 | Payslip ↔ salary transaction, check 4 | `transaction.amount = payslip.netPayment` | Pay arrives, and `netPayment` is a magnitude ≥ 0 ([§13](13-validation.md)). |
-| Pension credits ↔ payslip total, check 5 | `Σ transaction.amount = Σ pensionContribution` | Credits into the fund, against a magnitude ≥ 0. |
+| Payslip pension figure ↔ pension credit, check 5 | `transaction.amount = the figure` | A credit into the fund, against a magnitude ≥ 0. |
 
 **Every matcher here is greedy, and every one of them states its order.** The pattern is the same in
-all three: the side being matched *from* is walked in the ordering its own screen uses —
+all four — transfer legs, trades, salary payments and pension credits: the side being matched *from*
+is walked in the ordering its own screen uses —
 `date ASC, insertionSeq ASC, id ASC` for transactions and trades
 ([§5.2](05-transactions.md#52-ordering-and-paging), [§7.2](07-investments.md#72-purchases)), month
 ascending and unlabelled first for payslips ([§8.1](08-salaries.md#81-payslips)) — and each record
@@ -262,31 +272,30 @@ that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteratio
 - **A `netPayment` of zero pairs like any other figure**, against a transaction of `0,00`. Both sides
   are legal amounts ([§13](13-validation.md)) and the ordinary equality finds them. Nothing
   special-cases zero on this path.
-- **Pension contributions are compared as monthly totals, not paired.** Months are walked in
-  ascending order; each claims the role `pension contribution` transactions dated in it or the month
-  after that no earlier month has claimed, **in date order and never past its own total**: that total
-  is the sum of `pensionContribution` over its payslips, and the month goes on claiming while the
-  running sum **stays at or below** it. What it claimed is then compared with what it expected. Check
-  5 reports the months that disagree, with the difference.
-- **A credit that would take a month over its total is not claimed, and the walk stops there.** It is
-  never claimed in part — a transaction is claimed whole or not at all — and the credits after it are
-  not examined either, even where a smaller one further down the window would have fitted exactly.
-  Expecting € 300,00 and finding two credits of € 200,00, the month takes the first, stops, and
-  reports being € 100,00 short; the second is left where it lies and is reported against the month it
-  is actually in.
-- **A claimed credit is shown against the payslip that expected it**, even though nothing here is a
-  one-to-one pairing: each credit is claimed by exactly one month, and the *Matched* column
-  ([§5.1](05-transactions.md#51-columns)) names the payslip of that month which carried a
-  `pensionContribution` — the two or three credits of a month all naming the same one. Where a month
-  holds more than one payslip with a contribution, **the earliest in the order of
-  [§8.1](08-salaries.md#81-payslips) is the one named**. Where the month holds no payslips at all,
-  the cell reads an em dash.
-- **The walk covers every month either side has something in.** A month with payslips is walked
-  whether or not they contribute anything; and a credit that no month with payslips has claimed — one
-  arriving where there are no payslips at all, after a contract ended or before one began — is
-  attributed to its own month, which then reports a payslip total of zero against it. **No month is
-  exempt**: a month that claims something is a month that gets compared. Months where both sides are
-  zero produce nothing.
+- **Pension credits against payslip figures:** each of a payslip's three pension figures —
+  `employeeContribution`, `employerContribution`, `severanceContribution` ([§2](02-domain-model.md))
+  — pairs with a transaction in a role `pension contribution` category whose amount equals it and
+  whose date falls in the payslip's own month or the month after. One-to-one, the figures walked in
+  the payslip order of [§8.1](08-salaries.md#81-payslips) and, within one payslip, employee then
+  employer then severance, each claiming the nearest-dated unclaimed transaction that qualifies.
+  **The window is a whole month, not a number of days**, exactly as for a salary payment. Check 5
+  reports both sides.
+- **Distance is measured from the first day of the payslip's month** here too, a payslip having no
+  date of its own, with ties broken by the transaction's `insertionSeq` and then its `id`. **The
+  payslips of every contract are walked together** for the same reason as check 4: a transaction
+  carries no employer.
+- **A figure of 0 is not a claim.** It expects no credit, takes no part in the walk and cannot be
+  reported as unmatched — a heading the payslip has nothing under is not a credit that failed to
+  arrive. This is the one place a zero behaves differently from `netPayment` above, and the
+  difference is that every payslip has a net payment while most have at least one contribution
+  heading standing empty.
+- **Two of a payslip's figures being equal costs nothing.** Two claims of € 180,00 against two
+  credits of € 180,00 both pair, and the only thing that can be wrong is which of two identical
+  credits the *Matched* column names — the same harmless crossing as two transfers of one amount in
+  one week.
+- **A credit is shown against the payslip whose figure claimed it**, by its month and its label, in
+  the *Matched* column ([§5.1](05-transactions.md#51-columns)). A credit no figure claimed reads an
+  em dash and is what check 5 lists on the transaction side.
 
 ## 11.7 Salary figures
 
@@ -330,6 +339,12 @@ that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteratio
   fractions of a cent behind, and without the reset a later repurchase of the same security in the
   same account would begin from a cost basis of half a cent — small enough never to be noticed and
   wrong from then on.
+- **The walk's order is total, and purchases lead on a shared date**, because the alternative was a
+  rule that read “date order” and left one case undecided — the case that decides whether the
+  position exists at all. Buying 100 and selling 100 on one morning is a round trip; walking the sale
+  first turns it into a quantity of −100 and disqualifies the position permanently, along with every
+  figure derived from it and the realised gain on every sale in it. Two implementations, or one
+  implementation after a re-sort, would have disagreed about a file neither of them had changed.
 - **A sale below zero ends the walk** because the arithmetic is defined only while the position is
   non-negative: subtracting `q × avgCost` for more units than the basis holds leaves a cost basis
   that is too low by the difference, and every later purchase carries that error forward rather than
@@ -412,25 +427,19 @@ that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteratio
   moved through the account.
 - **The salary window is a whole month** because what varies is which month the employer pays in, not
   by how many days it slips.
-- **Check 5's cap is what keeps two adjacent months from fighting over one credit.** A month's window
-  overlaps the next month's, so a month that claimed everything in it would take its successor's
-  credits as well whenever the fund pays in the same month as the payslip rather than the month
-  after — and the successor, finding nothing left, would fail for the amount its predecessor
-  swallowed. Stopping at the expected total gives each month exactly what it was owed and leaves the
-  rest where it lies, under either payment habit and without the file having to declare which one it
-  follows.
-- **Stopping at the first overshoot rather than searching for a subset that adds up** is what keeps
-  this a single pass in date order with a single answer — a matcher free to skip one credit and take
-  a later one is choosing among combinations, and two implementations would choose differently on the
-  same file. It also reports the more useful of the two shapes: a month short by a hundred and a
-  stray credit named where it sits, rather than one month quietly made whole out of another month's
-  money.
-- **Naming one payslip for a month's credits is precisely what says they were read together as a
-  total.** For a month with no payslip there is nothing to name, and the em dash is the same thing
-  check 5 is about to say at greater length.
-- **No month is exempt from the walk** so there is no month that can quietly claim a transaction and
-  then decline to report on it; months where both sides are zero are months in which nothing
-  happened.
+- **Pension credits are paired one to one because the payslip records them one at a time.** The
+  earlier design held a single combined figure and had to compare monthly totals against it, which
+  brought two problems that were properties of the totals rather than of the data. A month's window
+  overlaps the next month's, so the two compete for the same credit whenever the fund pays in the
+  month of the payslip rather than the month after; and any rule for stopping a month short of
+  another's credits leaves stray amounts with no month willing to report them. Three figures against
+  three credits has neither: every claim is an exact amount, every credit is claimed by at most one
+  figure, and anything left over on either side is named by check 5 as itself rather than as a
+  difference between two sums. It is also the shape check 4 already uses, so there is one matching
+  rule to understand instead of two.
+- **A zero contribution takes no part** because a heading with nothing under it is not a credit that
+  failed to arrive. `netPayment` is the opposite case — every payslip has one, so a zero there is a
+  figure somebody entered and a `0,00` credit is the thing to look for.
 - **The salary averages divide by the payslips there were** because that is what makes them the only
   salary figures a partial year does not understate ([§8.1](08-salaries.md#81-payslips)); a
   thirteenth month of pay is pay, and spreading it over twelve would flatter every month by a

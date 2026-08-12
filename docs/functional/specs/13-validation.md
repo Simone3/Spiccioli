@@ -42,15 +42,17 @@ no invalid choice to reject and no message to write ([§2](02-domain-model.md),
   Interior whitespace is left alone — bank descriptions carry it and rules match on it.
 - **`notes` is optional on every entity that has one**, trimmed like any other text, of no bounded
   length, and read by nothing in the application ([§5.1](05-transactions.md#51-columns)).
-- **An imported row is validated exactly as a typed one.** A pasted row whose date does not parse,
-  **whose date is in the future**, whose amount does not parse, or whose description is empty after
-  trimming **cannot be read**, is marked with the reason and cannot be ticked
-  ([§5.7](05-transactions.md#57-bulk-import)). **There is no value the form refuses that a paste can
-  nevertheless put in the file.** **A zero amount is not one of them** — it is legal on both paths,
-  and an import that met one would bring it in.
-- **The paste is stricter than the form in one respect, deliberately.** A typed `1234` is a perfectly
-  good amount and means `€ 1.234,00`, while a pasted `1234` cannot be read at all
-  ([§5.7](05-transactions.md#57-bulk-import)).
+- **An imported row is validated exactly as a typed one.** A pasted row whose date does not parse
+  under the import's date control, **whose date is in the future**, whose amount does not parse under
+  its two separator controls, or whose description is empty after trimming **cannot be read**, is
+  marked with the reason and cannot be ticked ([§5.7](05-transactions.md#57-bulk-import)). **There is
+  no value the form refuses that a paste can nevertheless put in the file.** **A zero amount is not
+  one of them** — it is legal on both paths, and an import that met one would bring it in.
+- **Once the import's three controls have said what a row's characters mean, the paste and the form
+  admit exactly the same values.** A typed `1234` and a pasted `1234` are both `€ 1.234,00`; a third
+  decimal is refused on both paths. The one asymmetry runs the harmless way: the amount field will
+  not accept a thousands separator at all, while a paste may carry them, since a field knows there is
+  none in play and a bank export does not say so until the control does.
 - **Every monetary field in the application is the same field.** One control, used wherever an
   amount is entered — opening balance, transaction amount, fee, tax, sell fee, every figure on a
   payslip: **at most two decimals**, digits and at most one decimal separator, nothing else typeable.
@@ -159,7 +161,8 @@ no invalid choice to reject and no message to write ([§2](02-domain-model.md),
 | label | Optional, trimmed, not unique. It is what distinguishes a second payslip in a month from the first and what orders the two ([§8.1](08-salaries.md#81-payslips)); nothing reads it but the eye. |
 | gross, contractGross | Amount fields, required, > 0. |
 | netPayment | Amount field, required, ≥ 0. |
-| refunds, carPayment, pensionContribution | Amount fields, required, ≥ 0. These are magnitudes; the formula of [§11.7](11-calculations.md#117-salary-figures) applies their signs. |
+| refunds, carPayment | Amount fields, required, ≥ 0. These are magnitudes; the formula of [§11.7](11-calculations.md#117-salary-figures) applies their signs. |
+| employeeContribution, employerContribution, severanceContribution | Amount fields, required, ≥ 0. Magnitudes, and **zero is the ordinary value for a heading the payslip has nothing under** — it expects no credit and takes no part in check 5 ([§11.6](11-calculations.md#116-derived-matching)). |
 
 ### Rule
 
@@ -187,6 +190,7 @@ no invalid choice to reject and no message to write ([§2](02-domain-model.md),
 | Field | Rule |
 | --- | --- |
 | account | Required before anything can be imported. |
+| date format, decimal separator, thousands separator | Pickers over the same closed sets as the preferences of the same name ([§10](10-settings.md)), each opening at that preference's current value. There is nothing to reject: the only values offered are the legal ones. Decimal and thousands **must differ**, refused in place with the previous value left in force, exactly as on Settings; **none** never collides. They apply to this paste only and are written nowhere ([§5.7](05-transactions.md#57-bulk-import)). |
 | selection | *Import* is disabled while no account is chosen or nothing is ticked, and by nothing else. An unreadable row can never be ticked; **every other row is freely selectable**, a flagged duplicate included — the flag unselects it, it does not lock it ([§5.7](05-transactions.md#57-bulk-import)). |
 
 ---
@@ -227,9 +231,13 @@ no invalid choice to reject and no message to write ([§2](02-domain-model.md),
   refusal and is instead an absence.**
 - **`notes` is stated once here instead of in nine tables**, being the one field with no rule of its
   own.
-- **The paste being stricter than the form costs a reshaped export and buys a column that can never
-  be misread by a factor of a thousand.** The field knows there is no thousands separator in play
-  because it is the one that just refused to accept one, and a pasted column does not.
+- **The paste and the form admit the same values because the paste is no longer guessing.** The
+  earlier design required two decimals on every pasted amount, which was the price of inferring the
+  separator from the digits; with the separators declared on the import screen there is nothing to
+  infer, so the requirement bought nothing and cost a reshaped export on every import
+  ([§5.7](05-transactions.md#57-bulk-import)). What guards the column now is the grouping rule: a
+  thousands separator that does not fall in threes, or one present when the control says none, is a
+  row that cannot be read rather than a figure out by a factor of a thousand.
 - **There is no currency field** because a picker with one entry would have been a control that can
   only be confirmed, on two forms, read by nothing — and the version that adds a second currency has
   to revisit every total in [§11](11-calculations.md) regardless, which a field stored in advance

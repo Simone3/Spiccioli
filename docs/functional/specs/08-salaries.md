@@ -34,14 +34,17 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
   that is accepted rather than corrected.
 - **Payslip table** shows every payslip of the selected year, by the month the pay is for. A month
   may hold several; the *tredicesima* is a second December row with a label, not a synthetic
-  thirteenth month. It carries no car deduction and no pension contribution, which is why its
+  thirteenth month. It carries no car deduction and no pension contributions, which is why its
   net/gross ratio is higher.
-- **Its columns are the month, the label, and then every stored figure on the payslip in the order
-  [§2](02-domain-model.md) lists them** — contract gross, gross, net payment, refunds, car — followed
-  by the two derived ones, **net salary** and **net/gross**
-  ([§11.7](11-calculations.md#117-salary-figures)), then **pension** and notes. Eleven columns, which
-  is every field of the record except `contractId`, carried by the selector above, and `year`,
-  carried by the row selected in the per-year table.
+- **Its columns are the month, the label, then every stored figure on the payslip in the order
+  [§2](02-domain-model.md) lists them** — contract gross, gross, net payment, refunds, car, and the
+  three pension figures **employee**, **employer** and **TFR** — and then notes. **The two derived
+  columns are inserted rather than appended**: **net salary** and **net/gross**
+  ([§11.7](11-calculations.md#117-salary-figures)) sit immediately after `carPayment`, each beside
+  the entered figures it reads against, which is the one departure from [§2](02-domain-model.md)'s
+  order and the only one. **Thirteen columns**, which is every field of the record except `id`,
+  `contractId`, carried by the selector above, and `year`, carried by the row selected in the
+  per-year table.
 - **Ordered by month ascending, then by label alphabetically with the unlabelled row first.**
 - A payslip's money often reaches the bank the following month. The screen does not care — every
   figure here comes from the payslips — but checks 4 and 5 do, and they look one month ahead
@@ -54,8 +57,8 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
 - Payslips are edited in place; the row menu holds **Duplicate** and **Delete**. Duplicate copies
   every field including `year`, `month` and `label` — a month may legitimately hold more than one
   payslip ([§2](02-domain-model.md)), so the copy is valid where it lands. **Add payslip** opens a
-  form with the same fields as the table, defaulting `contractGross` and `carPayment` from the
-  previous month.
+  form with the eleven stored fields the table shows, defaulting the month to the one after the
+  latest payslip of the selected year and `contractGross` and `carPayment` from the previous month.
 
 ## 8.2 Contracts
 
@@ -97,7 +100,13 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
   reading.
 - **The two derived payslip columns sit where they do** because each reads against the entered
   figures to its left: net salary next to the payment and the two adjustments it is made of,
-  net/gross next to the gross it divides.
+  net/gross next to the gross it divides. Appending them instead would have put the whole of the
+  monthly pay on one side of the table and its two summaries at the far end, past three pension
+  figures that have nothing to do with either.
+- **The pension contribution is three columns rather than one** because the fund credits the three
+  parts separately, and a payslip prints them separately ([§2](02-domain-model.md)). Recording them
+  as they are printed is what lets check 5 pair each one against the credit that carries it
+  ([§9](09-checks.md)) instead of reconciling a total nobody's statement shows.
 - **The label breaks the ordering tie** because a label is what distinguishes the second payslip of a
   month from the first; and the ordinary monthly payslip is the one that has none, which puts
   December's pay above December's tredicesima — the order they were earned in, and the order they are

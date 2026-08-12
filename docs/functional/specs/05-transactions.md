@@ -17,8 +17,8 @@ The screen with the most hours on it. No tabs.
 - **Matched** is derived and read-only, and it names the counterpart for **every** kind of pairing
   [§11.6](11-calculations.md#116-derived-matching) makes: the counterpart account for a paired
   internal transfer, the security for a trade-matched securities transaction, and the **payslip** for
-  a salary transaction paired with one or a pension contribution attributed to one — its month and
-  its label, *December 2025* or *December 2025 · 13th*. An em dash otherwise.
+  a salary transaction or a pension-fund credit paired with one — its month and its label,
+  *December 2025* or *December 2025 · 13th*. An em dash otherwise.
 - **Notes** is free text the user owns. **The application never writes to it.**
 - **Receipt** is a picker with three values — `pending`, `checked`, `na` — chosen directly. It is
   not a cycle and there is no order to work through
@@ -85,11 +85,13 @@ the twenty-seven categories **alphabetically**, with an *Uncategorised* entry ab
   is committed ([§2](02-domain-model.md)). A `manual` row keeps its category whatever its description
   becomes.
 - Row menu: **Duplicate**, **Delete**. Delete asks for confirmation — there is no undo.
-- **Duplicate copies the record and opens the copy for editing, immediately below the original.** It
-  carries over account, date, description, amount, category and notes; it takes a new `id` and a new
-  `insertionSeq`, which is what puts it there — same date, higher sequence, so the ordering of
-  [§5.2](#52-ordering-and-paging) lands it in the next row down. Change the date and it moves to
-  where that date belongs, on the next redraw. Two fields do not come across as-is. `receiptState`
+- **Duplicate copies the record and opens the copy for editing, last among the rows sharing its
+  date.** It carries over account, date, description, amount, category and notes; it takes a new `id`
+  and a new `insertionSeq`, and that sequence is the highest in the file, so the ordering of
+  [§5.2](#52-ordering-and-paging) puts it after every other row of that date — immediately below the
+  original when the original is the newest of them, which is the usual case, and a few rows further
+  down when it is not. Change the date and it moves to where that date belongs, on the next redraw.
+  Two fields do not come across as-is. `receiptState`
   resets to `na` ([§5.5](#55-add-transaction), [§6.3](06-categories.md#63-category-list)).
   `categorySource` is preserved: a copy of a hand-set row is itself hand-set and keeps the category,
   a copy of an automatic row is automatic and is re-derived from the description it inherited.
@@ -103,9 +105,12 @@ the twenty-seven categories **alphabetically**, with an *Uncategorised* entry ab
 > **Mockup —** [Add transaction](../mockups/05-transactions.html#add-transaction)
 
 - **Seven fields, in this order: account, date, description, amount, category, receipt, notes** —
-  every stored field of a transaction that is not derived ([§2](02-domain-model.md)). Description is
-  required and is the only thing a rule will match on ([§13](13-validation.md)); notes are optional
-  and the application never writes to them ([§5.1](#51-columns)).
+  every field of a transaction the user fills in. The three stored fields that are not on it are not
+  asked for: `categorySource` follows from the category picker, *Automatic* meaning `automatic` and
+  any category meaning `manual` ([§5.4](#54-editing)), and `id` and `insertionSeq` are the
+  application's ([§2](02-domain-model.md)). Description is required and is the only thing a rule
+  will match on ([§13](13-validation.md)); notes are optional and the application never writes to
+  them ([§5.1](#51-columns)).
 - **Account** starts empty and lists cash accounts only — closed ones among them, marked and last
   ([§4.3](04-accounts.md#43-creating-and-editing)). **No picker in the application remembers what was
   chosen last.**
@@ -148,10 +153,10 @@ import* button on the Transactions screen, and the sidebar stays on Transactions
 
 ### One screen
 
-- **The paste box and the consequences of the paste are on screen together.** Row count, detected
-  formats, preview, duplicate flags and the count on the *Import* button all update live as text is
-  pasted or edited. There is no *Continue*, no review step and no way back: a mis-shaped paste is
-  corrected where it was made.
+- **The paste box, the three format controls and the consequences of the paste are on screen
+  together.** Row count, preview, duplicate flags and the count on the *Import* button all update
+  live as text is pasted or edited, or as a control is changed. There is no *Continue*, no review
+  step and no way back: a mis-shaped paste is corrected where it was made.
 - The **account is chosen once** for the whole paste, not per row. It **starts empty and is the first
   thing to pick** ([§5.5](#55-add-transaction)), and lists cash accounts only — a brokerage account
   holds no transactions to import.
@@ -164,34 +169,38 @@ import* button on the Transactions screen, and the sidebar stays on Transactions
 - A single signed amount column; debit/credit pairs are not supported. Bank-specific import profiles
   are future work.
 
+### The three format controls
+
+- **Nothing about a paste is inferred.** The screen carries three controls — **date format**,
+  **decimal separator** and **thousands separator** — and the rows are read exactly as those controls
+  say they should be. There is no detection, no chip, no evidence weighed across rows and no
+  fallback assumption. A row that does not fit what the controls say is a row that cannot be read.
+- **Each control offers the same values as the preference of the same name** ([§10](10-settings.md))
+  and **opens at the value that preference currently holds**: `DD/MM/YYYY` · `MM/DD/YYYY` ·
+  `YYYY-MM-DD` for the date, `,` · `.` for the decimal separator, `.` · `,` · space · **none** for
+  the thousands separator.
+- **Changing one re-parses every row immediately** — the preview, the marks, the duplicate flags and
+  the count on the *Import* button with it. This is the control to reach for when the preview looks
+  wrong.
+- **The controls belong to the paste, not to the preferences.** Changing one here changes nothing on
+  Settings, and it is remembered nowhere: the next import opens at the preferences again, like every
+  other picker in the application ([§5.5](#55-add-transaction)).
+- **Decimal and thousands must differ**, the same rule the preferences carry
+  ([§13](13-validation.md)); choosing the decimal separator's character as the thousands one is
+  refused in place and the previous value stays in force. **None** never collides.
+
 ### Dates
 
-- **The order is inferred from the pasted rows themselves**, never from the display preferences of
-  [§10](10-settings.md). It is shown as a chip and **the chip is overridable**; changing it re-parses
-  every row immediately.
-- **Three orders are read: `DMY`, `MDY` and `YMD`.** The last is what an ISO date is, so
-  `2026-07-11` needs no rule of its own.
-- **The separator between the parts may be `/`, `-` or `.`**, and carries no meaning: it is not
-  inferred, not shown on the chip, and a paste may mix rows that use different ones. It is the order
-  that is ambiguous, never the punctuation.
+- **The date control names the order of the three parts and nothing else.** `DD/MM/YYYY`,
+  `MM/DD/YYYY` and `YYYY-MM-DD` are day-month-year, month-day-year and year-month-day; the last is
+  what an ISO date is, so `2026-07-11` needs no entry of its own.
+- **The separator between the parts may be `/`, `-` or `.`, whichever the control's label happens to
+  print**, and carries no meaning: all three are accepted under every one of the three orders, and a
+  paste may mix rows that use different ones. The control selects the order and nothing else.
 - **The year is always four digits.** A two-digit year cannot be read and the row is marked like any
   other unreadable one.
-- Inference reads the whole column, and **the three tests are applied in this order, the first one
-  that fires settling the paste**:
-  1. **the first part is four digits** → `YMD`;
-  2. **the first part is above 12** → `DMY`;
-  3. **the second part is above 12** → `MDY`.
-
-  Test 1 is about *position and width*, not about being the first evidence found: it asks whether the
-  field in first position is four digits long. **When every row in the paste is ambiguous, `DMY` is
-  assumed and the chip says so** — a fixed assumption written into the application, not a preference
-  read from [§10](10-settings.md), and the thing to change when the preview looks wrong.
-- **Contradictory evidence settles nothing, and is not resolved silently.** If one row settles `DMY`
-  and another `MDY` there is no order that reads the whole paste: the chip takes the order the first
-  decisive row settles, and the rows contradicting it appear as unreadable with the reason. Flipping
-  the chip flips which half is readable.
-- **A date that parses into a day that does not exist cannot be read** — `31/02/2026` is marked
-  rather than rolled into March.
+- **A field that is not a real date under the chosen order cannot be read** — `31/02/2026` is marked
+  rather than rolled into March, and so is a thirteenth month.
 - **A date later than today cannot be read either** ([§13](13-validation.md)); the row is marked with
   that reason like any other.
 - Anything else in the date column — a month name, a weekday, a time appended after the date —
@@ -199,35 +208,39 @@ import* button on the Transactions screen, and the sidebar stays on Transactions
 
 ### Amounts
 
-- **An amount carries exactly two decimals, and a row whose amount does not cannot be read.** The
-  final `.` or `,` in the field must be followed by exactly two digits: `-54,80`, `1234.50` and
-  `0,00` are amounts, and `12345`, `1.234` and `12,3` are not.
-- **Whichever character introduces those two digits is the decimal separator**, and the other one,
-  where it appears, is the thousands separator grouping the integer part in threes. `1.234,56` and
-  `1,234.56` are both read correctly, each row on its own evidence. **Thousands separators are
-  optional**: `1234,56` is the same amount as `1.234,56`.
-- **There is therefore no amount chip and nothing to override**, because nothing about an amount is
-  inferred. The one chip on this screen is the date order.
+- **The two separator controls say what the digits mean.** With the decimal separator at `,` and the
+  thousands separator at `.`, `1.234,56` and `1234,56` are both € 1.234,56, and `1,234.56` cannot be
+  read at all. Flip the two controls and the readings swap.
+- **Zero, one or two decimals are all read**: `1234`, `1234,5` and `1234,56` are amounts.
+  **More than two cannot be read**, exactly as the amount field refuses a third
+  ([§13](13-validation.md)).
+- **Thousands separators are optional, and where they appear they must group the integer part in
+  threes.** `1.234.567,89` reads; `1.2345` does not. **With the control at none, a thousands
+  separator anywhere in the field makes the row unreadable** — which is what catches a control left
+  on the wrong setting instead of quietly reading the number as something else.
 - **The sign is a leading `-` for money out, and a leading `+` or nothing at all for money in.**
   Trailing signs, parentheses and `D`/`C` markers are not read ([§15](15-out-of-scope.md)).
-- **A `€` or `EUR` marker on the amount is ignored**, leading or trailing, with or without a space
-  between it and the digits: `€ -54,80`, `-54,80 €` and `-54,80 EUR` are the same amount as
-  `-54,80`. **Those two spellings and no others.** Nothing about this is configurable: there is no
-  currency setting anywhere in the application ([§10](10-settings.md)), and `€` is simply what the
-  amounts in this file are ([§1](01-premise-and-constraints.md)).
-- **A bank export that writes whole euros as `1234` is reshaped before pasting, not guessed at.**
+- **A `€` or `EUR` marker on the amount is stripped before the separators are read**, leading or
+  trailing, with or without a space between it and the digits: `€ -54,80`, `-54,80 €` and
+  `-54,80 EUR` are the same amount as `-54,80`. **Those two spellings and no others.** This is not
+  configurable and there is no fourth control: there is no currency setting anywhere in the
+  application ([§10](10-settings.md)), and `€` is simply what the amounts in this file are
+  ([§1](01-premise-and-constraints.md)).
 
 ### Rows that cannot be read
 
-- A row with fewer than three columns, whose date does not parse under the current order, whose date
-  is **in the future**, whose amount does not carry two decimals, or **whose description is empty**
-  once trimmed, appears in the preview **marked with the reason, and cannot be ticked**. It is
-  excluded from the count on the *Import* button and from the import. These are the transaction
-  rules of [§13](13-validation.md) and nothing more — an import cannot write a row the form would
-  have refused.
+- A row with fewer than three columns, whose date does not parse **under the chosen date format**,
+  whose date is **in the future**, whose amount does not parse **under the chosen separators**, or
+  **whose description is empty** once trimmed, appears in the preview **marked with the reason, and
+  cannot be ticked**. It is excluded from the count on the *Import* button and from the import.
+  These are the transaction rules of [§13](13-validation.md) and nothing more — an import cannot
+  write a row the form would have refused.
 - **An amount of `0,00` reads fine and is imported.** It is a legal amount
   ([§13](13-validation.md)), and a row is unreadable only when the amount cannot be understood — not
   when it is understood to be nothing.
+- **A column of rows the preview says are in the future is the paste telling you the date control is
+  wrong.** `07/11/2026` read as `MM/DD/YYYY` is next November; set the control to `DD/MM/YYYY` and
+  the column reads.
 - **An unreadable row never blocks the rows around it.** Import what is good, fix the rest, paste
   again — the duplicate detection below is what makes re-pasting safe.
 - *Import* is disabled while no account is chosen or no row is selected, and by nothing else
@@ -291,8 +304,11 @@ indistinguishable from one typed by hand.
 - **A duplicate keeps `categorySource` and loses `receiptState`** because a duplicate is a row nobody
   has looked at yet whatever the original's state was, while a copy of an automatic row re-derives
   the same category, by the same rule, for the same reason. Duplicating is for the recurring payment
-  that differs in one field, so it is worth the copy landing exactly where the original was and
-  needing one edit.
+  that differs in one field, so it is worth the copy landing beside the original and needing one
+  edit. It lands after the date's other rows rather than adjacent to its source because
+  `insertionSeq` is monotonic and never reused ([§2](02-domain-model.md)); a sequence that could be
+  slotted between two existing rows would be a second ordering to maintain, for the sake of a row
+  that is open for editing as it appears.
 - **There is no *apply rules* action** because the automatic categories in the file are always
   current ([§2](02-domain-model.md)), so a button that re-ran the rule list would have nothing left
   to do.
@@ -327,37 +343,51 @@ indistinguishable from one typed by hand.
 - **The sidebar stays on Transactions during an import** because transactions are what it produces —
   it is a mode of that screen rather than a destination of its own.
 - **Pasting and reviewing are one screen rather than two** because a row that will not parse is
-  almost always a format chip set wrongly, and a gate that refused to advance would put the diagnosis
-  on one screen and the control that fixes it on the other. *Import* waiting on an account is half of
-  what that button is waiting for, the account being unset the ordinary state of a screen just
-  opened.
+  almost always a format control set wrongly, and a gate that refused to advance would put the
+  diagnosis on one screen and the control that fixes it on the other. *Import* waiting on an account
+  is half of what that button is waiting for, the account being unset the ordinary state of a screen
+  just opened.
 - **Tabs are the column separator** because a tab is what a spreadsheet puts on the clipboard, so a
   range copied out of an opened bank export arrives in the right shape without being reformatted. It
   is also the one separator that cannot occur inside a field: commas and semicolons both turn up in
   bank descriptions and in amounts. A blank line is skipped silently because a trailing newline is
   what every paste ends with, and a fourth column is ignored because exports routinely carry a
   running balance or a value date there.
-- **Dates are inferred from the rows and not from preferences** because the file came from a bank and
-  has no reason to match how you like to read numbers.
-- **The order of the three tests is not a detail.** Every date carries a four-digit year, so
-  `2026-07-11` satisfies test 2 as readily as test 1 — its first part is 2026, which is above 12 —
-  and an implementation that ran them the other way round would read every ISO paste as `DMY` and
-  then report the rest of the column as contradicting it.
-- **A two-digit year is refused** because it would have to be resolved by a rule the paste gives no
-  evidence for, and it is the one part of a date that can be wrong by a century without looking wrong
-  at all — where a swapped day and month at least produces a date the eye can catch. Widening a year
-  column is one spreadsheet operation, the same one the amount column already asks for.
-- **Contradictory rows are marked rather than guessed at per row**, because a column that reads
-  `03/04/2026` one way on one line and the other way on the next is the kind of wrong that is never
-  found. A paste that holds two date formats wants splitting in two.
-- **A future-dated row is in practice the surest sign of a date order read the wrong way round**:
-  `07/11/2026` under `MDY` is next November, and a column of rows the file says are in the future is
-  the paste telling you to flip the chip.
-- **Two decimals are required** because the alternative was inferring whether `1.234` meant one
-  thousand or one and a bit, silently, on a row that looks perfectly ordinary and is out by a factor
-  of a thousand when it is wrong. Two decimals is what a statement prints, it costs one spreadsheet
-  column to produce, and requiring it buys a column that is never wrong instead of one that is nearly
-  always right.
+- **Nothing about a paste is inferred, because inference is the part that can be wrong quietly.**
+  Detecting a date order or a decimal separator from the rows means that a paste with no decisive
+  evidence in it, or with evidence pointing two ways, has to be resolved by a rule the user never
+  sees applied — and the failure it produces is a column that reads perfectly and means something
+  else. `03/04/2026` is a date under either order, and `1.234` is one thousand or one and a bit
+  depending on a convention the digits do not carry. Three controls turn a guess the application
+  makes into a statement the user makes, in the one place where what the characters mean is knowable
+  by looking at the export and not by looking at the row.
+- **The controls open at the display preferences because that is right most of the time and visibly
+  wrong the rest.** A person's own bank writes dates and numbers the way that person reads them far
+  more often than not, so the defaults land, and when they do not, the preview says so on every row
+  at once and the fix is one click away. Seeding them is not the same as importing by preference: the
+  preference is a starting position for a control that is on screen and can be moved, so
+  [§10](10-settings.md) keeps its promise that a display setting never silently interprets a file.
+  Nothing is written back the other way, so the two can never drift.
+- **The controls are not remembered between imports** for the same reason no picker in the
+  application is ([§5.5](#55-add-transaction)): a format carried over from a previous sitting is a
+  format nobody sees themselves accept, and the export in front of the user this month may not be
+  last month's bank.
+- **Requiring the thousands separator to group in threes is the safety net that replaced inference.**
+  With nothing inferred, a control left on the wrong setting has to be *caught* rather than worked
+  around, and a grouping rule catches it on the first row that carries a separator at all — as does
+  refusing any separator when the control says none. The failure mode this closes is the expensive
+  one: a figure read as a thousandth or a thousandfold of what it says.
+- **Two decimals are no longer required** because they were only ever required to disambiguate the
+  separator, and the separator is now declared. A statement that prints whole euros as `1234` is a
+  statement that can now be pasted as it stands, and one spreadsheet operation is saved on every
+  import.
+- **A two-digit year is refused** because none of the three formats has a place for one, and it is
+  the one part of a date that can be wrong by a century without looking wrong at all — where a
+  swapped day and month at least produces a date the eye can catch. Widening a year column is one
+  spreadsheet operation.
+- **A future-dated row is in practice the surest sign of a date control set the wrong way round**:
+  `07/11/2026` read as `MM/DD/YYYY` is next November, and a column of rows the file says are in the
+  future is the paste telling you which way to move the control.
 - **A leading `+` is accepted** because it costs one character and some banks print it on credits;
   refusing it would have made a column that says exactly what it means the one column that cannot be
   pasted. **The `€`/`EUR` strip is exactly two spellings** rather than a general rule that ignores
