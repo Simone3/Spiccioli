@@ -1,0 +1,41 @@
+docs/functional/mockups/12-storage.html
+  s_926acc8cda6318::t_24409a21ce40bd 61-64
+docs/functional/specs/02-domain-model.md
+  s_926acc8cda6318::t_f1939749312e44 99,112-116,229,242-244,246-247,252-261
+docs/functional/specs/03-portfolio.md
+  s_926acc8cda6318::t_944fd51e72c992 77-81
+docs/functional/specs/05-transactions.md
+  s_926acc8cda6318::t_52a5cb2886fcb4 81-83,113-120,241-243,258-263
+docs/functional/specs/06-categories.md
+  s_926acc8cda6318::t_267ad790080622 239-244,246-247
+docs/functional/specs/07-investments.md
+  s_926acc8cda6318::t_45d79b92d92d8f 14-16,170-175
+docs/functional/specs/09-checks.md
+  s_926acc8cda6318::t_1c78570a3c8086 53-57
+docs/functional/specs/11-calculations.md
+  s_926acc8cda6318::t_f65a27cd444f2d 42-43,52-59,181-205
+docs/functional/specs/12-storage.md
+  s_926acc8cda6318::t_7a84712d32f80a 70-81,107-109
+docs/functional/specs/13-validation.md
+  s_926acc8cda6318::t_dfd16e6af71f74 96,181
+docs/functional/specs/14-empty-and-error-states.md
+  s_926acc8cda6318::t_51bf3f49e9d6cb 30
+docs/functional/specs/15-out-of-scope.md
+  s_926acc8cda6318::t_567ff3be59c668 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "6052852e40f29035b280f24afc8c368e02eabcc9",
+  "prompts": {},
+  "sessions": {
+    "s_926acc8cda6318": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1db64ede-f771-4e39-81f8-3052ae27dc46",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
