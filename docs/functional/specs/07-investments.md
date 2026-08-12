@@ -22,11 +22,11 @@ Securities is what all three point at.
   ([§13](13-validation.md)). The whole editable history of a security lives
   on the Securities tab of this same screen ([§7.4](#74-securities)); Holdings is the fast path for
   the one thing done weekly, that tab is where a past mistake is repaired.
-- **Update prices** fetches the latest quote for **every security in the file** and writes what comes
-  back, each record dated the day its quote belongs to, with no selection beforehand and no
-  confirmation afterwards — then a notice says what happened, dates included ([§7.6](#76-prices)). It is a button and nothing else: there is no setting behind it, and
-  pressing it is the only thing that ever contacts the network. Never press it and the inline editor
-  is the only way in, which is a complete way to use the application.
+- **Update prices** sits on this screen; [§7.6](#76-prices) is what it does. What belongs here is
+  its relation to the editor above: it is a button and nothing else — no selection first, no
+  confirmation after, no setting behind it — and pressing it is the only thing in the application
+  that ever contacts the network. Never press it and the inline editor is the only way a price gets
+  in, which is a complete way to use the application.
 - A price older than `priceStalenessDays` is marked on the row itself, not only in
   [§9](09-checks.md). **A security with no price at all is marked more loudly**: its price cell
   reads *none*, its value reads `€ 0,00`, its gain reads **minus everything the position cost**, and

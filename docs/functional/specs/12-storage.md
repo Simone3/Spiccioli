@@ -66,10 +66,8 @@
   ([§12.1](#121-the-launch-screen)) each state that the copy is part of the rotation and will
   eventually be rotated out, because that is precisely when the user can still decide to move it
   somewhere safe.
-- **On launch the application always asks which file to open**, offering the recently opened
-  locations, a browse option, and **New file…** — which writes a fresh file with the categories of
-  [§6.3](06-categories.md#63-category-list) seeded and nothing else. It never reopens the last file
-  automatically.
+- **On launch the application always asks which file to open**, and never reopens the last one on its
+  own. [§12.1](#121-the-launch-screen) is that screen.
 - **No undo/redo** in v1. This is why every delete confirms.
 - **The format must be documented** well enough for an external script to write it — the ten years
   of historical data will be loaded by a one-off migration script, not by the application. It

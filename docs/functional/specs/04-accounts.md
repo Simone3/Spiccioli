@@ -13,8 +13,12 @@ hang off an account, so it sits second in the sidebar and everything else refers
 
 - Every account ever opened, closed ones dimmed and last. The columns are the stored fields of
   [§2](02-domain-model.md) plus a **transaction count** and a **trade count**. They are also the
-  quickest way to spot an account that was created twice: two rows for the same account at the same
-  bank, one carrying the history and the other a handful of rows that belong to it.
+  quickest way to spot **one real account recorded twice**, which the name rules narrow but cannot
+  prevent: two accounts at one bank cannot share a name ([§13](13-validation.md)), so what this
+  actually looks like is *Conto Corrente* beside *Conto corrente 2*, or the same bank entered as two
+  institutions with one account under each. The counts are what give it away — one row carrying ten
+  years and its twin carrying the handful of rows that belong to it — and the fix is to move those
+  rows by editing them and delete the emptied account, which the delete rule then allows.
 - **Together those two columns are what says whether a row can be deleted**, and they have to be
   two because the account types hold different things: a cash account is blocked by its
   transactions, a `Brokerage` one by its trades ([§13](13-validation.md)). One count would have left

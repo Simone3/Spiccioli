@@ -98,17 +98,21 @@ The categories × years matrix — the one screen that answers where the money g
   this report, and the two are worth being a tab apart.
 - Uncategorised transactions appear in no row. Their existence is a failing check, not a silent
   omission.
-- **Total income is money that arrived, not money that was earned.** It adds net salary, the
-  employer's pension contributions and meal-voucher top-ups, which are three different things with
-  one property in common: each increased what the portfolio is worth. It is therefore not comparable
-  to gross pay, not a tax base, and not what anyone means by an annual salary —
+- **Total income is money that arrived, not money that was earned.** It adds the pay that reached
+  the bank, the pension fund contributions and the meal-voucher top-ups, which are three different
+  things with one property in common: each increased what the portfolio is worth. It is therefore
+  not comparable to gross pay, not a tax base, and not what anyone means by an annual salary —
   [§8.1](08-salaries.md#81-payslips) is the screen for those. The line is the top of a cash-flow
   statement, and the figure it exists to produce is **Net**, further down.
-- **Salary** here is the sum of *Salary* transactions, i.e. net payments received — not gross pay.
-  Gross figures live on the Salaries screen ([§8.1](08-salaries.md#81-payslips)). Because a payslip
-  for December is typically paid in January, a calendar year of Salary transactions need not line up
-  exactly with that year's payslips; [§8.1](08-salaries.md#81-payslips) is the screen that reads
-  payslip by payslip.
+- **Salary** here is the sum of *Salary* transactions: what the bank actually received, which is a
+  payslip's `netPayment` ([§2](02-domain-model.md)) and the figure check 4 pairs against. **It is
+  not the *netSalary* of [§11.7](11-calculations.md#117-salary-figures)**, which adds the car
+  deduction back and takes the refunds out to say what the month was worth as pay — a different
+  question, answered on a different screen, and the two are worth keeping apart by name because
+  “net salary” said loosely means either. Gross figures live on Salaries as well
+  ([§8.1](08-salaries.md#81-payslips)). Because a payslip for December is typically paid in January,
+  a calendar year of Salary transactions need not line up exactly with that year's payslips;
+  [§8.1](08-salaries.md#81-payslips) is the screen that reads payslip by payslip.
 
 ## 6.2 Rules
 
