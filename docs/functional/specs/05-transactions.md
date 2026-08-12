@@ -51,7 +51,26 @@ The screen with the most hours on it. No tabs.
 
 Account · period · category · **set by** · amount range · receipt state · free-text search on
 description. **The account filter lists cash accounts only** ([§2](02-domain-model.md)). Combined
-with AND. Filters affect the footer totals and the page count. **No filter is applied by default** —
+with AND.
+
+**Each of the three that could be read two ways is fixed here, and the rule holds wherever the same
+filter appears** — the report's account filter, the period on Purchases and Sales
+([§6.1](06-categories.md#61-report), [§7.2](07-investments.md#72-purchases)):
+
+- **Period is two date pickers, *from* and *to*, and both ends are inclusive.** Either may be left
+  empty, which leaves that end open, and both empty is no period filter at all. It is the same date
+  picker used everywhere else, so a period is chosen the way a date is entered and there is nothing
+  to parse ([§10](10-settings.md)).
+- **The amount range is on the signed amount, and both ends are inclusive.** −100 to −10 selects
+  payments between ten and a hundred euros; 0 to 0 selects the zero-amount rows
+  ([§13](13-validation.md)); −10 to 10 selects the small ones in both directions. Filtering on
+  magnitudes would have made the sign unreachable, and the sign is what says which way the money
+  went — a column where every figure carries one ([§5.1](#51-columns)) needs a filter that can say
+  *out*.
+- **The search is case- and accent-insensitive**, on the description only, and matches anywhere in
+  it. It is the same comparison a rule makes ([§2](02-domain-model.md)), deliberately: the search box
+  is where a substring is tried out before it is made into a rule, and a search that matched a
+  different set from the rule it inspired would be worse than no search. Filters affect the footer totals and the page count. **No filter is applied by default** —
 opened from the sidebar the screen shows the whole history, and the period filter in the mockup is
 one the user set. The two ways in that arrive with filters already set say so as they hand over
 ([§5.2](#52-ordering-and-paging)): a report cell and a finished import both set them where the user
@@ -224,8 +243,17 @@ produces — it is a mode of this screen rather than a destination of its own.
   for, and it is the one part of a date that can be wrong by a century without looking wrong at all
   — where a swapped day and month at least produces a date the eye can catch. Widening a year column
   is one spreadsheet operation, the same one the amount column already asks for.
-- Inference reads the whole column: a four-digit field first settles `YMD`, a first part above 12
-  settles `DMY`, a second part above 12 settles `MDY`. **When every row in the paste is ambiguous,
+- Inference reads the whole column, and **the three tests are applied in this order, the first one
+  that fires settling the paste**:
+  1. **the first part is four digits** → `YMD`;
+  2. **the first part is above 12** → `DMY`;
+  3. **the second part is above 12** → `MDY`.
+
+  The order is not a detail. Every date carries a four-digit year, so `2026-07-11` satisfies test 2 as
+  readily as test 1 — its first part is 2026, which is above 12 — and an implementation that ran them
+  the other way round would read every ISO paste as `DMY` and then report the rest of the column as
+  contradicting it. Test 1 is about *position and width*, not about being the first evidence found:
+  it asks whether the field in first position is four digits long. **When every row in the paste is ambiguous,
   `DMY` is assumed and the chip says so** — a fixed assumption written into the application, not a
   preference read from [§10](10-settings.md), and the thing to change when the preview looks wrong.
 - **Contradictory evidence settles nothing, and is not resolved silently.** If one row settles `DMY`
@@ -260,8 +288,18 @@ produces — it is a mode of this screen rather than a destination of its own.
 - **There is therefore no amount chip and nothing to override**, because nothing about an amount is
   inferred — every field says what it is or is not an amount. The one chip on this screen is the
   date order.
-- The sign is a leading `-`, or nothing for money in. Trailing signs, parentheses and `D`/`C`
-  markers are not read ([§15](15-out-of-scope.md)).
+- **The sign is a leading `-` for money out, and a leading `+` or nothing at all for money in.** The
+  `+` costs one character to accept and some banks print it on credits; refusing it would have made a
+  column that says exactly what it means the one column that cannot be pasted. Trailing signs,
+  parentheses and `D`/`C` markers are still not read ([§15](15-out-of-scope.md)).
+- **A `€` or `EUR` marker on the amount is ignored**, leading or trailing, with or without a space
+  between it and the digits: `€ -54,80`, `-54,80 €` and `-54,80 EUR` are the same amount as
+  `-54,80`. Exports carry it about half the time, everything in the file is EUR
+  ([§1](01-premise-and-constraints.md)), and stripping a marker that can only mean the one currency
+  there is cannot misread anything. **Those two spellings and no others** — this is not a general
+  rule that ignores whatever letters sit beside the digits, which is exactly how a trailing `D`/`C`
+  marker would get swallowed and a debit read as a credit. The `currencySymbol` preference plays no
+  part here: it is display-only and the paste came from a bank ([§10](10-settings.md)).
 - **A bank export that writes whole euros as `1234` is reshaped before pasting, not guessed at.**
   Two decimals is what a statement prints, it costs one spreadsheet column to produce, and requiring
   it buys a column that is never wrong instead of one that is nearly always right.

@@ -49,6 +49,14 @@ lie and a dash would look like “none recorded”.
 exist and says how many it could not — never treating an undefined figure as zero, and never
 refusing to produce a total because one row is broken.
 
+**Every formula here assumes a file whose checks pass.** Where one does not, the figures downstream
+of what the check names may be undefined, wrong, or in disagreement with one another, and that is
+the reported state rather than a case to be handled: the remedy is to fix the records the check
+names, not to make each formula defensible against them ([§9](09-checks.md)). The few readings this
+section fixes for a broken file — a holding with no price, a position that has gone oversold — are
+there because refusing to guess was cheaper than guessing, and they are not the start of a
+catalogue.
+
 ---
 
 ## 11.1 Weighted average cost
@@ -212,6 +220,14 @@ refusing to produce a total because one row is broken.
   approximations this is the one that makes the two numbers on the screen comparable. It is also the
   same caveat the headline already carries ([§11.3](#113-hypothetical-liquidation)) rather than a
   new one.
+- **A position that has ever gone oversold contributes nothing at any point on the line**, early ones
+  included, because no holding is derived for it at all and there is nothing to value
+  ([§2](02-domain-model.md), [§11.1](#111-weighted-average-cost)). The line is therefore wrong by
+  whatever that position was worth in the years before the trade that broke it, and no attempt is
+  made to draw those years from the trades that were fine. Checks 8 and 9 are failing while this is
+  true, and a chart drawn from a file that contradicts itself is not a case to be handled — it is the
+  check doing its job ([§9](09-checks.md)). Fix the dates or enter the missing purchase and the line
+  is right again along its whole length.
 - **The fallback to cost covers the years before a price was recorded, and nothing else.** A holding
   whose security has at least one Price record but none dated ≤ `d` contributes **its cost** —
   `quantity(d) × avgCost(d)`, with no sell fee and no tax, since nothing has been valued at that date
@@ -350,10 +366,21 @@ that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteratio
   reaches the fund as two or three credits — employee share, employer share, TFR — against one
   figure on the payslip, so there is nothing to pair one to one. Months are walked in ascending
   order; each claims the role `pension contribution` transactions dated in it or the month after
-  that no earlier month has claimed, **in date order and no further than its own total**: it stops
-  claiming as soon as what it has claimed reaches the sum of `pensionContribution` over its
-  payslips. That total is then compared with what it claimed. Check 5 reports the months that
-  disagree, with the difference.
+  that no earlier month has claimed, **in date order and never past its own total**: that total is
+  the sum of `pensionContribution` over its payslips, and the month goes on claiming while the
+  running sum **stays at or below** it. What it claimed is then compared with what it expected. Check
+  5 reports the months that disagree, with the difference.
+- **A credit that would take a month over its total is not claimed, and the walk stops there.** It is
+  never claimed in part — a transaction is claimed whole or not at all — and the credits after it are
+  not examined either, even where a smaller one further down the window would have fitted exactly.
+  Expecting € 300,00 and finding two credits of € 200,00, the month takes the first, stops, and
+  reports being € 100,00 short; the second is left where it lies and is reported against the month it
+  is actually in. Stopping at the first overshoot rather than searching for a subset that adds up is
+  what keeps this a single pass in date order with a single answer — a matcher free to skip one
+  credit and take a later one is choosing among combinations, and two implementations would choose
+  differently on the same file. It also reports the more useful of the two shapes: a month short by a
+  hundred and a stray credit named where it sits, rather than one month quietly made whole out of
+  another month's money.
 - **The cap is what keeps two adjacent months from fighting over one credit.** A month's window
   overlaps the next month's, so a month that claimed everything in it would take its successor's
   credits as well whenever the fund pays in the same month as the payslip rather than the month

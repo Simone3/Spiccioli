@@ -17,6 +17,28 @@
   nothing of it.
 - **Autosave**, debounced, written **atomically** — write to a temporary file in the same directory,
   then rename — so an interrupted write cannot truncate it.
+> **Mockup —** [When the file cannot be written](../mockups/12-storage.html#write-failure)
+
+- **A write that fails is retried, five times in all, and said so on screen.** The causes are almost
+  always momentary and not the user's doing — a sync client holding the file open, a volume that has
+  gone away for a second, an antivirus pass — so the first answer is to try again rather than to stop
+  the session. The attempts are spaced a few seconds apart rather than fired back to back, since a
+  lock that is going to clear needs a moment to clear in. While they run, **the save state in the
+  sidebar says so instead of *Saved 14:32*** ([§12.2](#122-the-menu-bar-and-which-file-is-open)), and
+  a line on the screen the user is on says the file could not be written and is being retried. The
+  session carries on: everything is in memory, nothing is lost, and a retry that succeeds clears the
+  line and restores the ordinary save state without further ceremony.
+- **If all five fail, the application blocks with a message and a *Retry* button.** This is **the one
+  thing besides an unreadable file that stops the screens working**
+  ([§14](14-empty-and-error-states.md)), and it earns it: every keystroke after a write that will not
+  land is work the file does not have, and an application that let the user go on typing over a dead
+  file would be lying with every *Saved* it printed. The message states **which file could not be
+  written and what the system said**, so a full disk and a permission problem are not the same
+  sentence. *Retry* runs the same write; succeeding dismisses it and the session goes on exactly
+  where it was, and failing puts the same message back with the new reason. There is no *Continue
+  anyway* and no *Save As…* in v1: one file is the model ([§12](#12--storage)), and the way out is to
+  free the disk, reconnect the volume or unlock the file — with the message on screen naming which of
+  those it is, and the session still in memory waiting for it.
 - **External modification detection.** Before writing, the application verifies the file has not
   changed on disk since it last read it. If it has, it **copies the version found on disk into the
   backup folder** and carries on with the session in memory — whose next save overwrites it. The
@@ -102,7 +124,19 @@
   `automatic` transaction disagreeing with what the rule list now produces. The upgrade therefore
   runs the same pass the Rules tab runs ([§6.2](06-categories.md#62-rules)) over every transaction
   whose `categorySource = automatic`, and writes the categories, the rules and the new schema
-  version in one step. `manual` rows are untouched, here as everywhere. Without it the invariant of
+  version in one step. `manual` rows are untouched by *that* pass, here as everywhere.
+- **A category the new version retires is the upgrade's own problem to solve, and it is solved in the
+  upgrade for that version.** A `manual` transaction points at a category id by hand, so re-running
+  the rules cannot speak for it: the upgrade that retires a category says what becomes of the rows
+  that pointed at it — mapped to whichever category now means what that one meant, or cleared to no
+  category so check 2 lists them for the user to place. Which of the two is right depends entirely on
+  why the category was retired, so it is decided when it is retired and written into that version's
+  upgrade, not fixed here in advance. What this document does fix is that **no upgrade may leave a
+  transaction pointing at a category the file no longer holds**: a dangling reference is the one
+  outcome not available, since the next open would refuse the file it had just written
+  ([§12](#12--storage)). The dialog says which categories are going and what happened to their rows,
+  for the same reason it mentions the rules — they are changes to figures the user knows they did not
+  make. Without it the invariant of
   [§2](02-domain-model.md) would hold for every file except the ones that had just been upgraded,
   and it is that invariant which lets every total read the stored category instead of re-deriving
   it. It needs no separate consent — it is part of the upgrade the user has already confirmed — but
@@ -125,9 +159,16 @@
 
 > **Mockup —** [The launch screen](../mockups/12-storage.html#launch)
 
-- The application **always** opens here — recent locations, *Open…*, and *New file…*, which writes a
-  fresh file with the categories of [§6.3](06-categories.md#63-category-list) seeded and nothing
-  else. It never reopens the last file on its own.
+- The application **always** opens here — recent locations, *Open…*, and *New file…*. It never
+  reopens the last file on its own.
+- ***New file…* asks where to put it, and creates it there and then.** It opens the platform's own
+  save dialog, and the file — with the categories of
+  [§6.3](06-categories.md#63-category-list) seeded and nothing else in it — is **written at the
+  moment the location is chosen**, before any screen is shown. There is no unsaved,
+  not-yet-anywhere ledger to lose: the application has one file open at a time and it is a file on
+  disk from its first second, which is what makes autosave the only saving mechanism there is and
+  *Save As…* a thing that does not need to exist. Cancelling the dialog writes nothing and leaves
+  the launch screen up.
 - A recent entry whose file has moved or been deleted is shown struck through with the reason, and
   stays in the list until it is dismissed: a file that has vanished from a synced folder is news,
   not something to tidy away.
@@ -135,8 +176,10 @@
   sentence rather than a footnote, says that the rules will be re-applied to every automatically
   categorised transaction as part of the upgrade ([§12](#12--storage)), and says plainly what stops
   working afterwards. Cancelling writes nothing at all.
-- This is the **only** screen in the application where an error can prevent you from getting to the
-  rest of it ([§14](14-empty-and-error-states.md)).
+- This is the only *screen* whose errors can keep you out of the rest of the application
+  ([§14](14-empty-and-error-states.md)). The one other blocking error belongs to no screen: a file
+  that cannot be written after five attempts ([§12](#12--storage)). A file that will not open and a
+  file that will not save are the same problem seen from two ends, and they are the only two.
 
 ## 12.2 The menu bar, and which file is open
 
@@ -147,8 +190,12 @@
   glance. The full path is on Settings ([§10](10-settings.md)), a click away, because a path is too
   long to read at a glance and too useful to hide.
 - **The sidebar carries the eight screens, the failing-check badge beside *Checks*
-  ([§9](09-checks.md)), and the save state** — *Saved 14:32*. **What it does not carry is the file
-  name.** It used to, which put the answer in two places and meant the sidebar had to be wide enough
+  ([§9](09-checks.md)), and the save state** — *Saved 14:32* in the ordinary case, and **the only
+  other things it ever says are that a write is being retried and that one has failed**
+  ([§12](#12--storage)). There is no third state and no spinner for the ordinary debounced write: a
+  save takes no perceptible time, and an indicator that flickered on every keystroke would train the
+  user to stop reading the one line that will one day carry bad news. **What it does not carry is the
+  file name.** It used to, which put the answer in two places and meant the sidebar had to be wide enough
   for the longer of them. The window title already had the job.
 - **Opening another file is a menu action, not a restart.** The launch screen
   ([§12.1](#121-the-launch-screen)) is what the application opens *with*; the File menu is how you
@@ -161,8 +208,8 @@
   contains and carries the failing-check banner, which is the thing to read on arriving at a ledger
   whatever was being done in it last time.
 - **Two things the menu bar must carry, and everything else is the platform's business.**
-  - **A File menu of four actions**: *New…*, which writes a fresh seeded file; *Open…*, which
-    browses for one; *Open Recent*, which is the same list the launch screen offers; and *Quit*.
+  - **A File menu of four actions**: *New…*, which asks where to put a fresh seeded file and writes
+    it there ([§12.1](#121-the-launch-screen)); *Open…*, which browses for one; *Open Recent*, which is the same list the launch screen offers; and *Quit*.
     Those four are the same three files and one exit on every platform
     ([§1](01-premise-and-constraints.md)). **All four end the current session and all four take its
     closing backup**, as does closing the window without quitting ([§12](#12--storage)).

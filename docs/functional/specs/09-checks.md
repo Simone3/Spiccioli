@@ -14,7 +14,7 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 | 2 | Every transaction has a category | `categoryId` is set. | Each uncategorised transaction. |
 | 3 | Prices are recent | Every security with an open holding has at least one Price record, and its latest one is dated within `priceStalenessDays`. **No price at all fails too**, and is the more serious of the two: that holding is valued at zero everywhere ([§11.3](11-calculations.md#113-hypothetical-liquidation)). | Security, price, date, age — or “no price recorded”. |
 | 4 | Payslips match salary transactions | Every payslip pairs one-to-one with a transaction in a role `salary` category whose amount is **`+ netPayment`** — pay arrives, so the transaction is positive and the two are equal as they stand — dated in the payslip's month or the one after; and every such transaction pairs with a payslip ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched payslips and unmatched transactions, listed separately, with amounts. |
-| 5 | Payslip pension contributions match transactions | **Monthly totals, not record by record.** For each month, Σ `pensionContribution` over that month's payslips = Σ of the role `pension contribution` transactions attributed to it — credits into the fund, so both sides are positive and are compared as they stand — each month claiming the credits in its window in date order and no further than its own total ([§11.6](11-calculations.md#116-derived-matching)). A month's contribution reaches the fund as two or three separate credits — employee share, employer share, TFR — so pairing them one to one could never have worked. **Both directions**: a month that expected nothing and received something fails exactly as a month that expected something and received nothing. Only months where both totals are zero are silent. | The month, the payslip total, the transaction total, and the difference — linking to the payslip that carried the contribution, or, for a month that has none, saying so: credits arrived in a month with no payslip to expect them. |
+| 5 | Payslip pension contributions match transactions | **Monthly totals, not record by record.** For each month, Σ `pensionContribution` over that month's payslips = Σ of the role `pension contribution` transactions attributed to it — credits into the fund, so both sides are positive and are compared as they stand — each month claiming the credits in its window in date order and **stopping at the first that would take it past its own total**, which is left unclaimed and reported against the month it sits in ([§11.6](11-calculations.md#116-derived-matching)). A month's contribution reaches the fund as two or three separate credits — employee share, employer share, TFR — so pairing them one to one could never have worked. **Both directions**: a month that expected nothing and received something fails exactly as a month that expected something and received nothing. Only months where both totals are zero are silent. | The month, the payslip total, the transaction total, and the difference — linking to the payslip that carried the contribution, or, for a month that has none, saying so: credits arrived in a month with no payslip to expect them. |
 | 6 | Purchase transactions match purchases | Every transaction in a role `securities purchase` category pairs with a purchase trade, and vice versa. The money leaves the account, so the transaction is negative and the trade total positive: **`transaction.amount = − trade.total`** ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched transactions and unmatched trades, listed separately. |
 | 7 | Sale transactions match sales | As above for role `securities sale` and sale trades. The money arrives, so both sides carry the same sign: **`transaction.amount = trade.total`**, the trade side being net proceeds — after tax and fees — so it can equal what the bank credited. | As above. |
 | 8 | No holding has gone negative | For every (security, account), running quantity in date order never drops below 0. | Security, account, the trade that took it negative. |
@@ -24,6 +24,27 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 | 12 | Records fall within their account's life | No transaction or trade is dated before its account's `openingDate` or after its `closingDate`. Both ends, not just the near one. | The record, its date, and the account's opening or closing date. |
 | 13 | Receipt-tracked transactions carry a state | No transaction in a category with `receiptTracked` has `receiptState = na`. | Each such transaction. |
 | 14 | No receipt has been pending too long | Every transaction with `receiptState = pending` is dated **within `receiptPendingMonths` of today** — the transaction's own date, not the moment the state was set. | Each overdue transaction, with its age. |
+
+> **A failing check suspends the promise that the figures are right, and nothing is designed around
+> that.** A check fails because the file contradicts itself, and the application's whole answer to a
+> file that contradicts itself is the check: it names the records, and the records get fixed. While
+> one fails, figures that depend on what it names **may be undefined, may be wrong, and may disagree
+> with each other**, and that is not a defect to be handled — it is the state the check exists to
+> report. Nothing invents a plausible value to paper over it, nothing is recomputed defensively
+> around it, and this document does not enumerate what each failure does to each figure. Fix what the
+> check names and the numbers are correct again.
+>
+> **That is what makes the rest of the specification affordable.** Every screen is written for a file
+> whose checks pass, which is the file the user is meant to have, and the cases where a broken record
+> would poison a figure are met once — by the check that names it — instead of at every total that
+> touches it. The handful of readings this document *does* fix for a failing state are there because
+> the honest answer was cheap and the dishonest one was dangerous: a holding with no price is worth
+> zero rather than worth its cost ([§11.3](11-calculations.md#113-hypothetical-liquidation)), an
+> oversold position yields no holding at all rather than a plausible average cost
+> ([§11.1](11-calculations.md#111-weighted-average-cost)), and a realised gain with no cost basis
+> reads *undefined* rather than nothing ([§11.2](11-calculations.md#112-realised-gain-on-a-sale)).
+> They are examples of refusing to guess, not the beginning of a catalogue: no further case is
+> specified, and none should be invented.
 
 **Checks 8 and 9 overlap on purpose.** Any sale with no purchase before it also drives the running
 quantity below zero, so 9 never fails alone — but the two say different things when you read the

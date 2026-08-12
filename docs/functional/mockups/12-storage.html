@@ -23,6 +23,7 @@
 <nav class="toc">
   <a href="#launch"><b>§12.1</b> The launch screen</a>
   <a href="#conflicts"><b>§12.2</b> The File menu · switching files</a>
+  <a href="#write-failure"><b>§12</b> When the file cannot be written</a>
 </nav>
 
 
@@ -46,6 +47,9 @@
         <button class="btn ghost">Open…</button>
         <button class="btn">New file…</button>
       </div>
+      <p class="hint"><b>New file…</b> asks where to put it and writes it there and then, seeded with
+      the 27 categories and nothing else. There is never an unsaved ledger: the open file is a file
+      on disk from its first second (§12.1).</p>
     </div>
 
     <div class="dlg">
@@ -108,6 +112,49 @@
       <b>exactly</b> what a file opened from the launch screen goes through: the same upgrade prompt,
       the same refusal if it cannot be understood. If it is refused, the file you had stays open and
       the message says why; the launch screen is not brought back mid-session.</p>
+    </div>
+  </div>
+</section>
+
+<section class="doc" id="write-failure">
+  <header>
+    <div class="num">§12</div>
+    <h2>When the file cannot be written</h2>
+  </header>
+  <div class="dlgrow">
+    <div class="dlg">
+      <h5>Retrying</h5>
+      <div class="dsub">attempt 2 of 5 · a line on whatever screen you are on</div>
+      <div class="alert">
+        <span class="dot"></span>
+        <p><b>The file could not be written.</b> Trying again — your work is here and nothing has
+        been lost.</p>
+      </div>
+      <div class="figs">
+        <div class="fig"><span>Sidebar save state</span><b>Not saved — retrying</b></div>
+        <div class="fig"><span>The session</span><b>carries on, fully editable</b></div>
+      </div>
+      <p class="hint">Five attempts in all, spaced a few seconds apart rather than fired back to
+      back: a sync client holding the file, a volume away for a moment and an antivirus pass all
+      clear on their own, given the moment. A retry that succeeds clears the line and puts
+      <b>Saved 14:32</b> back with no further ceremony.</p>
+    </div>
+
+    <div class="dlg">
+      <h5>The file cannot be written</h5>
+      <div class="dsub">finances.spiccioli · after 5 attempts</div>
+      <div class="figs">
+        <div class="fig"><span>Location</span><b>~/Documents</b></div>
+        <div class="fig"><span>The system said</span><b>No space left on device</b></div>
+        <div class="fig"><span>Your work</span><b>still in memory, unwritten</b></div>
+      </div>
+      <hr class="sep">
+      <p class="hint">One of the <b>two</b> errors in the application that block a screen — the other
+      is a file that cannot be read (§14). <b>Retry</b> runs the same write: succeeding puts the
+      session back exactly where it was, failing shows this again with whatever the system said this
+      time. There is no <i>Continue anyway</i> and no <i>Save As…</i> — one file is the model, and
+      typing on over a file that cannot keep it is the one thing worse than stopping.</p>
+      <div class="dlgfoot"><button class="btn primary">Retry</button></div>
     </div>
   </div>
 </section>

@@ -14,6 +14,12 @@ Securities is what all three point at.
 - One row per (security, brokerage account) holding a position — quantity greater than 0, and a
   running quantity that never went below it ([§2](02-domain-model.md)). Every figure is derived, and
   every column is read-only **except the price**.
+- **Ordered by the security's `name`, alphabetically**, then by account name where one security is
+  held at two brokers and is therefore two rows ([§2](02-domain-model.md)). Case- and
+  accent-insensitive, like every other comparison of text in the application. Not by value, not by
+  gain: this is a table of positions to be found and priced, and the one thing known before opening
+  it is which instrument is being looked for. Portfolio is where the shape of the money is read, and
+  that is the one table sorted by its own amounts ([§3.1](03-portfolio.md#31-behaviour)).
 - **This is where prices are kept up to date.** Clicking the price cell opens an inline editor — a
   value and an as-of date defaulting to today — and saving writes a Price record, replacing whatever
   that day already held ([§2](02-domain-model.md)). **Nothing is confirmed**: the editor shows the
@@ -66,7 +72,8 @@ Securities is what all three point at.
   Transactions ([§5.2](05-transactions.md#52-ordering-and-paging)), so both ledgers read the same
   way and neither can rearrange itself between two openings. No paging; filters narrow the list
   instead.
-- Filters: security, account — **brokerage accounts only** ([§2](02-domain-model.md)) — and period.
+- Filters: security, account — **brokerage accounts only** ([§2](02-domain-model.md)) — and period,
+  which is the *from* and *to* pair of [§5.3](05-transactions.md#53-filters), inclusive at both ends.
 
 ## 7.3 Sales
 
@@ -116,6 +123,11 @@ Securities is what all three point at.
   purchase.
 - Correcting is the rest of the tab's job: a mistyped ISIN, a renamed instrument, the wrong type,
   the tax rate on a whitelist government bond.
+- **Ordered by `name`, alphabetically**, the same key and the same comparison as Holdings
+  ([§7.1](#71-holdings)) — the two tables list the same instruments and there is no reason for them
+  to disagree about where one sits. Securities no longer held are in the list like everything else,
+  marked by an em dash in *Held*; nothing sorts them apart, since a security is looked up by what it
+  is called whether or not there is a position in it today.
 - **Held** is the quantity across every brokerage account, an em dash when the position is closed.
   **Trades** is what decides whether the security can be deleted; **Prices** does not. A price is
   part of a security rather than a reference to one, so deleting a security deletes its history with

@@ -43,6 +43,14 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
   may hold several; the *tredicesima* is a second December row with a label, not a synthetic
   thirteenth month. Note it carries no car deduction and no pension contribution, which is why its
   net/gross ratio is higher.
+- **Its columns are the month, the label, and then every stored figure on the payslip in the order
+  [§2](02-domain-model.md) lists them** — contract gross, gross, net payment, refunds, car — followed
+  by the two derived ones, **net salary** and **net/gross**
+  ([§11.7](11-calculations.md#117-salary-figures)), then **pension** and notes. Eleven columns, which
+  is every field of the record except `contractId`, carried by the selector above, and `year`,
+  carried by the row selected in the per-year table. The two derived figures sit where they are
+  because each reads against the entered figures to its left: net salary next to the payment and the
+  two adjustments it is made of, net/gross next to the gross it divides.
 - **Ordered by month ascending, then by label alphabetically with the unlabelled row first.** A
   label is what distinguishes the second payslip of a month from the first, so it is what breaks the
   tie; and the ordinary monthly payslip is the one that has none, which puts December's pay above
@@ -70,12 +78,22 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
 
 > **Mockup —** [Contracts tab](../mockups/08-salaries.html#contracts)
 
-- One row per employer. **Months per year** and **hours per day** are contract terms that every
+- One row per employer, **ordered by `startDate`, then by name** to break the tie. Employment reads
+  as a sequence — this job, then that one — so the list is the working life in the order it happened,
+  and the current contract is the last row rather than wherever the alphabet put it. The tie-break
+  exists only to make the order total; two contracts starting on one day is someone holding two jobs
+  at once, which the model allows and nothing else in the application cares about.
+- **Months per year** and **hours per day** are contract terms that every
   figure on the other tab divides by, which is why the two tabs sit together: this is the
   denominator, that is the numerator.
 - **A contract is never retired, only ended.** Filling in `endDate` records when it finished; it
   stays in the selector, keeps its payslips and keeps its years. There is nothing to exclude from a
   total, because no figure in the application sums across contracts ([§8.1](#81-payslips)).
+- **The dates cannot be narrowed past the records that depend on them.** The per-year table is built
+  from `startDate` and `endDate` ([§8.1](#81-payslips)), so moving either inwards would take rows off
+  that table and leave the payslips and working days in them with nowhere to be seen — the form
+  refuses it and names what is in the way ([§13](13-validation.md)). Widening is always fine, and is
+  what an employer extending a contract looks like.
 - **Payslips** counts what points at the contract, and is what decides whether it can be deleted: at
   zero it can, otherwise it cannot ([§4.3](04-accounts.md#43-creating-and-editing)). Its
   ContractYear records go with it.
