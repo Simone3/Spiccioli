@@ -10,13 +10,13 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 
 | # | Check | Definition | Failure output |
 | --- | --- | --- | --- |
-| 1 | Internal transfers balance out | Every transaction in a category with role `internal transfer` pairs with an opposite leg ([§11.6](11-calculations.md#116-derived-matching)). | Each unpaired leg, with date, account, description, amount. |
+| 1 | Internal transfers balance out | Every transaction in a category with role `internal transfer` pairs with a leg of the **exactly opposite amount** — `a.amount = − b.amount` — on another account ([§11.6](11-calculations.md#116-derived-matching)). | Each unpaired leg, with date, account, description, amount. |
 | 2 | Every transaction has a category | `categoryId` is set. | Each uncategorised transaction. |
 | 3 | Prices are recent | Every security with an open holding has at least one Price record, and its latest one is dated within `priceStalenessDays`. **No price at all fails too**, and is the more serious of the two: that holding is valued at zero everywhere ([§11.3](11-calculations.md#113-hypothetical-liquidation)). | Security, price, date, age — or “no price recorded”. |
-| 4 | Payslips match salary transactions | Every payslip pairs one-to-one with a transaction in a role `salary` category, of equal `netPayment`, dated in the payslip's month or the one after — and every such transaction pairs with a payslip ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched payslips and unmatched transactions, listed separately, with amounts. |
-| 5 | Payslip pension contributions match transactions | **Monthly totals, not record by record.** For each month, Σ `pensionContribution` over that month's payslips = Σ of the role `pension contribution` transactions attributed to it — each month claiming the credits in its window in date order and no further than its own total ([§11.6](11-calculations.md#116-derived-matching)). A month's contribution reaches the fund as two or three separate credits — employee share, employer share, TFR — so pairing them one to one could never have worked. **Both directions**: a month that expected nothing and received something fails exactly as a month that expected something and received nothing. Only months where both totals are zero are silent. | The month, the payslip total, the transaction total, and the difference — linking to the payslip that carried the contribution, or, for a month that has none, saying so: credits arrived in a month with no payslip to expect them. |
-| 6 | Purchase transactions match purchases | Every transaction in a role `securities purchase` category pairs with a purchase trade, and vice versa ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched transactions and unmatched trades, listed separately. |
-| 7 | Sale transactions match sales | As above for role `securities sale` and sale trades. The trade side is net proceeds — after tax and fees — so it can equal what the bank credited. | As above. |
+| 4 | Payslips match salary transactions | Every payslip pairs one-to-one with a transaction in a role `salary` category whose amount is **`+ netPayment`** — pay arrives, so the transaction is positive and the two are equal as they stand — dated in the payslip's month or the one after; and every such transaction pairs with a payslip ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched payslips and unmatched transactions, listed separately, with amounts. |
+| 5 | Payslip pension contributions match transactions | **Monthly totals, not record by record.** For each month, Σ `pensionContribution` over that month's payslips = Σ of the role `pension contribution` transactions attributed to it — credits into the fund, so both sides are positive and are compared as they stand — each month claiming the credits in its window in date order and no further than its own total ([§11.6](11-calculations.md#116-derived-matching)). A month's contribution reaches the fund as two or three separate credits — employee share, employer share, TFR — so pairing them one to one could never have worked. **Both directions**: a month that expected nothing and received something fails exactly as a month that expected something and received nothing. Only months where both totals are zero are silent. | The month, the payslip total, the transaction total, and the difference — linking to the payslip that carried the contribution, or, for a month that has none, saying so: credits arrived in a month with no payslip to expect them. |
+| 6 | Purchase transactions match purchases | Every transaction in a role `securities purchase` category pairs with a purchase trade, and vice versa. The money leaves the account, so the transaction is negative and the trade total positive: **`transaction.amount = − trade.total`** ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched transactions and unmatched trades, listed separately. |
+| 7 | Sale transactions match sales | As above for role `securities sale` and sale trades. The money arrives, so both sides carry the same sign: **`transaction.amount = trade.total`**, the trade side being net proceeds — after tax and fees — so it can equal what the bank credited. | As above. |
 | 8 | No holding has gone negative | For every (security, account), running quantity in date order never drops below 0. | Security, account, the trade that took it negative. |
 | 9 | No sale precedes its purchase | Every sale has at least one earlier purchase of that security in that account. | The offending sale. |
 | 10 | Pension fund revalued recently | Latest transaction in a role `value adjustment` category, in each **open** pension fund account, within `pensionRevaluationMonths`. An account that has never had one fails too. | Account and date of the last adjustment, or “never revalued”. |
@@ -76,19 +76,26 @@ way the user is thinking about it.
   step with the first.
 - Checks key off category **roles** ([§2](02-domain-model.md)), never off category names, so
   rewording a label never silently switches a check off.
-- **Every check reads the whole file, closed accounts included.** A closed account keeps its history
-  and its rows stay editable — it is still in every picker, marked and last
-  ([§4.3](04-accounts.md#43-creating-and-editing)) — so an unpaired transfer, an uncategorised row
-  or a receipt left `pending` on an account shut in 2021 is as findable and as fixable as one on the
-  current account, and there is no reason for a check to look away from it. Closing an account
-  removes its balance from net worth ([§11.4](11-calculations.md#114-balances-and-net-worth)); it
-  does not remove its records from the file, and the checks are about the records.
+- **No check compares absolute values.** Wherever two amounts are matched, the check states whether
+  the two carry the **same** sign or **opposite** ones, and compares the signed figures: opposite for
+  a transfer's two legs and for a purchase against its trade, the same for a sale, a salary and a
+  pension credit. Amounts are signed ([§2](02-domain-model.md)) and the sign is information — a
+  securities purchase recorded as money *in* is a mistake worth reporting, and a matcher working on
+  magnitudes would have paired it and said nothing. The unmatched record is then named by the check,
+  which is exactly where a sign error should surface.
+- **Every check reads the whole file, closed accounts included.** A closed account keeps its
+  history, keeps its balance in every total
+  ([§11.4](11-calculations.md#114-balances-and-net-worth)) and keeps its rows editable — it is still
+  in every picker, marked and last ([§4.3](04-accounts.md#43-creating-and-editing)) — so an unpaired
+  transfer, an uncategorised row or a receipt left `pending` on an account shut in 2021 is as
+  findable and as fixable as one on the current account. Nothing about a closing date makes a record
+  less true, and the checks are about the records.
 - **Check 10 is the one exception, and it is an exception about meaning rather than about scope.**
-  It asks whether a pension fund's balance has been kept in step with its real value, and a closed
-  account has no balance left to keep in step: it reads **open pension fund accounts only**. The
-  alternative was a check that failed forever on an account closed years ago, with no legitimate way
-  to satisfy it — a value adjustment dated after the closing date would immediately fail check 12
-  instead.
+  It asks whether a pension fund is being kept in step with its real value, which is a question about
+  a fund you still hold: it reads **open pension fund accounts only**. The alternative was a check
+  that failed forever on an account closed years ago, with no legitimate way to satisfy it — a value
+  adjustment dated after the closing date would immediately fail check 12 instead. What a closed
+  pension fund still owes is an empty balance, and that is check 11's question, not this one.
 
 > **What a run actually costs.** Fourteen checks over ten years is a handful of passes over the
 > whole file — a few thousand transactions, a few dozen trades, a hundred-odd payslips — plus the

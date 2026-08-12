@@ -28,7 +28,7 @@ Eleven stored entities and one derived one. *Italic* marks a derived field.
 | openingDate | date | Records dated before it are reported by check 12, never prevented. |
 | closingDate | date? | Empty means open. An account is closed by editing it and setting this date; there is no other retirement mechanism. |
 | notes | text | |
-| *status* | *enum* | `closed` when `closingDate` is set, `open` otherwise. Closed accounts keep their history and leave the portfolio breakdown. |
+| *status* | *enum* | `closed` when `closingDate` is set, `open` otherwise. A closed account keeps its history **and keeps its balance in every total** ([§11.4](11-calculations.md#114-balances-and-net-worth)); closing marks it and sorts it last, it does not take it out of the arithmetic. |
 | *balance* | *amount* | Cash accounts: openingBalance + Σ transaction amounts. Brokerage: Σ holding `netProceeds` — net of the hypothetical tax and sell fee of [§11.3](11-calculations.md#113-hypothetical-liquidation), per [§11.4](11-calculations.md#114-balances-and-net-worth). |
 
 **Cash and securities never live in the same account.** The five cash types hold transactions and no
@@ -91,7 +91,7 @@ net worth chart possible ([§11.5](11-calculations.md#115-net-worth-over-time)).
 | --- | --- | --- |
 | id | id | |
 | accountId | ref | Never a `Brokerage` account. |
-| date | date | |
+| date | date | **Never in the future** ([§13](13-validation.md)). |
 | description | text | As exported by the bank. |
 | amount | amount | Signed. Negative is money out. |
 | categoryId | ref? | Empty is legal and reported by check 2. |
@@ -131,7 +131,7 @@ the next without passing through a third.
 | kind | enum | `purchase` · `sale` |
 | securityId | ref | |
 | accountId | ref | **Always a `Brokerage` account.** The cash moved separately, through a transaction on a cash account at the same institution. |
-| date | date | |
+| date | date | **Never in the future** ([§13](13-validation.md)). |
 | quantity | decimal(4) | Always positive; `kind` carries direction. |
 | unitPrice | decimal(4) | |
 | fees | amount | Actually charged, per trade. |
@@ -199,9 +199,9 @@ keep in step. Checks 4 and 5 therefore look for their counterpart in month M *or
 | id | id | Stable. Referenced by every transaction and never reused. |
 | name | text | |
 | type | enum | `Income` · `Expense` · `Investment` · `Divestment` · `Internal` · `Revaluation`. Drives the grouping in [§6.1](06-categories.md#61-report), where `Income`, `Expense` and `Internal` are a group each and the other three share one. |
-| role | enum | `none` · `salary` · `pension contribution` · `securities purchase` · `securities sale` · `internal transfer` · `value adjustment` · `bank fees` · `wealth tax` · `interest and dividends`. **What the checks and the Portfolio all-time card key off** — never a name. |
+| role | enum? | `salary` · `pension contribution` · `securities purchase` · `securities sale` · `internal transfer` · `value adjustment` · `bank fees` · `wealth tax` · `interest and dividends`. **Nullable, and empty on most categories** — an empty role means no check and no card cares about this category. **What the checks and the Portfolio all-time card key off** — never a name. |
 | receiptTracked | bool | Its transactions are expected to carry a receipt state other than `na` — check 13. |
-| order | int | Global display order. **It decides the order of every table a category appears in** — the report and the category list — and nothing anywhere sorts categories by their amounts ([§6.1](06-categories.md#61-report)). **Pickers do not use it:** every category picker and filter is alphabetical by name ([§6.3](06-categories.md#63-category-list)). |
+| order | int | Global display order, **used by the report and by nothing else** ([§6.1](06-categories.md#61-report)): it fixes the row order inside each of the report's four groups, and the numbering runs down the report's own reading order so the whole table ascends in it. Nothing anywhere sorts categories by their amounts. **Every other list of categories is alphabetical by name** — the category list tab, every picker and every filter ([§6.3](06-categories.md#63-category-list)). |
 
 **Categories are stored, but not editable in v1.** The application seeds the list of
 [§6.3](06-categories.md#63-category-list) into every new file and offers no way to add, rename or

@@ -83,8 +83,19 @@ Securities is what all three point at.
 - **Realised gain is net of everything the broker took**, so a sale can show a gain before tax and a
   loss after it. It is summed into the all-time figure on Portfolio ([§3](03-portfolio.md)), where
   it is the one investment number that is a recorded fact rather than an estimate.
+- **Realised gain reads *undefined* when the position it came out of has no average cost.** A sale in
+  a (security, account) whose running quantity ever went below zero is a sale with nothing to measure
+  against: the walk of [§11.1](11-calculations.md#111-weighted-average-cost) stops, no `avgCost`
+  exists, and the figure is undefined rather than zero or blank
+  ([§11.2](11-calculations.md#112-realised-gain-on-a-sale), [§11](11-calculations.md)). Every other
+  column on the row is entered or is arithmetic on what was entered, so the row is shown in full and
+  only that one cell says so. Checks 8 and 9 name the trade that caused it, and putting the dates or
+  the missing purchase right restores the figure ([§9](09-checks.md)).
 - The footer sums fees, taxes, net proceeds and realised gain. It is the only place the tax actually
-  paid over ten years is visible as one figure.
+  paid over ten years is visible as one figure. **The realised-gain total covers the sales that have
+  one** and says how many it left out, which is the same rule the Portfolio all-time card follows
+  ([§3.1](03-portfolio.md#31-behaviour)); the other three columns are entered figures and always
+  total everything.
 - Everything else — ordering, filters, editing, matching, the fact that a sale creates no
   transaction — is exactly as [§7.2](#72-purchases).
 

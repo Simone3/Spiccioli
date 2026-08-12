@@ -123,7 +123,8 @@ that will survive every future rule change, which is the set worth keeping small
   sees themselves accept. Which account a row belongs to is the one field on this form that cannot
   be inferred from anything else on it, so it is the one that is always chosen.
   **Date** is a date picker
-  defaulting to today; **amount** is a validated numeric field, signed, negative being money out.
+  defaulting to today and **offering no day after it** — a ledger records what has happened
+  ([§13](13-validation.md)); **amount** is a validated numeric field, signed, negative being money out.
   Neither can hold text that would have to be interpreted: nothing invalid can be entered, so
   nothing invalid has to be rejected on save, and the display preferences of
   [§10](10-settings.md) never enter into data entry.
@@ -236,6 +237,11 @@ produces — it is a mode of this screen rather than a destination of its own.
   found.
 - **A date that parses into a day that does not exist cannot be read** — `31/02/2026` is three
   numbers in the right shape and not a date, and it is marked rather than rolled into March.
+- **A date later than today cannot be read either.** A transaction records something that has
+  happened ([§13](13-validation.md)), and the form refuses a future date, so a paste cannot bring one
+  in — the row is marked with that reason like any other. In practice it is the surest sign of a
+  date order read the wrong way round: `07/11/2026` under `MDY` is next November, and a column of
+  rows the file says are in the future is the paste telling you to flip the chip.
 - Anything else in the date column — a month name, a weekday, a time appended after the date —
   **cannot be read** ([§15](15-out-of-scope.md)).
 
@@ -262,9 +268,9 @@ produces — it is a mode of this screen rather than a destination of its own.
 
 ### Rows that cannot be read
 
-- A row with fewer than three columns, whose date does not parse under the current order, whose
-  amount does not carry two decimals, or **whose description is empty** once trimmed, appears in the
-  preview **marked with the reason, and cannot be ticked**. It is excluded from the count on the *Import* button and from the
+- A row with fewer than three columns, whose date does not parse under the current order, whose date
+  is **in the future**, whose amount does not carry two decimals, or **whose description is empty**
+  once trimmed, appears in the preview **marked with the reason, and cannot be ticked**. It is excluded from the count on the *Import* button and from the
   import. These are the transaction rules of [§13](13-validation.md) and nothing more — an import
   cannot write a row the form would have refused.
 - **An amount of `0,00` reads fine and is imported.** It is a legal amount

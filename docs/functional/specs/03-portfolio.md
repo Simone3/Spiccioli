@@ -15,11 +15,20 @@ The home screen. No tabs.
 - **Net worth is what the portfolio is worth in hand**
   ([§11.4](11-calculations.md#114-balances-and-net-worth)): cash at its balance, holdings at their
   latest known price *less* the hypothetical capital-gains tax and sell fee of
-  [§11.3](11-calculations.md#113-hypothetical-liquidation). It is the sum of the two figures beneath
-  it, and those two are the only decomposition offered.
-- **Total at cost** is the same total with holdings valued at what they were paid for instead —
-  Σ cash balances + Σ holdings at cost. **Unrealised net investment gain** is exactly the difference,
-  so the two lines add up to the headline by construction. It was once labelled *sum of all
+  [§11.3](11-calculations.md#113-hypothetical-liquidation).
+- **Three figures, in this order, and the lower two add up to the headline.** *Net worth* is the
+  headline. **Total at cost** sits beneath it: the same total with holdings valued at what they were
+  paid for instead — Σ cash balances + Σ holdings at cost — which is the portfolio as the ledger
+  recorded it, opening balances and transactions and purchase prices and nothing estimated.
+  **Unrealised net investment gain** sits beneath that: what selling every holding today would add
+  to the portfolio or take out of it, net of the tax and the fees of
+  [§11.3](11-calculations.md#113-hypothetical-liquidation). It is exactly the difference between the
+  two figures above it, so `total at cost + unrealised net investment gain = net worth` by
+  construction.
+- **That is the only decomposition offered, and it splits net worth by what is measured rather than
+  by where the money sits.** Cash and holdings are deliberately not shown as two totals here: a split
+  by kind of asset is the breakdown further down the same screen, and one figure appearing twice on
+  one screen is a figure that can disagree with itself. *Total at cost* was once labelled *sum of all
   transactions*, which was wrong twice over: it includes opening balances, which are not
   transactions, and it values holdings at their cost basis, which is not a transaction either.
 - **The headline figure is therefore an estimate**, and must carry the
@@ -31,12 +40,20 @@ The home screen. No tabs.
   `wealth tax` and `interest and dividends`, plus realised gain from sales
   ([§11.2](11-calculations.md#112-realised-gain-on-a-sale)). Unlike net worth, realised gain is a
   recorded fact, not an estimate.
-- **They include closed accounts, and that is what “all-time” means.** Net worth excludes a closed
-  account because its balance is no longer yours ([§11.4](11-calculations.md#114-balances-and-net-worth));
-  but the bank charged those fees, that interest was received and that sale really was made, and a
-  card that quietly dropped them the day an account was shut would report a smaller lifetime than
-  the one that happened. The rule is the same one the report follows
-  ([§6.1](06-categories.md#61-report)): a balance can be retired, a history cannot.
+- **Realised gain covers the sales that have one.** A sale in a (security, account) whose running
+  quantity ever went below zero has no average cost to be measured against and therefore no realised
+  gain at all ([§11.2](11-calculations.md#112-realised-gain-on-a-sale)); those sales are left out of
+  the sum, and the card says how many it left out and links to checks 8 and 9, which name the trades
+  ([§9](09-checks.md)). A total that silently omitted them would be the one figure on this card that
+  is not what it says it is.
+- **Every figure on this screen counts closed accounts**, all-time and net worth alike. A closed
+  account should be an empty one — check 11 fails by name while it is not
+  ([§9](09-checks.md)) — so in a file whose checks pass it contributes nothing to net worth anyway,
+  and in a file whose checks do not it contributes the balance that is really still there. Nothing is
+  dropped from a total for having been closed: the bank charged those fees, that interest was
+  received, that sale really was made, and money left in a shut account is money the file still says
+  you have. The rule is the same one the report follows ([§6.1](06-categories.md#61-report)) — a
+  closing date marks an account and sorts it last, it does not remove it from the arithmetic.
 - **Those three roles exist for this card and nothing else.** The category list is fixed
   ([§6.3](06-categories.md#63-category-list)), so the card could have named its three categories
   directly and been correct forever — but every other part of the application that cares about a
@@ -45,9 +62,10 @@ The home screen. No tabs.
 - **Breakdown by type.** Cash accounts contribute under the account's type; holdings contribute
   under their *security's* type, at the same net value used for net worth. A brokerage account never
   appears as a slice of its own — it is entirely its holdings — so the types available are the five
-  cash types plus the five security types. Closed accounts and their holdings are excluded. **Only
-  types actually present get a slice**: the ten are the ceiling, and the nine in the mockup are
-  what that portfolio happens to hold — a `Bond` bought tomorrow would make ten.
+  cash types plus the five security types. Closed accounts and their holdings are in it, like
+  everywhere else, which is what keeps the slices adding to net worth. **Only types actually present
+  get a slice**: the ten are the ceiling, and the nine in the mockup are what that portfolio happens
+  to hold — a `Bond` bought tomorrow would make ten.
 - **The pie** carries one slice per type present, sized by its share, with the slice count at its
   centre and the same colour keying the list beside it. It exists to make the shape of the portfolio
   readable at a glance; the list beside it carries the amounts and percentages.
@@ -88,9 +106,12 @@ The home screen. No tabs.
   stretch is the only part that is not net worth as computed everywhere else, and the legend also
   says that the rate and the fee applied across the whole line are today's, those being the only
   ones the file records ([§11.5](11-calculations.md#115-net-worth-over-time)).
-- **Accounts table** lists open accounts with computed balances, brokerage accounts among them; its
-  total is the headline net worth. Read-only — accounts are created, edited and closed on the
-  Accounts screen ([§4.1](04-accounts.md#41-accounts)).
+- **Accounts table** lists every account with its computed balance, brokerage accounts among them
+  and closed ones dimmed and last ([§4.1](04-accounts.md#41-accounts)); its total is the headline net
+  worth, which is only true because nothing is left out of it. This and the Accounts screen are the
+  two places every account is shown together, and neither filters ([§2](02-domain-model.md)).
+  Read-only — accounts are created, edited and closed on the Accounts screen
+  ([§4.1](04-accounts.md#41-accounts)).
 
 ---
 

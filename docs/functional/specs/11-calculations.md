@@ -36,12 +36,18 @@ across midnight goes on reporting yesterday's ages until something changes or th
 restarted. There is no timer and no midnight refresh — for a ledger measuring ages in weeks and
 months, a day of lag on an idle window is not worth a background process.
 
-**A formula that would divide by zero produces *undefined*, not zero and not blank.** Hourly pay for
-a year whose working days were never entered, a net-to-gross ratio on a gross of zero, a percentage
-gain on a position that cost nothing: each reads `undefined` where the figure would go, and the
-input that would make it computable is the one left visibly empty
-([§8.1](08-salaries.md#81-payslips), [§13](13-validation.md)). Zero would be a lie and a dash would
-look like “none recorded”.
+**A formula that cannot be evaluated produces *undefined*, not zero and not blank.** That covers a
+division by zero — hourly pay for a year whose working days were never entered, a net-to-gross ratio
+on a gross of zero, a percentage gain on a position that cost nothing — and equally a formula one of
+whose inputs does not exist, which is the realised gain on a sale in a position that has no average
+cost ([§11.2](#112-realised-gain-on-a-sale)). Each reads `undefined` where the figure would go, and
+whatever would make it computable is left visibly empty or is named by a check
+([§8.1](08-salaries.md#81-payslips), [§9](09-checks.md), [§13](13-validation.md)). Zero would be a
+lie and a dash would look like “none recorded”.
+
+**A total made of figures that may be undefined states what it left out.** It sums the ones that
+exist and says how many it could not — never treating an undefined figure as zero, and never
+refusing to produce a total because one row is broken.
 
 ---
 
@@ -72,7 +78,17 @@ look like “none recorded”.
   the bank transaction by check 7.
 - `realisedGain = netProceeds − (q × avgCost at the time of the sale)`. Net of everything the broker
   took, so it is what the sale actually added to net worth.
-- Summed across all sales for the Portfolio all-time figure.
+- **It is *undefined* when there is no `avgCost` to subtract.** The walk of [§11.1](#111-weighted-average-cost)
+  ends the moment a (security, account) goes below zero, so every sale in such a position — the one
+  that broke it and any recorded after it — has no cost basis behind it and no realised gain, exactly
+  as that position has no average cost, no invested total and no holding
+  ([§2](02-domain-model.md)). The figure reads `undefined` on the Sales tab
+  ([§7.3](07-investments.md#73-sales)) by the general rule of [§11](#11--calculations), and **the
+  totals that sum realised gain — the Sales footer and the Portfolio all-time card — sum the sales
+  that have one and state how many they left out** ([§3.1](03-portfolio.md#31-behaviour)). Treating
+  an undefined gain as zero would fold a broken position silently into a lifetime figure; leaving the
+  count visible points at checks 8 and 9, which name the trade to fix ([§9](09-checks.md)).
+- Summed across all sales that have a defined figure, for the Portfolio all-time card.
 - The gross counterpart, `q × price − fees − (q × avgCost)`, is what the tax was computed on — the
   same shape as `taxableGain` in [§11.3](#113-hypothetical-liquidation), fee first, which is why the
   estimate and the record are comparable at all. It is not displayed: the tax on a real sale is a
@@ -142,18 +158,24 @@ look like “none recorded”.
 - Cash account: `accountBalance = openingBalance + Σ transaction amounts`
 - Brokerage account: `accountBalance = Σ netProceeds of its holdings`
   ([§11.3](#113-hypothetical-liquidation))
-- `netWorth = Σ accountBalance` over open accounts — which, holdings being held in accounts of their
-  own, is the whole of it.
-- `totalAtCost = Σ cash accountBalance + Σ holding invested`, the same total with holdings at cost.
-  `netWorth − totalAtCost` is the unrealised net gain, and the two are the decomposition shown on
-  Portfolio ([§3.1](03-portfolio.md#31-behaviour)).
+- `netWorth = Σ accountBalance` over **every account** — which, holdings being held in accounts of
+  their own, is the whole of it.
+- `totalAtCost = Σ cash accountBalance + Σ holding invested`, over the same accounts: the same total
+  with holdings at cost. `netWorth − totalAtCost` is the unrealised net gain, and the two are the
+  decomposition shown on Portfolio ([§3.1](03-portfolio.md#31-behaviour)). **The two sums must run
+  over the same set of accounts or the decomposition stops adding up**, which is one of the reasons
+  the set is simply *all of them*.
 - Securities purchases already reduce the cash account through their transaction, so holdings are
   added, not double-counted.
-- **Closed accounts are excluded** — and nothing stops an account being closed with money still in
-  it, since checks report rather than block ([§9](09-checks.md)). The exclusion can therefore move
-  net worth on its own, which is exactly what check 11 exists to say out loud: it fails naming the
-  account and the balance left in it, and the Portfolio banner carries it until the account is
-  emptied or its closing date removed. The money is never quietly gone; it is gone and named.
+- **Closed accounts are included, exactly like open ones.** A closing date is a label on an account,
+  not a subtraction: nothing stops an account being closed with money still in it, since checks
+  report rather than block ([§9](09-checks.md)), and an account closed properly was emptied first
+  and contributes zero without needing to be excluded. Excluding them would mean net worth moving by
+  whatever was left behind at the moment a date was typed into a form — an edit that records nothing
+  about any money changing the headline figure — and it would put the same asterisk on the breakdown,
+  the chart and the accounts table. **Check 11 is what reports a closed account that is not empty**,
+  naming it and the balance left in it, and the Portfolio banner carries that until the account is
+  emptied or its closing date removed. The money is never quietly dropped; it is counted and named.
 
 ## 11.5 Net worth over time
 
@@ -170,7 +192,9 @@ look like “none recorded”.
   the first row was recorded, an account whose whole history is an opening balance has no
   transactions at all, and a file whose investing predates its bank exports would otherwise begin
   after its own first purchase. Whichever of the three is earliest is where the line begins.
-- At date `d`, over every account whose `openingDate ≤ d` and which was not yet closed at `d`:
+- At date `d`, over every account whose `openingDate ≤ d` — **closed ones included, on the same rule
+  as [§11.4](#114-balances-and-net-worth)**, since an account that was emptied when it closed stops
+  contributing on its own and one that was not is money the file still holds:
   `Σ (openingBalance + Σ transactions ≤ d)` plus, per holding in those accounts, that holding's
   **net proceeds at `d`** — `quantity(d) × price`, less the institution's sell fee and the tax on the
   gain over `avgCost(d)`, by the arithmetic of [§11.3](#113-hypothetical-liquidation) — where price
@@ -204,6 +228,15 @@ look like “none recorded”.
   it is never dashed. Had the fallback been written as “no price is known at `d`” it would have
   fired at today's point too, and the chart would have ended a little above the number printed over
   it on exactly the files where check 3 is already failing.
+- **The three dates that could have broken that equality are all barred from the future**, and this
+  is what they are barred for. A transaction, a trade and a price are each a record of something that
+  has happened ([§13](13-validation.md)), so at `d` = today `Σ transactions ≤ d` is *every*
+  transaction, `quantity(d)` is the whole of every position, and no price sits beyond the point being
+  drawn — which is precisely the set [§11.4](#114-balances-and-net-worth) sums over. Allow one
+  future-dated row and the two figures on the screen part company: the headline counts it and the
+  line cannot, since the line is a function of `d` and the row is not in the past at any `d` on it.
+  There is no third figure to reconcile and no footnote to write; the dates simply cannot say
+  tomorrow.
 - **The dash is per point, not per stretch:** a month is dashed when *any* holding open in it fell
   back to cost, and solid when every one of them had a price. In practice that produces a single
   dashed prefix and a solid remainder, because prices start being recorded and then keep being
@@ -222,6 +255,25 @@ look like “none recorded”.
 Records that ought to correspond are paired heuristically, with **no linking effort from the user**.
 Matching is recomputed, never stored.
 
+**No matcher here compares absolute values.** Amounts are signed ([§2](02-domain-model.md)) and the
+sign is part of what is being matched, so every pairing below states whether the two figures are
+**equal** or **exactly opposite** and compares them as they stand:
+
+| Pairing | Relation | Because |
+| --- | --- | --- |
+| Internal transfer legs, check 1 | `a.amount = − b.amount` | One account sends what the other receives. |
+| Purchase transaction ↔ purchase trade, check 6 | `transaction.amount = − trade.total` | The money leaves the cash account; the trade total is what it cost, a positive figure. |
+| Sale transaction ↔ sale trade, check 7 | `transaction.amount = trade.total` | The money arrives; net proceeds is what arrived. |
+| Payslip ↔ salary transaction, check 4 | `transaction.amount = payslip.netPayment` | Pay arrives, and `netPayment` is a magnitude ≥ 0 ([§13](13-validation.md)). |
+| Pension credits ↔ payslip total, check 5 | `Σ transaction.amount = Σ pensionContribution` | Credits into the fund, against a magnitude ≥ 0. |
+
+Matching on magnitudes would have been shorter to write and would have paired a securities purchase
+recorded as money *in*, a transfer whose two legs are both negative and a salary entered as a debit —
+each of them a sign error that the file should be reporting. Comparing the signed figures leaves
+those unpaired, and an unpaired record is named by its check ([§9](09-checks.md)), which is where a
+sign error belongs. Nothing else about the pairing changes: the windows, the greed and the ordering
+below are the same either way.
+
 **Every matcher here is greedy, and every one of them states its order**, because a greedy pairing
 with an unstated order is a pairing that can come out differently on two machines reading the same
 file. The pattern is the same in all three: the side being matched *from* is walked in the ordering
@@ -231,8 +283,8 @@ ascending and unlabelled first for payslips ([§8.1](08-salaries.md#81-payslips)
 claims the **nearest-dated** unclaimed counterpart that satisfies the conditions, ties broken by
 that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteration order.
 
-- **Internal transfer legs:** equal absolute amount, opposite signs, different accounts, dates
-  within `transferMatchWindowDays`, both in a category with role `internal transfer`. Greedy
+- **Internal transfer legs:** exactly opposite amounts — `a.amount = − b.amount` — different
+  accounts, dates within `transferMatchWindowDays`, both in a category with role `internal transfer`. Greedy
   one-to-one in the order above — legs walked by date, each claiming the nearest-dated unclaimed
   counterpart. Unpaired legs are listed by check 1.
 - **The two legs carry the same amount, and a transfer fee is never netted into one of them.** If
@@ -243,8 +295,9 @@ that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteratio
   it also puts the fee where the rest of the year's bank charges are, which is where anyone would
   look for it.
 - **Trades against transactions:** a transaction whose category role is `securities purchase` /
-  `securities sale` pairs with a trade of the matching kind when the absolute amount equals the
-  trade total, dates are within `tradeMatchWindowDays`, and **the transaction's account and the
+  `securities sale` pairs with a trade of the matching kind when the amount stands in the relation
+  above to the trade total — **negated on a purchase, equal on a sale** — dates are within
+  `tradeMatchWindowDays`, and **the transaction's account and the
   trade's brokerage account belong to the same institution**. One-to-one, trades walked in their own
   table order and each claiming the nearest-dated unclaimed transaction that qualifies. Unmatched
   records on either side are listed by checks 6 and 7.
@@ -271,6 +324,14 @@ that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteratio
   transaction that qualifies. **The window is a whole month, not a number of days**,
   because what varies is which month the employer pays in, not by how many days it slips. Check 4
   reports both sides.
+- **A payslip has no date, so “nearest” is measured from the first day of its own month.** It carries
+  a `year` and a `month` and deliberately no payment date ([§2](02-domain-model.md)), and a greedy
+  matcher still has to say what it is greedy about: the distance ranked is from that month's first
+  day to the transaction's date, so among two candidates a payslip takes the earlier one, and the
+  ordinary case — pay on the 27th of the month, or on the 1st of the next — falls out in the order
+  anyone would expect. Ties are broken by the transaction's `insertionSeq` and then its `id`, as
+  everywhere else here. Any fixed anchor inside the month would do; what matters is that the document
+  names one, since two implementations picking differently would pair the same file two ways.
 - **The payslips of every contract are walked together, because a transaction has no employer on
   it.** Nothing in a bank row says which job paid it ([§2](02-domain-model.md)), so there is nothing
   to scope the pairing by and the walk covers every contract's payslips in one pass, ordered by

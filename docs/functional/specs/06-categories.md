@@ -13,9 +13,14 @@ The categories × years matrix — the one screen that answers where the money g
 
 > **Mockup —** [Report tab](../mockups/06-categories.html#report)
 
-- Rows are categories, **in the fixed order of the category list** ([§6.3](#63-category-list)) —
-  never by amount. Columns are calendar years plus a total. **The whole table is shown; there is no
-  paging.**
+- Rows are categories, **in the fixed `order` of [§2](02-domain-model.md)** — never by amount, and
+  never alphabetically. Columns are calendar years plus a total. **The whole table is shown; there is
+  no paging.**
+- **`order` exists for this table and is numbered to suit it.** It runs down the report's own reading
+  order — the Income group, then Expense, then Internal, then the Investments group below Net — so
+  the table ascends in it from top to bottom and the group boundaries fall where the numbering
+  changes type. Nothing else in the application reads the field
+  ([§6.3](#63-category-list)).
 - **Three of the four groups are a single type; the fourth is three.** Income, Expense and Internal
   each hold the categories of the type they are named after. *Investments* holds the `Investment`,
   `Divestment` and `Revaluation` types together, because buying, selling and revaluing are one
@@ -25,9 +30,8 @@ The categories × years matrix — the one screen that answers where the money g
   group, which reads well once and badly forever: change the year filter and every row jumps, so the
   eye has to find *Groceries* again instead of going straight to where it was last time. A table
   read every month is worth more when its shape is memorised, and that is only possible if the shape
-  is a constant. The same order is used on the list tab — the two tables agree, so a category is
-  always in the same place in both. **Pickers do not follow it and are alphabetical**
-  ([§6.3](#63-category-list)).
+  is a constant. **This is the one table that reads in `order`; everywhere else categories are
+  alphabetical** — the list tab, every picker and every filter ([§6.3](#63-category-list)).
 - Amounts **carry the sign and colour of the transactions behind them** — income green and positive,
   expense red and negative — exactly as on the Transactions screen. Absolute values with the
   direction implied by the group header would have read fine for Income and Expense and lied about
@@ -90,8 +94,9 @@ The categories × years matrix — the one screen that answers where the money g
   else ([§4.3](04-accounts.md#43-creating-and-editing)). The report is a history of where the money
   went, and the money that went through an account shut in 2021 went somewhere: leaving it out would
   make every year before that one disagree with itself depending on what has been closed since.
-  Closing an account takes its balance out of net worth
-  ([§11.4](11-calculations.md#114-balances-and-net-worth)) and takes nothing out of its past.
+  Closing an account takes nothing out of anything — not its past here and not its balance on
+  Portfolio ([§11.4](11-calculations.md#114-balances-and-net-worth)); it marks the account and sorts
+  it last.
 - The screen carries three tabs: this report, the categorisation rules ([§6.2](#62-rules)), and a
   read-only list of the twenty-seven categories with their types and roles
   ([§6.3](#63-category-list)). Rules sit here because what a rule change does is move figures in
@@ -187,51 +192,63 @@ the two lists by hand, and the application stores no alias.
 - **Read-only, and the only place the whole taxonomy is visible at once.** Its types and roles
   decide how every other screen adds things up, so being able to look at them without reading this
   document is worth a tab even though nothing on it can be changed.
-- **The order of this list is the order of every table.** Its `order` field
-  ([§2](02-domain-model.md)) fixes where a category sits in the report and in this list, and no
-  screen ever re-sorts by amount ([§6.1](#61-report)).
-- **Every picker is alphabetical instead** — the category picker on a transaction, the category
-  filter, the category on a rule. A table is read down and its shape is worth memorising; a picker
-  is opened with a name already in mind, and the place to look for a name is the alphabet. The two
-  orders serve two different actions and neither is improved by matching the other. Only the entries
-  that are not categories sit outside it: *Automatic* at the top of the transaction picker and
-  *Uncategorised* at the top of the filter ([§5.3](05-transactions.md#53-filters),
-  [§5.4](05-transactions.md#54-editing)).
+- **This list is alphabetical by name**, and so is every picker and every filter — the category
+  picker on a transaction, the category filter, the category on a rule. This tab is opened to look
+  one category up: to see what type *Voucher top-up* is, whether *Wealth tax* carries a role, why a
+  figure landed where it did. That is the same action a picker serves, and the place to look a name
+  up is the alphabet.
+- **The report is the one table that reads in `order` instead** ([§6.1](#61-report)), because it is
+  read down rather than looked up in — a matrix whose shape is worth memorising, grouped by type,
+  with subtotals that only mean anything if the rows above them are the right ones. The two orders
+  serve two different actions and neither is improved by matching the other, so the `order` value is
+  a column here rather than the arrangement of the page: this tab is where you can see what the
+  report's order actually is.
+- Only the entries that are not categories sit outside the alphabet: *Automatic* at the top of the
+  transaction picker and *Uncategorised* at the top of the filter
+  ([§5.3](05-transactions.md#53-filters), [§5.4](05-transactions.md#54-editing)).
 - The **Transactions** column is a live count and the reason the tab is more than decoration: a
   category with none is one the rules never reach, and the total across all 27 is every categorised
   transaction in the file — 4.811 of 4.812 in the mockup, the missing one being the failure of check 2.
 - Adding, renaming or removing a category is a change to the application, not a setting
   ([§15](15-out-of-scope.md)).
 
-| Category | Type | Role | Was | Receipt tracked |
-| --- | --- | --- | --- | --- |
-| Salary | Income | salary | Stipendio | ✓ |
-| Pension fund contribution | Income | pension contribution | Contribuzione fondo pensione | |
-| Reimbursement | Income | — | Rimborso | |
-| Gift received | Income | — | Regalo | |
-| Other income | Income | — | Altra entrata | |
-| Interest, dividends & bonuses | Income | interest and dividends | Interessi, dividendi e bonus | |
-| Voucher top-up | Income | — | Aggiunta voucher | |
-| Securities purchase | Investment | securities purchase | Acquisto titoli | |
-| Securities sale | Divestment | securities sale | Vendita titoli | |
-| Restaurants & bars | Expense | — | Ristorante e bar | |
-| Groceries | Expense | — | Supermercato | |
-| Travel | Expense | — | Viaggio | |
-| Home & household | Expense | — | Casa | |
-| Rent & condominium fees | Expense | — | Affitto e spese condominiali | ✓ |
-| Electricity | Expense | — | Luce | ✓ |
-| Home internet | Expense | — | Internet casa | ✓ |
-| Mobile & phone | Expense | — | Internet telefono | ✓ |
-| Entertainment | Expense | — | Intrattenimento | |
-| Other expense | Expense | — | Altro pagamento | |
-| Bank fees | Expense | bank fees | Costo banca | |
-| Income & other taxes | Expense | — | Tassa non patrimoniale | ✓ |
-| Wealth tax | Expense | wealth tax | Tassa patrimoniale | |
-| Culture & education | Expense | — | Cultura | |
-| Health & personal care | Expense | — | Salute e persona | |
-| Technology & devices | Expense | — | Tecnologia e devices | |
-| Internal transfer | Internal | internal transfer | Trasferimento interno | |
-| Value adjustment | Revaluation | value adjustment | — new — | |
+Listed as the tab lists them, **alphabetically**. `Order` is the report's row order
+([§6.1](#61-report)) and is the only thing that reads in a sequence of its own.
+
+| Category | Type | Role | Order | Was | Receipt tracked |
+| --- | --- | --- | --- | --- | --- |
+| Bank fees | Expense | bank fees | 18 | Costo banca | |
+| Culture & education | Expense | — | 21 | Cultura | |
+| Electricity | Expense | — | 13 | Luce | ✓ |
+| Entertainment | Expense | — | 16 | Intrattenimento | |
+| Gift received | Income | — | 4 | Regalo | |
+| Groceries | Expense | — | 9 | Supermercato | |
+| Health & personal care | Expense | — | 22 | Salute e persona | |
+| Home & household | Expense | — | 11 | Casa | |
+| Home internet | Expense | — | 14 | Internet casa | ✓ |
+| Income & other taxes | Expense | — | 19 | Tassa non patrimoniale | ✓ |
+| Interest, dividends & bonuses | Income | interest and dividends | 6 | Interessi, dividendi e bonus | |
+| Internal transfer | Internal | internal transfer | 24 | Trasferimento interno | |
+| Mobile & phone | Expense | — | 15 | Internet telefono | ✓ |
+| Other expense | Expense | — | 17 | Altro pagamento | |
+| Other income | Income | — | 5 | Altra entrata | |
+| Pension fund contribution | Income | pension contribution | 2 | Contribuzione fondo pensione | |
+| Reimbursement | Income | — | 3 | Rimborso | |
+| Rent & condominium fees | Expense | — | 12 | Affitto e spese condominiali | ✓ |
+| Restaurants & bars | Expense | — | 8 | Ristorante e bar | |
+| Salary | Income | salary | 1 | Stipendio | ✓ |
+| Securities purchase | Investment | securities purchase | 25 | Acquisto titoli | |
+| Securities sale | Divestment | securities sale | 26 | Vendita titoli | |
+| Technology & devices | Expense | — | 23 | Tecnologia e devices | |
+| Travel | Expense | — | 10 | Viaggio | |
+| Value adjustment | Revaluation | value adjustment | 27 | — new — | |
+| Voucher top-up | Income | — | 7 | Aggiunta voucher | |
+| Wealth tax | Expense | wealth tax | 20 | Tassa patrimoniale | |
+
+**Read down the `Order` column and the report appears**: 1 – 7 are the Income group, 8 – 23 the
+Expense group, 24 the Internal group, and 25 – 27 the Investments group that sits below Net
+([§6.1](#61-report)). The numbering is contiguous and every category has one, which is what lets the
+report sort on a single field and still come out grouped.
 
 - **Value adjustment** carries the manual correction that realigns an account's balance with its
   real value when that value moves on its own — the pension fund's underlying investments being the

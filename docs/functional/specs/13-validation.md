@@ -8,6 +8,30 @@ record in isolation** is a validation and is prevented, while a **rule about how
 relate** is a check and is reported. That is why a trade cannot have a negative quantity but can
 sell more than was ever bought.
 
+**Four families of rule cross that line and are prevented anyway. They are listed here because they
+are the exceptions, and there are no others** — every other two-record rule in the application is a
+check.
+
+| Prevented although it relates two records | Why it is not left to a check |
+| --- | --- |
+| **Uniqueness** — institution name, account name within its institution, contract name, security ISIN | The damage is to the pickers, and it is immediate: two identical entries in a list the user is about to choose from cannot be told apart, so the next record is misfiled by a form that offered no way to get it right. A check would report the collision after everything chosen in between had already gone to the wrong one of the two. |
+| **Deletion refused while something points at the record** | The alternative is not a reported inconsistency but a dangling reference — a transaction on an account that no longer exists. The file has no state for that and no screen could render it. |
+| **The two locks** — an account's `type` once it holds anything, a trade's `kind` once it exists | Both would silently restate records already written rather than correct the one in front of the user: a cash account turned brokerage orphans every row on it, a purchase turned sale reverses a position. Deleting and re-entering is the honest way to do either, and it is available. |
+| **A payslip's month within its contract's start and end dates** | Both records are on screen as it is typed — the contract is the selector scoping the whole screen ([§8.1](08-salaries.md#81-payslips)) — so this is not a rule about a record the user has not reached yet. A payslip from before you were hired is always a typo, never a half-entered state on the way to something. |
+
+The thread through all four is that the counterpart record is **already chosen, already on screen,
+and not going to arrive later**. Where that is not true — a trade whose funding transaction has not
+been entered yet, a transfer whose second leg comes with next month's export, a sale whose purchase
+is further down the pile of confirmations — the rule is a check, because a form that refuses those
+is a form blocked by a record the user is on their way to entering.
+
+**What a reference is allowed to point at is not on this list, because nothing is refused.** A
+transaction's account picker holds cash accounts and no others, a trade's holds brokerage accounts, a
+rule's category picker holds real categories: the wrong kind of record is never offered, so there is
+no invalid choice to reject and no message to write ([§2](02-domain-model.md),
+[§9](09-checks.md)). That is the general shape of every rule here that could have been a refusal and
+is instead an absence.
+
 ---
 
 ## 13.1 How it behaves
@@ -26,9 +50,10 @@ sell more than was ever bought.
   length, and read by nothing in the application ([§5.1](05-transactions.md#51-columns)). It is the
   one field with no rule to state, which is why it is stated once here instead of in nine tables.
 - **An imported row is validated exactly as a typed one.** Bulk import is another way into the same
-  record, not a side door around these rules: a pasted row whose date does not parse, whose amount
-  does not parse, or whose description is empty after trimming **cannot be read**, is marked with
-  the reason and cannot be ticked ([§5.7](05-transactions.md#57-bulk-import)). **There is no value
+  record, not a side door around these rules: a pasted row whose date does not parse, **whose date is
+  in the future**, whose amount does not parse, or whose description is empty after trimming
+  **cannot be read**, is marked with the reason and cannot be ticked
+  ([§5.7](05-transactions.md#57-bulk-import)). **There is no value
   the form refuses that a paste can nevertheless put in the file**, which is the direction that
   matters. **A zero amount is not one of them** — it is legal on both paths, and an import that met
   one would bring it in.
@@ -92,7 +117,7 @@ sell more than was ever bought.
 | Field | Rule |
 | --- | --- |
 | accountId | Required. The picker lists **cash accounts only**; a brokerage account can never be chosen, here or on an import. **Closed accounts are listed**, marked and after the open ones ([§4.3](04-accounts.md#43-creating-and-editing)). |
-| date | Required, date picker. No bound against the account's dates — check 12 reports those. |
+| date | Required, date picker. **Not in the future** — a ledger records what has happened, and the picker offers no day after today, on the form and in an inline edit alike. It is also what lets the net worth chart end exactly on the headline figure ([§11.5](11-calculations.md#115-net-worth-over-time)). A pasted row dated ahead cannot be read ([§5.7](05-transactions.md#57-bulk-import)). No bound against the *account's* dates — check 12 reports those. |
 | description | Required, trimmed, non-empty. It is the only thing a rule matches on. |
 | amount | Amount field, required, either sign. **Zero is legal** — a card verification, a reversed charge and a fee waived to nothing all post as `0,00`, and refusing them would send the user to invent a figure the bank did not use. Empty still blocks the save: zero is a value that was typed, empty is a field that was not. |
 | categoryId | **Either a category or *Automatic* — never nothing.** The picker offers no clearing entry, so a `manual` row always carries a category and the only empty category in the file is one no rule matched ([§2](02-domain-model.md)). |
@@ -105,7 +130,7 @@ sell more than was ever bought.
 | kind | Required, `purchase` or `sale`. Not a field on the form — it is which tab the trade was recorded from ([§7.2](07-investments.md#72-purchases), [§7.3](07-investments.md#73-sales)) — and it is **locked once the trade exists**: a purchase edited into a sale would restate a position rather than correct a typo, and deleting the row and recording it again is the honest way to do that. |
 | accountId | Required. The picker lists **brokerage accounts only**, closed ones included and marked ([§4.3](04-accounts.md#43-creating-and-editing)). |
 | securityId | Required — chosen from the existing list or created inline ([§7.5](07-investments.md#75-recording-a-trade-and-where-securities-come-from)). |
-| date | Required, date picker. No bound against the account's dates — check 12 reports those, exactly as for a transaction. |
+| date | Required, date picker. **Not in the future**, exactly as for a transaction and for the same two reasons — a trade is a confirmation of something that happened, and a position dated ahead would put the net worth chart below the headline it ends at ([§11.5](11-calculations.md#115-net-worth-over-time)). No bound against the *account's* dates — check 12 reports those. |
 | quantity | Required, > 0, at most 4 decimals. Direction is `kind`, never a negative quantity. |
 | unitPrice | Required, > 0, at most 4 decimals. |
 | fees | Amount field, required, ≥ 0. |

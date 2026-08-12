@@ -43,12 +43,20 @@
   folder without either one pushing the other out. One folder for all of them would have meant two
   files sharing ten slots, and the one opened less often losing its history to the one opened daily.
 - **One backup is taken when a file is closed, and only if something changed during the session.**
-  Closing is the moment, and there are two ways to reach it: quitting the application, and leaving
-  one file for another through the File menu
-  ([§12.2](#122-the-menu-bar-and-which-file-is-open)) — both take the copy, because both end a
-  session with that file. A session that only read the file writes nothing: an identical copy is not
-  a backup, it is a leak in the rotation, and it would push out the one version that was worth
-  keeping.
+  The rule is about the session, not about the gesture that ended it: **however the open file stops
+  being the open file, that is a close and it takes the copy.** There are four ways to get there and
+  they are all the same event —
+  - **Quit**, from the File menu or by any means the platform offers;
+  - **closing the window**, which on some platforms is not quitting and is a close all the same;
+  - **File › New…**, which leaves this file for a fresh one;
+  - **File › Open…** or **Open Recent**, which leaves it for another
+    ([§12.2](#122-the-menu-bar-and-which-file-is-open)).
+
+  Listing them is the point: a backup that depended on which of four doors was used would be missing
+  precisely when someone worked all afternoon and then opened last year's ledger to compare
+  something. A session that only *read* the file writes nothing, whichever door it leaves by — an
+  identical copy is not a backup, it is a leak in the rotation, and it would push out the one version
+  that was worth keeping.
 - **Not per save.** Autosave fires every few seconds while typing; backing up on each would cycle
   the whole rotation away within a minute and leave nothing older than lunchtime.
 - **A session that ends in a crash tries to take its backup and may not manage it. That is
@@ -154,9 +162,10 @@
   whatever was being done in it last time.
 - **Two things the menu bar must carry, and everything else is the platform's business.**
   - **A File menu of four actions**: *New…*, which writes a fresh seeded file; *Open…*, which
-    browses for one; *Open Recent*, which is the same list the launch screen offers; and *Quit*,
-    which takes the closing backup. Those four are the same three files and one exit on every
-    platform ([§1](01-premise-and-constraints.md)).
+    browses for one; *Open Recent*, which is the same list the launch screen offers; and *Quit*.
+    Those four are the same three files and one exit on every platform
+    ([§1](01-premise-and-constraints.md)). **All four end the current session and all four take its
+    closing backup**, as does closing the window without quitting ([§12](#12--storage)).
   - **An About item naming the application and its version.** It is the only place a version number
     appears, and it is the thing to read before saying which version wrote a file
     ([§12.1](#121-the-launch-screen)) or reporting that something went wrong.

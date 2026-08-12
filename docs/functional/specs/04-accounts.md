@@ -89,12 +89,20 @@ great deal of machinery for a keystroke saved twice a decade. Add the bank first
 - **Opening balance** is the balance on the opening date, before any recorded transaction. Leave it
   at zero when the account’s full history is being imported; a *Brokerage* account has none, its
   value being entirely its holdings.
-- **Closing date** is how an account is retired: fill it in and the account leaves the portfolio,
-  keeping its history. The form does not require the account to be empty first — check 11 reports a
-  closed account that still holds something, and check 12 the records dated outside the two dates.
-  Both name the situation; neither refuses the edit ([§9](09-checks.md)).
+- **Closing date** is how an account is retired: fill it in and the account is marked closed and
+  sorted last everywhere, keeping its history. The form does not require the account to be empty
+  first — check 11 reports a closed account that still holds something, and check 12 the records
+  dated outside the two dates. Both name the situation; neither refuses the edit
+  ([§9](09-checks.md)).
+- **Closing changes no total.** A closed account keeps its balance in net worth, in the breakdown and
+  in the report ([§11.4](11-calculations.md#114-balances-and-net-worth)), because an account that was
+  closed properly was emptied first and contributes zero of its own accord, and one that was not is
+  holding money the file still says you have. Dropping it out of the arithmetic instead would move
+  net worth on the day a date was typed into a form — a figure changing because of an edit that
+  recorded nothing about the money. Check 11 is what says an account was closed with something left
+  in it, and it says it without the total having to lie in the meantime.
 - **A closed account stays in every picker**, marked as closed and sorted after the open ones.
-  Closing says a balance no longer counts towards net worth; it does not say the account has become
+  Closing marks an account; it does not say the account has become
   unmentionable. Its rows still have to be editable — a miscategorised payment from 2019 is found
   long after the account it sat on was shut — and a row can only be edited if its own account is
   among the choices. It is also the only way check 12's second half is reachable by hand: a record
@@ -110,12 +118,22 @@ great deal of machinery for a keystroke saved twice a decade. Add the bank first
 > deleted; deletion stays available only while nothing points at it. Every delete asks for
 > confirmation: there is no undo.
 >
-> **Only accounts can be retired.** Setting an account's `closingDate` keeps its history and drops
-> it out of the portfolio — but **not** out of the pickers, where it stays marked and last, because
-> its rows remain editable. There is no equivalent for institutions, securities, contracts or rules
-> — a contract has an `endDate` that says when it ended, and everything else stays in the list. One
-> retirement mechanism, on the one entity whose balance would otherwise distort net worth, beats a
-> status flag on everything.
+> **Two deletions are confirmed somewhere other than at the click, and they are the only two.**
+> Clearing a year's `workingDays` cell deletes its ContractYear record and is **not** confirmed at
+> all — nothing is lost but the number in the cell, which is in front of the user as they clear it,
+> and typing it again is the whole of the undo ([§13](13-validation.md)). Deleting a **rule** is
+> confirmed once, later, as part of *Apply changes*: a rule removed from a draft has changed nothing
+> in the file yet, and the apply summary states how many transactions the deletion un-categorises
+> before anything is written ([§6.2](06-categories.md#62-rules)). Everywhere else the confirmation is
+> the click itself.
+>
+> **Only accounts can be retired**, and retiring one marks it rather than removing it: setting an
+> account's `closingDate` keeps its history, keeps its balance in every total
+> ([§11.4](11-calculations.md#114-balances-and-net-worth)) and keeps it in the pickers, where it
+> stays marked and last, because its rows remain editable. There is no equivalent for institutions,
+> securities, contracts or rules — a contract has an `endDate` that says when it ended, and
+> everything else stays in the list. One retirement mechanism, on the one entity anyone would think
+> to retire, beats a status flag on everything.
 
 ---
 
