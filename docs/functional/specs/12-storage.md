@@ -32,11 +32,29 @@
   where to find what it displaced. This is what [§1](01-premise-and-constraints.md) means by not
   coordinating two of itself: the folder is allowed to be a synced one, so the situation is ordinary
   rather than exotic, and detecting it and saying so is the whole of the application's answer to it.
-- **Ten rolling timestamped backups** in a folder beside the data file, count configurable. One is
-  taken **when the application quits after a session in which anything changed**, and one **when a
-  file is opened** — not per save. Autosave fires every few seconds while typing; backing up on each
-  would cycle all ten away within a minute and leave nothing older than lunchtime.
-- **Every copy the application writes there is one of the ten.** The routine backups, the version
+- **Rolling timestamped backups live beside the file they belong to, in a folder of their own.** A
+  ledger at `…/ledgers/finances.spiccioli` keeps its backups in `…/ledgers/finances-backups/` — the
+  file's own name without its extension, plus `-backups`, in the same directory. **The rotation is
+  therefore per file**: `backupCount` copies of *this* ledger, ten by default
+  ([§10](10-settings.md)), and a second ledger in the same directory keeps its own count in its own
+  folder without either one pushing the other out. One folder for all of them would have meant two
+  files sharing ten slots, and the one opened less often losing its history to the one opened daily.
+- **One backup is taken when a file is closed, and only if something changed during the session.**
+  Closing is the moment, and there are two ways to reach it: quitting the application, and leaving
+  one file for another through the File menu
+  ([§12.2](#122-the-menu-bar-and-which-file-is-open)) — both take the copy, because both end a
+  session with that file. A session that only read the file writes nothing: an identical copy is not
+  a backup, it is a leak in the rotation, and it would push out the one version that was worth
+  keeping.
+- **Not per save.** Autosave fires every few seconds while typing; backing up on each would cycle
+  the whole rotation away within a minute and leave nothing older than lunchtime.
+- **A session that ends in a crash tries to take its backup and may not manage it. That is
+  accepted**, and it costs less than it looks: the copy written when the *previous* session closed
+  is precisely the state this one started from, so the folder already holds the version to fall back
+  to, and the file itself is on disk autosaved to within a few seconds of the crash. What is lost is
+  the copy that would have marked where the crashed session got to. Guaranteeing it would mean
+  backing up on a timer, which is the per-save rotation this rule exists to avoid.
+- **Every copy the application writes there is one of the count.** The backups on close, the version
   displaced by an external modification, and the pre-upgrade copy all go into the same folder and
   the same rotation, and all of them can be pushed out by later ones. There is no protected shelf: a
   second class of backup that never expires would fill the folder with the files nobody chose to
@@ -45,13 +63,6 @@
   ([§12.1](#121-the-launch-screen)) each state that the copy is part of the rotation and will
   eventually be rotated out, because that is precisely when the user can still decide to move it
   somewhere safe.
-- **The backup on open is skipped when the file is byte-for-byte the newest backup already held.**
-  Otherwise opening the application ten times on a quiet week would fill the folder with ten
-  identical copies and push out the one version that was actually worth keeping. Backups exist to
-  hold *different* states, so an identical one is not a backup, it is a leak in the rotation.
-- Between them the two moments cover the case the quit-only rule missed: a session that ends in a
-  crash, or one that ruins the file and is closed in a hurry, still has the state it started from
-  sitting in the folder.
 - **On launch the application always asks which file to open**, offering the recently opened
   locations, a browse option, and **New file…** — which writes a fresh file with the categories of
   [§6.3](06-categories.md#63-category-list) seeded and nothing else. It never reopens the last file

@@ -25,7 +25,7 @@ interpret.
 | thousandsSeparator | `.` · `,` · space · **none** | `.` | Display only |
 | currencySymbol | 1 – 3 characters, required | `€` | Every monetary figure — **all of them carry it** |
 | currencyPosition | before · after | before | As above |
-| defaultTaxRate | 0 – 100%, one decimal | 26% | Initial value of `Security.taxRate` ([§2](02-domain-model.md)). Changing it does not touch securities that already exist. |
+| defaultTaxRate | 0 – 100%, one decimal | 26% | Initial value of `Security.taxRate` ([§2](02-domain-model.md)). Entered as a percentage, **stored as the fraction it names** — 26% is `0,26` ([§11](11-calculations.md)). Changing it does not touch securities that already exist. |
 | priceStalenessDays | integer ≥ 1 | 30 | Check 3, holdings marker |
 | pensionRevaluationMonths | integer ≥ 1 | 3 | Check 10 |
 | receiptPendingMonths | integer ≥ 1 | 3 | Check 14 |

@@ -9,6 +9,14 @@ totals, yearly aggregates, hourly rates — so a round thousand reads `€ 21.90
 prices carry four; percentages carry one. The only figures written short are the axis labels on a
 chart, where `100k` is the point.
 
+**A percentage is stored as a fraction and displayed as a percentage.** `taxRate`, `defaultTaxRate`,
+`netGrossPct`, `gainPct` and `netGainPct` all hold a number between 0 and 1 — 26% is `0,26` and
+12,5% is `0,125` — and the × 100 happens once, at display, beside the sign that says what it means.
+Every formula in this section therefore applies a rate by multiplying, with no scaling step to
+forget: `taxableGain × security.taxRate` is the tax, not a hundred times it. A field that is
+*entered* as a percentage says so where it is defined ([§13](13-validation.md)); what is stored
+underneath it is the fraction.
+
 **There are exactly two exceptions to the no-intermediate-rounding rule, and both round to the
 cent** because on both sides of them sits an amount of money someone else has already rounded to the
 cent:
@@ -212,10 +220,19 @@ look like “none recorded”.
 Records that ought to correspond are paired heuristically, with **no linking effort from the user**.
 Matching is recomputed, never stored.
 
+**Every matcher here is greedy, and every one of them states its order**, because a greedy pairing
+with an unstated order is a pairing that can come out differently on two machines reading the same
+file. The pattern is the same in all three: the side being matched *from* is walked in the ordering
+its own screen uses — `date ASC, insertionSeq ASC, id ASC` for transactions and trades
+([§5.2](05-transactions.md#52-ordering-and-paging), [§7.2](07-investments.md#72-purchases)), month
+ascending and unlabelled first for payslips ([§8.1](08-salaries.md#81-payslips)) — and each record
+claims the **nearest-dated** unclaimed counterpart that satisfies the conditions, ties broken by
+that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteration order.
+
 - **Internal transfer legs:** equal absolute amount, opposite signs, different accounts, dates
   within `transferMatchWindowDays`, both in a category with role `internal transfer`. Greedy
-  one-to-one, nearest date first, and ties broken by `insertionSeq` so the result never depends on
-  iteration order. Unpaired legs are listed by check 1.
+  one-to-one in the order above — legs walked by date, each claiming the nearest-dated unclaimed
+  counterpart. Unpaired legs are listed by check 1.
 - **The two legs carry the same amount, and a transfer fee is never netted into one of them.** If
   the sending bank takes € 1,00 to make the wire, that euro is **its own transaction** on the
   sending account, in a category with role `bank fees` — never subtracted from the leg. Netting it
@@ -226,8 +243,9 @@ Matching is recomputed, never stored.
 - **Trades against transactions:** a transaction whose category role is `securities purchase` /
   `securities sale` pairs with a trade of the matching kind when the absolute amount equals the
   trade total, dates are within `tradeMatchWindowDays`, and **the transaction's account and the
-  trade's brokerage account belong to the same institution**. One-to-one. Unmatched records on
-  either side are listed by checks 6 and 7.
+  trade's brokerage account belong to the same institution**. One-to-one, trades walked in their own
+  table order and each claiming the nearest-dated unclaimed transaction that qualifies. Unmatched
+  records on either side are listed by checks 6 and 7.
 - The two sides sit in different accounts by construction — the trade in a brokerage account, the
   money in a cash one — so the pairing keys off the institution they share rather than off the
   account. **The trade side always has one**: a `Brokerage` account cannot be created without an
@@ -246,8 +264,9 @@ Matching is recomputed, never stored.
   is why the comparison is an exact match on the cent-rounded total rather than a tolerance.
 - **Payslips against transactions:** a payslip pairs with a transaction in a role `salary` category
   whose amount equals its `netPayment` and whose date falls in the payslip's own month or the month
-  after. One-to-one, earliest transaction first. The same rule pairs `pensionContribution` against
-  role `pension contribution` transactions. **The window is a whole month, not a number of days**,
+  after. One-to-one, payslips walked in the order of [§8.1](08-salaries.md#81-payslips) and each
+  claiming the nearest-dated unclaimed transaction that qualifies. **The window is a whole month, not
+  a number of days**,
   because what varies is which month the employer pays in, not by how many days it slips. Check 4
   reports both sides.
 - **A `netPayment` of zero pairs like any other figure**, against a transaction of `0,00`. A payslip
@@ -259,8 +278,20 @@ Matching is recomputed, never stored.
   reaches the fund as two or three credits — employee share, employer share, TFR — against one
   figure on the payslip, so there is nothing to pair one to one. Months are walked in ascending
   order; each claims the role `pension contribution` transactions dated in it or the month after
-  that no earlier month has claimed, and its total is compared with the sum of `pensionContribution`
-  over that month's payslips. Check 5 reports the months that disagree, with the difference.
+  that no earlier month has claimed, **in date order and no further than its own total**: it stops
+  claiming as soon as what it has claimed reaches the sum of `pensionContribution` over its
+  payslips. That total is then compared with what it claimed. Check 5 reports the months that
+  disagree, with the difference.
+- **The cap is what keeps two adjacent months from fighting over one credit.** A month's window
+  overlaps the next month's, so a month that claimed everything in it would take its successor's
+  credits as well whenever the fund pays in the same month as the payslip rather than the month
+  after — and the successor, finding nothing left, would fail for the amount its predecessor
+  swallowed. Stopping at the expected total gives each month exactly what it was owed and leaves the
+  rest where it lies, under either payment habit and without the file having to declare which one it
+  follows. A month that is genuinely short claims everything its window holds, never reaches its
+  total, and reports the shortfall; a genuine surplus is left unclaimed and reported against its own
+  month by the rule below, which names the month the extra credit is actually in instead of
+  smearing it down the rest of the year.
 - **The walk covers every month either side has something in**, which is what makes the comparison
   symmetric. A month with payslips is walked whether or not they contribute anything; and a credit
   that no month with payslips has claimed — one arriving where there are no payslips at all, after a
@@ -274,7 +305,12 @@ Matching is recomputed, never stored.
 
 - `netSalary = netPayment − refunds + carPayment`
 - `netGrossPct = netSalary ÷ gross`
-- `yearContractGross = max(contractGross in year) × contract.monthsPerYear`
+- `yearContractGross = contractGross of the year's **last** payslip × contract.monthsPerYear`, in
+  the ordering of [§8.1](08-salaries.md#81-payslips), and **0 for a year with no payslips**. The
+  last one is the terms as they stood at the end of the year, which is what the contract line on the
+  totals chart is read against; a year that recorded nothing has no terms to report and draws no
+  line rather than an *undefined* ([§11](#11--calculations)), the figure being a restatement of a
+  contract term and not a division by anything.
 - `yearAvgGross = Σ gross in year ÷ count of payslips in year`, and the same over `netSalary` for
   `yearAvgNet`. **The divisor is the payslips there were**, not twelve and not `monthsPerYear`: a
   year with five payslips averages over five, which is what makes these the only salary figures a

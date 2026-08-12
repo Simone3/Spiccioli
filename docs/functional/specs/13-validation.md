@@ -105,7 +105,7 @@ sell more than was ever bought.
 | unitPrice | Required, > 0, at most 4 decimals. |
 | fees | Amount field, required, ≥ 0. |
 | taxes | Amount field, required on a sale, ≥ 0. **Forced to 0 and disabled on a purchase.** Never pre-filled from the estimate of [§11.3](11-calculations.md#113-hypothetical-liquidation). |
-| oversell | **Not validated.** A sale of more than has been bought is saved and reported by checks 8 and 9 — during entry, a sale recorded before its purchase is the ordinary case ([§9](09-checks.md)). |
+| oversell | **Not validated.** A sale of more than has been bought is saved and reported by checks 8 and 9. It is an anomaly, not a stage of ordinary work — but it is a rule about how two records relate, and those are reported, never refused ([§13.1](#131-how-it-behaves), [§9](09-checks.md)). Refusing it would also mean a form that can be blocked by a record the user has not reached yet, on the one screen where trades are entered in whatever order the confirmations came out of the envelope. |
 
 ### Security
 
@@ -114,7 +114,7 @@ sell more than was ever bought.
 | isin | Required, unique, 12 characters, two letters then nine alphanumerics then a digit. The format is checked; the check digit is not recomputed. |
 | ticker, name | Required, trimmed. |
 | currency | Required. `EUR` only in v1 ([§13.1](#131-how-it-behaves)). |
-| taxRate | Required, 0 – 100, at most 1 decimal. |
+| taxRate | Required. **Entered and shown as a percentage**, 0 – 100 with at most 1 decimal, and stored as the fraction it names — 12,5 is typed and `0,125` is kept ([§11](11-calculations.md)). |
 | delete | Refused while any **trade** points at it. Prices are not dependent data — they are part of the security, not references to it, and they go with it. Deleting a security therefore deletes its price history in the same breath, and the confirmation says how many records that is. |
 
 ### Price
@@ -167,7 +167,7 @@ sell more than was ever bought.
 | priceStalenessDays, pensionRevaluationMonths, receiptPendingMonths | Integer ≥ 1. |
 | transferMatchWindowDays, tradeMatchWindowDays | Integer 0 – 31. Zero means same day only. |
 | backupCount | Integer 1 – 100. |
-| defaultTaxRate | 0 – 100, at most 1 decimal. |
+| defaultTaxRate | 0 – 100, at most 1 decimal, entered as a percentage and stored as a fraction, exactly as `Security.taxRate` above. |
 | dateFormat, decimalSeparator, currencyPosition | Pickers over the closed sets of [§10](10-settings.md). There is nothing to reject: the only values offered are the legal ones. |
 | thousandsSeparator | The same, plus **none**, which is a value rather than an empty field. |
 | currencySymbol | Required, trimmed, 1 – 3 characters. The one free-text preference; empty is refused, since every figure in the application carries it ([§10](10-settings.md)). |

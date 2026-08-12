@@ -22,9 +22,9 @@ Securities is what all three point at.
   ([§13](13-validation.md)). The whole editable history of a security lives
   on the Securities tab of this same screen ([§7.4](#74-securities)); Holdings is the fast path for
   the one thing done weekly, that tab is where a past mistake is repaired.
-- **Update prices** fetches today's quote for **every security in the file** and writes what comes
-  back, with no selection beforehand and no confirmation afterwards — then a notice says what
-  happened ([§7.6](#76-prices)). It is a button and nothing else: there is no setting behind it, and
+- **Update prices** fetches the latest quote for **every security in the file** and writes what comes
+  back, each record dated the day its quote belongs to, with no selection beforehand and no
+  confirmation afterwards — then a notice says what happened, dates included ([§7.6](#76-prices)). It is a button and nothing else: there is no setting behind it, and
   pressing it is the only thing that ever contacts the network. Never press it and the inline editor
   is the only way in, which is a complete way to use the application.
 - A price older than `priceStalenessDays` is marked on the row itself, not only in
@@ -132,7 +132,8 @@ Securities is what all three point at.
 - **Total cost** is computed and shown live as quantity, price and fees are typed — never entered.
   It is the figure [§11.6](11-calculations.md#116-derived-matching) pairs against the bank
   transaction.
-- **Account** lists brokerage accounts only, and defaults to the one last used.
+- **Account** lists brokerage accounts only and starts empty, no picker in the application
+  remembering what was chosen last ([§5.5](05-transactions.md#55-add-transaction)).
 - **A security can be created inline, here.** Typing an ISIN or ticker searches existing securities;
   if none matches, the form expands with the fields needed to create one, and it is saved together
   with the trade. No “create a security first” step is *required* — the Securities tab has *Add
@@ -167,7 +168,8 @@ Securities is what all three point at.
   own ISIN and its own holding — which the model already supports and which is what the difference
   is telling you.
 - **A security with no price at all values at zero**, everywhere a current figure is shown, and
-  fails check 3 by name while it holds an open position. That is true on the historical chart of
+  fails check 3 by name while it has an open holding ([§9](09-checks.md)) — a fully sold one has no
+  position left to value and no check to fail. That is true on the historical chart of
   [§11.5](11-calculations.md#115-net-worth-over-time) as well: what the chart values at cost is the
   stretch **before a security's first recorded price**, drawn dashed — a chart that exists to show
   shape can afford an approximation for the years nobody was recording prices, but a security with
@@ -178,24 +180,37 @@ Securities is what all three point at.
   never on load, never in the background. A switch in Settings would have been a second way to
   express what the button already expresses by not being pressed, and a state in which the button is
   present but refuses is worse than no state at all.
-- **One press covers every security in the file**, held or fully sold, and asks for one thing:
-  today's quote. There is no list to tick first — a fetch is cheap, the securities are a few dozen,
-  and choosing among them is a decision the user would have to make correctly every week to save
-  nothing.
-- **What comes back is written straight in**, as a `fetched` Price record dated **today**, replacing
-  whatever that day already held ([§2](02-domain-model.md)). **Nothing is shown for confirmation
-  first.** A confirmation step here would be a list of two dozen numbers nobody can check — the
-  figure being replaced is at most a few hours old and the one replacing it comes from the same
-  provider — and it would ask the question once per security every week.
-- **A security the provider has no quote for today is left exactly as it is.** No record is written,
-  the price it already had still stands and still ages towards check 3, and nothing is carried
-  forward or invented. The same is true of one the provider does not recognise, or of a fetch that
-  fails outright.
-- **The notice afterwards is the whole report of the pass**: how many prices were written, how many
-  securities had no quote for today, and how many could not be fetched at all, **naming the
-  securities in the last two groups**. It sits on the screen until dismissed. Nothing about a failed
-  fetch is recorded in the file — the notice is where it lives, and the remedy is to press the
-  button again or to type the price in by hand ([§7.1](#71-holdings)).
+- **One press covers every security in the file**, held or fully sold, and asks for one thing: the
+  **latest quote the provider has**, whatever day it belongs to. There is no list to tick first — a
+  fetch is cheap, the securities are a few dozen, and choosing among them is a decision the user
+  would have to make correctly every week to save nothing.
+- **What comes back is written straight in, dated the day the quote is for** — not the day the
+  button was pressed — as a `fetched` Price record replacing whatever that day already held
+  ([§2](02-domain-model.md)). A quote is a fact about a trading day, and a Friday close filed under
+  Sunday would be a small lie that the net worth chart of
+  [§11.5](11-calculations.md#115-net-worth-over-time) then draws. It also makes the button work at
+  the weekend, which asking for *today's* quote did not: markets are shut for two days in seven and
+  half the times anyone sits down with their accounts, nothing would have been written at all and
+  every price would have gone on ageing towards check 3.
+- **A quote the provider dates in the future is not written**, on the same rule that governs a typed
+  one: a price is a fact about a day that has happened ([§13](13-validation.md)). It is reported as
+  a security that could not be fetched.
+- **Nothing is shown for confirmation first.** A confirmation step here would be a list of two dozen
+  numbers nobody can check — the figure being replaced is a session or two old and the one replacing
+  it comes from the same provider — and it would ask the question once per security every week.
+- **A security the provider has no quote for at all is left exactly as it is.** No record is
+  written, the price it already had still stands and still ages towards check 3, and nothing is
+  carried forward or invented. The same is true of one the provider does not recognise, or of a
+  fetch that fails outright.
+- **The notice afterwards is the whole report of the pass**: how many prices were written and **what
+  dates they carry** — one line when they all share a date, which is the ordinary case, and the
+  spread with the securities named when they do not — how many securities had no quote, and how many
+  could not be fetched at all, **naming the securities in the last two groups**. The dates are the
+  part worth reading: they are what says whether the file has just been brought up to Friday or up
+  to a fortnight ago, and check 3 measures staleness from them and not from the moment the button
+  was pressed. It sits on the screen until dismissed. Nothing about a failed fetch is recorded in
+  the file — the notice is where it lives, and the remedy is to press the button again or to type
+  the price in by hand ([§7.1](#71-holdings)).
 - It sends security identifiers — ISIN or ticker — to the provider. **No amounts, quantities or
   account data ever leave the machine.** The application must state this **next to the button**,
   which is the moment it matters and now the only place the feature is visible.

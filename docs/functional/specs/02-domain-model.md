@@ -59,7 +59,7 @@ filters.
 | name | text | |
 | type | enum | `Stock` · `Bond` · `Stock ETF` · `Bond ETF` · `ETC`. Five, and each one is a slice of the portfolio breakdown ([§3.1](03-portfolio.md#31-behaviour)). |
 | currency | enum | EUR in v1. |
-| taxRate | % | Capital-gains rate this instrument would be taxed at, used only by [§11.3](11-calculations.md#113-hypothetical-liquidation). Defaults to `defaultTaxRate` ([§10](10-settings.md)); set to 12,5% on a whitelist government bond. |
+| taxRate | fraction | Capital-gains rate this instrument would be taxed at, **stored 0 – 1 and shown as a percentage** ([§11](11-calculations.md)): `0,26` reads 26%. Used only by [§11.3](11-calculations.md#113-hypothetical-liquidation). Defaults to `defaultTaxRate` ([§10](10-settings.md)); `0,125` on a whitelist government bond. |
 | notes | text | |
 
 A security belongs to no institution — it is the same instrument everywhere. The *holding* belongs
@@ -185,7 +185,7 @@ that actually happened.
 | pensionContribution | amount | **Everything credited to the fund for that month** as printed on the payslip — employee share, employer share and TFR together, as one figure. Check 5 compares it as a monthly total, never record by record, because the three parts usually reach the fund as separate credits. |
 | notes | text | |
 | *netSalary* | *amount* | netPayment − refunds + carPayment |
-| *netGrossPct* | *%* | netSalary ÷ gross |
+| *netGrossPct* | *fraction* | netSalary ÷ gross — a fraction, shown as a percentage ([§11](11-calculations.md)) |
 
 **A payslip for month M is often paid in month M+1.** There is no payment-date field: the bank
 transaction already carries the real date, and duplicating it here would create a second figure to
@@ -247,9 +247,9 @@ never edited; it changes only by recording a trade.
 of the answer.** More sold than was ever bought is not a position that can be valued — there is no
 meaningful average cost, no invested total and no gain to derive from it — so nothing is derived:
 the row is absent from [§7.1](07-investments.md#71-holdings) and checks 8 and 9 name the trade that
-did it ([§9](09-checks.md)). That is what those two checks are *for*, and during data entry the
-usual cause is a sale typed before its purchase, which stops being true as soon as the purchase is
-recorded — dated before the sale, which is where it belongs.
+did it ([§9](09-checks.md)). That is what those two checks are *for*. It is an anomaly and not a
+stage of ordinary work: the usual causes are a purchase that was never entered and a date that was
+mistyped, and the position stays underived until one of the two is put right.
 
 **A dip disqualifies the position, not merely the moment it happened in.** 50 bought, 100 sold and
 200 bought later ends at a quantity of 150, which is positive and is still not a holding: the sale

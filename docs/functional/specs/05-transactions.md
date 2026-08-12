@@ -102,8 +102,14 @@ that will survive every future rule change, which is the set worth keeping small
   every stored field of a transaction that is not derived ([§2](02-domain-model.md)). Description is
   required and is the only thing a rule will match on ([§13](13-validation.md)); notes are optional
   and the application never writes to them ([§5.1](#51-columns)).
-- **Account** defaults to the one last used, and lists cash accounts only — closed ones among them,
-  marked and last ([§4.3](04-accounts.md#43-creating-and-editing)). **Date** is a date picker
+- **Account** starts empty and lists cash accounts only — closed ones among them, marked and last
+  ([§4.3](04-accounts.md#43-creating-and-editing)). **No picker in the application remembers what was
+  chosen last**: there is nowhere for that memory to live, the file holding the eleven entities and
+  nothing else ([§12](12-storage.md)) and preferences being the closed list of
+  [§10](10-settings.md) — and a default carried over from a previous sitting is a default nobody
+  sees themselves accept. Which account a row belongs to is the one field on this form that cannot
+  be inferred from anything else on it, so it is the one that is always chosen.
+  **Date** is a date picker
   defaulting to today; **amount** is a validated numeric field, signed, negative being money out.
   Neither can hold text that would have to be interpreted: nothing invalid can be entered, so
   nothing invalid has to be rejected on save, and the display preferences of
@@ -168,8 +174,11 @@ produces — it is a mode of this screen rather than a destination of its own.
 - This is the reason the two steps became one. A row that will not parse is almost always a format
   chip set wrongly, and a gate that refused to advance put the diagnosis on one screen and the chip
   that fixes it on the next.
-- The **account is chosen once** for the whole paste, not per row. It defaults to the account last
-  imported into, and lists cash accounts only — a brokerage account holds no transactions to import.
+- The **account is chosen once** for the whole paste, not per row. It **starts empty and is the first
+  thing to pick** ([§5.5](#55-add-transaction)), and lists cash accounts only — a brokerage account
+  holds no transactions to import. It is the field a remembered default would do the most damage in:
+  two hundred rows landing in last month's account is precisely the mistake bulk delete exists to
+  undo ([§5.6](#56-selecting-and-deleting-in-bulk)).
 - **Fixed column order: date · description · amount**, one row per line, **columns separated by
   tabs**. A tab is what a spreadsheet puts on the clipboard, so a range copied out of an opened bank
   export arrives in the right shape without being reformatted. It is also the one separator that
@@ -195,13 +204,24 @@ produces — it is a mode of this screen rather than a destination of its own.
 - **The separator between the parts may be `/`, `-` or `.`**, and carries no meaning: it is not
   inferred, not shown on the chip, and a paste may mix rows that use different ones. It is the order
   that is ambiguous, never the punctuation.
-- **The year may be four digits or two**, and a two-digit `YY` reads as `20YY`. A ledger that begins
-  in 2016 has no use for 1926, and a bank that prints two digits is not offering to disambiguate
-  them.
-- Inference reads the whole column: a leading four-digit field settles `YMD`, a first part above 12
+- **The year is always four digits.** A two-digit year cannot be read and the row is marked like any
+  other unreadable one. Two digits would have to be resolved by a rule the paste gives no evidence
+  for, and it is the one part of a date that can be wrong by a century without looking wrong at all
+  — where a swapped day and month at least produces a date the eye can catch. Widening a year column
+  is one spreadsheet operation, the same one the amount column already asks for.
+- Inference reads the whole column: a four-digit field first settles `YMD`, a first part above 12
   settles `DMY`, a second part above 12 settles `MDY`. **When every row in the paste is ambiguous,
   `DMY` is assumed and the chip says so** — a fixed assumption written into the application, not a
   preference read from [§10](10-settings.md), and the thing to change when the preview looks wrong.
+- **Contradictory evidence settles nothing, and is not resolved silently.** If one row settles `DMY`
+  and another `MDY` there is no order that reads the whole paste: the chip takes the order the first
+  decisive row settles, and the rows contradicting it appear as unreadable with the reason. Flipping
+  the chip flips which half is readable, which is the paste telling you it holds two date formats
+  and wants splitting in two. Guessing per row was the alternative, and a column that reads
+  `03/04/2026` one way on one line and the other way on the next is the kind of wrong that is never
+  found.
+- **A date that parses into a day that does not exist cannot be read** — `31/02/2026` is three
+  numbers in the right shape and not a date, and it is marked rather than rolled into March.
 - Anything else in the date column — a month name, a weekday, a time appended after the date —
   **cannot be read** ([§15](15-out-of-scope.md)).
 
@@ -239,8 +259,8 @@ produces — it is a mode of this screen rather than a destination of its own.
 - **An unreadable row never blocks the rows around it.** Import what is good, fix the rest, paste
   again — the duplicate detection below is what makes re-pasting safe.
 - *Import* is disabled while no account is chosen or no row is selected, and by nothing else
-  ([§13](13-validation.md)). The account is normally already there, defaulting to the one last
-  imported into; on a file that has never had an import it is the one thing to pick first.
+  ([§13](13-validation.md)). The account being unset is the ordinary state of a screen just opened,
+  so it is half of what that button is waiting for.
 
 ### Duplicates
 

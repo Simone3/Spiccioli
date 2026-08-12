@@ -14,7 +14,7 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 | 2 | Every transaction has a category | `categoryId` is set. | Each uncategorised transaction. |
 | 3 | Prices are recent | Every security with an open holding has at least one Price record, and its latest one is dated within `priceStalenessDays`. **No price at all fails too**, and is the more serious of the two: that holding is valued at zero everywhere ([§11.3](11-calculations.md#113-hypothetical-liquidation)). | Security, price, date, age — or “no price recorded”. |
 | 4 | Payslips match salary transactions | Every payslip pairs one-to-one with a transaction in a role `salary` category, of equal `netPayment`, dated in the payslip's month or the one after — and every such transaction pairs with a payslip ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched payslips and unmatched transactions, listed separately, with amounts. |
-| 5 | Payslip pension contributions match transactions | **Monthly totals, not record by record.** For each month, Σ `pensionContribution` over that month's payslips = Σ of the role `pension contribution` transactions attributed to it ([§11.6](11-calculations.md#116-derived-matching)). A month's contribution reaches the fund as two or three separate credits — employee share, employer share, TFR — so pairing them one to one could never have worked. **Both directions**: a month that expected nothing and received something fails exactly as a month that expected something and received nothing. Only months where both totals are zero are silent. | The month, the payslip total, the transaction total, and the difference. |
+| 5 | Payslip pension contributions match transactions | **Monthly totals, not record by record.** For each month, Σ `pensionContribution` over that month's payslips = Σ of the role `pension contribution` transactions attributed to it — each month claiming the credits in its window in date order and no further than its own total ([§11.6](11-calculations.md#116-derived-matching)). A month's contribution reaches the fund as two or three separate credits — employee share, employer share, TFR — so pairing them one to one could never have worked. **Both directions**: a month that expected nothing and received something fails exactly as a month that expected something and received nothing. Only months where both totals are zero are silent. | The month, the payslip total, the transaction total, and the difference. |
 | 6 | Purchase transactions match purchases | Every transaction in a role `securities purchase` category pairs with a purchase trade, and vice versa ([§11.6](11-calculations.md#116-derived-matching)). | Unmatched transactions and unmatched trades, listed separately. |
 | 7 | Sale transactions match sales | As above for role `securities sale` and sale trades. The trade side is net proceeds — after tax and fees — so it can equal what the bank credited. | As above. |
 | 8 | No holding has gone negative | For every (security, account), running quantity in date order never drops below 0. | Security, account, the trade that took it negative. |
@@ -27,10 +27,12 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 
 **Checks 8 and 9 overlap on purpose.** Any sale with no purchase before it also drives the running
 quantity below zero, so 9 never fails alone — but the two say different things when you read the
-failure. 8 reports a quantity that cannot exist; 9 reports a sale that arrived before its purchase
-was entered, which during data entry is the ordinary case and resolves itself as soon as the missing
-purchase is recorded. Keeping both costs nothing and names the situation the way the user is
-thinking about it.
+failure. 8 reports a quantity that cannot exist; 9 reports a sale standing where no purchase
+precedes it, which is the same anomaly seen from the record that caused it rather than from the
+arithmetic that broke. Both are anomalies and neither is a stage of ordinary work: the usual causes
+are a purchase never entered and a date mistyped, and the position stays underived until one of the
+two is put right ([§2](02-domain-model.md)). Keeping both costs nothing and names the situation the
+way the user is thinking about it.
 
 - **Two states only**, pass or fail. No warning tier — it would become a place for things to sit
   unfixed.
