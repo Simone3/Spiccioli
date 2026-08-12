@@ -20,9 +20,9 @@ currency either: every figure is EUR and is printed with `€`
 
 | Setting | Values | Default | Used by |
 | --- | --- | --- | --- |
-| dateFormat | `DD/MM/YYYY` · `MM/DD/YYYY` · `YYYY-MM-DD` | `DD/MM/YYYY` | Display; the opening value of the import's date control ([§5.7](05-transactions.md#57-bulk-import)) |
-| decimalSeparator | `,` · `.` | `,` | Display; the opening value of the import's decimal control |
-| thousandsSeparator | `.` · `,` · space · **none** | `.` | Display; the opening value of the import's thousands control |
+| dateFormat | `DD/MM/YYYY` · `MM/DD/YYYY` · `YYYY-MM-DD` | `DD/MM/YYYY` | Display, the date picker included; the opening value of the import's date control ([§5.7](05-transactions.md#57-bulk-import)) |
+| decimalSeparator | `,` · `.` | `,` | Display; **the one decimal character the amount field accepts** ([§13](13-validation.md)); the opening value of the import's decimal control |
+| thousandsSeparator | `.` · `,` · space · **none** | `.` | Display; the opening value of the import's thousands control. Never typeable in a form. |
 | defaultTaxRate | 0 – 100%, one decimal | 26% | Initial value of `Security.taxRate` ([§2](02-domain-model.md)). Entered as a percentage, **stored as the fraction it names** — 26% is `0,26` ([§11](11-calculations.md)). Changing it does not touch securities that already exist. |
 | priceStalenessDays | integer ≥ 1 | 30 | Check 3, holdings marker |
 | pensionRevaluationMonths | integer ≥ 1 | 3 | Check 10 |
@@ -49,9 +49,14 @@ is a control on screen, showing what it is doing.
 
 **Nothing the user types is parsed either.** Every date in the application is entered through a date
 picker and every amount through a validated numeric field that accepts one shape and refuses the
-rest as it is typed, so no form holds free text needing interpretation. The only text the
-application parses is a pasted bank export, and it is parsed to the three controls the import screen
-puts beside it.
+rest as it is typed, so no form holds free text needing interpretation. **`decimalSeparator` does
+reach one form control**: it names the single decimal character the amount field will accept, the
+other one being untypeable there and a thousands separator being untypeable anywhere
+([§13](13-validation.md)). That is a keyboard decision, not an interpretation — the field still
+admits one shape and refuses the rest, and changing the preference changes which key produces the
+decimal point, never what a figure already entered was taken to mean. The only text the application
+parses is a pasted bank export, and it is parsed to the three controls the import screen puts beside
+it.
 
 - **Preferences are global, and are not stored in the data file.** They live with the application,
   in the platform's own application-data location, together with the list of recently opened files
@@ -71,6 +76,11 @@ puts beside it.
 ## Why it is this way
 
 - **The decimal separator cannot be none** because without it two decimals would run into the units.
+- **The amount field takes its decimal character from the preference** because the alternative was to
+  accept both and decide afterwards, which is interpretation, or to fix one in the code, which would
+  put a keyboard the user cannot reach behind a screen that exists to let them choose one. The
+  question a form has to answer is which key produces the separator; the question it must never ask
+  is what the digits around it meant.
 - **Display, entry and import are three separate things, and none of them guesses.** Entry is pickers
   and validated fields, so nothing typed ever needs interpreting. A paste does need it — the
   characters in a bank export mean whatever that bank meant by them — so the import screen asks, in

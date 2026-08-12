@@ -73,11 +73,11 @@ else.
 | --- | --- | --- |
 | securityId + date | key | **One price per security per day.** |
 | value | decimal(4) | Positive. |
-| source | enum | `manual` · `fetched` |
+| source | enum | `manual` · `fetched`. **Says what last wrote this record**, and is shown in the price history of [§7.4](07-investments.md#74-securities) and nowhere else. `fetched` only while the value is one *Update prices* wrote and nobody has touched since ([§7.6](07-investments.md#76-prices)); **every edit a user makes sets it to `manual`**, including an edit to a fetched record's value or its date. Nothing reads it. |
 
 **Every day is kept; a day is overwritten.** Recording a price for a date that already has one
-replaces that value. Prices for other days are never touched, and that history is what makes the
-net worth chart possible ([§11.5](11-calculations.md#115-net-worth-over-time)).
+replaces that value **and its source**. Prices for other days are never touched, and that history is
+what makes the net worth chart possible ([§11.5](11-calculations.md#115-net-worth-over-time)).
 
 ## Transaction
 
@@ -256,7 +256,12 @@ panel beside it.
   portfolio is not. Putting the rate on the instrument leaves `type` to do the one job it is good at,
   which is grouping the portfolio into slices a person recognises.
 - **A day's price is overwritten rather than versioned** so that the last word on a day wins and
-  correcting a typo does not leave a second record to disambiguate.
+  correcting a typo does not leave a second record to disambiguate. **`source` says who had that last
+  word**, which is the only question the field is there to answer: a figure the user typed and a
+  figure a provider returned are worth telling apart when reading a decade of history, and a fetched
+  value that has since been corrected by hand is the user's figure now, not the provider's. It
+  changes nothing — no check, no total and no fetch consults it
+  ([§7.6](07-investments.md#76-prices)) — so it can be a label without becoming a rule.
 - **The category invariant is what lets every total read the stored value** instead of re-deriving it
   behind each figure ([§6.1](06-categories.md#61-report), [§9](09-checks.md)). An upgrade is included
   in the list of moments that restore it because a new version may seed a category the old one did

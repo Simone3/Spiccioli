@@ -57,8 +57,10 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
 - Payslips are edited in place; the row menu holds **Duplicate** and **Delete**. Duplicate copies
   every field including `year`, `month` and `label` — a month may legitimately hold more than one
   payslip ([§2](02-domain-model.md)), so the copy is valid where it lands. **Add payslip** opens a
-  form with the eleven stored fields the table shows, defaulting the month to the one after the
-  latest payslip of the selected year and `contractGross` and `carPayment` from the previous month.
+  form with the eleven stored fields the table shows, **every one of them empty**: no month is
+  proposed, no figure is carried over from the previous payslip, and nothing on the form is filled in
+  on the user's behalf ([§5.5](05-transactions.md#55-add-transaction)). Duplicate is what exists for
+  a row that resembles another.
 
 ## 8.2 Contracts
 
@@ -117,7 +119,12 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
   is the figure the contract line can be read against — and a partial first or last year shows
   visibly below that line, which is correct, not a defect.
 - **Duplicate exists for the tredicesima**, the case where a month legitimately holds a second
-  payslip.
+  payslip. It is also the answer to the form proposing nothing: a payslip that is mostly last
+  month's is copied from last month's, where every figure comes across and is visibly a copy, rather
+  than typed into a form that had quietly filled two boxes in from a record the user was not looking
+  at. **A default nobody sees themselves accept is a figure that gets saved unread**, and a payslip
+  is a dozen amounts read off a PDF once a month — a wrong contract gross carried forward silently is
+  exactly the kind of thing that survives for a year ([§5.5](05-transactions.md#55-add-transaction)).
 - **Contracts are ordered by start date** because employment reads as a sequence — this job, then
   that one — so the list is the working life in the order it happened, and the current contract is
   the last row rather than wherever the alphabet put it. The tie-break exists only to make the order

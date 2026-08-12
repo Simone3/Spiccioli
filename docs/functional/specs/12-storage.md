@@ -46,6 +46,13 @@
   therefore per file**: `backupCount` copies of *this* ledger, ten by default
   ([§10](10-settings.md)), and a second ledger in the same directory keeps its own count in its own
   folder without either one pushing the other out.
+- **Every copy is named for the file, the moment and what took it**: the file's own name without its
+  extension, the date, the time to the minute, and a suffix only where there is one —
+  - `finances-2026-08-08-1432` — the copy taken when a session closed;
+  - `finances-2026-08-08-1432-external` — a version displaced by an external modification;
+  - `finances-2026-08-08-1432-pre-upgrade` — the copy taken before an upgrade.
+
+  Whatever extension the format turns out to carry ([§12](#12--storage)) is on the copy too.
 - **One backup is taken when a file is closed, and only if something changed during the session.**
   The rule is about the session, not about the gesture that ended it: **however the open file stops
   being the open file, that is a close and it takes the copy.** There are four ways to get there and
@@ -66,6 +73,20 @@
   **Both the moments that produce an unusual copy say so at the time** — the external-modification
   line above and the upgrade dialog ([§12.1](#121-the-launch-screen)) each state that the copy is
   part of the rotation and will eventually be rotated out.
+- **Rotation happens as copies arrive, oldest out first.** Writing the copy that would make
+  `backupCount + 1` is what deletes the oldest, and nothing else in the application ever deletes a
+  backup. **Lowering `backupCount` removes nothing on its own**: the folder comes down to the new
+  number over the next few backups, as each new copy pushes one more out.
+- **A backup that cannot be written never stops the session, and is never silent.** The two moments
+  that already have something to say say this as well: the external-modification line states that
+  the displaced version could not be copied and what the system said, and the upgrade **does not
+  run at all** — the pre-upgrade copy is what makes an upgrade reversible, so its failure is reported
+  in the dialog with the reason and nothing is written ([§12.1](#121-the-launch-screen)). **A closing
+  backup that fails shows an error banner** naming the file and the reason: on *File › New…*,
+  *Open…* and *Open Recent* the application is still on screen, so the banner appears on the screen
+  the new file lands on. **On a quit or a closed window there may be no moment left to draw one, and
+  then nothing is shown** — the file itself is safely on disk and what was lost is a copy of it,
+  which is the same accepted loss as the backup a crashed session does not manage.
 - **On launch the application always asks which file to open**, and never reopens the last one on its
   own. [§12.1](#121-the-launch-screen) is that screen.
 - **No undo/redo** in v1. This is why every delete confirms.
@@ -98,6 +119,15 @@
   upgrade may leave a transaction pointing at a category the file no longer holds**. The dialog says
   which categories are going and what happened to their rows. It needs no separate consent — it is
   part of the upgrade the user has already confirmed.
+- **The rules pointing at a retired category are settled the same way, and settled first.** A rule
+  carries a required `categoryId` ([§2](02-domain-model.md)), so the same upgrade says what becomes
+  of every rule pointing at a category it is retiring — repointed to whichever category now means
+  what that one meant, or deleted — and **no upgrade may leave a rule pointing at a category the file
+  no longer holds** either, on exactly the reasoning that bars a dangling transaction: the next open
+  would refuse the file the upgrade had just written. **Retired categories are resolved before the
+  rule list is re-applied**, so the pass below runs over the rules the file is going to keep and
+  produces the categories those rules produce. The dialog names the rules that were repointed or
+  removed, alongside the categories going and the rows that moved.
 - **Anything not understood is not opened at all.** A schema version later than the application's,
   or a file at a known version carrying something unrecognised — an unknown category, role or field
   — is refused with a statement of what was not understood, and the launch screen stays up with the
@@ -120,7 +150,9 @@
 - The upgrade dialog is the second panel. It names both schema versions, states the backup in the
   sentence rather than a footnote, says that the rules will be re-applied to every automatically
   categorised transaction as part of the upgrade ([§12](#12--storage)), and says plainly what stops
-  working afterwards. Cancelling writes nothing at all.
+  working afterwards. Cancelling writes nothing at all. **A pre-upgrade backup that cannot be
+  written stops the upgrade**: the dialog states the reason the system gave, offers *Retry* and
+  *Cancel*, and nothing has been written to the file either way ([§12](#12--storage)).
 - This is the only *screen* whose errors can keep you out of the rest of the application
   ([§14](14-empty-and-error-states.md)). The one other blocking error belongs to no screen: a file
   that cannot be written after five attempts ([§12](#12--storage)).
@@ -187,6 +219,23 @@
   allowed to be a synced one, so the situation is ordinary rather than exotic.
 - **The rotation is per file** because one folder for all of them would have meant two ledgers sharing
   ten slots, and the one opened less often losing its history to the one opened daily.
+- **The names say when and why, in that order**, so the folder sorts chronologically by name and the
+  two unusual copies are still findable by eye. Reversing them would have grouped the three kinds
+  together and scattered the timeline, which is the wrong way round for a folder whose whole content
+  is one file at ten moments.
+- **Lowering `backupCount` deletes nothing immediately** because a preference change is not a
+  decision to destroy the copies already made, and someone reducing ten to three has no reason to
+  expect seven files to disappear as they tab away from the field. Letting the count take effect as
+  new copies arrive reaches the same folder within a week of ordinary use, and does it at moments
+  where a backup was being written anyway.
+- **A failed backup is reported where there is somewhere to report it, and not otherwise.** The two
+  unusual copies already interrupt with something to say, so adding a clause costs nothing and their
+  failure matters most — an external modification whose displaced version was not copied is the one
+  case where the other version is genuinely gone. The upgrade is the only one that stops, because
+  the copy is what the confirmation was really about: an upgrade with no fallback is the operation
+  the user agreed to on the strength of having one. A close, by contrast, may have no window left to
+  draw a banner in, and requiring one would mean holding the application open to complain about a
+  copy of a file that is itself already safely written.
 - **The four doors are listed on purpose**: a backup that depended on which of them was used would be
   missing precisely when someone worked all afternoon and then opened last year's ledger to compare
   something. A read-only session writes nothing because an identical copy is not a backup, it is a
@@ -216,8 +265,13 @@
 - **A retired category cannot be handled generically** because a `manual` transaction points at a
   category id by hand, so re-running the rules cannot speak for it, and which remedy is right depends
   entirely on why the category was retired. A dangling reference is the one outcome not available,
-  since the next open would refuse the file it had just written. The dialog mentions both the rules
-  and the retired categories because they are changes to figures the user knows they did not make.
+  since the next open would refuse the file it had just written. **A rule is the same reference from
+  a different record** — required, by id, and equally undisplayable if it dangles — so it gets the
+  same treatment and the same prohibition. Settling the rules *before* the re-application pass is
+  what stops the upgrade re-categorising the file through a rule it is about to remove, which would
+  put every affected row through two categories to reach the one it ends at. The dialog mentions the
+  rules, the retired categories and the rows that moved because all three are changes to figures the
+  user knows they did not make.
 - **A file that is not understood is not opened at all.** Half-open is a state that would have to be
   explained on every screen, and the alternative it exists to avoid — writing back a file with the
   unknown parts quietly removed — is already prevented by refusing. Files outlive versions, and the

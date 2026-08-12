@@ -39,6 +39,16 @@ Securities is what all three point at.
   gross proceeds, the sell fee with the institution whose default it is, taxable gain, tax with the
   rate and the security it belongs to, net proceeds, and net gain **with its percentage**.
 - The caveat about lot matching is shown in the panel, next to the number it qualifies.
+- **The footer totals the two money columns** — value and gain — **and states the percentage those
+  two make**: Σ gain ÷ (Σ value − Σ gain), the denominator being what the positions cost, and
+  *undefined* where that is zero ([§11](11-calculations.md)). Quantities, prices and average costs
+  are not totalled: they belong to different instruments. Like the table above it the footer is
+  **gross**, and it is the one place the portfolio's untaxed value is stated as a single figure —
+  the net counterpart is the Portfolio headline ([§3.1](03-portfolio.md#31-behaviour)), and the two
+  are meant to be read against each other. A holding with no price contributes `€ 0,00` of value and
+  minus its cost in gain, exactly as its row does, so **no total here states an omission**: every
+  figure exists, and the ones that are missing a price are wrong in the direction check 3 is already
+  naming.
 
 ## 7.2 Purchases
 
@@ -57,8 +67,13 @@ Securities is what all three point at.
 - Ordering: `date ASC, insertionSeq ASC, id ASC` — the same three keys and the same direction as
   Transactions ([§5.2](05-transactions.md#52-ordering-and-paging)). No paging; filters narrow the
   list instead.
-- Filters: security, account — **brokerage accounts only** ([§2](02-domain-model.md)) — and period,
-  which is the *from* and *to* pair of [§5.3](05-transactions.md#53-filters), inclusive at both ends.
+- Filters: security, account — **brokerage accounts only** ([§2](02-domain-model.md)), one at a time
+  or *All*, like every account filter in the application
+  ([§5.3](05-transactions.md#53-filters)) — and period, which is the *from* and *to* pair of
+  [§5.3](05-transactions.md#53-filters), inclusive at both ends.
+- **The footer sums the filtered rows**: quantity is not totalled, and fees and total cost are, with
+  the count beside them. It is the counterpart of the Sales footer ([§7.3](#73-sales)) minus the
+  columns Purchases does not have.
 
 ## 7.3 Sales
 
@@ -105,7 +120,13 @@ Securities is what all three point at.
   ([§7.1](#71-holdings)). Securities no longer held are in the list like everything else, marked by
   an em dash in *Held*; nothing sorts them apart.
 - **Held** is the quantity across every brokerage account, an em dash when the position is closed.
-  **Trades** is what decides whether the security can be deleted; **Prices** does not. Deleting a
+  **A security oversold in any account reads an em dash too, in a cell tinted light red**: no holding
+  is derived for that (security, account) at all ([§2](02-domain-model.md)), so there is no quantity
+  to state and none is invented — not for the broken account and not for the others, since a partial
+  sum would read as the position. The tint is what separates it from the ordinary dash: one means
+  nothing is held, the other means nothing can be said. Checks 8 and 9 name the trade
+  ([§9](09-checks.md)), and the cell reads normally again once it is put right.
+- **Trades** is what decides whether the security can be deleted; **Prices** does not. Deleting a
   security deletes its price history with it and the confirmation says how many records that is
   ([§13](13-validation.md)).
 - **The full price history lives here, and every record in it can be edited or deleted.** Editing a
@@ -113,6 +134,11 @@ Securities is what all three point at.
   on ([§2](02-domain-model.md)) — **and neither is confirmed** ([§13](13-validation.md)). **Deleting
   is confirmed**, like every delete in the application; **this is the only place a price is
   deleted**, and it is the only way to undo a price recorded against a date that never had one.
+- **The history carries the date, the value and the source** — *manual* or *fetched*, the `source` of
+  [§2](02-domain-model.md), and **this is the only screen that shows it**. It is a label and nothing
+  more: no check, no total and no fetch reads it ([§7.6](#76-prices)). **Any edit a user makes, here
+  or in the inline editor on Holdings, sets it to *manual*** — an edit to the value and an edit to
+  the date alike — so a fetched figure somebody has corrected stops claiming to be the provider's.
 - The history is **newest first** — the opposite of every other table in the application.
 - Changing a security's **tax rate** changes the
   [§11.3](11-calculations.md#113-hypothetical-liquidation) estimate for it and therefore net worth,
@@ -164,7 +190,10 @@ Securities is what all three point at.
   **latest quote the provider has**, whatever day it belongs to. There is no list to tick first.
 - **What comes back is written straight in, dated the day the quote is for** — not the day the
   button was pressed — as a `fetched` Price record replacing whatever that day already held
-  ([§2](02-domain-model.md)).
+  ([§2](02-domain-model.md)), **a hand-typed value included**. A price the user typed for the same
+  day is replaced like any other, since a day holds one price and the last word on it wins; what the
+  history then shows against that day is *fetched* ([§7.4](#74-securities)), which is the record
+  saying so.
 - **A quote the provider dates in the future is not written**, on the same rule that governs a typed
   one ([§13](13-validation.md)). It is reported as a security that could not be fetched.
 - **Nothing is shown for confirmation first.**
@@ -231,6 +260,25 @@ Securities is what all three point at.
   accident to warn about.
 - **The price history reads newest first** because the reason to open it is almost always the most
   recent value, and the ten-year tail is reached by scrolling rather than by paging.
+- **The source is shown on the one screen where prices are worked on, and it governs nothing.** A
+  decade of prices is worth being able to read — which days were kept by hand before the button
+  existed, which stretch a provider filled in — and the history is the only place that question is
+  asked. Making it govern anything would have been the mistake: a fetch that skipped days the user
+  had typed would leave the file quietly out of date on exactly the securities someone had cared
+  enough to price, and a warning before each such overwrite would ask a question every week that the
+  editor already answers by showing the value it is about to replace. An edit resets it to *typed*
+  because a corrected figure is the user's, and a label that still said *fetched* would be pointing
+  at the wrong author.
+- **An oversold security's *Held* is tinted rather than worded** because the column is one figure
+  wide and the situation is already named at length by two checks and on the Holdings tab by an
+  absent row. What the tint has to do is stop the dash being read as a closed position, which is the
+  one wrong reading available; anyone who wants the rest goes to Checks. Summing the accounts that
+  are fine was the alternative, and it would print a quantity that is not what is held.
+- **Purchases and Holdings carry footers for the same reason Sales does.** A table with no total
+  invites the figure to be added up somewhere else. Holdings totals the gross value the Portfolio
+  headline states net, which is the comparison the two screens exist to allow
+  ([§3.1](03-portfolio.md#31-behaviour)); quantities are left out of both footers because adding
+  shares of one instrument to shares of another produces a number with no meaning.
 - **The sale form never pre-fills the tax from the estimate** because an estimate silently becoming a
   recorded figure is exactly the kind of thing [§9](09-checks.md) exists to catch, and it would
   defeat check 7.

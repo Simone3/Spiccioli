@@ -30,33 +30,38 @@ The categories × years matrix — the one screen that answers where the money g
   twenty-seven ([§6.3](#63-category-list)): the report accounts for the whole taxonomy, once each.
 - Amounts **carry the sign and colour of the transactions behind them** — income green and positive,
   expense red and negative — exactly as on the Transactions screen.
-- **Internal is inside Net.** With no account filter its **row total** is zero, both legs of every
-  transfer being in scope and cancelling. **Filtered to a subset of accounts it stops being zero by
-  design**, because the transfers crossing the boundary of the selection no longer have both legs in
-  view, and Net then reads as what actually happened to the money in the accounts selected.
+- **Internal is inside Net.** With the account filter on *All* its **row total** is zero, both legs
+  of every transfer being in scope and cancelling. **Filtered to one account it stops being zero by
+  design**, because a transfer in or out of that account has only one leg in view, and Net then reads
+  as what actually happened to the money in the account selected.
 - **A single year's cell is a different matter, and one exception is ordinary.** A transfer sent in
   December and received in January has its two legs in two calendar years, so both years' Internal
   cells are non-zero and the two cancel only in the row total. Nothing is wrong: the money did leave
   one year and arrive in the next, and Net reads it that way in both. **Only the row total is
   expected to be zero.**
-- **Beyond that, a non-zero Internal row total with no account filter means a leg is missing**, and
+- **Beyond that, a non-zero Internal row total with the account filter on *All* means a leg is
+  missing**, and
   it moves Net by that amount. Check 1 is failing while it is true — an unpaired leg is exactly what
   that check reports — so the Portfolio banner is already up and the Checks screen already names the
   leg ([§9](09-checks.md)); the row is where the damage is quantified. **The implication runs one way
   only:** check 1 also fails on two legs that cancel perfectly but sit further apart than
   `transferMatchWindowDays` ([§10](10-settings.md)), and those leave the row total at zero.
 - **Every figure in a category row is a link.** Clicking a cell opens Transactions filtered to that
-  category and that year — plus whatever account filter the report already has — and clicking the
-  row total drops the year. What opens is the ordinary Transactions screen on its last page, with
-  those filters set and nothing else different about it
+  category and to that year — the period set to its first and last day — **plus the report's account
+  filter, which is one account or *All* and transfers as it stands**
+  ([§5.3](05-transactions.md#53-filters)). **Clicking the row total carries the same category and
+  account with no period at all**: the year column is what the period expressed, and the row total
+  spans every year the report holds, so the filter that says *some* years is cleared rather than
+  widened to the report's year range. What opens is the ordinary Transactions screen on its last
+  page, with those filters set and nothing else different about it
   ([§5.2](05-transactions.md#52-ordering-and-paging)).
 - **The three subtotals and Net are not links.** **Every other row in the table is a category, and
   therefore is a link** — transfers, purchases, sales and revaluations included.
 - A cell with no transactions shows an em dash, not `€ 0,00`, so a real zero stays distinguishable
   from nothing recorded — and an em dash is not a link.
-- Filters: year range, accounts — **cash accounts only**, since a brokerage account holds no
-  transactions to report ([§2](02-domain-model.md)). A partial year is labelled with the months it
-  covers.
+- Filters: year range, and **account — one account or *All***, **cash accounts only**, since a
+  brokerage account holds no transactions to report ([§2](02-domain-model.md),
+  [§5.3](05-transactions.md#53-filters)). A partial year is labelled with the months it covers.
 - **Closed accounts are in the report and in its account filter**, marked and last like everywhere
   else ([§4.3](04-accounts.md#43-creating-and-editing)). Closing an account takes nothing out of
   anything — not its past here and not its balance on Portfolio
@@ -223,7 +228,7 @@ report sort on a single field and still come out grouped.
   lost value produces a negative value adjustment; inside *Internal* the two legs are a plus and a
   minus by definition.
 - **Internal belongs above the line, not beside it.** Folding it into Net changes nothing over the
-  whole row when unfiltered, which is precisely why it is safe, and a year filtered to one savings
+  whole row on *All*, which is precisely why it is safe, and a year filtered to one savings
   account should say the balance went up by what arrived — most of which is a transfer. The
   year-straddling transfer is the same property seen in one column: a December leg is money that
   left that year, and a Net that pretended otherwise would be describing a calendar the money did not
@@ -237,8 +242,12 @@ report sort on a single field and still come out grouped.
 - **The cells are links** because the matrix always provokes the question *what is in there?*
   Without it the user has to reconstruct the filter by hand on another screen, which is the sort of
   small friction that ends with a spreadsheet being opened instead. The subtotals and Net are not
-  links because no filter expresses them: the category filter takes one category, and *Net* is a sum
-  of sums rather than a selection. Nothing is offered that cannot then be shown.
+  links because no filter expresses them: the category filter takes one category
+  ([§5.3](05-transactions.md#53-filters)), and *Net* is a sum of sums rather than a selection.
+  Nothing is offered that cannot then be shown — which is also why a row total clears the period
+  rather than setting it to the report's year range: the range is what the report is showing, not
+  what the row total is made of, and a filter carried over from one screen to the other has to
+  select the same rows the figure was.
 - **Closed accounts stay in the report** because the money that went through an account shut in 2021
   went somewhere: leaving it out would make every year before that one disagree with itself depending
   on what has been closed since.

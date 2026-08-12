@@ -44,6 +44,12 @@ Account · period · category · **set by** · amount range · receipt state · 
 description. **The account filter lists cash accounts only** ([§2](02-domain-model.md)). Combined
 with AND.
 
+**Every filter in the application takes one value or none.** An account filter selects one account
+or *All*, a category filter one category, and there is no multiple selection anywhere — not here,
+not on the report ([§6.1](06-categories.md#61-report)) and not on Purchases and Sales
+([§7.2](07-investments.md#72-purchases)). This is what lets one screen hand its filters to another
+and know they fit ([§5.2](#52-ordering-and-paging)).
+
 **Each of the three that could be read two ways is fixed here, and the rule holds wherever the same
 filter appears** — the report's account filter, the period on Purchases and Sales
 ([§6.1](06-categories.md#61-report), [§7.2](07-investments.md#72-purchases)):
@@ -116,8 +122,12 @@ the twenty-seven categories **alphabetically**, with an *Uncategorised* entry ab
   chosen last.**
 - **Date** is a date picker defaulting to today and **offering no day after it**
   ([§13](13-validation.md)); **amount** is a validated numeric field, signed, negative being money
-  out. Neither can hold text that would have to be interpreted, so the display preferences of
-  [§10](10-settings.md) never enter into data entry.
+  out. **Neither holds text that has to be interpreted.** The date picker shows dates in the format
+  `dateFormat` names and returns a day, not a string; the amount field accepts digits and **the one
+  decimal character `decimalSeparator` names**, and nothing else — the other character is not
+  typeable and a thousands separator is not typeable at all ([§10](10-settings.md),
+  [§13](13-validation.md)). A preference decides which key means *decimal*; it never decides what an
+  entered figure meant.
 - **Category** defaults to *Automatic*, so a manually added row is categorised by the same rules as
   an imported one.
 - **Receipt** defaults to *n/a*, and this form is **the one place a row can be given a state before
@@ -255,6 +265,12 @@ import* button on the Transactions screen, and the sidebar stays on Transactions
   also match a single existing transaction are therefore **both** unselected.
 
 ### After import
+
+**Rows are written in the order they were pasted**, taking consecutive `insertionSeq` values in that
+order ([§2](02-domain-model.md)). A paste is usually in date order already, but where it is not —
+two rows of one day the bank listed the other way round — the file keeps the order the export had,
+and that is the order the list shows them in ([§5.2](#52-ordering-and-paging)). Rows the user left
+unticked take no sequence at all; the ones imported are consecutive among themselves.
 
 Rows are inserted with `categorySource = automatic`, which means the rule list applies to them as
 they are written and they arrive categorised wherever a rule matches ([§2](02-domain-model.md)), and

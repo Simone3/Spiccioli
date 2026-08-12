@@ -59,6 +59,11 @@ no invalid choice to reject and no message to write ([§2](02-domain-model.md),
   Whether it accepts a sign and whether zero is allowed vary by field and are stated below; the
   shape never does. A price and a quantity are the two exceptions and carry **four** decimals
   ([§11](11-calculations.md)).
+- **The decimal character the field accepts is the one `decimalSeparator` names**
+  ([§10](10-settings.md)). With the preference at `,` a `.` is simply not typeable in an amount, and
+  a thousands separator is not typeable under either setting. Changing the preference changes which
+  key produces the separator and nothing else: no stored figure moves, and no figure already entered
+  is re-read.
 - **There is no currency field, on any form or in any record.** Every amount is EUR
   ([§1](01-premise-and-constraints.md)), so there is nothing to choose, nothing to validate and
   nothing that could be set wrong.
@@ -134,6 +139,7 @@ no invalid choice to reject and no message to write ([§2](02-domain-model.md),
 | date | Required. **Not in the future** — a price is a fact about a day that has happened. |
 | value | Required, > 0, at most 4 decimals. |
 | collision | **Never asked about.** Saving onto a day that already has a price replaces it, and moving a record onto an occupied day does the same ([§2](02-domain-model.md), [§7.4](07-investments.md#74-securities)). **The editor shows the value the day currently holds while it is open.** |
+| source | **Not a field on any form.** It is set by whatever wrote the record — `fetched` by *Update prices* ([§7.6](07-investments.md#76-prices)), `manual` by every editor and by every user edit of a fetched record, value or date ([§2](02-domain-model.md)). It is shown in the price history of [§7.4](07-investments.md#74-securities) and read by nothing. |
 
 ### Contract
 

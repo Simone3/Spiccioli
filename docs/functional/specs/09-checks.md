@@ -40,6 +40,21 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 - Each failing check **names the exact records**, and each entry links to the record it names. Check
   5's payslip-side entries name a figure on a payslip rather than the payslip as a whole, and say
   which of the three it is; the link is to the payslip.
+- **A failing check lists at most five entries and states the whole count** — *showing 5 of 212* —
+  and the five are the first five **in the order the screen those records live on shows them**:
+  `date ASC, insertionSeq ASC, id ASC` for transactions and trades
+  ([§5.2](05-transactions.md#52-ordering-and-paging),
+  [§7.2](07-investments.md#72-purchases)), month then label for payslips
+  ([§8.1](08-salaries.md#81-payslips)), ticker for securities
+  ([§7.4](07-investments.md#74-securities)), and the order of
+  [§4.1](04-accounts.md#41-accounts) for accounts. **There is
+  no “show all”**, no paging inside a check and no scrolling list: the fix for a check naming two
+  hundred records is the screen the records live on, which is one click away through any of the five
+  links. **A check with two sides shows five of each**, with its own count on each — checks 4, 5, 6
+  and 7 list unmatched records on both sides ([§11.6](11-calculations.md#116-derived-matching)).
+- **The fourteen are always in the order of the table above**, failing and passing alike. Nothing
+  sorts a failure to the top: a screen read every day is worth more when each check is where it was
+  last time, and the count of what is failing is in the badge and the Portfolio banner already.
 - A passing check **states its reach** (“117 payslips”, “41 purchases”), so a check that passed
   because it examined nothing is distinguishable from one that passed properly.
 - Checks run **at application startup and after every change**, **debounced** — a change schedules a
@@ -134,6 +149,17 @@ Fourteen checks. Each passes or names the exact records that made it fail. No ta
 - **The badge counts checks rather than records** because a record count would leap about as one
   import landed and say nothing about how much is wrong. **There is no manual re-run** because a
   result that could be stale enough to need one would not be worth showing in a badge.
+- **Five entries and a count, rather than all of them.** Check 13 fails on every receipt-tracked row
+  the moment an import lands, which is hundreds, and check 2 on a half-migrated file can be
+  thousands; a screen that listed them would be a second Transactions screen with worse filters and
+  no editing, and the fourteen checks would stop being readable at a glance. Five is enough to see
+  *what kind* of thing is wrong — which is the question this screen answers — and the count is what
+  says how much of it there is. The remedy was never on this screen anyway: every entry links to the
+  row, and the row is where it gets fixed.
+- **The order of the fourteen is fixed for the same reason the report's rows are**
+  ([§6.1](06-categories.md#61-report)): a list that rearranged itself as things broke and were mended
+  would have to be re-read from the top every time, and the one piece of information sorting would
+  add — how many are failing — is already the badge.
 - **Check 13 failing after an import is the to-do list working, not a defect** — the alternative was
   an application that quietly marked a receipt as expected and let the user believe someone had
   looked at it.
