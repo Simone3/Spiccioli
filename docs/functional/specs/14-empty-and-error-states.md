@@ -3,7 +3,7 @@
 *[Index](../README.md) · no mockups for this section*
 
 A file starts empty and stays that way for a while. Every screen therefore has a state with no data
-behind it, and every one of them must say what to do next rather than showing a blank card.
+behind it, and every one of them says what to do next rather than showing a blank card.
 
 ---
 
@@ -12,8 +12,7 @@ behind it, and every one of them must say what to do next rather than showing a 
 - **An empty screen names the action that fills it**, as a sentence and a button that goes there —
   never an empty table with headers, never the word “No data”.
 - **Empty because of a filter is a different state** from empty because nothing exists. The first
-  says which filter is hiding the rows and offers to clear it; the second is the state below.
-  Confusing the two makes a user hunt for data that was never there.
+  says which filter is hiding the rows and offers to clear it; the second is the state above.
 - **A zero is not an empty state.** An account with a € 0,00 balance, a category with no
   transactions this year, a check that passed — all of these render normally.
 - **Errors are shown where the thing failed** and never as a modal that has to be dismissed before
@@ -22,10 +21,6 @@ behind it, and every one of them must say what to do next rather than showing a 
   ([§12.1](12-storage.md#121-the-launch-screen)), and a file that cannot be **written** after five
   attempts, which blocks with a *Retry* ([§12](12-storage.md)). Everything else — a refused value, a
   failed fetch, an unreadable pasted row — is reported in place and leaves the application working.
-- **The reason those two are the exceptions is that neither leaves anything worth doing.** Every
-  other error still allows the next action to be a good one; those two mean the ledger in front of
-  the user is not the ledger on disk, and every keystroke after that point is work being typed into
-  something that cannot keep it.
 
 ## 14.2 Per screen
 
@@ -49,6 +44,17 @@ behind it, and every one of them must say what to do next rather than showing a 
 | Settings | Never empty; every preference has a default ([§10](10-settings.md)). | A value that cannot be applied is rejected in place, leaving the previous one in force. |
 | Launch | No recent files: only *New file…* and *Open…*. | File missing, unreadable, written by a newer schema version, or carrying something unrecognised: stated on the launch screen, with the other files still openable. A file written by an *older* version is not an error — it asks for confirmation to upgrade, naming both versions and the backup taken first ([§12.1](12-storage.md#121-the-launch-screen)). One of the two places an error blocks a screen. |
 | Every screen | — | **A write that failed** is the error no screen owns, so it appears on whichever one is in front of the user: a line while it is being retried, saying the file could not be written and the work is safe in memory, and after five failures a blocking message naming the file, the reason and a *Retry* ([§12](12-storage.md)). The save state in the sidebar carries the same two states ([§12.2](12-storage.md#122-the-menu-bar-and-which-file-is-open)). This is the other place an error blocks. |
+
+---
+
+## Why it is this way
+
+- **Empty-because-filtered and empty-because-nothing-exists are kept apart** because confusing the
+  two makes a user hunt for data that was never there.
+- **The two blocking errors are the exceptions because neither leaves anything worth doing.** Every
+  other error still allows the next action to be a good one; those two mean the ledger in front of
+  the user is not the ledger on disk, and every keystroke after that point is work being typed into
+  something that cannot keep it.
 
 ---
 

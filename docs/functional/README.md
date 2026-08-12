@@ -46,11 +46,13 @@ docs/functional/
 - **The numbers are the specification's vocabulary and never change.** `§7.6` means section 7,
   subsection 6, and it names the same thing here as it did before the document was split. File names
   carry the same number so a directory listing reads in document order.
-- **Every screen section opens with *In brief*** — the decisions of that screen as a short list, with
-  no reasoning in it. Sections 3 to 10 all have one. What follows it is the argument: why each
-  decision is the one taken, what was rejected and what it would have cost. **Both are normative and
-  they say the same thing at two lengths** — read the list to build the screen, read the prose before
-  changing anything on it, and treat a disagreement between the two as a defect in this document.
+- **Every file states the specification first and the reasoning last.** The body of a file — its
+  numbered subsections, tables and lists — is the specification: what the application does, with no
+  argument in it. Every file then ends with **an unnumbered *Why it is this way* section**: why each
+  decision is the one taken, what was rejected and what it would have cost. **The closing section
+  introduces nothing new** — every fact lives in the specification above it. Read the specification
+  to build the screen, read the closing section before changing anything on it, and treat a
+  disagreement between the two as a defect in this document.
 - **Implementing one screen means reading two files**: the spec for that section and its mockups.
   [§2](specs/02-domain-model.md) is the one other file worth having open, since every screen's
   fields come from it.

@@ -7,36 +7,69 @@ accident.
 
 ---
 
-| Not building | Why |
+| Not building | What is there instead |
 | --- | --- |
-| Currency, in any form | Everything is EUR and **nothing records a currency**: no field on accounts or securities, no picker on a form, no symbol in the preferences ([§1](01-premise-and-constraints.md), [§13](13-validation.md)). A second currency needs a rate table and a decision at every total about what is being added to what, so it is a version of its own — and a one-valued field stored in advance would not have bought that version anything. |
+| Currency, in any form | Everything is EUR and **nothing records a currency**: no field on accounts or securities, no picker on a form, no symbol in the preferences ([§1](01-premise-and-constraints.md), [§13](13-validation.md)). |
 | A second interface language | English only, no language selector. Strings stay separable so it remains possible ([§1](01-premise-and-constraints.md)). |
-| Tax systems other than the Italian one | Rate per security is a parameter, not a constant; anything more is future work ([§11.3](11-calculations.md#113-hypothetical-liquidation)). |
+| Tax systems other than the Italian one | Rate per security is a parameter, not a constant ([§11.3](11-calculations.md#113-hypothetical-liquidation)). |
 | Export in any format | The file is the data, and [§12](12-storage.md) documents it well enough to read with a script. No CSV, no report export. |
 | Accessibility work and keyboard shortcuts | Not designed for v1. Dark theme, mouse-first, one user. |
 | Editing the category list at runtime | Categories are stored records with stable ids ([§2](02-domain-model.md)), but the application seeds them and offers no editor. |
 | Undo / redo | Backups and delete confirmation cover it for now. |
 | Bank-specific import profiles | One fixed column order; the user pre-formats the export. Explicitly future work. |
-| Bank exports in any other shape | Trailing-sign negatives (`54,80-`), parenthesised negatives, a separate debit/credit column pair, a `D`/`C` marker, a header row and a space or non-breaking space used as a thousands separator (`1 234,56`) are none of them parsed. A **leading `+`** and a **`€` or `EUR` marker** on the amount *are* read, being the two decorations that cannot be mistaken for anything else ([§5.7](05-transactions.md#57-bulk-import)); quoted fields and a leading byte-order mark are not handled either. Neither are dates carrying a month name, a weekday, a time or a two-digit year (`11/07/26`), nor amounts written without their two decimals (`1234`). Three columns, fixed order, one signed amount, two decimals ([§5.7](05-transactions.md#57-bulk-import)): reshape the export before pasting, and anything that does not fit is reported as a row that cannot be read rather than guessed at. A fourth column and beyond is the one thing tolerated, because ignoring it cannot misread anything. |
+| Bank exports in any other shape | Trailing-sign negatives (`54,80-`), parenthesised negatives, a separate debit/credit column pair, a `D`/`C` marker, a header row and a space or non-breaking space used as a thousands separator (`1 234,56`) are none of them parsed. A **leading `+`** and a **`€` or `EUR` marker** on the amount *are* read ([§5.7](05-transactions.md#57-bulk-import)); quoted fields and a leading byte-order mark are not handled either. Neither are dates carrying a month name, a weekday, a time or a two-digit year (`11/07/26`), nor amounts written without their two decimals (`1234`). Three columns, fixed order, one signed amount, two decimals ([§5.7](05-transactions.md#57-bulk-import)): reshape the export before pasting, and anything that does not fit is reported as a row that cannot be read rather than guessed at. A fourth column and beyond is the one thing tolerated. |
 | Term-deposit maturity | Not tracked. A term deposit carries no maturity date and nothing announces one — the date goes in the account's notes if it is wanted, and the bank is what tells you the money has moved. |
-| Bulk import of trades | Pasting is for bank exports, which arrive by the hundred every month ([§5.7](05-transactions.md#57-bulk-import)). Trades arrive a few dozen a year, one confirmation at a time, and each one carries a security that may not exist yet — the paste would need a column for that too, and a way to say what to do when it does not match. The form of [§7.5](07-investments.md#75-recording-a-trade-and-where-securities-come-from) is the one way in. |
-| Bulk import of payslips | The same reasoning, more so: a dozen a year, ten fields each, and no export to paste from — a payslip is read off a PDF by eye whatever the application offers. The ten years of history come in with everything else, through the migration script. |
+| Bulk import of trades | The form of [§7.5](07-investments.md#75-recording-a-trade-and-where-securities-come-from) is the one way in. |
+| Bulk import of payslips | The ten years of history come in with everything else, through the migration script. |
 | A migration importer | A one-off custom script will load the Excel history. |
-| Category groups | The list is readable flat; grouping adds a concept for no gain. |
+| Category groups | The list is readable flat. |
 | Monthly reports | Yearly only. |
 | Voucher expiry | Not tracked. |
-| Automatic transaction generation from trades, or paired transfer entry | The independence of the two sources is what makes the checks meaningful. |
-| A warning tier on checks | Pass or fail only ([§9](09-checks.md)). A middle state becomes a place for things to sit unfixed. |
+| Automatic transaction generation from trades, or paired transfer entry | Both sides are recorded independently ([§1](01-premise-and-constraints.md), [§9](09-checks.md)). |
+| A warning tier on checks | Pass or fail only ([§9](09-checks.md)). |
 | Mobile or web deployment | Desktop on macOS, Windows and Linux ([§1](01-premise-and-constraints.md)), single machine. |
 | Percentage or tiered sell fees | Flat per institution. |
 | Sortable columns | Fixed chronological order everywhere; filters narrow instead. |
-| Bulk edit of transactions | Bulk *delete* exists ([§5.6](05-transactions.md#56-selecting-and-deleting-in-bulk)). Changing many categories at once is what rules are for, and they leave a reason behind. |
-| Transferring a position between brokers | Not modelled. Recorded as a sale and a purchase, which invents a realised gain and leaves checks 6 and 7 with no bank transaction to pair — both failures are visible and are the price of not building it. |
+| Bulk edit of transactions | Bulk *delete* exists ([§5.6](05-transactions.md#56-selecting-and-deleting-in-bulk)); changing many categories at once is what rules are for. |
+| Transferring a position between brokers | Not modelled. Recorded as a sale and a purchase, which invents a realised gain and leaves checks 6 and 7 with no bank transaction to pair; both failures are visible. |
 | Corporate actions — splits, mergers, ISIN changes | Not modelled. A split is entered by hand as an adjusting trade, or the security is replaced and the history restarted. |
 | Attributing dividends and coupons to a holding | They arrive as ordinary transactions under *Interest, dividends & bonuses* and stay there. A holding's gain is therefore price only, never total return — the income is counted, just not against the instrument that produced it. |
-| Merging two securities | A mistyped ISIN entered twice produces two securities and two half-holdings. The fix is to correct one, move its trades by editing them, and delete the other ([§7.4](07-investments.md#74-securities)) — a handful of edits for something that happens once. |
-| Showing an oversold position | A (security, account) whose running quantity has **ever** been negative gets no holding row and no derived figures — average cost, invested, gain and the **realised gain on every sale in it** are all undefined ([§11.2](11-calculations.md#112-realised-gain-on-a-sale)) — and that holds whether it is still in deficit or was brought back above zero by a later purchase, since the cost basis does not recover ([§11.1](11-calculations.md#111-weighted-average-cost)). The two totals that would have summed those sales say how many they left out rather than counting them as zero ([§3.1](03-portfolio.md#31-behaviour), [§7.3](07-investments.md#73-sales)). Checks 8 and 9 name the trade instead, which is the report the situation actually calls for ([§2](02-domain-model.md), [§9](09-checks.md)). |
-| Re-validating a file on open | Validation is for the forms ([§13](13-validation.md)). The migration script is written once, for one file, by the one person who will run it. |
+| Merging two securities | A mistyped ISIN entered twice produces two securities and two half-holdings. The fix is to correct one, move its trades by editing them, and delete the other ([§7.4](07-investments.md#74-securities)). |
+| Showing an oversold position | A (security, account) whose running quantity has **ever** been negative gets no holding row and no derived figures — average cost, invested, gain and the **realised gain on every sale in it** are all undefined ([§11.2](11-calculations.md#112-realised-gain-on-a-sale)) — and that holds whether it is still in deficit or was brought back above zero by a later purchase, since the cost basis does not recover ([§11.1](11-calculations.md#111-weighted-average-cost)). The two totals that would have summed those sales say how many they left out rather than counting them as zero ([§3.1](03-portfolio.md#31-behaviour), [§7.3](07-investments.md#73-sales)). Checks 8 and 9 name the trade instead ([§2](02-domain-model.md), [§9](09-checks.md)). |
+| Re-validating a file on open | Validation is for the forms ([§13](13-validation.md)). |
+
+---
+
+## Why it is this way
+
+- **Currency** is a version of its own: a second one needs a rate table and a decision at every total
+  about what is being added to what — and a one-valued field stored in advance would not have bought
+  that version anything.
+- **Another tax system** is a change to
+  [§11.3](11-calculations.md#113-hypothetical-liquidation) alone, since the rate is already a
+  parameter on the instrument; anything beyond that is future work.
+- **Bulk import of trades** is declined because pasting is for bank exports, which arrive by the
+  hundred every month ([§5.7](05-transactions.md#57-bulk-import)). Trades arrive a few dozen a year,
+  one confirmation at a time, and each one carries a security that may not exist yet — the paste
+  would need a column for that too, and a way to say what to do when it does not match.
+- **Bulk import of payslips** is the same reasoning, more so: a dozen a year, ten fields each, and no
+  export to paste from — a payslip is read off a PDF by eye whatever the application offers.
+- **Category groups** would add a concept for no gain.
+- **Automatic generation between trades and transactions** is refused because the independence of the
+  two sources is what makes the checks meaningful.
+- **A warning tier** would become a place for things to sit unfixed.
+- **Bulk edit** is refused because rules do the same job repeatably and leave a reason behind.
+- **Transferring a position between brokers** is not modelled, and the two failing checks are the
+  price of not building it.
+- **Merging two securities** is a handful of edits for something that happens once.
+- **An oversold position is not shown** because there is no reading of its figures that would be
+  true, and checks 8 and 9 are the report the situation actually calls for.
+- **A file is not re-validated on open** because the migration script is written once, for one file,
+  by the one person who will run it.
+- **The import stays strict about shape** because anything that does not fit is reported as a row
+  that cannot be read rather than guessed at; the two decorations that *are* read — a leading `+` and
+  a `€`/`EUR` marker — are the two that cannot be mistaken for anything else, and a fourth column is
+  tolerated because ignoring it cannot misread anything.
 
 ---
 

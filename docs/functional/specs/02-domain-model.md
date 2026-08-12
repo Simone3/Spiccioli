@@ -42,10 +42,9 @@ offered — a form's picker, a screen's filter — the list holds only the kind 
 ([§5](05-transactions.md), [§5.7](05-transactions.md#57-bulk-import),
 [§6.1](06-categories.md#61-report)), **brokerage accounts** where trades and holdings are
 ([§7.1](07-investments.md#71-holdings), [§7.2](07-investments.md#72-purchases),
-[§7.3](07-investments.md#73-sales)). Neither list ever shows the other kind, because choosing it
-could only produce an empty result or a record that cannot exist. Closed accounts are the one thing
-both lists still carry, marked and last ([§4.3](04-accounts.md#43-creating-and-editing)). The
-Portfolio and Accounts screens are the two that show every account together, and neither of them
+[§7.3](07-investments.md#73-sales)). Neither list ever shows the other kind. Closed accounts are the
+one thing both lists still carry, marked and last ([§4.3](04-accounts.md#43-creating-and-editing)).
+The Portfolio and Accounts screens are the two that show every account together, and neither of them
 filters.
 
 ## Security
@@ -63,12 +62,10 @@ filters.
 A security belongs to no institution — it is the same instrument everywhere. The *holding* belongs
 to one, through its account, so the same security held at two institutions produces two holdings.
 
-**The tax rate is per security, not per type.** `Bond` exists as a type and still settles nothing: a
-BTP is on the whitelist that earns the reduced Italian rate and a corporate bond beside it in the
-same portfolio is not, so two securities of one type carry two rates. The rate is therefore a fact
-about the instrument, filled in once when the security is created and rarely touched again — and
-`type` is left to do the one job it is good at, which is grouping the portfolio into slices a person
-recognises ([§3.1](03-portfolio.md#31-behaviour)).
+**The tax rate is per security, not per type.** Two securities of one type may carry two rates. The
+rate is a fact about the instrument, filled in once when the security is created and rarely touched
+again; `type` groups the portfolio into slices ([§3.1](03-portfolio.md#31-behaviour)) and nothing
+else.
 
 ## Price
 
@@ -79,8 +76,7 @@ recognises ([§3.1](03-portfolio.md#31-behaviour)).
 | source | enum | `manual` · `fetched` |
 
 **Every day is kept; a day is overwritten.** Recording a price for a date that already has one
-replaces that value — the last word on a day wins, and correcting a typo does not leave a second
-record to disambiguate. Prices for other days are never touched, and that history is what makes the
+replaces that value. Prices for other days are never touched, and that history is what makes the
 net worth chart possible ([§11.5](11-calculations.md#115-net-worth-over-time)).
 
 ## Transaction
@@ -109,17 +105,14 @@ would produce, so it is recomputed the moment either side of that equation moves
 is created or imported, when its description is edited, when a row is switched back to `automatic`
 ([§5.4](05-transactions.md#54-editing)), when a changed rule list is applied
 ([§6.2](06-categories.md#62-rules)), and **when a file written by an older version is upgraded** —
-a new version may seed a category the old one did not have or change what an existing one means, and
 the upgrade restores the invariant before the file opens ([§12](12-storage.md)). There is no state
-in which the file holds an automatic category
-no rule would assign — which is what lets [§6.1](06-categories.md#61-report) and
-[§9](09-checks.md) read the stored value instead of re-deriving it behind every total.
+in which the file holds an automatic category no rule would assign.
 
 **A rule list being edited is not yet the rule list.** Rules are changed in an editing session that
 writes nothing until it is applied, and the application writes the new rules and the categories they
-produce in the same step ([§6.2](06-categories.md#62-rules)). So the invariant is never suspended:
-what a draft on screen would produce is a preview, and the file goes from one consistent state to
-the next without passing through a third.
+produce in the same step ([§6.2](06-categories.md#62-rules)). The invariant is never suspended: what
+a draft on screen would produce is a preview, and the file goes from one consistent state to the
+next without passing through a third.
 
 ## Trade
 
@@ -141,13 +134,9 @@ the next without passing through a third.
 **A trade never generates a transaction, and a transaction never generates a trade.** Both are
 recorded independently; [§9](09-checks.md) compares them.
 
-**Why a sale carries taxes.** Under the Italian *regime amministrato* the broker withholds the tax
-at the moment of the sale, so the amount that reaches the account is already net of it. Recording it
-is what lets the sale's `total` equal the bank transaction it is compared against in check 7, and
-what makes realised gain a real figure rather than a pre-tax one. It is entered from the trade
-confirmation, never computed — the hypothetical rate of
-[§11.3](11-calculations.md#113-hypothetical-liquidation) is an estimate and has no bearing on a sale
-that actually happened.
+**A sale carries the tax the broker actually withheld.** Under the Italian *regime amministrato* the
+broker withholds the tax at the moment of the sale, so the amount that reaches the account is
+already net of it. It is entered from the trade confirmation, never computed.
 
 ## Contract
 
@@ -180,14 +169,13 @@ that actually happened.
 | netPayment | amount | What reached the bank. The figure check 4 uses. |
 | refunds | amount | Positive. |
 | carPayment | amount | Positive; withheld from the payment. |
-| pensionContribution | amount | **Everything credited to the fund for that month** as printed on the payslip — employee share, employer share and TFR together, as one figure. Check 5 compares it as a monthly total, never record by record, because the three parts usually reach the fund as separate credits. |
+| pensionContribution | amount | **Everything credited to the fund for that month** as printed on the payslip — employee share, employer share and TFR together, as one figure. Check 5 compares it as a monthly total, never record by record. |
 | notes | text | |
 | *netSalary* | *amount* | netPayment − refunds + carPayment |
 | *netGrossPct* | *fraction* | netSalary ÷ gross — a fraction, shown as a percentage ([§11](11-calculations.md)) |
 
-**A payslip for month M is often paid in month M+1.** There is no payment-date field: the bank
-transaction already carries the real date, and duplicating it here would create a second figure to
-keep in step. Checks 4 and 5 therefore look for their counterpart in month M *or* M+1
+**A payslip for month M is often paid in month M+1.** There is no payment-date field. Checks 4 and 5
+therefore look for their counterpart in month M *or* M+1
 ([§11.6](11-calculations.md#116-derived-matching)).
 
 ## Category
@@ -203,11 +191,7 @@ keep in step. Checks 4 and 5 therefore look for their counterpart in month M *or
 
 **Categories are stored, but not editable in v1.** The application seeds the list of
 [§6.3](06-categories.md#63-category-list) into every new file and offers no way to add, rename or
-remove one — that remains a code change ([§15](15-out-of-scope.md)). They are records rather than
-constants for two reasons. Transactions reference a stable `id`, so the migration script and the
-file format have something durable to point at; and every check that concerns a particular kind of
-money keys off `role` rather than off a name, so nothing breaks when a label is reworded and a
-future version can add, say, a second salary-like category without touching [§9](09-checks.md).
+remove one — that remains a code change ([§15](15-out-of-scope.md)).
 
 ## Rule
 
@@ -241,30 +225,62 @@ A holding exists while its quantity is greater than 0 **and its running quantity
 below 0** at any point in the walk of [§11.1](11-calculations.md#111-weighted-average-cost). It is
 never edited; it changes only by recording a trade.
 
-**A running quantity that has gone below 0 produces no holding and no figures, and that is the whole
-of the answer.** More sold than was ever bought is not a position that can be valued — there is no
-meaningful average cost, no invested total and no gain to derive from it — so nothing is derived:
-the row is absent from [§7.1](07-investments.md#71-holdings) and checks 8 and 9 name the trade that
-did it ([§9](09-checks.md)). That is what those two checks are *for*. It is an anomaly and not a
-stage of ordinary work: the usual causes are a purchase that was never entered and a date that was
-mistyped, and the position stays underived until one of the two is put right.
-
-**A dip disqualifies the position, not merely the moment it happened in.** 50 bought, 100 sold and
-200 bought later ends at a quantity of 150, which is positive and is still not a holding: the sale
-drew the cost basis down by twice what was in it, and no later purchase puts that back
-([§11.1](11-calculations.md#111-weighted-average-cost)). The average cost such a walk arrives at is
-wrong by an amount nothing on the screen would reveal, so the row is absent for the same reason a
-row with a negative quantity is — and checks 8 and 9 name the trade, which is the report the
-situation calls for. The remedy is the same one: give the trades the dates they actually happened
-on, and the position becomes a holding again. Presenting an impossible position in the tables would mean inventing a reading for every
-figure on the screen, in the service of a state whose only correct next step is to fix it
-([§15](15-out-of-scope.md)).
+**A running quantity that has gone below 0 produces no holding and no figures.** The row is absent
+from [§7.1](07-investments.md#71-holdings) and checks 8 and 9 name the trade that did it
+([§9](09-checks.md)). **A dip disqualifies the position, not merely the moment it happened in**: a
+walk that went below zero and was brought back above it by a later purchase yields no holding
+either. The position stays underived until the trades are corrected.
 
 **All three quantities are kept, and all three are shown** ([§7.1](07-investments.md#71-holdings)).
-`quantity` is the position and is what every valuation multiplies, but it is a difference and a
-difference forgets: 338 bought and none sold and 900 bought and 562 sold are the same position and
-not the same history, and the second is the one where the weighted average is worth reading twice.
-The table column is the net figure; the two it is made of sit in the detail panel beside it.
+The table column is the net `quantity`; `purchasedQuantity` and `soldQuantity` sit in the detail
+panel beside it.
+
+---
+
+## Why it is this way
+
+- **The cash/brokerage split is enforced out to every picker and filter** because offering the wrong
+  kind of account could only produce an empty result or a record that cannot exist. Closed accounts
+  are the exception both lists keep, since their rows stay editable
+  ([§4.3](04-accounts.md#43-creating-and-editing)).
+- **The tax rate sits on the security rather than on its type** because `Bond` settles nothing: a BTP
+  is on the whitelist that earns the reduced Italian rate and a corporate bond beside it in the same
+  portfolio is not. Putting the rate on the instrument leaves `type` to do the one job it is good at,
+  which is grouping the portfolio into slices a person recognises.
+- **A day's price is overwritten rather than versioned** so that the last word on a day wins and
+  correcting a typo does not leave a second record to disambiguate.
+- **The category invariant is what lets every total read the stored value** instead of re-deriving it
+  behind each figure ([§6.1](06-categories.md#61-report), [§9](09-checks.md)). An upgrade is included
+  in the list of moments that restore it because a new version may seed a category the old one did
+  not have or change what an existing one means, and the invariant would otherwise hold for every
+  file except the ones just upgraded ([§12](12-storage.md)).
+- **Recording the tax withheld on a sale** is what lets the sale's `total` equal the bank transaction
+  it is compared against in check 7, and what makes realised gain a real figure rather than a pre-tax
+  one. The hypothetical rate of [§11.3](11-calculations.md#113-hypothetical-liquidation) is an
+  estimate and has no bearing on a sale that actually happened.
+- **A payslip carries no payment date** because the bank transaction already carries the real date,
+  and duplicating it here would create a second figure to keep in step. Check 5 compares monthly
+  totals rather than record by record because the three parts of a contribution usually reach the
+  fund as separate credits.
+- **Categories are records rather than constants** for two reasons. Transactions reference a stable
+  `id`, so the migration script and the file format have something durable to point at; and every
+  check that concerns a particular kind of money keys off `role` rather than off a name, so nothing
+  breaks when a label is reworded and a future version can add, say, a second salary-like category
+  without touching [§9](09-checks.md).
+- **An oversold position is not valued at all** because more sold than was ever bought is not a
+  position that can be valued — there is no meaningful average cost, no invested total and no gain to
+  derive from it. It is an anomaly and not a stage of ordinary work: the usual causes are a purchase
+  that was never entered and a date that was mistyped.
+- **A dip disqualifies the position even after a recovery** because the sale drew the cost basis down
+  by more than was in it, and no later purchase puts that back
+  ([§11.1](11-calculations.md#111-weighted-average-cost)). 50 bought, 100 sold and 200 bought later
+  ends at a quantity of 150, which is positive and still wrong by an amount nothing on the screen
+  would reveal. Presenting an impossible position in the tables would mean inventing a reading for
+  every figure on the screen, in the service of a state whose only correct next step is to fix it
+  ([§15](15-out-of-scope.md)).
+- **All three quantities are shown** because `quantity` is a difference and a difference forgets: 338
+  bought and none sold and 900 bought and 562 sold are the same position and not the same history,
+  and the second is the one where the weighted average is worth reading twice.
 
 ---
 
