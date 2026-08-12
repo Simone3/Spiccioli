@@ -236,12 +236,15 @@ the two lists by hand, and the application stores no alias.
   receipt state other than `na` — the document that ought to exist somewhere for that payment: the
   invoice for the electricity, the contract for the rent, and for *Salary* the payslip itself, which
   is also the record [§8.1](08-salaries.md#81-payslips) is built from. It changes nothing about what
-  gets recorded: **receipt state is entered by hand and by nothing else**. Every transaction is
-  created `na` — typed, imported, duplicated, however it arrived — and moves only when the user
-  moves it ([§5.1](05-transactions.md#51-columns)).
-- **Check 13 therefore fails the moment a receipt-tracked row is created**, and that is the point.
+  gets recorded: **receipt state is entered by hand and by nothing else**. It defaults to `na`
+  everywhere, and the add-transaction form is the one place it can be given another value as the row
+  is created ([§5.5](05-transactions.md#55-add-transaction)) — a row that arrives imported or
+  duplicated is created `na` and moved on the row itself
+  ([§5.1](05-transactions.md#51-columns)).
+- **Check 13 therefore fails the moment a receipt-tracked row is imported**, and that is the point.
   The rent that was just imported *is* outstanding until someone has looked for the invoice, and the
-  check is the list of what to look for. An application that set the state to `pending` on the
+  check is the list of what to look for. A row typed by hand can be given its state on the form and
+  need never appear in that list at all, which is the difference between one row and two hundred. An application that set the state to `pending` on the
   user's behalf would have been guessing, and one that set it to `checked` would have been lying;
   the only honest default is the one that says nobody has been near this yet. **Check 14 says
   nothing at that moment** — it reads only rows already moved to `pending`, so it starts counting

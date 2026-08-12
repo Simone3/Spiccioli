@@ -93,7 +93,7 @@ sell more than was ever bought.
 | description | Required, trimmed, non-empty. It is the only thing a rule matches on. |
 | amount | Amount field, required, either sign. **Zero is legal** — a card verification, a reversed charge and a fee waived to nothing all post as `0,00`, and refusing them would send the user to invent a figure the bank did not use. Empty still blocks the save: zero is a value that was typed, empty is a field that was not. |
 | categoryId | **Either a category or *Automatic* — never nothing.** The picker offers no clearing entry, so a `manual` row always carries a category and the only empty category in the file is one no rule matched ([§2](02-domain-model.md)). |
-| receiptState | One of the three values, `na` on creation, changed only by hand ([§6.3](06-categories.md#63-category-list)). |
+| receiptState | One of the three values, never empty. Defaults to `na` and is **set by hand and by nothing else** — on the add-transaction form as the row is created ([§5.5](05-transactions.md#55-add-transaction)), or on the row afterwards. A row created any other way starts `na` ([§6.3](06-categories.md#63-category-list)). |
 
 ### Trade
 
@@ -178,7 +178,7 @@ sell more than was ever bought.
 | Field | Rule |
 | --- | --- |
 | account | Required before anything can be imported. |
-| selection | *Import* is disabled only while nothing is ticked. An unreadable row can never be ticked; **every other row is freely selectable**, a flagged duplicate included — the flag unselects it, it does not lock it ([§5.7](05-transactions.md#57-bulk-import)). |
+| selection | *Import* is disabled while no account is chosen or nothing is ticked, and by nothing else. An unreadable row can never be ticked; **every other row is freely selectable**, a flagged duplicate included — the flag unselects it, it does not lock it ([§5.7](05-transactions.md#57-bulk-import)). |
 
 ---
 

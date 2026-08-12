@@ -39,7 +39,8 @@ look like “none recorded”.
 
 ## 11.1 Weighted average cost
 
-- Per (security, account), walking trades in date order.
+- Per (security, account), walking trades in date order from `quantity = 0`, `costBasis = 0` and an
+  `avgCost` that is undefined until the first purchase gives it one.
 - **Purchase:** `quantity += q`, `costBasis += q × price + fees`, `avgCost = costBasis ÷ quantity`.
 - **Sale:** `quantity −= q`, `costBasis −= q × avgCost`. **`avgCost` is unchanged by a sale.**
 - Fees increase the cost basis on purchase and reduce proceeds on sale. **Taxes withheld on a sale
@@ -48,6 +49,14 @@ look like “none recorded”.
   Four-decimal quantities and averages leave fractions of a cent behind, and without the reset a
   later repurchase of the same security in the same account would begin from a cost basis of half a
   cent — small enough never to be noticed and wrong from then on.
+- **A sale that takes quantity below 0 ends the walk.** The arithmetic above is defined only while
+  the position is non-negative: subtracting `q × avgCost` for more units than the basis holds leaves
+  a cost basis that is too low by the difference, and every later purchase carries that error
+  forward rather than repairing it. So no holding is derived for that (security, account) and no
+  average cost, invested total, gain or valuation is computed from it, **whatever the walk ends at**
+  ([§2](02-domain-model.md)) — checks 8 and 9 name the trade instead
+  ([§9](09-checks.md)). A position that dipped and recovered is as unreadable as one still in
+  deficit, and it is the one of the two that would otherwise look perfectly ordinary on screen.
 
 ## 11.2 Realised gain on a sale
 
@@ -169,18 +178,31 @@ look like “none recorded”.
   approximations this is the one that makes the two numbers on the screen comparable. It is also the
   same caveat the headline already carries ([§11.3](#113-hypothetical-liquidation)) rather than a
   new one.
-- If no price is known at `d`, that holding contributes **its cost** — `quantity(d) × avgCost(d)`,
-  with no sell fee and no tax, since nothing has been valued and a gain of nothing is taxed at
-  nothing. **The dash is per point, not per stretch:** a month is dashed when *any* holding open in
-  it fell back to cost, and solid when every one of them had a price. In practice that produces a
-  single dashed prefix and a solid remainder, because prices start being recorded and then keep
-  being recorded — but the rule is stated per point so that a security bought later and never priced
-  dashes the segment it affects instead of quietly passing as measured. **This is the one place a
-  missing price is not zero** ([§11.3](#113-hypothetical-liquidation)), and the reason is what the
-  dashed stretch is for: it shows the shape of the years before anyone was recording prices, and a
-  decade of holdings collapsing to zero would have said something false about the past rather than
-  something true about the data. A dashed point is the only part of the line that is not net worth
-  as [§11.4](#114-balances-and-net-worth) computes it — which is precisely what the dashing says.
+- **The fallback to cost covers the years before a price was recorded, and nothing else.** A holding
+  whose security has at least one Price record but none dated ≤ `d` contributes **its cost** —
+  `quantity(d) × avgCost(d)`, with no sell fee and no tax, since nothing has been valued at that date
+  and a gain of nothing is taxed at nothing. A holding whose security has **no Price record at all**
+  contributes **zero**, exactly as it does everywhere else
+  ([§11.3](#113-hypothetical-liquidation)): it is not a position waiting for its history to begin, it
+  is a position nobody has ever valued, and check 3 names it.
+- **That distinction is what makes the final point the headline figure.** A price is never dated in
+  the future ([§13](13-validation.md)), so at `d` = today every security that has any price has one
+  dated ≤ today, and nothing can fall back to cost there. The only holdings left to treat at that
+  point are the ones with no price at all, and those are worth zero on this line for the same reason
+  they are worth zero on the card above it. The last point is therefore
+  [§11.4](#114-balances-and-net-worth) evaluated at today, by the same arithmetic, to the cent — and
+  it is never dashed. Had the fallback been written as “no price is known at `d`” it would have
+  fired at today's point too, and the chart would have ended a little above the number printed over
+  it on exactly the files where check 3 is already failing.
+- **The dash is per point, not per stretch:** a month is dashed when *any* holding open in it fell
+  back to cost, and solid when every one of them had a price. In practice that produces a single
+  dashed prefix and a solid remainder, because prices start being recorded and then keep being
+  recorded — but the rule is stated per point so that a security first priced years after it was
+  bought dashes the stretch before that instead of quietly passing as measured. The dashed stretch
+  shows the shape of the years before anyone was recording prices; a decade of holdings collapsing
+  to zero would have said something false about the past rather than something true about the data.
+  A dashed point is the only part of the line that is not net worth as
+  [§11.4](#114-balances-and-net-worth) computes it — which is precisely what the dashing says.
 - **The legend carries the two things that are not obvious from the line**: which stretch was drawn
   from prices and which from cost, and that the tax and the fee taken out at every point are today's
   ones. The final point needs no note at all: it is the figure printed at the top of the screen.

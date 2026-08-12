@@ -78,8 +78,9 @@ that will survive every future rule change, which is the set worth keeping small
   `insertionSeq`, which is what puts it there — same date, higher sequence, so the ordering of
   [§5.2](#52-ordering-and-paging) lands it in the next row down without anything having to place it.
   Change the date and it moves to where that date belongs, on the next redraw. Two fields do not come across as-is. `receiptState` resets to
-  `na`, because a duplicate is a new row and every new row starts there whatever made it
-  ([§6.3](06-categories.md#63-category-list)). `categorySource` is preserved: a copy of a hand-set
+  `na`, because a duplicate is a row nobody has looked at yet whatever the original's state was, and
+  the add-transaction form is the only place a state is chosen as a row is created
+  ([§5.5](#55-add-transaction), [§6.3](06-categories.md#63-category-list)). `categorySource` is preserved: a copy of a hand-set
   row is itself hand-set and keeps the category, a copy of an automatic row is automatic and is
   re-derived from the description it inherited — which produces the same category, by the same rule,
   for the same reason. Duplicating is for the recurring payment that differs in one field, so it is
@@ -109,9 +110,14 @@ that will survive every future rule change, which is the set worth keeping small
   [§10](10-settings.md) never enter into data entry.
 - **Category** defaults to *Automatic*, so a manually added row is categorised by the same rules as
   an imported one.
-- **Receipt** defaults to *n/a* and stays there unless the user says otherwise, on this form as
-  everywhere else ([§6.3](06-categories.md#63-category-list)). Nothing about the category the row
-  ends up with changes it.
+- **Receipt** defaults to *n/a*, and this form is **the one place a row can be given a state before
+  it exists**: the picker offers all three values and whatever it holds on save is what the row is
+  created with. One row typed by hand is a row whose document you either have in front of you or do
+  not, so asking here costs nothing and saves a second visit. Every other way a row arrives — an
+  import, a duplicate — creates it `na` and leaves the state to be moved afterwards, a paste being
+  hundreds of rows and no moment at which the question could sensibly be asked
+  ([§5.7](#57-bulk-import), [§6.3](06-categories.md#63-category-list)). Nothing about the category
+  the row ends up with changes it, on this form as everywhere else.
 - **Save and add another** keeps the dialog open with account and date retained and the other fields
   cleared — the shape of manual entry is several rows in one sitting.
 
@@ -232,7 +238,9 @@ produces — it is a mode of this screen rather than a destination of its own.
   understood — not when it is understood to be nothing.
 - **An unreadable row never blocks the rows around it.** Import what is good, fix the rest, paste
   again — the duplicate detection below is what makes re-pasting safe.
-- *Import* is disabled only while nothing is selected.
+- *Import* is disabled while no account is chosen or no row is selected, and by nothing else
+  ([§13](13-validation.md)). The account is normally already there, defaulting to the one last
+  imported into; on a file that has never had an import it is the one thing to pick first.
 
 ### Duplicates
 
@@ -247,7 +255,12 @@ produces — it is a mode of this screen rather than a destination of its own.
 ### After import
 
 Rows are inserted with `categorySource = automatic`, which means the rule list applies to them as
-they are written and they arrive categorised wherever a rule matches ([§2](02-domain-model.md)).
+they are written and they arrive categorised wherever a rule matches ([§2](02-domain-model.md)), and
+with `receiptState = na`. **The paste has no receipt column and the screen has no picker for one**:
+the state is a fact about a document the user has or has not found, asked once per row on the
+add-transaction form ([§5.5](#55-add-transaction)) and set on the rows themselves afterwards. It is
+why check 13 fails straight after an import, which is that check working
+([§6.3](06-categories.md#63-category-list), [§9](09-checks.md)).
 **No categorisation is previewed on this screen** — the preview is about which rows come in, not
 what they will be called. The user lands on Transactions filtered to the account imported into and
 to the date range of the rows imported, where a wrong category can be fixed in place with the full

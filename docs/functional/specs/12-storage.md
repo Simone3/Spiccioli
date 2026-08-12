@@ -67,6 +67,18 @@
   cancel and nothing is written and the launch screen returns. It is never silent and never
   automatic, because it is the one operation that makes a file unreadable by the version the user
   was running yesterday.
+- **An upgrade re-applies the rule list as part of itself.** The category list is seeded by the
+  application and changing it is a change to the application
+  ([§6.3](06-categories.md#63-category-list)), so a new version is exactly the thing that can add a
+  category, retire one or move a role — and any of those leaves the stored category of an
+  `automatic` transaction disagreeing with what the rule list now produces. The upgrade therefore
+  runs the same pass the Rules tab runs ([§6.2](06-categories.md#62-rules)) over every transaction
+  whose `categorySource = automatic`, and writes the categories, the rules and the new schema
+  version in one step. `manual` rows are untouched, here as everywhere. Without it the invariant of
+  [§2](02-domain-model.md) would hold for every file except the ones that had just been upgraded,
+  and it is that invariant which lets every total read the stored category instead of re-deriving
+  it. It needs no separate consent — it is part of the upgrade the user has already confirmed — but
+  the dialog says it will happen, since it is a change to figures the user knows they did not make.
 - **Anything not understood is not opened at all.** A schema version later than the application's,
   or a file at a known version carrying something unrecognised — an unknown category, role or field
   — is refused with a statement of what was not understood, and the launch screen stays up with the
@@ -92,8 +104,9 @@
   stays in the list until it is dismissed: a file that has vanished from a synced folder is news,
   not something to tidy away.
 - The upgrade dialog is the second panel. It names both schema versions, states the backup in the
-  sentence rather than a footnote, and says plainly what stops working afterwards. Cancelling writes
-  nothing at all.
+  sentence rather than a footnote, says that the rules will be re-applied to every automatically
+  categorised transaction as part of the upgrade ([§12](#12--storage)), and says plainly what stops
+  working afterwards. Cancelling writes nothing at all.
 - This is the **only** screen in the application where an error can prevent you from getting to the
   rest of it ([§14](14-empty-and-error-states.md)).
 

@@ -11,8 +11,9 @@ Securities is what all three point at.
 
 > **Mockup —** [Holdings tab](../mockups/07-investments.html#holdings)
 
-- One row per (security, brokerage account) with quantity > 0. Every figure is derived, and every
-  column is read-only **except the price**.
+- One row per (security, brokerage account) holding a position — quantity greater than 0, and a
+  running quantity that never went below it ([§2](02-domain-model.md)). Every figure is derived, and
+  every column is read-only **except the price**.
 - **This is where prices are kept up to date.** Clicking the price cell opens an inline editor — a
   value and an as-of date defaulting to today — and saving writes a Price record, replacing whatever
   that day already held ([§2](02-domain-model.md)). **Nothing is confirmed**: the editor shows the
@@ -166,10 +167,12 @@ Securities is what all three point at.
   own ISIN and its own holding — which the model already supports and which is what the difference
   is telling you.
 - **A security with no price at all values at zero**, everywhere a current figure is shown, and
-  fails check 3 by name. The one exception is the historical chart of
-  [§11.5](11-calculations.md#115-net-worth-over-time), which values a holding at cost for the
-  stretch before its first recorded price and draws it dashed — a chart that exists to show shape
-  can afford an approximation that a figure on the home screen cannot.
+  fails check 3 by name while it holds an open position. That is true on the historical chart of
+  [§11.5](11-calculations.md#115-net-worth-over-time) as well: what the chart values at cost is the
+  stretch **before a security's first recorded price**, drawn dashed — a chart that exists to show
+  shape can afford an approximation for the years nobody was recording prices, but a security with
+  no price at all has no first price to be before, and valuing it at cost at today's point would put
+  the end of the line above the net worth printed at the top of the same screen.
 - **Online lookup has no setting: it is the *Update prices* button ([§7.1](#71-holdings)) and
   nothing else.** Pressing it is the only thing that ever contacts the network — never automatic,
   never on load, never in the background. A switch in Settings would have been a second way to

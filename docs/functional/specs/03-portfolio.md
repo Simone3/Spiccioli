@@ -74,7 +74,11 @@ The home screen. No tabs.
   point is the headline, to the cent. A chart sitting under a number and ending somewhere else would
   spend every reading being explained.
 - Any month in which at least one holding had to be valued at cost is drawn dashed and labelled as
-  cost-based; the line goes solid at the first month in which every holding had a price. The dashed
+  cost-based; the line goes solid at the first month in which every holding had a price. **Only a
+  month earlier than a security's first recorded price can be dashed** — a security with no price at
+  all is worth zero on this line exactly as it is on the card above, which is what leaves the final
+  point equal to the headline to the cent and means today's point is never dashed
+  ([§11.5](11-calculations.md#115-net-worth-over-time)). The dashed
   stretch is the only part that is not net worth as computed everywhere else, and the legend also
   says that the rate and the fee applied across the whole line are today's, those being the only
   ones the file records ([§11.5](11-calculations.md#115-net-worth-over-time)).

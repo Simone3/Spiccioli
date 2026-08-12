@@ -50,9 +50,11 @@ thinking about it.
   enough to need one would not be worth showing in a badge.
 - Each failing entry links to the record it names.
 - **Check 13 fails immediately after an import, by design.** Receipt state is never set by the
-  application ([§6.3](06-categories.md#63-category-list)): every row arrives `na`, so the rent, the
-  electricity and the salary that just came in are all reported as untracked until the user goes
-  through them. That is the to-do list working, not a defect — the alternative was an application
+  application ([§6.3](06-categories.md#63-category-list)): an imported row arrives `na`, so the
+  rent, the electricity and the salary that just came in are all reported as untracked until the
+  user goes through them. A row typed on the add-transaction form is the one that can be given its
+  state as it is created ([§5.5](05-transactions.md#55-add-transaction)) — an import has no such
+  moment, being one paste and hundreds of rows. That is the to-do list working, not a defect — the alternative was an application
   that quietly marked a receipt as expected and let the user believe someone had looked at it.
   **Check 14 cannot fail then, and the two are not a pair**: it examines only rows already moved to
   `pending`, and an imported row is `na`. 13 is the list of what has not been looked at; 14 is the

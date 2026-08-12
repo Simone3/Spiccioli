@@ -96,7 +96,7 @@ net worth chart possible ([§11.5](11-calculations.md#115-net-worth-over-time)).
 | amount | amount | Signed. Negative is money out. |
 | categoryId | ref? | Empty is legal and reported by check 2. |
 | categorySource | enum | `automatic` · `manual`. Never empty. Reversible — see [§5.4](05-transactions.md#54-editing). |
-| receiptState | enum | `pending` · `checked` · `na`. **Always `na` on creation**, however the row was created, and moved only by hand ([§6.3](06-categories.md#63-category-list)). |
+| receiptState | enum | `pending` · `checked` · `na`. **Set by hand and by nothing else.** It defaults to `na` on the add-transaction form, which is the one place it can be given a value as the row is created ([§5.5](05-transactions.md#55-add-transaction)); a row arriving any other way — imported, duplicated — is created `na` and moved afterwards ([§6.3](06-categories.md#63-category-list)). |
 | notes | text | User-owned. Never written by the application. |
 | insertionSeq | int | Monotonic **per entity** — transactions and trades count separately, and neither ever reuses a value. Second sort key ([§5.2](05-transactions.md#52-ordering-and-paging)). |
 
@@ -109,8 +109,11 @@ by hand. `manual` means the user chose it and no automatic pass may overwrite it
 `automatic` transaction is never allowed to disagree with what **the rule list as the file holds it**
 would produce, so it is recomputed the moment either side of that equation moves: when a transaction
 is created or imported, when its description is edited, when a row is switched back to `automatic`
-([§5.4](05-transactions.md#54-editing)), and when a changed rule list is applied
-([§6.2](06-categories.md#62-rules)). There is no state in which the file holds an automatic category
+([§5.4](05-transactions.md#54-editing)), when a changed rule list is applied
+([§6.2](06-categories.md#62-rules)), and **when a file written by an older version is upgraded** —
+a new version may seed a category the old one did not have or change what an existing one means, and
+the upgrade restores the invariant before the file opens ([§12](12-storage.md)). There is no state
+in which the file holds an automatic category
 no rule would assign — which is what lets [§6.1](06-categories.md#61-report) and
 [§9](09-checks.md) read the stored value instead of re-deriving it behind every total.
 
@@ -223,7 +226,7 @@ Rules are global. They are not scoped to an account.
 
 | Field | Derivation |
 | --- | --- |
-| key | (securityId, accountId) — the account is always a `Brokerage` one |
+| key | (securityId, accountId) — the account is always a `Brokerage` one. No holding is derived at all when the running quantity ever went below 0, however the walk ends |
 | purchasedQuantity | Σ purchases, carrying the **lot count** — how many purchase trades it came from |
 | soldQuantity | Σ sales |
 | quantity | purchasedQuantity − soldQuantity |
@@ -236,15 +239,26 @@ Rules are global. They are not scoped to an account.
 | netProceeds, netGain | marketValue and gain after the hypothetical tax and sell fee of [§11.3](11-calculations.md#113-hypothetical-liquidation) |
 | netGainPct | netGain ÷ invested |
 
-A holding exists while quantity > 0. It is never edited; it changes only by recording a trade.
+A holding exists while its quantity is greater than 0 **and its running quantity has never gone
+below 0** at any point in the walk of [§11.1](11-calculations.md#111-weighted-average-cost). It is
+never edited; it changes only by recording a trade.
 
-**A quantity that has gone below 0 produces no holding and no figures, and that is the whole of the
-answer.** More sold than was ever bought is not a position that can be valued — there is no
+**A running quantity that has gone below 0 produces no holding and no figures, and that is the whole
+of the answer.** More sold than was ever bought is not a position that can be valued — there is no
 meaningful average cost, no invested total and no gain to derive from it — so nothing is derived:
 the row is absent from [§7.1](07-investments.md#71-holdings) and checks 8 and 9 name the trade that
 did it ([§9](09-checks.md)). That is what those two checks are *for*, and during data entry the
 usual cause is a sale typed before its purchase, which stops being true as soon as the purchase is
-recorded. Presenting an impossible position in the tables would mean inventing a reading for every
+recorded — dated before the sale, which is where it belongs.
+
+**A dip disqualifies the position, not merely the moment it happened in.** 50 bought, 100 sold and
+200 bought later ends at a quantity of 150, which is positive and is still not a holding: the sale
+drew the cost basis down by twice what was in it, and no later purchase puts that back
+([§11.1](11-calculations.md#111-weighted-average-cost)). The average cost such a walk arrives at is
+wrong by an amount nothing on the screen would reveal, so the row is absent for the same reason a
+row with a negative quantity is — and checks 8 and 9 name the trade, which is the report the
+situation calls for. The remedy is the same one: give the trades the dates they actually happened
+on, and the position becomes a holding again. Presenting an impossible position in the tables would mean inventing a reading for every
 figure on the screen, in the service of a state whose only correct next step is to fix it
 ([§15](15-out-of-scope.md)).
 
