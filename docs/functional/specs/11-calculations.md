@@ -162,7 +162,9 @@ look like “none recorded”.
   end. Ending on the last completed month would leave the chart short of the headline figure above
   it by however far into the month it happens to be, and the line would appear to stop growing for a
   few weeks every month. The final point is the same date every other figure on the screen is
-  computed at ([§11](#11--calculations)).
+  computed at ([§11](#11--calculations)). **On a day that is itself a month end there is one point,
+  not two** — the month-end point and the final point are the same date and the same figure, and
+  drawing it twice would put a marker on top of a marker to no purpose.
 - **The file starts at the earliest of any account's `openingDate`, any transaction's date and any
   trade's date** — not at the earliest transaction. Opening balances are money that was there before
   the first row was recorded, an account whose whole history is an opening balance has no
@@ -264,11 +266,20 @@ that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteratio
   is why the comparison is an exact match on the cent-rounded total rather than a tolerance.
 - **Payslips against transactions:** a payslip pairs with a transaction in a role `salary` category
   whose amount equals its `netPayment` and whose date falls in the payslip's own month or the month
-  after. One-to-one, payslips walked in the order of [§8.1](08-salaries.md#81-payslips) and each
-  claiming the nearest-dated unclaimed transaction that qualifies. **The window is a whole month, not
-  a number of days**,
+  after. One-to-one, payslips walked by month and then label as
+  [§8.1](08-salaries.md#81-payslips) orders them, and each claiming the nearest-dated unclaimed
+  transaction that qualifies. **The window is a whole month, not a number of days**,
   because what varies is which month the employer pays in, not by how many days it slips. Check 4
   reports both sides.
+- **The payslips of every contract are walked together, because a transaction has no employer on
+  it.** Nothing in a bank row says which job paid it ([§2](02-domain-model.md)), so there is nothing
+  to scope the pairing by and the walk covers every contract's payslips in one pass, ordered by
+  month and label with the contract's name breaking any remaining tie. Two employers paying an
+  identical net amount in the same month can therefore have their two links crossed. That costs
+  nothing: both payslips pair, both transactions pair, check 4 passes, and the only thing that is
+  wrong is which of two identical rows the *Matched* column names. Scoping it properly would mean
+  putting an employer on every bank transaction, which is a field to maintain forever against a
+  coincidence with no consequence.
 - **A `netPayment` of zero pairs like any other figure**, against a transaction of `0,00`. A payslip
   that paid out nothing — everything withheld, or a correction that cancelled itself — is a real
   payslip and the bank has a real row for it, so both sides are legal amounts
@@ -292,6 +303,15 @@ that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteratio
   total, and reports the shortfall; a genuine surplus is left unclaimed and reported against its own
   month by the rule below, which names the month the extra credit is actually in instead of
   smearing it down the rest of the year.
+- **A claimed credit is shown against the payslip that expected it**, even though nothing here is a
+  one-to-one pairing. Check 5 compares totals, but each credit is claimed by exactly one month, and
+  that month almost always holds one payslip carrying a `pensionContribution` — so the *Matched*
+  column ([§5.1](05-transactions.md#51-columns)) names that payslip, and the two or three credits of
+  a month all name the same one, which is precisely what says they were read together as a total.
+  Where a month holds more than one payslip with a contribution, the earliest in the order of
+  [§8.1](08-salaries.md#81-payslips) is the one named. Where the month holds no payslips at all —
+  the case below, which reports a payslip total of zero — there is nothing to name and the cell
+  reads an em dash, which is the same thing check 5 is about to say at greater length.
 - **The walk covers every month either side has something in**, which is what makes the comparison
   symmetric. A month with payslips is walked whether or not they contribute anything; and a credit
   that no month with payslips has claimed — one arriving where there are no payslips at all, after a

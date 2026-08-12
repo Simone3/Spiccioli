@@ -19,7 +19,9 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
   it. Its columns are the year, its **payslip count**, annual contract gross, total gross, total net
   salary, net/gross, working days and the two hourly figures
   ([§11.7](11-calculations.md#117-salary-figures)) — totals and rates, never averages. `Working
-  days` is editable here — it is the ContractYear record, created by typing into the cell.
+  days` is editable here — it **is** the ContractYear record, created by typing into the cell and
+  **deleted by clearing it**, which puts the year back exactly where it was before the number was
+  typed ([§13](13-validation.md)).
 - **One row per calendar year from the contract's start year to its end year**, or to the current
   year while the contract is running, ascending. The rows come from the contract's own dates and not
   from the payslips: a year in the middle with nothing recorded in it is a year that shows zeros and

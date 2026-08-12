@@ -17,9 +17,13 @@ The screen with the most hours on it. No tabs.
 - **Category** chip is violet when `categorySource = automatic` and a rule matched, neutral when
   `manual`, red when no category was assigned. Violet denotes provenance, not correctness —
   deliberately not green.
-- **Matched** is derived and read-only: the counterpart account for a paired internal transfer, the
-  security for a trade-matched securities transaction, an em dash otherwise
-  ([§11.6](11-calculations.md#116-derived-matching)).
+- **Matched** is derived and read-only, and it names the counterpart for **every** kind of pairing
+  [§11.6](11-calculations.md#116-derived-matching) makes, not some of them: the counterpart account
+  for a paired internal transfer, the security for a trade-matched securities transaction, and the
+  **payslip** for a salary transaction paired with one or a pension contribution attributed to one —
+  its month and its label, *December 2025* or *December 2025 · 13th*. An em dash otherwise. A row
+  that a check has quietly paired and a row nothing has touched must not look the same, or the
+  column answers a different question in each half of the file.
 - **Notes** is free text the user owns. **The application never writes to it.**
 - **Receipt** is a picker with three values — `pending`, `checked`, `na` — chosen directly. It is
   not a cycle and there is no order to work through: a transaction is not on its way anywhere, it
@@ -36,13 +40,22 @@ The screen with the most hours on it. No tabs.
 - **The screen opens on the last page**, so the most recent rows are in view. Ascending order with a
   jump to the end keeps chronology reading the same direction everywhere while still landing on the
   rows just imported; the pager is how you go back.
+- **However the screen is reached, it is the same screen.** Arriving from a report cell
+  ([§6.1](06-categories.md#61-report)) or from a finished import ([§5.7](#57-bulk-import)) sets the
+  filters and changes nothing else: the last page of what those filters match, the same ordering,
+  the same everything. A screen that behaved one way when opened from the sidebar and another way
+  when linked to would be two screens wearing one name, and the filters it arrives with are ones the
+  user could have set by hand in a few seconds.
 
 ## 5.3 Filters
 
 Account · period · category · **set by** · amount range · receipt state · free-text search on
 description. **The account filter lists cash accounts only** ([§2](02-domain-model.md)). Combined
 with AND. Filters affect the footer totals and the page count. **No filter is applied by default** —
-the screen opens on the whole history, and the period filter in the mockup is one the user set. The
+opened from the sidebar the screen shows the whole history, and the period filter in the mockup is
+one the user set. The two ways in that arrive with filters already set say so as they hand over
+([§5.2](#52-ordering-and-paging)): a report cell and a finished import both set them where the user
+would have, and both leave every control free to be changed or cleared. The
 category filter lists the twenty-seven categories **alphabetically**, with an *Uncategorised* entry
 above them ([§6.3](06-categories.md#63-category-list)).
 
@@ -141,21 +154,22 @@ that will survive every future rule change, which is the set worth keeping small
   ([§6.2](06-categories.md#62-rules)), and they do it repeatably and leave a reason behind; a bulk
   edit does it once and leaves nothing. Everything else worth changing on many rows at once is a
   mistake better deleted and re-imported.
-- **Selection survives paging.** Turning the page keeps every tick, so a selection may span pages
-  and the count in the header and the footer is the whole of it, not the part in view — which is the
-  only reading under which the header checkbox means what [§5.6](#56-selecting-and-deleting-in-bulk)
-  says it means. Coming back to a page shows the ticks still there.
-- **Selection is cleared by any change to the filters, and by the bulk delete itself** — and by
-  nothing else. A filter change is the one action that can put a selected row somewhere the user
-  cannot see or reach it, so it is the one action that discards the selection rather than carrying
-  an invisible one forward; and after a delete there is nothing left to have selected. Paging does
-  not clear it, because the pager can always take you back.
-- **A row edited out of the current filter keeps its tick and stays in the count.** Re-dating a
-  selected transaction outside the period filter takes it off the screen, not out of the selection:
-  it was chosen deliberately, one edit later it is still the same row, and silently dropping it
-  would make the count in the header mean something different from what the user built. It is the
-  same reading as paging — the row is out of view, not out of the set — and the way to let go of it
-  is to touch the filters, which is the action that says so.
+- **Selection survives paging, and nothing else.** Turning the page keeps every tick, so a selection
+  may span pages and the count in the header and the footer is the whole of it, not the part in view
+  — which is the only reading under which the header checkbox means what
+  [§5.6](#56-selecting-and-deleting-in-bulk) says it means. Coming back to a page shows the ticks
+  still there, because the pager can always take you back to them.
+- **Every other action clears it**: changing a filter, editing any cell, a row-menu *Duplicate* or
+  *Delete*, leaving the screen, and the bulk delete itself. The rule is one line rather than a list
+  of exceptions on purpose. A selection is a short-lived thing built for one action — filter, tick,
+  delete — and the moment anything else happens the set the user assembled may no longer be the set
+  the screen would describe: a filter change hides rows, an edit can move one out of view, and a
+  screen left and returned to is a fresh start by every other reckoning in the application. Carrying
+  an invisible selection across any of that puts a count in the header that nobody can verify
+  against what is in front of them, and the confirmation on the bulk delete is the last place to
+  discover that the count means something else.
+- **This is cheap to lose and expensive to get wrong.** Re-ticking is a filter and one click on the
+  header checkbox; deleting the wrong fortnight has no undo ([§12](12-storage.md)).
 
 ## 5.7 Bulk import
 
@@ -283,8 +297,9 @@ why check 13 fails straight after an import, which is that check working
 ([§6.3](06-categories.md#63-category-list), [§9](09-checks.md)).
 **No categorisation is previewed on this screen** — the preview is about which rows come in, not
 what they will be called. The user lands on Transactions filtered to the account imported into and
-to the date range of the rows imported, where a wrong category can be fixed in place with the full
-filter set available.
+to the date range of the rows imported — the ordinary screen on its last page, with two filters
+already set ([§5.2](#52-ordering-and-paging)) — where a wrong category can be fixed in place with
+the full filter set available.
 
 That filter is an ordinary account-and-period filter, reachable by hand like any other. Nothing is
 stamped on the imported rows to make it possible: **an import leaves no trace on the transactions it

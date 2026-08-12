@@ -57,6 +57,10 @@ The home screen. No tabs.
   list and shows the negative amount — that figure is the whole reason anyone would want the row —
   but reads **0,0%** and is **given no slice**. A negative arc cannot be drawn, and pretending
   otherwise would leave a circle whose parts sum to more than the circle.
+- **A type totalling exactly nothing is the same case**: it shows `€ 0,00` and **0,0%** and is given
+  no slice, because a slice of no size is not a slice. It is still a row — an emptied voucher
+  balance or a term deposit that has just been paid out is a type the portfolio has and a shape it
+  no longer contributes to, and a row saying so is worth more than a row that vanished.
 - **Shares are therefore computed against the total of the positive types**, not against net worth,
   which is what keeps the column adding to 100% while a negative type sits in it. The two figures
   differ by exactly the negative amounts, which are on screen a line away. If no type is positive at
@@ -64,7 +68,9 @@ The home screen. No tabs.
   value to divide up, and the list still shows every amount.
 - **Both are ordered by share, largest first**, and in the same order — the list reads down in the
   order the slices are drawn clockwise, so finding a slice in the legend is following a line rather
-  than searching. Types with no share sort last, by amount, least negative first. This is the one
+  than searching. Types with no share sort last, **by amount descending** — zero first, then the
+  negatives from least to most — which keeps the whole column reading downwards from the largest
+  contribution to the deepest hole. This is the one
   table in the application ordered by its own amounts (compare
   [§6.1](06-categories.md#61-report)): there are nine rows, they are a shape rather than a ledger,
   and the shape is the entire point of drawing them.

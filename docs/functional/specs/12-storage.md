@@ -24,9 +24,12 @@
   means the other version is recoverable if the overwrite turns out to be the wrong call.
 - **The user is told, in those terms, and not with a question.** A line appears on the screen they
   are on — *“This file was changed by something else while you had it open. That version has been
-  saved to the backup folder as finances-2026-08-08-1432-external.spiccioli, and your work has been
-  kept. That copy is one of the ten backups kept there, so it will be rotated out in time — move it
-  somewhere else if you want to keep it.”* — and it stays until dismissed. It is not a modal and it
+  saved to the backup folder as finances-2026-08-08-1432-external, and your work has been kept. That
+  copy is one of the 10 backups kept there, so it will be rotated out in time — move it somewhere
+  else if you want to keep it.”* — and it stays until dismissed. **The count in that sentence is
+  `backupCount` as it currently stands** ([§10](10-settings.md)), not the number ten: the one thing
+  the line exists to tell the user is how long the displaced version will last, and a message that
+  said ten to someone keeping three would be worse than saying nothing. It is not a modal and it
   is not a choice between two versions: the user has one of them in front of them and has no way to
   judge the other from a dialog, so the application does the safe thing and tells them precisely
   where to find what it displaced. This is what [§1](01-premise-and-constraints.md) means by not
@@ -72,6 +75,14 @@
   of historical data will be loaded by a one-off migration script, not by the application. It
   carries a **schema version**, and every file is at exactly one of three positions relative to the
   running application: current, older, or not understood.
+- **What that format is, and what the file is called, are implementation decisions.** A text format,
+  an embedded database, something else: this document requires only that it is one file, that a
+  script can write it, and that it carries its schema version. The **extension is not specified
+  either** and follows from the format chosen. Where these pages and the mockups need a filename
+  they write `finances`, sometimes with an invented extension, and nothing anywhere depends on it —
+  the backup folder takes the file's name without whatever extension it turns out to have
+  ([§12](#12--storage)), and the window title carries the name alone
+  ([§12.2](#122-the-menu-bar-and-which-file-is-open)).
 - **An older file is upgraded once, with the user's consent.** Opening one shows a screen that says
   which version wrote it and which version it will become, and states that a copy of the file as it
   stands now is written to the backup folder first. Confirm and the upgrade runs and the file opens;
@@ -137,6 +148,12 @@
   ([§12.1](#121-the-launch-screen)) is what the application opens *with*; the File menu is how you
   leave one file for another once it is running. Both reach the same code, so there is nothing you
   can do at launch that you cannot do afterwards.
+- **An opened file lands on Portfolio, with no filter set anywhere.** Which screen was last looked
+  at, which filters were on it and which row was selected are not remembered — not between files and
+  not between sessions. There is nowhere for that state to live ([§10](10-settings.md),
+  [§12](#12--storage)), and it is worth nothing: Portfolio is the screen that says what the file
+  contains and carries the failing-check banner, which is the thing to read on arriving at a ledger
+  whatever was being done in it last time.
 - **Two things the menu bar must carry, and everything else is the platform's business.**
   - **A File menu of four actions**: *New…*, which writes a fresh seeded file; *Open…*, which
     browses for one; *Open Recent*, which is the same list the launch screen offers; and *Quit*,

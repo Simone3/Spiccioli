@@ -70,7 +70,9 @@ The categories × years matrix — the one screen that answers where the money g
   built out of Investments, so nothing is added up.
 - **Every figure in a category row is a link.** Clicking a cell opens Transactions filtered to that
   category and that year — plus whatever account filter the report already has — and clicking the
-  row total drops the year. It is the answer to the question the table always provokes: *what is in
+  row total drops the year. What opens is the ordinary Transactions screen on its last page, with
+  those filters set and nothing else different about it
+  ([§5.2](05-transactions.md#52-ordering-and-paging)). It is the answer to the question the table always provokes: *what is in
   there?* Without it the matrix reports a number and leaves the user to reconstruct the filter by
   hand on another screen, which is the sort of small friction that ends with a spreadsheet being
   opened instead.

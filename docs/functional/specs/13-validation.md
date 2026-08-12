@@ -22,6 +22,9 @@ sell more than was ever bought.
   row is never left half-changed.
 - **Text is trimmed on save**, everywhere, and a field that trims to nothing counts as empty.
   Interior whitespace is left alone — bank descriptions carry it and rules match on it.
+- **`notes` is optional on every entity that has one**, trimmed like any other text, of no bounded
+  length, and read by nothing in the application ([§5.1](05-transactions.md#51-columns)). It is the
+  one field with no rule to state, which is why it is stated once here instead of in nine tables.
 - **An imported row is validated exactly as a typed one.** Bulk import is another way into the same
   record, not a side door around these rules: a pasted row whose date does not parse, whose amount
   does not parse, or whose description is empty after trimming **cannot be read**, is marked with
@@ -80,8 +83,8 @@ sell more than was ever bought.
 | type | Required. **Locked once the account holds anything** — a transaction or a trade. Changing a cash account into a brokerage one would orphan every row on it. |
 | openingBalance | Amount field, required, any sign. **Forced to 0 and disabled on `Brokerage`** ([§2](02-domain-model.md)). |
 | currency | Required. `EUR` only in v1 ([§13.1](#131-how-it-behaves)). |
-| openingDate | Required. |
-| closingDate | Optional; must be ≥ `openingDate`. Nothing else is required to close an account — check 11 reports what was left in it ([§9](09-checks.md)). |
+| openingDate | Required. **Not in the future** — an account is opened before it is recorded, not after. |
+| closingDate | Optional; must be ≥ `openingDate` and, like it, **not in the future**. An account closing next month is an account that is still open. Nothing else is required to close one — check 11 reports what was left in it ([§9](09-checks.md)). |
 | delete | Refused while any transaction or trade points at it. Closing is what retiring looks like ([§4.3](04-accounts.md#43-creating-and-editing)). |
 
 ### Transaction
@@ -99,8 +102,10 @@ sell more than was ever bought.
 
 | Field | Rule |
 | --- | --- |
+| kind | Required, `purchase` or `sale`. Not a field on the form — it is which tab the trade was recorded from ([§7.2](07-investments.md#72-purchases), [§7.3](07-investments.md#73-sales)) — and it is **locked once the trade exists**: a purchase edited into a sale would restate a position rather than correct a typo, and deleting the row and recording it again is the honest way to do that. |
 | accountId | Required. The picker lists **brokerage accounts only**, closed ones included and marked ([§4.3](04-accounts.md#43-creating-and-editing)). |
 | securityId | Required — chosen from the existing list or created inline ([§7.5](07-investments.md#75-recording-a-trade-and-where-securities-come-from)). |
+| date | Required, date picker. No bound against the account's dates — check 12 reports those, exactly as for a transaction. |
 | quantity | Required, > 0, at most 4 decimals. Direction is `kind`, never a negative quantity. |
 | unitPrice | Required, > 0, at most 4 decimals. |
 | fees | Amount field, required, ≥ 0. |
@@ -113,7 +118,8 @@ sell more than was ever bought.
 | --- | --- |
 | isin | Required, unique, 12 characters, two letters then nine alphanumerics then a digit. The format is checked; the check digit is not recomputed. |
 | ticker, name | Required, trimmed. |
-| currency | Required. `EUR` only in v1 ([§13.1](#131-how-it-behaves)). |
+| type | Required, one of the five of [§2](02-domain-model.md). Freely editable afterwards — it groups the portfolio breakdown ([§3.1](03-portfolio.md#31-behaviour)) and nothing is derived from it, so correcting one restates a slice and no recorded figure. |
+| currency | Required. `EUR` only in v1 ([§13.1](#131-how-it-behaves)). **It need not match the currency of the account the security is held in**: both are EUR in v1, and the day a second currency exists an instrument quoted in one and settled through an account in another is an ordinary arrangement, not an error to have designed a refusal for. |
 | taxRate | Required. **Entered and shown as a percentage**, 0 – 100 with at most 1 decimal, and stored as the fraction it names — 12,5 is typed and `0,125` is kept ([§11](11-calculations.md)). |
 | delete | Refused while any **trade** points at it. Prices are not dependent data — they are part of the security, not references to it, and they go with it. Deleting a security therefore deletes its price history in the same breath, and the confirmation says how many records that is. |
 
@@ -140,6 +146,7 @@ sell more than was ever bought.
 | Field | Rule |
 | --- | --- |
 | workingDays | Integer 1 – 366, **or empty**. Empty is a legitimate state meaning “not entered yet”, and is what makes the hourly columns read *undefined* rather than wrong ([§11.7](11-calculations.md#117-salary-figures)). Zero is refused — it is not a year, it is a division by zero spelled differently. |
+| the record | **Created by typing into the cell and deleted by emptying it** ([§8.1](08-salaries.md#81-payslips)). Emptying returns the year to exactly the state it had before anything was typed, so there is no second reading in which the record survives holding nothing. It is the one delete that is **not confirmed**: nothing is lost but the number in the cell, it is in front of the user as they clear it, and typing it again is the whole of the undo ([§4.3](04-accounts.md#43-creating-and-editing)). |
 
 ### Payslip
 
@@ -147,6 +154,7 @@ sell more than was ever bought.
 | --- | --- |
 | contractId | Required. |
 | year, month | Required; month 1 – 12. The month must fall **within the contract's start and end dates** — a payslip from before you were hired is always a typo. |
+| label | Optional, trimmed. It is what distinguishes a second payslip in a month from the first and what orders the two ([§8.1](08-salaries.md#81-payslips)), so it is not required — the ordinary monthly payslip is the one that has none — and not unique: nothing reads it but the eye. |
 | gross, contractGross | Amount fields, required, > 0. |
 | netPayment | Amount field, required, ≥ 0. |
 | refunds, carPayment, pensionContribution | Amount fields, required, ≥ 0. These are magnitudes; the formula of [§11.7](11-calculations.md#117-salary-figures) applies their signs. |

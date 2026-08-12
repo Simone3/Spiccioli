@@ -211,15 +211,23 @@ Securities is what all three point at.
   was pressed. It sits on the screen until dismissed. Nothing about a failed fetch is recorded in
   the file — the notice is where it lives, and the remedy is to press the button again or to type
   the price in by hand ([§7.1](#71-holdings)).
-- It sends security identifiers — ISIN or ticker — to the provider. **No amounts, quantities or
-  account data ever leave the machine.** The application must state this **next to the button**,
-  which is the moment it matters and now the only place the feature is visible.
-- **Which provider is built in, not chosen.** There is one, named in the application, with no
-  endpoint or credential to configure. A setting for the URL would have implied the application can
-  talk to whatever is put in it, which is not true: a price provider has a response shape, and
-  reading it is code. When the provider has to change, that is a new version, and
-  [§1](01-premise-and-constraints.md)'s promise about what leaves the machine stays something this
-  document can actually make.
+- **What leaves the machine is an identifier for a security and nothing else** — whichever of the
+  ones the file already holds the provider takes, an ISIN or a ticker — and what comes back is a
+  quote and the date it belongs to. **No amounts, quantities, balances or account data ever leave**,
+  and nothing about the portfolio is inferable from a request that names an instrument millions of
+  people hold. The application must state this **next to the button**, which is the moment it
+  matters and the only place the feature is visible.
+- **Which provider, and exactly what it is sent, are settled when the application is built, not
+  here.** This section fixes the shape of the exchange — identifiers out, latest quote and its date
+  back, one press, no configuration — and deliberately stops there: a provider has a request format,
+  a response shape, a rate limit and terms of use, and choosing among those is an engineering
+  decision to be made against the providers that exist at the time, with whatever adaptation reading
+  their response actually takes. What this document does commit to is the part a later choice cannot
+  quietly widen: one provider, built in, **named on screen beside the button**, with **no endpoint,
+  key or credential to configure**, and nothing sent beyond an identifier. A setting for the URL would have implied the application can
+  talk to whatever is put in it, which will not be true whichever provider is picked. When the
+  provider has to change, that is a new version, and [§1](01-premise-and-constraints.md)'s promise
+  about what leaves the machine stays something this document can actually make.
 - The application is fully usable without ever pressing the button. A provider failure is a line in
   the notice, never a blocked screen.
 
