@@ -139,7 +139,7 @@ Records that ought to correspond are paired heuristically, with **no linking eff
 | Internal transfer legs, check 1 | `a.amount = − b.amount` | One account sends what the other receives. |
 | Purchase transaction ↔ purchase trade, check 6 | `transaction.amount = − trade.total` | The money leaves the cash account; the trade total is what it cost, a positive figure. |
 | Sale transaction ↔ sale trade, check 7 | `transaction.amount = trade.total` | The money arrives; net proceeds is what arrived. |
-| Payslip ↔ salary transaction, check 4 | `transaction.amount = payslip.netPayment` | Pay arrives, and `netPayment` is a magnitude ≥ 0 ([§13](13-validation.md)). |
+| Payslip ↔ salary transaction, check 4 | `transaction.amount = payslip.netPayment` | The payment and the figure are the same signed amount. `netPayment` is positive on every ordinary payslip and **may be negative** ([§13](13-validation.md)); the equality does not care which. |
 | Payslip pension figure ↔ pension credit, check 5 | `transaction.amount = the figure` | A credit into the fund, against a magnitude ≥ 0. |
 
 **Every matcher here is greedy, and every one of them states its order.** The pattern is the same in all four — transfer legs, trades, salary payments and pension credits: the side being matched *from* is walked in the ordering its own screen uses — `date ASC, insertionSeq ASC, id ASC` for transactions and trades ([§5.2](05-transactions.md#52-ordering-and-paging), [§7.2](07-investments.md#72-purchases)), month ascending and unlabelled first for payslips ([§8.1](08-salaries.md#81-payslips)) — and each record claims the **nearest-dated** unclaimed counterpart that satisfies the conditions, ties broken by that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteration order.
@@ -157,7 +157,7 @@ Records that ought to correspond are paired heuristically, with **no linking eff
 - **Payslips against transactions:** a payslip pairs with a transaction in a role `salary` category whose amount equals its `netPayment` and whose date falls in the payslip's own month or the month after. One-to-one, payslips walked by month and then label as [§8.1](08-salaries.md#81-payslips) orders them, and each claiming the nearest-dated unclaimed transaction that qualifies. **The window is a whole month, not a number of days.** Check 4 reports both sides.
 - **A payslip has no date, so “nearest” is measured from the first day of its own month** ([§2](02-domain-model.md)): the distance ranked is from that month's first day to the transaction's date, so among two candidates a payslip takes the earlier one. Ties are broken by the transaction's `insertionSeq` and then its `id`, as everywhere else here.
 - **The payslips of every contract are walked together, because a transaction has no employer on it** ([§2](02-domain-model.md)). The walk covers every contract's payslips in one pass, ordered by month and label with the contract's name breaking any remaining tie. Two employers paying an identical net amount in the same month can therefore have their two links crossed: both payslips pair, both transactions pair, check 4 passes, and the only thing that is wrong is which of two identical rows the *Matched* column names.
-- **A `netPayment` of zero pairs like any other figure**, against a transaction of `0,00`. Both sides are legal amounts ([§13](13-validation.md)) and the ordinary equality finds them. Nothing special-cases zero on this path.
+- **A `netPayment` of zero pairs like any other figure**, against a transaction of `0,00`, and **so does a negative one**, against a debit of the same amount. All three are legal amounts ([§13](13-validation.md)) and the ordinary signed equality finds them; **nothing on this path special-cases a sign**. A negative payslip whose debt the employer carried into the next month rather than recovering has no transaction at all, and check 4 reports the payslip — correctly, since no money moved.
 - **Pension credits against payslip figures:** each of a payslip's three pension figures — `employeeContribution`, `employerContribution`, `severanceContribution` ([§2](02-domain-model.md)) — pairs with a transaction in a role `pension contribution` category whose amount equals it and whose date falls in the payslip's own month or the month after. One-to-one, the figures walked in the payslip order of [§8.1](08-salaries.md#81-payslips) and, within one payslip, employee then employer then severance, each claiming the nearest-dated unclaimed transaction that qualifies. **The window is a whole month, not a number of days**, exactly as for a salary payment. Check 5 reports both sides.
 - **Distance is measured from the first day of the payslip's month** here too, a payslip having no date of its own, with ties broken by the transaction's `insertionSeq` and then its `id`. **The payslips of every contract are walked together** for the same reason as check 4: a transaction carries no employer.
 - **A figure of 0 is not a claim.** It expects no credit, takes no part in the walk and cannot be reported as unmatched — a heading the payslip has nothing under is not a credit that failed to arrive. This is the one place a zero behaves differently from `netPayment` above, and the difference is that every payslip has a net payment while most have at least one contribution heading standing empty.
@@ -179,6 +179,26 @@ Records that ought to correspond are paired heuristically, with **no linking eff
 - `grossPerHour = Σ gross in year ÷ (workingDays × contract.hoursPerDay)`, and the same with `Σ netSalary`. `workingDays` is the whole calendar year ([§2](02-domain-model.md)), so a partial year understates both — accepted, see [§8.1](08-salaries.md#81-payslips).
 - Per-year `netGrossPct = Σ netSalary in year ÷ Σ gross in year`, not the average of the monthly percentages.
 - All of the above are computed within the selected contract only.
+
+### What `gross` is, and what that does to every ratio built on it
+
+**`netGrossPct` divides two figures that may not be on the same basis, and nothing in the file can tell whether they are.** `netSalary` is defined exactly — refunds out, car back in — while `gross` is whatever the employer prints on the *totale lordo* line ([§2](02-domain-model.md)). Two properties of that line move the ratio, in opposite directions, and neither is recorded:
+
+- **If reimbursed expenses are inside it**, the denominator carries something the numerator has just taken out, and the ratio reads **too low** in every month there is a reimbursement.
+- **If the car deduction reduces it**, the denominator is missing something the numerator has just added back, and the ratio reads **too high** — in exactly the months the first case pushes it down.
+
+**That the two point opposite ways is what makes this worth writing down.** A payslip carrying both produces a ratio that looks entirely ordinary and is wrong at both ends, and no check can catch it: the payslip's own breakdown of its gross line is not in the file, so there is nothing to compare against. **The same question governs `grossPerHour` and the per-year `netGrossPct`**, which read the same field; only `yearContractGross` is unaffected, being built from `contractGross`.
+
+**The test is two payslips and takes a minute**, and it is worth doing once per employer:
+
+1. Take a month with a reimbursement and one without, and compare each `gross` against its `contractGross`. If the reimbursement month is higher by about the reimbursement, **refunds are inside the gross line**.
+2. Take a month with the car deduction and one without. If the car month's `gross` is *lower* by about the car amount, **the deduction is inside it too**.
+
+**If the answer is yes to either, the correction is one line, and it is recorded here rather than applied:**
+
+`netGrossPct = netSalary ÷ (gross − refunds + carPayment)`
+
+which puts the denominator on precisely the basis the numerator is already on and makes the figure a ratio of like to like. **It is not applied now** because it is wrong on a payslip whose gross line already excludes both — which is what the figures in [§8.1](08-salaries.md#81-payslips) assume — and which of the two conventions an employer prints is a fact about that employer rather than something this document can settle ([§15](15-out-of-scope.md)).
 
 ## 11.8 Annualised return
 

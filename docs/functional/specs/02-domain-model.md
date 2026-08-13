@@ -135,17 +135,19 @@ A security belongs to no institution — it is the same instrument everywhere. T
 | contractId | ref | |
 | year, month | int, int | The month the pay is **for**, as printed on the payslip — not necessarily the month it was paid. **Not unique:** a month may hold more than one payslip. |
 | label | text? | “13th” for the tredicesima. |
-| contractGross | amount | Contractual monthly gross at that date. |
-| gross | amount | Actual gross for the month. |
-| netPayment | amount | What reached the bank. The figure check 4 uses. |
-| refunds | amount | Positive. |
-| carPayment | amount | Positive; withheld from the payment. |
+| contractGross | amount | Contractual monthly gross at that date — the term, not what the month turned out to be. |
+| gross | amount | **The payslip's own *totale lordo* line, copied as printed.** What that line contains is a payroll convention of the employer's and not a definition this application supplies; the consequences are set out in [§11.7](11-calculations.md#117-salary-figures). |
+| netPayment | amount | What reached the bank. **Either sign** ([§13](13-validation.md)) — a month whose deductions exceed its earnings is a real payslip, not a typo. The figure check 4 uses. |
+| refunds | amount | Expenses reimbursed through the payslip. Positive; a magnitude, and [§11.7](11-calculations.md#117-salary-figures) applies its sign. |
+| carPayment | amount | Withheld for the company car. Positive; a magnitude, on the same terms. |
 | employeeContribution | amount | The employee share credited to the pension fund for that month, as printed on the payslip. Positive; **0 where the payslip has nothing under that heading**. |
 | employerContribution | amount | The employer share, on the same terms. |
 | severanceContribution | amount | The TFR credited to the fund, on the same terms. |
 | notes | text | |
 | *netSalary* | *amount* | netPayment − refunds + carPayment |
 | *netGrossPct* | *fraction* | netSalary ÷ gross — a fraction, shown as a percentage ([§11](11-calculations.md)) |
+
+**`gross` is a line copied off a document, not a quantity this application defines.** Every other figure on a payslip here is unambiguous — what reached the bank, what was withheld for the car, what the fund was credited — and each is a single amount with one possible reading. *Totale lordo* is not: what an employer's payroll puts into it varies, and the file records the number without recording its composition. **`netSalary` is therefore defined exactly and `gross` is defined by reference**, which is the one place in this model those two kinds of definition meet. [§11.7](11-calculations.md#117-salary-figures) sets out what it does to the ratio between them and how to find out which convention a given payslip uses.
 
 **`severanceContribution` is the TFR that reached the *fund*, and the model assumes that is all of it.** An employee who leaves some or all of their severance accruing with the employer instead has an asset that grows every month, is revalued by statute, and **has nowhere in this file to live**: no account holds it, no payslip field records it, and net worth does not know about it ([§15](15-out-of-scope.md)). Where the payslip's TFR line is the credit into the fund, as it is here, the figure is complete and nothing is missing.
 
