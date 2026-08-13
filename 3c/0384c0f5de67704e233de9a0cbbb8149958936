@@ -1,0 +1,31 @@
+docs/functional/mockups/03-portfolio.html
+  s_fd820f3656f846::t_a1afebe36bd602 48-49
+docs/functional/specs/03-portfolio.md
+  s_fd820f3656f846::t_feb737bd93e572 15-17,20-22,41-43,47
+docs/functional/specs/04-accounts.md
+  s_fd820f3656f846::t_a39a3187f7947e 16,50-51
+docs/functional/specs/08-salaries.md
+  s_fd820f3656f846::t_86aa77aa64f4fd 21
+docs/functional/specs/09-checks.md
+  s_fd820f3656f846::t_b6ef2668b217c7 33
+docs/functional/specs/11-calculations.md
+  s_fd820f3656f846::t_0e5f1e14245af6 21,82,92,106-108,111-113,147,159,161,163
+docs/functional/specs/15-out-of-scope.md
+  s_fd820f3656f846::t_a432be7cf2045f 31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "3c0384c0f5de67704e233de9a0cbbb8149958936",
+  "prompts": {},
+  "sessions": {
+    "s_fd820f3656f846": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cfbb755e-dc6c-4221-a74f-f3ca651cba32",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
