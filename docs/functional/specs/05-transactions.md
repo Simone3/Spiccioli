@@ -14,7 +14,7 @@ The screen with the most hours on it. No tabs.
 - **Category** chip is violet when `categorySource = automatic` and a rule matched, neutral when `manual`, red when no category was assigned. Violet denotes provenance, not correctness.
 - **Matched** is derived and read-only, and it names the counterpart for **every** kind of pairing [§11.6](11-calculations.md#116-derived-matching) makes: the counterpart account for a paired internal transfer, the security for a trade-matched securities transaction, and the **payslip** for a salary transaction or a pension-fund credit paired with one — its month and its label, *December 2025* or *December 2025 · 13th*. An em dash otherwise.
 - **Notes** is free text the user owns. **The application never writes to it.**
-- **Receipt** is a picker with three values — `pending`, `checked`, `na` — chosen directly. It is not a cycle and there is no order to work through ([§6.3](06-categories.md#63-category-list)).
+- **Receipt** is a picker with three values, chosen directly. The stored values are `pending`, `checked` and `na` ([§2](02-domain-model.md)); **the third is written *N/A* everywhere it is shown to the user** — in this picker, on the add-transaction form and in the checks that read it — and the lower-case `na` appears in this document and in the file, never on a screen. It is not a cycle and there is no order to work through ([§6.3](06-categories.md#63-category-list)).
 - The footer sums the filtered rows, across all pages.
 
 ## 5.2 Ordering and paging
@@ -22,6 +22,7 @@ The screen with the most hours on it. No tabs.
 - Always `date ASC, insertionSeq ASC, id ASC`. Columns are not sortable and the order is not configurable.
 - **50 rows per page.** This is the only paginated table in the application; every other table is shown in full.
 - **The screen opens on the last page**, so the most recent rows are in view. The pager is how you go back.
+- **Changing a filter lands on the last page of what it now matches**, on the same rule and for the same reason. A page number carried over from the previous filter would point at a different part of a different list — page 7 of nine hundred rows is somewhere in 2019, and page 7 of eighty is the end — so the position is recomputed rather than kept. **This is the only thing a filter change does to the view**, the ordering and everything else being fixed ([§5.6](#56-selecting-and-deleting-in-bulk) is what it does to the selection).
 - **However the screen is reached, it is the same screen.** Arriving from a report cell ([§6.1](06-categories.md#61-report)) or from a finished import ([§5.7](#57-bulk-import)) sets the filters and changes nothing else: the last page of what those filters match, the same ordering, the same everything.
 
 ## 5.3 Filters
@@ -60,7 +61,7 @@ Filters affect the footer totals and the page count. **No filter is applied by d
 - **Account** starts empty and lists cash accounts only — closed ones among them, marked and last ([§4.3](04-accounts.md#43-creating-and-editing)). **No picker in the application remembers what was chosen last.**
 - **Date** is a date picker defaulting to today and **offering no day after it** ([§13](13-validation.md)); **amount** is a validated numeric field, signed, negative being money out. **Neither holds text that has to be interpreted.** The date picker shows dates in the format `dateFormat` names and returns a day, not a string; the amount field accepts digits and **the one decimal character `decimalSeparator` names**, and nothing else — the other character is not typeable and a thousands separator is not typeable at all ([§10](10-settings.md), [§13](13-validation.md)). A preference decides which key means *decimal*; it never decides what an entered figure meant.
 - **Category** defaults to *Automatic*, so a manually added row is categorised by the same rules as an imported one.
-- **Receipt** defaults to *n/a*, and this form is **the one place a row can be given a state before it exists**: the picker offers all three values and whatever it holds on save is what the row is created with. Every other way a row arrives — an import, a duplicate — creates it `na` and leaves the state to be moved afterwards ([§5.7](#57-bulk-import), [§6.3](06-categories.md#63-category-list)). Nothing about the category the row ends up with changes it, on this form as everywhere else.
+- **Receipt** defaults to *N/A*, and this form is **the one place a row can be given a state before it exists**: the picker offers all three values and whatever it holds on save is what the row is created with. Every other way a row arrives — an import, a duplicate — creates it `na` and leaves the state to be moved afterwards ([§5.7](#57-bulk-import), [§6.3](06-categories.md#63-category-list)). Nothing about the category the row ends up with changes it, on this form as everywhere else.
 - **Save and add another** keeps the dialog open with account and date retained and the other fields cleared.
 
 ## 5.6 Selecting and deleting in bulk
