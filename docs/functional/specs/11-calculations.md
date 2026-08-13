@@ -180,6 +180,47 @@ Records that ought to correspond are paired heuristically, with **no linking eff
 - Per-year `netGrossPct = Σ netSalary in year ÷ Σ gross in year`, not the average of the monthly percentages.
 - All of the above are computed within the selected contract only.
 
+## 11.8 Annualised return
+
+**The one figure in the application that says how *well* the investments have done rather than by how much.** `gainPct` is a ratio of two amounts with no time in it ([§2](02-domain-model.md)): +15% is excellent over one year and poor over ten, and on a position built by twenty purchases across eight years it is comparable with nothing at all, because most of the money has not been invested for most of the period. This is the figure that fixes that, and it is computed entirely from records the file already holds.
+
+- **It is a money-weighted return**: the constant annual rate which, applied to every euro from the day it went in until it came out or until today, reproduces exactly what is held now. It answers *what did my money earn*, which is the question a ledger is for, and it is directly comparable with a deposit rate or an index.
+- **It is not a time-weighted return**, which removes the effect of when money was added and answers *how did the fund do* — the figure a factsheet quotes. That one needs a valuation on every contribution date, which this file's price history has only sometimes, and it is out of scope ([§15](15-out-of-scope.md)).
+- **It is gross**, like the tab it appears on ([§7.1](07-investments.md#71-holdings)): no capital-gains tax on either side, neither the hypothetical tax of [§11.3](#113-hypothetical-liquidation) nor the recorded tax of a sale. **Commissions are in it**, on both sides, a commission being money that never went to work.
+
+### The flows
+
+Per (security, account), or pooled over any set of them:
+
+- a purchase, on its date: `− (quantity × unitPrice + fees)`
+- a sale, on its date: `+ (quantity × unitPrice − fees)` — **the taxes withheld are added back**, this figure being gross
+- today: `+ marketValue` of what is still held, at the latest price ([§2](02-domain-model.md)). **A position sold in full contributes no terminal flow at all**, its sales being the whole of what came back.
+
+### The rate
+
+- `r` is the value satisfying `Σ flowᵢ × (1 + r) ^ (− dᵢ ÷ 365) = 0`, where `dᵢ` is the number of days from the earliest flow to flow `i`.
+- **Days are counted actual and the year is 365 of them.** No month arithmetic and no leap-year rule: the day count is a subtraction and the divisor is a constant.
+- **It is found by bisection over `r ∈ [−0,999 , 10]`, halved 200 times**, and the result is the midpoint the bracket has converged to. **That is the specified method rather than an implementation note**: an iteration with an unstated bracket or an unstated stopping rule is a figure two machines can disagree about, which is exactly what the walk order of [§11.1](#111-weighted-average-cost) already refuses to allow.
+- Displayed as a percentage with one decimal, like every other percentage ([§11](#11--calculations)).
+
+### When it is *undefined*
+
+It reads *undefined* rather than 0, by the general rule of [§11](#11--calculations), in every one of these:
+
+- **Fewer than two flows, or every flow of one sign** — there is nothing for a rate to reconcile. A holding whose security has no price at all lands here: its terminal flow is `0` and the purchases alone cannot be solved, which is check 3 failing in another place ([§9](09-checks.md)).
+- **Every flow on one day.** The exponent is 0 throughout and no rate changes anything: a position opened and closed this morning made a profit and has no annual rate.
+- **No sign change across the bracket** — a return worse than −99,9% or better than +1000% a year. Both ends are absurd for a portfolio and neither is worth printing.
+- **The position is oversold** ([§11.1](#111-weighted-average-cost)). No holding is derived, so there is no terminal value, exactly as there is no average cost.
+
+**Where the flows change sign more than once, more than one rate can satisfy the equation.** The bisection returns one of them and returns the same one on every machine, and this document does not claim the figure is unique in that case. It arises from selling a position down and buying it back later, and it is left as it is rather than detected.
+
+### The two places it appears
+
+- **Per holding**, in the detail panel of [§7.1](07-investments.md#71-holdings), beside the gain it qualifies.
+- **Portfolio-wide**, in the Holdings footer: the flows of **every trade in the file** — including those of positions since sold in full, which are exactly the ones a figure about lifetime performance must not drop — plus the terminal value of every open holding. **Oversold positions contribute nothing and the footer says how many it left out**, the same rule the realised-gain totals follow ([§3.1](03-portfolio.md#31-behaviour), [§7.3](07-investments.md#73-sales)).
+
+**Both carry a line saying what the figure is**, because "annualised return" is not self-explanatory to someone who has not met it: that it is the yearly rate the money actually earned, that it accounts for when each purchase was made, and that it is before tax.
+
 ---
 
 ## Why it is this way
@@ -224,6 +265,12 @@ Records that ought to correspond are paired heuristically, with **no linking eff
 - **A zero contribution takes no part** because a heading with nothing under it is not a credit that failed to arrive. `netPayment` is the opposite case — every payslip has one, so a zero there is a figure somebody entered and a `0,00` credit is the thing to look for.
 - **The salary averages divide by the payslips there were** because that is what makes them the only salary figures a partial year does not understate ([§8.1](08-salaries.md#81-payslips)); a thirteenth month of pay is pay, and spreading it over twelve would flatter every month by a thirteenth. Keeping totals and rates in the per-year table means no figure in the application is an average and a total of the same thing sitting two columns apart.
 - **`yearContractGross` is 0 rather than *undefined* for an empty year** because the figure is a restatement of a contract term and not a division by anything.
+- **The annualised return exists because every other figure about the investments is a stock rather than a rate.** Value, gain, invested and realised gain all say *how much*; none of them says *how well*, and the closest thing — `gainPct` — is a ratio whose denominator has been accumulating for a decade, so it flatters a young position and punishes an old one and is comparable with nothing. A ledger holding ten years of dated purchases is holding the one thing that makes a real return computable, and computing it needs no new field and no new record.
+- **Money-weighted rather than time-weighted, because of whose question it answers.** A time-weighted return removes the effect of when money went in, which is right for judging a fund and wrong for judging what happened to a person's savings: a monthly purchase into a market that fell for five years and recovered is a very different outcome from a single purchase at the start, and the money-weighted figure is the one that tells them apart. It is also the one the file can actually produce — the other needs the portfolio valued on every contribution date, and the price history is not that dense.
+- **Gross, because of the tab it sits on.** Holdings is the gross screen and the Portfolio headline is the net one ([§7.1](07-investments.md#71-holdings), [§3.1](03-portfolio.md#31-behaviour)), so a return printed among gross figures is a gross return. Adding the withheld tax back on a sale is what makes the two sides consistent — a net terminal value against net-of-tax sale proceeds would have been defensible too, and mixing them would not. Commissions stay in on both sides because they are a cost of investing rather than a transfer that depends on a tax regime.
+- **The bracket and the iteration count are in the specification rather than left to the implementation.** There is no closed form for this rate, so it is found by search, and a search is exactly where two correct-looking implementations drift apart — a different starting guess, a different tolerance, a Newton step that fails to converge on a flow pattern bisection handles. Fixing the bracket and the halving count makes the figure a property of the file, which is what every other number in this document is.
+- **The two-root case is admitted rather than detected.** Detecting it means scanning the bracket for sign changes and then deciding what to print, and the honest thing to print would be two rates, which nobody wants. It needs a position sold down and bought back later, the figure is one of the true answers, and it is the same one everywhere.
+- **The explanatory line is required rather than optional** because this is the one figure in the application whose name does not say what it is. Every other number is an amount, a count or a date. Somebody meeting *annualised return* for the first time will read it as total gain unless the screen says otherwise, and a figure misread as a much bigger number is worse than no figure.
 
 ---
 

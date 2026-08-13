@@ -67,7 +67,10 @@
               <tr><td class="desc">SWDA <span class="dim">iShares Core MSCI World</span></td><td><span class="chip type">Stock ETF</span></td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">285</td><td class="n r">€ 78,4200</td><td class="n r">€ 92,1400</td><td class="n r">€ 26.259,90</td><td class="n r pos">+17,5%</td></tr>
               <tr class="sel"><td class="desc">VWCE <span class="dim">Vanguard FTSE All-World</span></td><td><span class="chip type">Stock ETF</span></td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">338</td><td class="n r">€ 108,2150</td><td class="n r">€ 124,8600</td><td class="n r">€ 42.202,68</td><td class="n r pos">+15,4%</td></tr>
             </tbody>
-            <tfoot><tr><td colspan="6">5 holdings · by ticker · gross of tax and fees · ▲ price older than <code>priceStalenessDays</code></td><td class="r tot">€ 92.889,18</td><td class="r pos">+ € 9.950,61 · +12,0%</td></tr></tfoot>
+            <tfoot>
+              <tr><td colspan="6">5 holdings · by ticker · gross of tax and fees · ▲ price older than <code>priceStalenessDays</code></td><td class="r tot">€ 92.889,18</td><td class="r pos">+ € 9.950,61 · +12,0%</td></tr>
+              <tr><td colspan="7">Annualised return, all 47 trades since 2018 including positions since sold — what the money has earned per year, before tax</td><td class="r pos">+4,1%</td></tr>
+            </tfoot>
           </table></div>
         </div>
         <div class="detail">
@@ -77,7 +80,12 @@
             <div class="fig"><span>Sold</span><b>0</b></div>
             <div class="fig"><span>Weighted average cost</span><b>€ 108,2150</b></div>
             <div class="fig"><span>Invested, incl. fees</span><b>€ 36.576,67</b></div>
+            <div class="fig"><span>Annualised return</span><b class="pos">+5,4%</b></div>
           </div>
+          <p class="note">Annualised return is what the money in this position has earned per year,
+          counting when each of the 14 purchases was made and not just how much went in. It is why
+          it reads lower than the +15,4% gain, which is the whole rise since the first purchase with
+          no time in it. Before tax.</p>
           <hr class="sep">
           <h4 class="subhead">If sold today</h4>
           <div class="figs">
@@ -312,7 +320,7 @@
       <hr class="sep">
       <h4 class="subhead">Nothing to write for these — they keep the prices they have</h4>
       <div class="figs">
-        <div class="fig"><span>PHAU <span class="dim">WisdomTree Physical Gold</span></span><b class="dim">no quote from the provider</b></div>
+        <div class="fig"><span>PHAU <span class="dim">WisdomTree Physical Gold</span></span><b class="neg">could not be fetched — quoted in USD, not EUR</b></div>
         <div class="fig"><span>EIMI <span class="dim">iShares Core MSCI EM IMI</span></span><b class="neg">could not be fetched — ISIN not recognised</b></div>
       </div>
       <p class="hint"><b>Confirm and all five are written</b>, each dated the day its quote is for and
@@ -321,6 +329,11 @@
       and a single figure that turns out wrong is corrected in the price history like any other
       (§7.4). Only security identifiers were sent to get this far; no amounts, quantities or balances
       ever leave the machine (§1).</p>
+      <p class="hint"><b>A quote that is not in EUR is refused rather than converted</b>, and so is one
+      that arrives with no currency stated: every amount in this file is EUR and nothing records a
+      currency (§1), so a dollar figure written into a price would land in net worth with nothing
+      able to catch it. PHAU keeps the price it has and can be priced by hand like any other security
+      (§7.4). No exchange rate is fetched, stored or applied anywhere.</p>
       <div class="dlgfoot">
         <button class="btn ghost">Cancel</button>
         <button class="btn primary">Write 5 prices</button>

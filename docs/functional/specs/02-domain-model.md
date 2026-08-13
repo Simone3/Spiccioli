@@ -147,6 +147,8 @@ A security belongs to no institution — it is the same instrument everywhere. T
 | *netSalary* | *amount* | netPayment − refunds + carPayment |
 | *netGrossPct* | *fraction* | netSalary ÷ gross — a fraction, shown as a percentage ([§11](11-calculations.md)) |
 
+**`severanceContribution` is the TFR that reached the *fund*, and the model assumes that is all of it.** An employee who leaves some or all of their severance accruing with the employer instead has an asset that grows every month, is revalued by statute, and **has nowhere in this file to live**: no account holds it, no payslip field records it, and net worth does not know about it ([§15](15-out-of-scope.md)). Where the payslip's TFR line is the credit into the fund, as it is here, the figure is complete and nothing is missing.
+
 **The three pension figures are recorded separately because they reach the fund separately.** Employee share, employer share and TFR are three credits on the fund's statement, so the payslip carries three figures and check 5 pairs each one against its own transaction, exactly as check 4 pairs `netPayment` ([§11.6](11-calculations.md#116-derived-matching)). **A figure of 0 expects no credit and is not paired.**
 
 **A payslip for month M is often paid in month M+1.** There is no payment-date field. Checks 4 and 5 therefore look for their counterpart in month M *or* M+1 ([§11.6](11-calculations.md#116-derived-matching)).
