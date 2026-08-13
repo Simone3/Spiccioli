@@ -118,14 +118,13 @@
   <div class="dlgrow">
     <div class="dlg">
       <h5>Add institution</h5>
-      <div class="dsub">from the Institutions tab — the only place one is created</div>
+      <div class="dsub">from the Institutions tab</div>
       <div class="frm">
         <label>Name</label><div class="inp ph">e.g. Banca Sella</div>
         <label>Default sell fee</label><div class="inp">12,00</div>
         <label>Notes</label><div class="inp ph">optional</div>
       </div>
-      <p class="hint">The fee is required and has no empty state: an institution that never sells
-      anything is given a <b>0,00</b>.</p>
+      <p class="hint">Required. An institution that never sells anything is given a <b>0,00</b>.</p>
       <div class="dlgfoot"><button class="btn ghost">Cancel</button><button class="btn primary">Save</button></div>
     </div>
 
@@ -142,16 +141,8 @@
         <label>Closing date</label><div class="inp ph">empty while open</div>
         <label>Notes</label><div class="inp ph">optional</div>
       </div>
-      <p class="hint">The picker offers the institutions already recorded, and <b>None</b> — but
-      <b>None</b> only on a <b>Liquidity</b> account, which is what physical cash is. Every other
-      type requires an institution. There is no <i>New institution…</i> entry: neither form opens
-      the other.</p>
-      <p class="hint"><b>Exit tax</b> is on this form only because the type is <b>Pension fund</b>;
-      on any other type the row is not there. It is the rate the fund's payout would be taxed at,
-      pre-filled with <b>15,0%</b> and corrected by hand when the fund's own statement says it has
-      moved — the application does not track years of participation. It is charged on what was
-      <i>paid in</i>, the fund's own returns having been taxed inside the fund already, and it
-      changes the estimate on Portfolio and nothing that was ever recorded.</p>
+      <p class="hint"><b>Exit tax</b> is pre-filled with <b>15,0%</b>. Correct it when the fund's own
+      statement says the rate has moved.</p>
       <div class="dlgfoot"><button class="btn ghost">Cancel</button><button class="btn primary">Save</button></div>
     </div>
   </div>

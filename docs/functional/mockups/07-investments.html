@@ -51,9 +51,7 @@
       </div>
       <div class="warnline">
         <span style="color:var(--brass-dim)">●</span>
-        <span><b>5 prices written, all quoted 07/08/2026.</b> This is the line that follows a
-        confirmed pass; what was written was reviewed first (<a href="#fetch-review">the review
-        panel</a>). Nothing else was changed, and only security identifiers were sent.</span>
+        <span><b>5 prices written, all quoted 07/08/2026.</b></span>
       </div>
       <nav class="tabs"><a class="on" href="#">Holdings</a><a href="#">Purchases · 41</a><a href="#">Sales · 6</a><a href="#">Securities · 7</a></nav>
       <div class="cols c">
@@ -68,7 +66,7 @@
               <tr class="sel"><td class="desc">VWCE <span class="dim">Vanguard FTSE All-World</span></td><td><span class="chip type">Stock ETF</span></td><td class="dim">Fineco · Dossier Titoli</td><td class="n r">338</td><td class="n r">€ 108,2150</td><td class="n r">€ 124,8600</td><td class="n r">€ 42.202,68</td><td class="n r pos">+15,4%</td></tr>
             </tbody>
             <tfoot>
-              <tr><td colspan="6">5 holdings · by ticker · gross of tax and fees · ▲ price older than <code>priceStalenessDays</code></td><td class="r tot">€ 92.889,18</td><td class="r pos">+ € 9.950,61 · +12,0%</td></tr>
+              <tr><td colspan="6">5 holdings · by ticker · gross of tax and fees · ▲ price older than 30 days</td><td class="r tot">€ 92.889,18</td><td class="r pos">+ € 9.950,61 · +12,0%</td></tr>
               <tr><td colspan="7">Annualised return, all 47 trades since 2018 including positions since sold — what the money has earned per year, before tax</td><td class="r pos">+4,1%</td></tr>
             </tfoot>
           </table></div>
@@ -249,8 +247,6 @@
             </tbody>
             <tfoot><tr><td colspan="2">5 of 42 · newest first</td><td colspan="2">01/2018 – 06/2026</td></tr></tfoot>
           </table></div>
-          <p class="note">Deleting the newest price re-values the holding at the one before it. There
-          is no undo.</p>
         </div>
       </div>
     </main>
@@ -265,7 +261,7 @@
   <div class="dlgrow">
     <div class="dlg">
       <h5>Add purchase</h5>
-      <div class="dsub">a sale is the same form, with a taxes field and proceeds instead of cost</div>
+      <div class="dsub">from the Purchases tab</div>
       <div class="frm">
         <label>Date</label><div class="inp">08/08/2026</div>
         <label>Account</label><div class="inp sel">Fineco · Dossier Titoli</div>
@@ -323,17 +319,8 @@
         <div class="fig"><span>PHAU <span class="dim">WisdomTree Physical Gold</span></span><b class="neg">could not be fetched — quoted in USD, not EUR</b></div>
         <div class="fig"><span>EIMI <span class="dim">iShares Core MSCI EM IMI</span></span><b class="neg">could not be fetched — ISIN not recognised</b></div>
       </div>
-      <p class="hint"><b>Confirm and all five are written</b>, each dated the day its quote is for and
-      replacing whatever that day held — the two hand-typed values above included. <b>Cancel and
-      nothing at all is written.</b> There is nothing to tick: the choice is this pass or none of it,
-      and a single figure that turns out wrong is corrected in the price history like any other
-      (§7.4). Only security identifiers were sent to get this far; no amounts, quantities or balances
-      ever leave the machine (§1).</p>
-      <p class="hint"><b>A quote that is not in EUR is refused rather than converted</b>, and so is one
-      that arrives with no currency stated: every amount in this file is EUR and nothing records a
-      currency (§1), so a dollar figure written into a price would land in net worth with nothing
-      able to catch it. PHAU keeps the price it has and can be priced by hand like any other security
-      (§7.4). No exchange rate is fetched, stored or applied anywhere.</p>
+      <p class="hint">Only security identifiers were sent. <b>No amounts, quantities, balances or
+      account data ever leave this machine.</b></p>
       <div class="dlgfoot">
         <button class="btn ghost">Cancel</button>
         <button class="btn primary">Write 5 prices</button>
