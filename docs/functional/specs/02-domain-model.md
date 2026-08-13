@@ -25,7 +25,7 @@ Eleven stored entities and one derived one. *Italic* marks a derived field.
 | name | text | |
 | institutionId | ref? | **Required on every type but `Liquidity`** ([§13](13-validation.md)). Physical cash is the account that has none, and it is a `Liquidity` one. |
 | type | enum | `Liquidity` · `Deposit account` · `Term deposit` · `Pension fund` · `Voucher` · `Brokerage` |
-| openingBalance | amount | Default 0. For accounts whose history starts mid-life. Always 0 on a `Brokerage` account. |
+| openingBalance | amount | Default 0. For accounts whose history starts mid-life. Always 0 on a `Brokerage` account. **On a `Pension fund` it counts wholly towards `contributions` below**, which overstates the exit tax where part of it was really revaluation — a known approximation with a direction ([§11.3](11-calculations.md#113-hypothetical-liquidation)). |
 | exitTaxRate | fraction? | **Only on a `Pension fund` account**; empty and disabled on every other type ([§13](13-validation.md)). The rate the fund's payout would be taxed at, **stored 0 – 1 and shown as a percentage** ([§11](11-calculations.md)): `0,15` reads 15%. Used only by [§11.3](11-calculations.md#113-hypothetical-liquidation). |
 | openingDate | date | Records dated before it are reported by check 12, never prevented. |
 | closingDate | date? | Empty means open. An account is closed by editing it and setting this date; there is no other retirement mechanism. |
