@@ -2,10 +2,7 @@
 
 **Functional analysis · v1**
 
-Everything needed to build the application: the domain model, every screen with its mockup, the
-forms behind each action, the calculations, the consistency checks, and what is deliberately left
-out. Self-contained — no other document is required to implement it. Sections 3 to 10 are the eight
-sidebar items, in sidebar order; where a screen has tabs, each tab is one of its subsections.
+Everything needed to build the application: the domain model, every screen with its mockup, the forms behind each action, the calculations, the consistency checks, and what is deliberately left out. Self-contained — no other document is required to implement it. Sections 3 to 10 are the eight sidebar items, in sidebar order; where a screen has tabs, each tab is one of its subsections.
 
 ---
 
@@ -40,24 +37,11 @@ docs/functional/
 └── mockups/           one HTML file per section that has screens, plus the shared stylesheet
 ```
 
-- **The written specification is Markdown, the mockups are HTML.** A section's prose lives in
-  `specs/NN-name.md`; the screens and dialogs it describes live in `mockups/NN-name.html`, each one
-  under its own anchor, so the spec can point at exactly the screen under discussion.
-- **The numbers are the specification's vocabulary and never change.** `§7.6` means section 7,
-  subsection 6, and it names the same thing here as it did before the document was split. File names
-  carry the same number so a directory listing reads in document order.
-- **Every file states the specification first and the reasoning last.** The body of a file — its
-  numbered subsections, tables and lists — is the specification: what the application does, with no
-  argument in it. Every file then ends with **an unnumbered *Why it is this way* section**: why each
-  decision is the one taken, what was rejected and what it would have cost. **The closing section
-  introduces nothing new** — every fact lives in the specification above it. Read the specification
-  to build the screen, read the closing section before changing anything on it, and treat a
-  disagreement between the two as a defect in this document.
-- **Implementing one screen means reading two files**: the spec for that section and its mockups.
-  [§2](specs/02-domain-model.md) is the one other file worth having open, since every screen's
-  fields come from it.
-- **Sections 1, 2, 11, 13, 14 and 15 have no mockups.** They are the model, the formulas and the
-  cross-cutting rules.
+- **The written specification is Markdown, the mockups are HTML.** A section's prose lives in `specs/NN-name.md`; the screens and dialogs it describes live in `mockups/NN-name.html`, each one under its own anchor, so the spec can point at exactly the screen under discussion.
+- **The numbers are the specification's vocabulary and never change.** `§7.6` means section 7, subsection 6, and it names the same thing here as it did before the document was split. File names carry the same number so a directory listing reads in document order.
+- **Every file states the specification first and the reasoning last.** The body of a file — its numbered subsections, tables and lists — is the specification: what the application does, with no argument in it. Every file then ends with **an unnumbered *Why it is this way* section**: why each decision is the one taken, what was rejected and what it would have cost. **The closing section introduces nothing new** — every fact lives in the specification above it. Read the specification to build the screen, read the closing section before changing anything on it, and treat a disagreement between the two as a defect in this document.
+- **Implementing one screen means reading two files**: the spec for that section and its mockups. [§2](specs/02-domain-model.md) is the one other file worth having open, since every screen's fields come from it.
+- **Sections 1, 2, 11, 13, 14 and 15 have no mockups.** They are the model, the formulas and the cross-cutting rules.
 
 ## Conventions
 
@@ -65,5 +49,4 @@ docs/functional/
 - In [§2](specs/02-domain-model.md), *italic* marks a field that is derived and never stored.
 - A mockup is referenced from the prose at the point it illustrates, as a blockquote:
   > **Mockup —** [Transactions list](mockups/05-transactions.html#list)
-- Mockups share one stylesheet, [`mockups/_mockups.css`](mockups/_mockups.css). Each mockup file
-  opens on its own in a browser — no server, no build step.
+- Mockups share one stylesheet, [`mockups/_mockups.css`](mockups/_mockups.css). Each mockup file opens on its own in a browser — no server, no build step.

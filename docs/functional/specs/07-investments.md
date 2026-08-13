@@ -2,8 +2,7 @@
 
 *[Index](../README.md) · [mockups for this section](../mockups/07-investments.html)*
 
-Four tabs: Holdings, Purchases, Sales, Securities. Holdings is entirely derived from the middle two;
-Securities is what all three point at.
+Four tabs: Holdings, Purchases, Sales, Securities. Holdings is entirely derived from the middle two; Securities is what all three point at.
 
 ---
 
@@ -11,347 +10,119 @@ Securities is what all three point at.
 
 > **Mockup —** [Holdings tab](../mockups/07-investments.html#holdings)
 
-- One row per (security, brokerage account) holding a position — quantity greater than 0, and a
-  running quantity that never went below it ([§2](02-domain-model.md)). Every figure is derived, and
-  every column is read-only **except the price**.
-- **Ordered by the security's `ticker`, alphabetically**, then by account name where one security is
-  held at two brokers and is therefore two rows ([§2](02-domain-model.md)). Case- and
-  accent-insensitive, like every other comparison of text in the application.
-- **This is where prices are kept up to date.** Clicking the price cell opens an inline editor — a
-  value and an as-of date defaulting to today — and saving writes a Price record, replacing whatever
-  that day already held ([§2](02-domain-model.md)). **Nothing is confirmed**: the editor shows the
-  value the chosen day currently holds, if it holds one ([§13](13-validation.md)). The whole editable
-  history of a security lives on the Securities tab of this same screen ([§7.4](#74-securities)).
-- **Update prices** sits on this screen; [§7.6](#76-prices) is what it does. It is a button and
-  nothing else — **no selection first and no setting behind it** — and pressing it is the only thing
-  in the application that ever contacts the network. **What comes back is put to the user in a review
-  panel before a single record is written** ([§7.6](#76-prices)). Never press it and the inline
-  editor is the only way a price gets in, which is a complete way to use the application.
-- A price older than `priceStalenessDays` is marked on the row itself, not only in
-  [§9](09-checks.md). **A security with no price at all is marked more loudly**: its price cell
-  reads *none*, its value reads `€ 0,00`, its gain reads **minus everything the position cost**, and
-  check 3 fails ([§2](02-domain-model.md),
-  [§11.3](11-calculations.md#113-hypothetical-liquidation)).
-- The table carries **gross** value and gain — market price, no tax, no fees. This is the
-  counterpart to the Portfolio headline, which is net ([§3.1](03-portfolio.md#31-behaviour)).
-- Selecting a row opens the detail panel: **quantity purchased with the number of lots it came
-  from**, **quantity sold**, weighted average cost, invested total including fees, and then the full
-  hypothetical liquidation breakdown ([§11.3](11-calculations.md#113-hypothetical-liquidation)) —
-  gross proceeds, the sell fee with the institution whose default it is, taxable gain, tax with the
-  rate and the security it belongs to, net proceeds, and net gain **with its percentage**.
+- One row per (security, brokerage account) holding a position — quantity greater than 0, and a running quantity that never went below it ([§2](02-domain-model.md)). Every figure is derived, and every column is read-only **except the price**.
+- **Ordered by the security's `ticker`, alphabetically**, then by account name where one security is held at two brokers and is therefore two rows ([§2](02-domain-model.md)). Case- and accent-insensitive, like every other comparison of text in the application.
+- **This is where prices are kept up to date.** Clicking the price cell opens an inline editor — a value and an as-of date defaulting to today — and saving writes a Price record, replacing whatever that day already held ([§2](02-domain-model.md)). **Nothing is confirmed**: the editor shows the value the chosen day currently holds, if it holds one ([§13](13-validation.md)). The whole editable history of a security lives on the Securities tab of this same screen ([§7.4](#74-securities)).
+- **Update prices** sits on this screen; [§7.6](#76-prices) is what it does. It is a button and nothing else — **no selection first and no setting behind it** — and pressing it is the only thing in the application that ever contacts the network. **What comes back is put to the user in a review panel before a single record is written** ([§7.6](#76-prices)). Never press it and the inline editor is the only way a price gets in, which is a complete way to use the application.
+- A price older than `priceStalenessDays` is marked on the row itself, not only in [§9](09-checks.md). **A security with no price at all is marked more loudly**: its price cell reads *none*, its value reads `€ 0,00`, its gain reads **minus everything the position cost**, and check 3 fails ([§2](02-domain-model.md), [§11.3](11-calculations.md#113-hypothetical-liquidation)).
+- The table carries **gross** value and gain — market price, no tax, no fees. This is the counterpart to the Portfolio headline, which is net ([§3.1](03-portfolio.md#31-behaviour)).
+- Selecting a row opens the detail panel: **quantity purchased with the number of lots it came from**, **quantity sold**, weighted average cost, invested total including fees, and then the full hypothetical liquidation breakdown ([§11.3](11-calculations.md#113-hypothetical-liquidation)) — gross proceeds, the sell fee with the institution whose default it is, taxable gain, tax with the rate and the security it belongs to, net proceeds, and net gain **with its percentage**.
 - The caveat about lot matching is shown in the panel, next to the number it qualifies.
-- **The footer totals the two money columns** — value and gain — **and states the percentage those
-  two make**: Σ gain ÷ (Σ value − Σ gain), the denominator being what the positions cost, and
-  *undefined* where that is zero ([§11](11-calculations.md)). Quantities, prices and average costs
-  are not totalled: they belong to different instruments. Like the table above it the footer is
-  **gross**, and it is the one place the portfolio's untaxed value is stated as a single figure —
-  the net counterpart is the Portfolio headline ([§3.1](03-portfolio.md#31-behaviour)), and the two
-  are meant to be read against each other. A holding with no price contributes `€ 0,00` of value and
-  minus its cost in gain, exactly as its row does, so **no total here states an omission**: every
-  figure exists, and the ones that are missing a price are wrong in the direction check 3 is already
-  naming.
+- **The footer totals the two money columns** — value and gain — **and states the percentage those two make**: Σ gain ÷ (Σ value − Σ gain), the denominator being what the positions cost, and *undefined* where that is zero ([§11](11-calculations.md)). Quantities, prices and average costs are not totalled: they belong to different instruments. Like the table above it the footer is **gross**, and it is the one place the portfolio's untaxed value is stated as a single figure — the net counterpart is the Portfolio headline ([§3.1](03-portfolio.md#31-behaviour)), and the two are meant to be read against each other. A holding with no price contributes `€ 0,00` of value and minus its cost in gain, exactly as its row does, so **no total here states an omission**: every figure exists, and the ones that are missing a price are wrong in the direction check 3 is already naming.
 
 ## 7.2 Purchases
 
 > **Mockup —** [Purchases tab](../mockups/07-investments.html#purchases)
 
-- Where purchase trades are created, edited in place and deleted. Every column but *Total cost* and
-  *Matched* is editable.
-- **Account** is the brokerage account the security sits in. The cash for the trade moved through a
-  different account — a cash one at the same institution — and pairing the two is what
-  [§11.6](11-calculations.md#116-derived-matching) does.
-- **Total cost** is `qty × price + fees`, derived, never entered. It is the figure
-  [§11.6](11-calculations.md#116-derived-matching) pairs against the bank transaction.
-- **Matched** shows the date of the bank transaction the application paired the trade with
-  ([§11.6](11-calculations.md#116-derived-matching)). A dash is what check 6 reports.
+- Where purchase trades are created, edited in place and deleted. Every column but *Total cost* and *Matched* is editable.
+- **Account** is the brokerage account the security sits in. The cash for the trade moved through a different account — a cash one at the same institution — and pairing the two is what [§11.6](11-calculations.md#116-derived-matching) does.
+- **Total cost** is `qty × price + fees`, derived, never entered. It is the figure [§11.6](11-calculations.md#116-derived-matching) pairs against the bank transaction.
+- **Matched** shows the date of the bank transaction the application paired the trade with ([§11.6](11-calculations.md#116-derived-matching)). A dash is what check 6 reports.
 - Recording a trade **does not** create a transaction.
-- Ordering: `date ASC, insertionSeq ASC, id ASC` — the same three keys and the same direction as
-  Transactions ([§5.2](05-transactions.md#52-ordering-and-paging)). No paging; filters narrow the
-  list instead.
-- Filters: security, account — **brokerage accounts only** ([§2](02-domain-model.md)), one at a time
-  or *All*, like every account filter in the application
-  ([§5.3](05-transactions.md#53-filters)) — and period, which is the *from* and *to* pair of
-  [§5.3](05-transactions.md#53-filters), inclusive at both ends.
-- **The footer sums the filtered rows**: quantity is not totalled, and fees and total cost are, with
-  the count beside them. It is the counterpart of the Sales footer ([§7.3](#73-sales)) minus the
-  columns Purchases does not have.
+- Ordering: `date ASC, insertionSeq ASC, id ASC` — the same three keys and the same direction as Transactions ([§5.2](05-transactions.md#52-ordering-and-paging)). No paging; filters narrow the list instead.
+- Filters: security, account — **brokerage accounts only** ([§2](02-domain-model.md)), one at a time or *All*, like every account filter in the application ([§5.3](05-transactions.md#53-filters)) — and period, which is the *from* and *to* pair of [§5.3](05-transactions.md#53-filters), inclusive at both ends.
+- **The footer sums the filtered rows**: quantity is not totalled, and fees and total cost are, with the count beside them. It is the counterpart of the Sales footer ([§7.3](#73-sales)) minus the columns Purchases does not have.
 
 ## 7.3 Sales
 
 > **Mockup —** [Sales tab](../mockups/07-investments.html#sales)
 
-- The same table as Purchases with **three columns it does not have**. *Taxes* is the capital-gains
-  tax the broker actually withheld, entered from the trade confirmation. *Net proceeds* replaces
-  *Total cost* — `qty × price − taxes − fees`, what actually reached the account. *Realised gain* is
-  derived per [§11.2](11-calculations.md#112-realised-gain-on-a-sale) and is the only figure on
-  either tab that is neither entered nor a restatement of what was.
-- **Taxes is zero, not blank, when nothing was withheld** — a sale at a loss, like the March 2020
-  row in the mockup, or one whose gain the broker offset against a carried-forward loss. The figure
-  feeds check 7.
-- **Realised gain is net of everything the broker took**, so a sale can show a gain before tax and a
-  loss after it. It is summed into the all-time figure on Portfolio ([§3](03-portfolio.md)), where
-  it is the one investment number that is a recorded fact rather than an estimate.
-- **Realised gain reads *undefined* when the position it came out of has no average cost.** A sale in
-  a (security, account) whose running quantity ever went below zero has no cost basis to measure
-  against: the walk of [§11.1](11-calculations.md#111-weighted-average-cost) stops, no `avgCost`
-  exists, and the figure is undefined rather than zero or blank
-  ([§11.2](11-calculations.md#112-realised-gain-on-a-sale), [§11](11-calculations.md)). The row is
-  shown in full and only that one cell says so. Checks 8 and 9 name the trade that caused it, and
-  putting the dates or the missing purchase right restores the figure ([§9](09-checks.md)).
-- The footer sums fees, taxes, net proceeds and realised gain. It is the only place the tax actually
-  paid over ten years is visible as one figure. **The realised-gain total covers the sales that have
-  one** and says how many it left out, which is the same rule the Portfolio all-time card follows
-  ([§3.1](03-portfolio.md#31-behaviour)); the other three columns are entered figures and always
-  total everything.
-- Everything else — ordering, filters, editing, matching, the fact that a sale creates no
-  transaction — is exactly as [§7.2](#72-purchases).
+- The same table as Purchases with **three columns it does not have**. *Taxes* is the capital-gains tax the broker actually withheld, entered from the trade confirmation. *Net proceeds* replaces *Total cost* — `qty × price − taxes − fees`, what actually reached the account. *Realised gain* is derived per [§11.2](11-calculations.md#112-realised-gain-on-a-sale) and is the only figure on either tab that is neither entered nor a restatement of what was.
+- **Taxes is zero, not blank, when nothing was withheld** — a sale at a loss, like the March 2020 row in the mockup, or one whose gain the broker offset against a carried-forward loss. The figure feeds check 7.
+- **Realised gain is net of everything the broker took**, so a sale can show a gain before tax and a loss after it. It is summed into the all-time figure on Portfolio ([§3](03-portfolio.md)), where it is the one investment number that is a recorded fact rather than an estimate.
+- **Realised gain reads *undefined* when the position it came out of has no average cost.** A sale in a (security, account) whose running quantity ever went below zero has no cost basis to measure against: the walk of [§11.1](11-calculations.md#111-weighted-average-cost) stops, no `avgCost` exists, and the figure is undefined rather than zero or blank ([§11.2](11-calculations.md#112-realised-gain-on-a-sale), [§11](11-calculations.md)). The row is shown in full and only that one cell says so. Checks 8 and 9 name the trade that caused it, and putting the dates or the missing purchase right restores the figure ([§9](09-checks.md)).
+- The footer sums fees, taxes, net proceeds and realised gain. It is the only place the tax actually paid over ten years is visible as one figure. **The realised-gain total covers the sales that have one** and says how many it left out, which is the same rule the Portfolio all-time card follows ([§3.1](03-portfolio.md#31-behaviour)); the other three columns are entered figures and always total everything.
+- Everything else — ordering, filters, editing, matching, the fact that a sale creates no transaction — is exactly as [§7.2](#72-purchases).
 
 ## 7.4 Securities
 
 > **Mockup —** [Securities tab](../mockups/07-investments.html#securities)
 
-- **One of the two places a security is created**, and the place one is corrected. *Add security*
-  here creates it on its own; the purchase form creates it inline while recording the first trade
-  that needs it ([§7.5](#75-recording-a-trade-and-where-securities-come-from)). The fields are the
-  same either way and so is the record — there is no such thing as a security that came in by one
-  path rather than the other.
-- Correcting is the rest of the tab's job: a mistyped ISIN, a renamed instrument, the wrong type,
-  the tax rate on a whitelist government bond.
-- **Ordered by `ticker`, alphabetically**, the same key and the same comparison as Holdings
-  ([§7.1](#71-holdings)). Securities no longer held are in the list like everything else, marked by
-  an em dash in *Held*; nothing sorts them apart.
-- **Held** is the quantity across every brokerage account, an em dash when the position is closed.
-  **A security oversold in any account reads an em dash too, in a cell tinted light red**: no holding
-  is derived for that (security, account) at all ([§2](02-domain-model.md)), so there is no quantity
-  to state and none is invented — not for the broken account and not for the others, since a partial
-  sum would read as the position. The tint is what separates it from the ordinary dash: one means
-  nothing is held, the other means nothing can be said. Checks 8 and 9 name the trade
-  ([§9](09-checks.md)), and the cell reads normally again once it is put right.
-- **Trades** is what decides whether the security can be deleted; **Prices** does not. Deleting a
-  security deletes its price history with it and the confirmation says how many records that is
-  ([§13](13-validation.md)).
-- **The full price history lives here, and every record in it can be edited or deleted.** Editing a
-  record's value replaces it; editing its date moves it, replacing whatever occupied the day it lands
-  on ([§2](02-domain-model.md)) — **and neither is confirmed** ([§13](13-validation.md)). **Deleting
-  is confirmed**, like every delete in the application; **this is the only place a price is
-  deleted**, and it is the only way to undo a price recorded against a date that never had one.
-- **The history carries the date, the value and the source** — *manual* or *fetched*, the `source` of
-  [§2](02-domain-model.md), and **this is the only screen that shows it**. It is a label and nothing
-  more: no check, no total and no fetch reads it ([§7.6](#76-prices)). **Any edit a user makes, here
-  or in the inline editor on Holdings, sets it to *manual*** — an edit to the value and an edit to
-  the date alike — so a fetched figure somebody has corrected stops claiming to be the provider's.
+- **One of the two places a security is created**, and the place one is corrected. *Add security* here creates it on its own; the purchase form creates it inline while recording the first trade that needs it ([§7.5](#75-recording-a-trade-and-where-securities-come-from)). The fields are the same either way and so is the record — there is no such thing as a security that came in by one path rather than the other.
+- Correcting is the rest of the tab's job: a mistyped ISIN, a renamed instrument, the wrong type, the tax rate on a whitelist government bond.
+- **Ordered by `ticker`, alphabetically**, the same key and the same comparison as Holdings ([§7.1](#71-holdings)). Securities no longer held are in the list like everything else, marked by an em dash in *Held*; nothing sorts them apart.
+- **Held** is the quantity across every brokerage account, an em dash when the position is closed. **A security oversold in any account reads an em dash too, in a cell tinted light red**: no holding is derived for that (security, account) at all ([§2](02-domain-model.md)), so there is no quantity to state and none is invented — not for the broken account and not for the others, since a partial sum would read as the position. The tint is what separates it from the ordinary dash: one means nothing is held, the other means nothing can be said. Checks 8 and 9 name the trade ([§9](09-checks.md)), and the cell reads normally again once it is put right.
+- **Trades** is what decides whether the security can be deleted; **Prices** does not. Deleting a security deletes its price history with it and the confirmation says how many records that is ([§13](13-validation.md)).
+- **The full price history lives here, and every record in it can be edited or deleted.** Editing a record's value replaces it; editing its date moves it, replacing whatever occupied the day it lands on ([§2](02-domain-model.md)) — **and neither is confirmed** ([§13](13-validation.md)). **Deleting is confirmed**, like every delete in the application; **this is the only place a price is deleted**, and it is the only way to undo a price recorded against a date that never had one.
+- **The history carries the date, the value and the source** — *manual* or *fetched*, the `source` of [§2](02-domain-model.md), and **this is the only screen that shows it**. It is a label and nothing more: no check, no total and no fetch reads it ([§7.6](#76-prices)). **Any edit a user makes, here or in the inline editor on Holdings, sets it to *manual*** — an edit to the value and an edit to the date alike — so a fetched figure somebody has corrected stops claiming to be the provider's.
 - The history is **newest first** — the opposite of every other table in the application.
-- Changing a security's **tax rate** changes the
-  [§11.3](11-calculations.md#113-hypothetical-liquidation) estimate for it and therefore net worth,
-  and changes nothing that was ever recorded — a sale carries the tax the broker actually withheld
-  ([§7.3](#73-sales)).
+- Changing a security's **tax rate** changes the [§11.3](11-calculations.md#113-hypothetical-liquidation) estimate for it and therefore net worth, and changes nothing that was ever recorded — a sale carries the tax the broker actually withheld ([§7.3](#73-sales)).
 
 ## 7.5 Recording a trade, and where securities come from
 
 > **Mockup —** [Record a purchase · new security](../mockups/07-investments.html#record-trade)
 
-- **Total cost** is computed and shown live as quantity, price and fees are typed — never entered.
-  It is the figure [§11.6](11-calculations.md#116-derived-matching) pairs against the bank
-  transaction.
-- **Account** lists brokerage accounts only and starts empty, no picker in the application
-  remembering what was chosen last ([§5.5](05-transactions.md#55-add-transaction)).
-- **A security can be created inline, here.** Typing an ISIN or ticker searches existing securities;
-  if none matches, the form expands with the fields needed to create one, and it is saved together
-  with the trade. No “create a security first” step is *required* — the Securities tab has *Add
-  security* for when it is wanted anyway ([§7.4](#74-securities)).
-- **Tax rate** is pre-filled from `defaultTaxRate` and only needs touching for a whitelist
-  government bond. It affects the [§11.3](11-calculations.md#113-hypothetical-liquidation) estimate
-  and nothing that is ever recorded.
-- **The Securities tab covers everything afterwards** ([§7.4](#74-securities)): correcting the
-  security, and its whole price history.
-- **The sale form adds a Taxes field** below Fees, and shows **net proceeds** —
-  `qty × price − taxes − fees` — live in place of total cost. It defaults to zero and is never
-  pre-filled from the hypothetical rate of [§11.3](11-calculations.md#113-hypothetical-liquidation).
+- **Total cost** is computed and shown live as quantity, price and fees are typed — never entered. It is the figure [§11.6](11-calculations.md#116-derived-matching) pairs against the bank transaction.
+- **Account** lists brokerage accounts only and starts empty, no picker in the application remembering what was chosen last ([§5.5](05-transactions.md#55-add-transaction)).
+- **A security can be created inline, here.** Typing an ISIN or ticker searches existing securities; if none matches, the form expands with the fields needed to create one, and it is saved together with the trade. No “create a security first” step is *required* — the Securities tab has *Add security* for when it is wanted anyway ([§7.4](#74-securities)).
+- **Tax rate** is pre-filled from `defaultTaxRate` and only needs touching for a whitelist government bond. It affects the [§11.3](11-calculations.md#113-hypothetical-liquidation) estimate and nothing that is ever recorded.
+- **The Securities tab covers everything afterwards** ([§7.4](#74-securities)): correcting the security, and its whole price history.
+- **The sale form adds a Taxes field** below Fees, and shows **net proceeds** — `qty × price − taxes − fees` — live in place of total cost. It defaults to zero and is never pre-filled from the hypothetical rate of [§11.3](11-calculations.md#113-hypothetical-liquidation).
 
 ## 7.6 Prices
 
 > **Mockup —** [Update prices · the review panel](../mockups/07-investments.html#fetch-review)
 
-- Prices are entered per security with an **as-of date**, inline on Holdings
-  ([§7.1](#71-holdings)) or on the Securities tab ([§7.4](#74-securities)), and every day is kept as
-  history. Recording a price for a day that already has one replaces that day and leaves the rest of
-  the history alone.
-- **A price belongs to the security, not to a holding.** The same instrument held at two
-  institutions is two holdings and one price, so editing the price on either row moves both. The
-  inline editor says so.
-- **If two quotes ever differ enough to matter, they are two listings and belong to two securities**,
-  each with its own ISIN and its own holding — which the model already supports.
-- **A security with no price at all values at zero**, everywhere a current figure is shown, and
-  fails check 3 by name while it has an open holding ([§9](09-checks.md)) — a fully sold one has no
-  position left to value and no check to fail. That is true on the historical chart of
-  [§11.5](11-calculations.md#115-net-worth-over-time) as well: what the chart values at cost is the
-  stretch **before a security's first recorded price**, drawn dashed.
-- **Online lookup has no setting: it is the *Update prices* button ([§7.1](#71-holdings)) and
-  nothing else.** Pressing it is the only thing that ever contacts the network — never automatic,
-  never on load, never in the background.
-- **One press covers every security in the file**, held or fully sold, and asks for one thing: the
-  **latest quote the provider has**, whatever day it belongs to. There is no list to tick first.
-- **What comes back is put to the user before any of it is written.** The fetch runs, the file is not
-  touched, and **a review panel reports the whole pass**:
-  - **every security that got a quote**, with **the value**, **the date the quote belongs to** — the
-    day the quote is *for*, not the day the button was pressed — and **what that day currently
-    holds**: a value it would replace, marked `manual` or `fetched` ([§7.4](#74-securities)), or
-    nothing at all, in which case the day is new;
+- Prices are entered per security with an **as-of date**, inline on Holdings ([§7.1](#71-holdings)) or on the Securities tab ([§7.4](#74-securities)), and every day is kept as history. Recording a price for a day that already has one replaces that day and leaves the rest of the history alone.
+- **A price belongs to the security, not to a holding.** The same instrument held at two institutions is two holdings and one price, so editing the price on either row moves both. The inline editor says so.
+- **If two quotes ever differ enough to matter, they are two listings and belong to two securities**, each with its own ISIN and its own holding — which the model already supports.
+- **A security with no price at all values at zero**, everywhere a current figure is shown, and fails check 3 by name while it has an open holding ([§9](09-checks.md)) — a fully sold one has no position left to value and no check to fail. That is true on the historical chart of [§11.5](11-calculations.md#115-net-worth-over-time) as well: what the chart values at cost is the stretch **before a security's first recorded price**, drawn dashed.
+- **Online lookup has no setting: it is the *Update prices* button ([§7.1](#71-holdings)) and nothing else.** Pressing it is the only thing that ever contacts the network — never automatic, never on load, never in the background.
+- **One press covers every security in the file**, held or fully sold, and asks for one thing: the **latest quote the provider has**, whatever day it belongs to. There is no list to tick first.
+- **What comes back is put to the user before any of it is written.** The fetch runs, the file is not touched, and **a review panel reports the whole pass**:
+  - **every security that got a quote**, with **the value**, **the date the quote belongs to** — the day the quote is *for*, not the day the button was pressed — and **what that day currently holds**: a value it would replace, marked `manual` or `fetched` ([§7.4](#74-securities)), or nothing at all, in which case the day is new;
   - **the securities the provider had no quote for**, named;
   - **the securities that could not be fetched at all**, named, each with its reason;
-  - **the provider's own reference date**, where it gives one — the moment its figures are as of,
-    which is not necessarily the date any individual quote carries.
-- **Confirm and everything listed is written**, each as a `fetched` Price record dated the day its
-  quote is for, replacing whatever that day already held ([§2](02-domain-model.md)), **a hand-typed
-  value included**: a day holds one price and the last word on it wins, and what the history then
-  shows against that day is *fetched* ([§7.4](#74-securities)), which is the record saying so.
-- **Cancel and nothing at all is written** — no record, no half-finished pass, every price the file
-  had still standing. Nothing about a cancelled or a failed fetch is recorded in the file, and the
-  remedy for either is to press the button again or to type the price in by hand
-  ([§7.1](#71-holdings)).
-- **One confirmation covers the pass. There is nothing to tick and no row to exclude**: the choice
-  the panel offers is this pass or none of it. A single figure that is wrong afterwards is corrected
-  in the price history like any other ([§7.4](#74-securities)).
-- **A quote the provider dates in the future is neither offered nor written**, on the same rule that
-  governs a typed one ([§13](13-validation.md)). It appears among the securities that could not be
-  fetched, with that as its reason.
-- **A security the provider has no quote for is left exactly as it is.** No record is written, the
-  price it already had still stands and still ages towards check 3, and nothing is carried forward or
-  invented. The same is true of one the provider does not recognise, and of a fetch that fails
-  outright.
-- **A pass with nothing to write still shows its panel** — every security having failed is a report
-  worth reading — and offers only *Close*.
-- **After the write, a line says how many prices were written and what dates they carry**: one line
-  when they all share a date, which is the ordinary case, and the spread with the securities named
-  when they do not. It sits on the screen until dismissed. **Check 3 measures staleness from those
-  dates and not from the moment the button was pressed.**
-- **What leaves the machine is an identifier for a security and nothing else** — whichever of the
-  ones the file already holds the provider takes, an ISIN or a ticker — and what comes back is a
-  quote and the date it belongs to. **No amounts, quantities, balances or account data ever leave.**
-  The application must state this **next to the button, and again in the review panel** — the panel
-  being the moment the user sees what a request brought back, and therefore the moment the question
-  of what it took occurs to them.
-- **Which provider, and exactly what it is sent, are settled when the application is built, not
-  here.** This section fixes the shape of the exchange — identifiers out, latest quote and its date
-  back, one press, no configuration. What this document commits to is: **one provider, built in,
-  named on screen beside the button**, with **no endpoint, key or credential to configure**, and
-  nothing sent beyond an identifier. When the provider has to change, that is a new version.
-- The application is fully usable without ever pressing the button. A provider failure is a line in
-  the review panel, never a blocked screen.
+  - **the provider's own reference date**, where it gives one — the moment its figures are as of, which is not necessarily the date any individual quote carries.
+- **Confirm and everything listed is written**, each as a `fetched` Price record dated the day its quote is for, replacing whatever that day already held ([§2](02-domain-model.md)), **a hand-typed value included**: a day holds one price and the last word on it wins, and what the history then shows against that day is *fetched* ([§7.4](#74-securities)), which is the record saying so.
+- **Cancel and nothing at all is written** — no record, no half-finished pass, every price the file had still standing. Nothing about a cancelled or a failed fetch is recorded in the file, and the remedy for either is to press the button again or to type the price in by hand ([§7.1](#71-holdings)).
+- **One confirmation covers the pass. There is nothing to tick and no row to exclude**: the choice the panel offers is this pass or none of it. A single figure that is wrong afterwards is corrected in the price history like any other ([§7.4](#74-securities)).
+- **A quote the provider dates in the future is neither offered nor written**, on the same rule that governs a typed one ([§13](13-validation.md)). It appears among the securities that could not be fetched, with that as its reason.
+- **A security the provider has no quote for is left exactly as it is.** No record is written, the price it already had still stands and still ages towards check 3, and nothing is carried forward or invented. The same is true of one the provider does not recognise, and of a fetch that fails outright.
+- **A pass with nothing to write still shows its panel** — every security having failed is a report worth reading — and offers only *Close*.
+- **After the write, a line says how many prices were written and what dates they carry**: one line when they all share a date, which is the ordinary case, and the spread with the securities named when they do not. It sits on the screen until dismissed. **Check 3 measures staleness from those dates and not from the moment the button was pressed.**
+- **What leaves the machine is an identifier for a security and nothing else** — whichever of the ones the file already holds the provider takes, an ISIN or a ticker — and what comes back is a quote and the date it belongs to. **No amounts, quantities, balances or account data ever leave.** The application must state this **next to the button, and again in the review panel** — the panel being the moment the user sees what a request brought back, and therefore the moment the question of what it took occurs to them.
+- **Which provider, and exactly what it is sent, are settled when the application is built, not here.** This section fixes the shape of the exchange — identifiers out, latest quote and its date back, one press, no configuration. What this document commits to is: **one provider, built in, named on screen beside the button**, with **no endpoint, key or credential to configure**, and nothing sent beyond an identifier. When the provider has to change, that is a new version.
+- The application is fully usable without ever pressing the button. A provider failure is a line in the review panel, never a blocked screen.
 
 ---
 
 ## Why it is this way
 
-- **Holdings are ordered by ticker** because the ticker is what the row leads with and what the eye
-  scans — a table ordered by a field printed in small type beside the one being read looks unsorted,
-  whatever the rule behind it says. Not by value and not by gain: this is a table of positions to be
-  found and priced, and the one thing known before opening it is which instrument is being looked
-  for. Portfolio is where the shape of the money is read, and that is the one table sorted by its own
-  amounts ([§3.1](03-portfolio.md#31-behaviour)).
-- **The inline price editor confirms nothing** because what is about to be replaced is on screen
-  while the new figure is typed, and a weekly correction does not cost a dialog. Holdings is the fast
-  path for the one thing done weekly; the Securities tab is where a past mistake is repaired.
-- **An unpriced holding is worth nothing rather than worth its cost.** What the row is saying is that
-  this holding is currently worth nothing, and a position worth nothing has lost exactly what was
-  paid for it. Valuing it at cost instead would have hidden the omission inside a plausible number,
-  and a holding worth nothing is the one wrong answer nobody mistakes for the right one.
-- **The Holdings table is gross and the Portfolio headline is net**: one screen shows what the
-  positions are worth, the other what they would leave you with.
-- **The detail panel carries both quantities** because the *Qty* column is their difference
-  ([§2](02-domain-model.md)), and a holding never sold and one bought twice over and half sold reach
-  it by different routes. This is the panel that says which.
-- **Taxes on a sale is zero rather than blank** because blank would be indistinguishable from “not
-  filled in yet”.
-- **A security is creatable from two places because they answer two moments.** A new instrument
-  usually first appears as something being bought, and stopping to create it before the trade can be
-  recorded is a detour out of the form you are in. But a security is a thing in its own right — the
-  tab that lists them, corrects them and holds their prices has no business refusing to add one, and
-  a security is occasionally wanted before any trade exists, to carry a price history that starts
-  before the first purchase.
-- **Securities and Holdings share an order** because the two tables list the same instruments, both
-  lead with the ticker, and there is no reason for them to disagree about where one sits. Fully sold
-  securities are not sorted apart, since a security is looked up by what it is called whether or not
-  there is a position in it today.
-- **Prices go with the security when it is deleted** because a price is part of a security rather
-  than a reference to one — which is what lets a fully sold instrument entered by mistake go away in
-  one action. Editing a price is not confirmed because one price per day is the model rather than an
-  accident to warn about.
-- **The price history reads newest first** because the reason to open it is almost always the most
-  recent value, and the ten-year tail is reached by scrolling rather than by paging.
-- **The source is shown on the one screen where prices are worked on, and it governs nothing.** A
-  decade of prices is worth being able to read — which days were kept by hand before the button
-  existed, which stretch a provider filled in — and the history is the only place that question is
-  asked. Making it govern anything would have been the mistake: a fetch that skipped days the user
-  had typed would leave the file quietly out of date on exactly the securities someone had cared
-  enough to price. What the label does instead is make those overwrites **legible** — the review
-  panel of [§7.6](#76-prices) marks which of the values a pass would replace were typed by hand,
-  which is the case worth a second look — while the decision stays one confirmation for the pass
-  rather than a question per security. An edit resets it to *manual* because a corrected figure is
-  the user's, and a label that still said *fetched* would be pointing at the wrong author.
-- **An oversold security's *Held* is tinted rather than worded** because the column is one figure
-  wide and the situation is already named at length by two checks and on the Holdings tab by an
-  absent row. What the tint has to do is stop the dash being read as a closed position, which is the
-  one wrong reading available; anyone who wants the rest goes to Checks. Summing the accounts that
-  are fine was the alternative, and it would print a quantity that is not what is held.
-- **Purchases and Holdings carry footers for the same reason Sales does.** A table with no total
-  invites the figure to be added up somewhere else. Holdings totals the gross value the Portfolio
-  headline states net, which is the comparison the two screens exist to allow
-  ([§3.1](03-portfolio.md#31-behaviour)); quantities are left out of both footers because adding
-  shares of one instrument to shares of another produces a number with no meaning.
-- **The sale form never pre-fills the tax from the estimate** because an estimate silently becoming a
-  recorded figure is exactly the kind of thing [§9](09-checks.md) exists to catch, and it would
-  defeat check 7.
-- **One price per security across institutions is a simplification, and a safe one.** Two brokers
-  quote the same instrument within a fraction of a percent of each other at any moment, and the
-  difference between them is a spread, not a value — but it is not literally one number: an ETF
-  cross-listed on Borsa Italiana and Xetra has two quotes, and a broker's screen is a snapshot of a
-  different second. None of it survives the only use this figure has, which is valuing a position to
-  the euro once a week; a difference big enough to matter is telling you there are two listings.
-- **A security with no price is worth zero on the chart too**, rather than falling back to cost,
-  because it has no first price to be before — and valuing it at cost at today's point would put the
-  end of the line above the net worth printed at the top of the same screen. A chart that exists to
-  show shape can afford an approximation for the years nobody was recording prices.
-- **There is no setting behind *Update prices*.** A switch in Settings would have been a second way
-  to express what the button already expresses by not being pressed, and a state in which the button
-  is present but refuses is worse than no state at all.
-- **One press covers everything** because a fetch is cheap, the securities are a few dozen, and
-  choosing among them is a decision the user would have to make correctly every week to save nothing.
-- **The quote is filed under its own day** because a quote is a fact about a trading day, and a
-  Friday close filed under Sunday would be a small lie that the net worth chart of
-  [§11.5](11-calculations.md#115-net-worth-over-time) then draws. It also makes the button work at
-  the weekend, which asking for *today's* quote did not: markets are shut for two days in seven and
-  half the times anyone sits down with their accounts, nothing would have been written at all and
-  every price would have gone on ageing towards check 3.
-- **The pass is reviewed before it lands because it is the one action in the application that changes
-  many records at once, from outside the file, with nothing on screen showing what is about to go.**
-  Every other overwrite here is a single value with its predecessor visible beside it — the inline
-  price editor is exactly that ([§7.1](#71-holdings)) — and that visibility is what earns those their
-  silence. This one replaces a few dozen figures, some of them typed by hand, on days the provider
-  chose rather than the user. A pass that filed a stale quote under the wrong day, or wrote the same
-  value over a week of hand-kept prices, would be invisible until the net worth chart looked wrong
-  ([§11.5](11-calculations.md#115-net-worth-over-time)), and by then there would be nothing left to
-  compare it against. The panel is also the only moment the two failure groups can be seen before
-  they matter rather than after, and the whole of it costs one click a week.
-- **One confirmation for the pass, rather than a row to tick per security**, because the question
-  worth asking is whether this pass is right, not which quarter of it to keep. A selectable table
-  here would be the bulk-import screen built a second time for a job that runs weekly over two dozen
-  rows, and a user who disagrees with one figure has a price editor two clicks away and a better
-  reason to use it ([§7.4](#74-securities)).
-- **The dates are the part worth reading** — the provider's reference date in the panel and the dates
-  on the quotes themselves: they say whether the file has just been brought up to Friday or up to a
-  fortnight ago, and they are what check 3 will measure from ([§9](09-checks.md)).
-- **The privacy statement sits next to the button and in the panel** because those are the two
-  moments it matters: before, when the user decides to press, and after, when they are looking at
-  what came back and can see for the first time that a request was made at all. Nothing about the
-  portfolio is inferable from a request that names an instrument millions of people hold.
-- **The provider is deliberately not chosen here.** A provider has a request format, a response
-  shape, a rate limit and terms of use, and choosing among those is an engineering decision to be
-  made against the providers that exist at the time. What is fixed is the part a later choice cannot
-  quietly widen: a setting for the URL would have implied the application can talk to whatever is put
-  in it, which will not be true whichever provider is picked, and
-  [§1](01-premise-and-constraints.md)'s promise about what leaves the machine stays something this
-  document can actually make.
+- **Holdings are ordered by ticker** because the ticker is what the row leads with and what the eye scans — a table ordered by a field printed in small type beside the one being read looks unsorted, whatever the rule behind it says. Not by value and not by gain: this is a table of positions to be found and priced, and the one thing known before opening it is which instrument is being looked for. Portfolio is where the shape of the money is read, and that is the one table sorted by its own amounts ([§3.1](03-portfolio.md#31-behaviour)).
+- **The inline price editor confirms nothing** because what is about to be replaced is on screen while the new figure is typed, and a weekly correction does not cost a dialog. Holdings is the fast path for the one thing done weekly; the Securities tab is where a past mistake is repaired.
+- **An unpriced holding is worth nothing rather than worth its cost.** What the row is saying is that this holding is currently worth nothing, and a position worth nothing has lost exactly what was paid for it. Valuing it at cost instead would have hidden the omission inside a plausible number, and a holding worth nothing is the one wrong answer nobody mistakes for the right one.
+- **The Holdings table is gross and the Portfolio headline is net**: one screen shows what the positions are worth, the other what they would leave you with.
+- **The detail panel carries both quantities** because the *Qty* column is their difference ([§2](02-domain-model.md)), and a holding never sold and one bought twice over and half sold reach it by different routes. This is the panel that says which.
+- **Taxes on a sale is zero rather than blank** because blank would be indistinguishable from “not filled in yet”.
+- **A security is creatable from two places because they answer two moments.** A new instrument usually first appears as something being bought, and stopping to create it before the trade can be recorded is a detour out of the form you are in. But a security is a thing in its own right — the tab that lists them, corrects them and holds their prices has no business refusing to add one, and a security is occasionally wanted before any trade exists, to carry a price history that starts before the first purchase.
+- **Securities and Holdings share an order** because the two tables list the same instruments, both lead with the ticker, and there is no reason for them to disagree about where one sits. Fully sold securities are not sorted apart, since a security is looked up by what it is called whether or not there is a position in it today.
+- **Prices go with the security when it is deleted** because a price is part of a security rather than a reference to one — which is what lets a fully sold instrument entered by mistake go away in one action. Editing a price is not confirmed because one price per day is the model rather than an accident to warn about.
+- **The price history reads newest first** because the reason to open it is almost always the most recent value, and the ten-year tail is reached by scrolling rather than by paging.
+- **The source is shown on the one screen where prices are worked on, and it governs nothing.** A decade of prices is worth being able to read — which days were kept by hand before the button existed, which stretch a provider filled in — and the history is the only place that question is asked. Making it govern anything would have been the mistake: a fetch that skipped days the user had typed would leave the file quietly out of date on exactly the securities someone had cared enough to price. What the label does instead is make those overwrites **legible** — the review panel of [§7.6](#76-prices) marks which of the values a pass would replace were typed by hand, which is the case worth a second look — while the decision stays one confirmation for the pass rather than a question per security. An edit resets it to *manual* because a corrected figure is the user's, and a label that still said *fetched* would be pointing at the wrong author.
+- **An oversold security's *Held* is tinted rather than worded** because the column is one figure wide and the situation is already named at length by two checks and on the Holdings tab by an absent row. What the tint has to do is stop the dash being read as a closed position, which is the one wrong reading available; anyone who wants the rest goes to Checks. Summing the accounts that are fine was the alternative, and it would print a quantity that is not what is held.
+- **Purchases and Holdings carry footers for the same reason Sales does.** A table with no total invites the figure to be added up somewhere else. Holdings totals the gross value the Portfolio headline states net, which is the comparison the two screens exist to allow ([§3.1](03-portfolio.md#31-behaviour)); quantities are left out of both footers because adding shares of one instrument to shares of another produces a number with no meaning.
+- **The sale form never pre-fills the tax from the estimate** because an estimate silently becoming a recorded figure is exactly the kind of thing [§9](09-checks.md) exists to catch, and it would defeat check 7.
+- **One price per security across institutions is a simplification, and a safe one.** Two brokers quote the same instrument within a fraction of a percent of each other at any moment, and the difference between them is a spread, not a value — but it is not literally one number: an ETF cross-listed on Borsa Italiana and Xetra has two quotes, and a broker's screen is a snapshot of a different second. None of it survives the only use this figure has, which is valuing a position to the euro once a week; a difference big enough to matter is telling you there are two listings.
+- **A security with no price is worth zero on the chart too**, rather than falling back to cost, because it has no first price to be before — and valuing it at cost at today's point would put the end of the line above the net worth printed at the top of the same screen. A chart that exists to show shape can afford an approximation for the years nobody was recording prices.
+- **There is no setting behind *Update prices*.** A switch in Settings would have been a second way to express what the button already expresses by not being pressed, and a state in which the button is present but refuses is worse than no state at all.
+- **One press covers everything** because a fetch is cheap, the securities are a few dozen, and choosing among them is a decision the user would have to make correctly every week to save nothing.
+- **The quote is filed under its own day** because a quote is a fact about a trading day, and a Friday close filed under Sunday would be a small lie that the net worth chart of [§11.5](11-calculations.md#115-net-worth-over-time) then draws. It also makes the button work at the weekend, which asking for *today's* quote did not: markets are shut for two days in seven and half the times anyone sits down with their accounts, nothing would have been written at all and every price would have gone on ageing towards check 3.
+- **The pass is reviewed before it lands because it is the one action in the application that changes many records at once, from outside the file, with nothing on screen showing what is about to go.** Every other overwrite here is a single value with its predecessor visible beside it — the inline price editor is exactly that ([§7.1](#71-holdings)) — and that visibility is what earns those their silence. This one replaces a few dozen figures, some of them typed by hand, on days the provider chose rather than the user. A pass that filed a stale quote under the wrong day, or wrote the same value over a week of hand-kept prices, would be invisible until the net worth chart looked wrong ([§11.5](11-calculations.md#115-net-worth-over-time)), and by then there would be nothing left to compare it against. The panel is also the only moment the two failure groups can be seen before they matter rather than after, and the whole of it costs one click a week.
+- **One confirmation for the pass, rather than a row to tick per security**, because the question worth asking is whether this pass is right, not which quarter of it to keep. A selectable table here would be the bulk-import screen built a second time for a job that runs weekly over two dozen rows, and a user who disagrees with one figure has a price editor two clicks away and a better reason to use it ([§7.4](#74-securities)).
+- **The dates are the part worth reading** — the provider's reference date in the panel and the dates on the quotes themselves: they say whether the file has just been brought up to Friday or up to a fortnight ago, and they are what check 3 will measure from ([§9](09-checks.md)).
+- **The privacy statement sits next to the button and in the panel** because those are the two moments it matters: before, when the user decides to press, and after, when they are looking at what came back and can see for the first time that a request was made at all. Nothing about the portfolio is inferable from a request that names an instrument millions of people hold.
+- **The provider is deliberately not chosen here.** A provider has a request format, a response shape, a rate limit and terms of use, and choosing among those is an engineering decision to be made against the providers that exist at the time. What is fixed is the part a later choice cannot quietly widen: a setting for the URL would have implied the application can talk to whatever is put in it, which will not be true whichever provider is picked, and [§1](01-premise-and-constraints.md)'s promise about what leaves the machine stays something this document can actually make.
 
 ---
 

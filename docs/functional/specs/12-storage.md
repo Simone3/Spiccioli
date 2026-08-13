@@ -4,300 +4,98 @@
 
 ---
 
-- **One file** holding all the data: institutions, accounts, securities, prices, transactions,
-  trades, contracts, contract years, payslips, categories, rules. All eleven stored entities of
-  [§2](02-domain-model.md) and nothing else.
-- **Preferences are not in it.** They belong to the installation and live in the platform's own
-  application-data location alongside the list of recently opened files ([§10](10-settings.md)).
-- **The file lives wherever the user puts it** — a plain local folder, a cloud-synced folder, or an
-  encrypted vault inside one. The application makes no assumption about the location and requires
-  nothing of it.
-- **Autosave**, debounced, written **atomically** — write to a temporary file in the same directory,
-  then rename — so an interrupted write cannot truncate it.
+- **One file** holding all the data: institutions, accounts, securities, prices, transactions, trades, contracts, contract years, payslips, categories, rules. All eleven stored entities of [§2](02-domain-model.md) and nothing else.
+- **Preferences are not in it.** They belong to the installation and live in the platform's own application-data location alongside the list of recently opened files ([§10](10-settings.md)).
+- **The file lives wherever the user puts it** — a plain local folder, a cloud-synced folder, or an encrypted vault inside one. The application makes no assumption about the location and requires nothing of it.
+- **Autosave**, debounced, written **atomically** — write to a temporary file in the same directory, then rename — so an interrupted write cannot truncate it.
 
 > **Mockup —** [When the file cannot be written](../mockups/12-storage.html#write-failure)
 
-- **A write that fails is retried, five times in all, and said so on screen.** The attempts are
-  spaced a few seconds apart rather than fired back to back. While they run, **the save state in the
-  sidebar says so instead of *Saved 14:32*** ([§12.2](#122-the-menu-bar-and-which-file-is-open)), and
-  a line on the screen the user is on says the file could not be written and is being retried. The
-  session carries on: everything is in memory, nothing is lost, and a retry that succeeds clears the
-  line and restores the ordinary save state without further ceremony.
-- **If all five fail, the application blocks with a message and a *Retry* button.** This is **the one
-  thing besides an unreadable file that stops the screens working**
-  ([§14](14-empty-and-error-states.md)). The message states **which file could not be written and
-  what the system said**. *Retry* runs the same write; succeeding dismisses it and the session goes
-  on exactly where it was, and failing puts the same message back with the new reason. There is no
-  *Continue anyway* and no *Save As…* in v1: the way out is to free the disk, reconnect the volume or
-  unlock the file, with the session still in memory waiting for it.
-- **External modification detection.** Before writing, the application verifies the file has not
-  changed on disk since it last read it. If it has, it **copies the version found on disk into the
-  backup folder** and carries on with the session in memory — whose next save overwrites it.
-- **The user is told, in those terms, and not with a question.** A line appears on the screen they
-  are on — *“This file was changed by something else while you had it open. That version has been
-  saved to the backup folder as finances-2026-08-08-1432-external, and your work has been kept. That
-  copy is one of the 10 backups kept there, so it will be rotated out in time — move it somewhere
-  else if you want to keep it.”* — and it stays until dismissed. **The count in that sentence is
-  `backupCount` as it currently stands** ([§10](10-settings.md)), not the number ten. It is not a
-  modal and it is not a choice between two versions.
-- **Rolling timestamped backups live beside the file they belong to, in a folder of their own.** A
-  ledger at `…/ledgers/finances.spiccioli` keeps its backups in `…/ledgers/finances-backups/` — the
-  file's own name without its extension, plus `-backups`, in the same directory. **The rotation is
-  therefore per file**: `backupCount` copies of *this* ledger, ten by default
-  ([§10](10-settings.md)), and a second ledger in the same directory keeps its own count in its own
-  folder without either one pushing the other out.
-- **Every copy is named for the file, the moment and what took it**: the file's own name without its
-  extension, the date, the time to the minute, and a suffix only where there is one —
+- **A write that fails is retried, five times in all, and said so on screen.** The attempts are spaced a few seconds apart rather than fired back to back. While they run, **the save state in the sidebar says so instead of *Saved 14:32*** ([§12.2](#122-the-menu-bar-and-which-file-is-open)), and a line on the screen the user is on says the file could not be written and is being retried. The session carries on: everything is in memory, nothing is lost, and a retry that succeeds clears the line and restores the ordinary save state without further ceremony.
+- **If all five fail, the application blocks with a message and a *Retry* button.** This is **the one thing besides an unreadable file that stops the screens working** ([§14](14-empty-and-error-states.md)). The message states **which file could not be written and what the system said**. *Retry* runs the same write; succeeding dismisses it and the session goes on exactly where it was, and failing puts the same message back with the new reason. There is no *Continue anyway* and no *Save As…* in v1: the way out is to free the disk, reconnect the volume or unlock the file, with the session still in memory waiting for it.
+- **External modification detection.** Before writing, the application verifies the file has not changed on disk since it last read it. If it has, it **copies the version found on disk into the backup folder** and carries on with the session in memory — whose next save overwrites it.
+- **The user is told, in those terms, and not with a question.** A line appears on the screen they are on — *“This file was changed by something else while you had it open. That version has been saved to the backup folder as finances-2026-08-08-1432-external, and your work has been kept. That copy is one of the 10 backups kept there, so it will be rotated out in time — move it somewhere else if you want to keep it.”* — and it stays until dismissed. **The count in that sentence is `backupCount` as it currently stands** ([§10](10-settings.md)), not the number ten. It is not a modal and it is not a choice between two versions.
+- **Rolling timestamped backups live beside the file they belong to, in a folder of their own.** A ledger at `…/ledgers/finances.spiccioli` keeps its backups in `…/ledgers/finances-backups/` — the file's own name without its extension, plus `-backups`, in the same directory. **The rotation is therefore per file**: `backupCount` copies of *this* ledger, ten by default ([§10](10-settings.md)), and a second ledger in the same directory keeps its own count in its own folder without either one pushing the other out.
+- **Every copy is named for the file, the moment and what took it**: the file's own name without its extension, the date, the time to the minute, and a suffix only where there is one —
   - `finances-2026-08-08-1432` — the copy taken when a session closed;
   - `finances-2026-08-08-1432-external` — a version displaced by an external modification;
   - `finances-2026-08-08-1432-pre-upgrade` — the copy taken before an upgrade.
 
   Whatever extension the format turns out to carry ([§12](#12--storage)) is on the copy too.
-- **One backup is taken when a file is closed, and only if something changed during the session.**
-  The rule is about the session, not about the gesture that ended it: **however the open file stops
-  being the open file, that is a close and it takes the copy.** There are four ways to get there and
-  they are all the same event —
+- **One backup is taken when a file is closed, and only if something changed during the session.** The rule is about the session, not about the gesture that ended it: **however the open file stops being the open file, that is a close and it takes the copy.** There are four ways to get there and they are all the same event —
   - **Quit**, from the File menu or by any means the platform offers;
   - **closing the window**, which on some platforms is not quitting and is a close all the same;
   - **File › New…**, which leaves this file for a fresh one;
-  - **File › Open…** or **Open Recent**, which leaves it for another
-    ([§12.2](#122-the-menu-bar-and-which-file-is-open)).
+  - **File › Open…** or **Open Recent**, which leaves it for another ([§12.2](#122-the-menu-bar-and-which-file-is-open)).
 
   A session that only *read* the file writes nothing, whichever door it leaves by.
 - **Not per save.**
-- **A session that ends in a crash tries to take its backup and may not manage it. That is
-  accepted.**
-- **Every copy the application writes there is one of the count.** The backups on close, the version
-  displaced by an external modification, and the pre-upgrade copy all go into the same folder and
-  the same rotation, and all of them can be pushed out by later ones. There is no protected shelf.
-  **Both the moments that produce an unusual copy say so at the time** — the external-modification
-  line above and the upgrade dialog ([§12.1](#121-the-launch-screen)) each state that the copy is
-  part of the rotation and will eventually be rotated out.
-- **Rotation happens as copies arrive, oldest out first.** Writing the copy that would make
-  `backupCount + 1` is what deletes the oldest, and nothing else in the application ever deletes a
-  backup. **Lowering `backupCount` removes nothing on its own**: the folder comes down to the new
-  number over the next few backups, as each new copy pushes one more out.
-- **A backup that cannot be written never stops the session, and is never silent.** The two moments
-  that already have something to say say this as well: the external-modification line states that
-  the displaced version could not be copied and what the system said, and the upgrade **does not
-  run at all** — the pre-upgrade copy is what makes an upgrade reversible, so its failure is reported
-  in the dialog with the reason and nothing is written ([§12.1](#121-the-launch-screen)). **A closing
-  backup that fails shows an error banner** naming the file and the reason: on *File › New…*,
-  *Open…* and *Open Recent* the application is still on screen, so the banner appears on the screen
-  the new file lands on. **On a quit or a closed window there may be no moment left to draw one, and
-  then nothing is shown** — the file itself is safely on disk and what was lost is a copy of it,
-  which is the same accepted loss as the backup a crashed session does not manage.
-- **On launch the application always asks which file to open**, and never reopens the last one on its
-  own. [§12.1](#121-the-launch-screen) is that screen.
+- **A session that ends in a crash tries to take its backup and may not manage it. That is accepted.**
+- **Every copy the application writes there is one of the count.** The backups on close, the version displaced by an external modification, and the pre-upgrade copy all go into the same folder and the same rotation, and all of them can be pushed out by later ones. There is no protected shelf. **Both the moments that produce an unusual copy say so at the time** — the external-modification line above and the upgrade dialog ([§12.1](#121-the-launch-screen)) each state that the copy is part of the rotation and will eventually be rotated out.
+- **Rotation happens as copies arrive, oldest out first.** Writing the copy that would make `backupCount + 1` is what deletes the oldest, and nothing else in the application ever deletes a backup. **Lowering `backupCount` removes nothing on its own**: the folder comes down to the new number over the next few backups, as each new copy pushes one more out.
+- **A backup that cannot be written never stops the session, and is never silent.** The two moments that already have something to say say this as well: the external-modification line states that the displaced version could not be copied and what the system said, and the upgrade **does not run at all** — the pre-upgrade copy is what makes an upgrade reversible, so its failure is reported in the dialog with the reason and nothing is written ([§12.1](#121-the-launch-screen)). **A closing backup that fails shows an error banner** naming the file and the reason: on *File › New…*, *Open…* and *Open Recent* the application is still on screen, so the banner appears on the screen the new file lands on. **On a quit or a closed window there may be no moment left to draw one, and then nothing is shown** — the file itself is safely on disk and what was lost is a copy of it, which is the same accepted loss as the backup a crashed session does not manage.
+- **On launch the application always asks which file to open**, and never reopens the last one on its own. [§12.1](#121-the-launch-screen) is that screen.
 - **No undo/redo** in v1. This is why every delete confirms.
-- **The format must be documented** well enough for an external script to write it — the ten years
-  of historical data will be loaded by a one-off migration script, not by the application. It
-  carries a **schema version**, and every file is at exactly one of three positions relative to the
-  running application: current, older, or not understood.
-- **What that format is, and what the file is called, are implementation decisions.** A text format,
-  an embedded database, something else: this document requires only that it is one file, that a
-  script can write it, and that it carries its schema version. The **extension is not specified
-  either** and follows from the format chosen. Where these pages and the mockups need a filename
-  they write `finances`, sometimes with an invented extension, and nothing anywhere depends on it —
-  the backup folder takes the file's name without whatever extension it turns out to have
-  ([§12](#12--storage)), and the window title carries the name alone
-  ([§12.2](#122-the-menu-bar-and-which-file-is-open)).
-- **An older file is upgraded once, with the user's consent.** Opening one shows a screen that says
-  which version wrote it and which version it will become, and states that a copy of the file as it
-  stands now is written to the backup folder first. Confirm and the upgrade runs and the file opens;
-  cancel and nothing is written and the launch screen returns. **It is never silent and never
-  automatic.**
-- **An upgrade re-applies the rule list as part of itself.** The upgrade runs the same pass the Rules
-  tab runs ([§6.2](06-categories.md#62-rules)) over every transaction whose
-  `categorySource = automatic`, and writes the categories, the rules and the new schema version in
-  one step. `manual` rows are untouched by *that* pass, here as everywhere.
-- **A category the new version retires is the upgrade's own problem to solve, and it is solved in the
-  upgrade for that version.** The upgrade that retires a category says what becomes of the rows that
-  pointed at it — mapped to whichever category now means what that one meant, or cleared to no
-  category so check 2 lists them for the user to place — and which of the two is right is decided
-  when the category is retired, not fixed here in advance. What this document does fix is that **no
-  upgrade may leave a transaction pointing at a category the file no longer holds**. The dialog says
-  which categories are going and what happened to their rows. It needs no separate consent — it is
-  part of the upgrade the user has already confirmed.
-- **The rules pointing at a retired category are settled the same way, and settled first.** A rule
-  carries a required `categoryId` ([§2](02-domain-model.md)), so the same upgrade says what becomes
-  of every rule pointing at a category it is retiring — repointed to whichever category now means
-  what that one meant, or deleted — and **no upgrade may leave a rule pointing at a category the file
-  no longer holds** either, on exactly the reasoning that bars a dangling transaction: the next open
-  would refuse the file the upgrade had just written. **Retired categories are resolved before the
-  rule list is re-applied**, so the pass below runs over the rules the file is going to keep and
-  produces the categories those rules produce. The dialog names the rules that were repointed or
-  removed, alongside the categories going and the rows that moved.
-- **Anything not understood is not opened at all.** A schema version later than the application's,
-  or a file at a known version carrying something unrecognised — an unknown category, role or field
-  — is refused with a statement of what was not understood, and the launch screen stays up with the
-  other files still openable. **There is no read-only mode**: a file is either open and fully
-  editable or not open.
+- **The format must be documented** well enough for an external script to write it — the ten years of historical data will be loaded by a one-off migration script, not by the application. It carries a **schema version**, and every file is at exactly one of three positions relative to the running application: current, older, or not understood.
+- **What that format is, and what the file is called, are implementation decisions.** A text format, an embedded database, something else: this document requires only that it is one file, that a script can write it, and that it carries its schema version. The **extension is not specified either** and follows from the format chosen. Where these pages and the mockups need a filename they write `finances`, sometimes with an invented extension, and nothing anywhere depends on it — the backup folder takes the file's name without whatever extension it turns out to have ([§12](#12--storage)), and the window title carries the name alone ([§12.2](#122-the-menu-bar-and-which-file-is-open)).
+- **An older file is upgraded once, with the user's consent.** Opening one shows a screen that says which version wrote it and which version it will become, and states that a copy of the file as it stands now is written to the backup folder first. Confirm and the upgrade runs and the file opens; cancel and nothing is written and the launch screen returns. **It is never silent and never automatic.**
+- **An upgrade re-applies the rule list as part of itself.** The upgrade runs the same pass the Rules tab runs ([§6.2](06-categories.md#62-rules)) over every transaction whose `categorySource = automatic`, and writes the categories, the rules and the new schema version in one step. `manual` rows are untouched by *that* pass, here as everywhere.
+- **A category the new version retires is the upgrade's own problem to solve, and it is solved in the upgrade for that version.** The upgrade that retires a category says what becomes of the rows that pointed at it — mapped to whichever category now means what that one meant, or cleared to no category so check 2 lists them for the user to place — and which of the two is right is decided when the category is retired, not fixed here in advance. What this document does fix is that **no upgrade may leave a transaction pointing at a category the file no longer holds**. The dialog says which categories are going and what happened to their rows. It needs no separate consent — it is part of the upgrade the user has already confirmed.
+- **The rules pointing at a retired category are settled the same way, and settled first.** A rule carries a required `categoryId` ([§2](02-domain-model.md)), so the same upgrade says what becomes of every rule pointing at a category it is retiring — repointed to whichever category now means what that one meant, or deleted — and **no upgrade may leave a rule pointing at a category the file no longer holds** either, on exactly the reasoning that bars a dangling transaction: the next open would refuse the file the upgrade had just written. **Retired categories are resolved before the rule list is re-applied**, so the pass below runs over the rules the file is going to keep and produces the categories those rules produce. The dialog names the rules that were repointed or removed, alongside the categories going and the rows that moved.
+- **Anything not understood is not opened at all.** A schema version later than the application's, or a file at a known version carrying something unrecognised — an unknown category, role or field — is refused with a statement of what was not understood, and the launch screen stays up with the other files still openable. **There is no read-only mode**: a file is either open and fully editable or not open.
 
 ## 12.1 The launch screen
 
 > **Mockup —** [The launch screen](../mockups/12-storage.html#launch)
 
-- The application **always** opens here — recent locations, *Open…*, and *New file…*. It never
-  reopens the last file on its own.
-- ***New file…* asks where to put it, and creates it there and then.** It opens the platform's own
-  save dialog, and the file — with the categories of
-  [§6.3](06-categories.md#63-category-list) seeded and nothing else in it — is **written at the
-  moment the location is chosen**, before any screen is shown. Cancelling the dialog writes nothing
-  and leaves the launch screen up.
-- A recent entry whose file has moved or been deleted is shown struck through with the reason, and
-  stays in the list until it is dismissed.
-- The upgrade dialog is the second panel. It names both schema versions, states the backup in the
-  sentence rather than a footnote, says that the rules will be re-applied to every automatically
-  categorised transaction as part of the upgrade ([§12](#12--storage)), and says plainly what stops
-  working afterwards. Cancelling writes nothing at all. **A pre-upgrade backup that cannot be
-  written stops the upgrade**: the dialog states the reason the system gave, offers *Retry* and
-  *Cancel*, and nothing has been written to the file either way ([§12](#12--storage)).
-- This is the only *screen* whose errors can keep you out of the rest of the application
-  ([§14](14-empty-and-error-states.md)). The one other blocking error belongs to no screen: a file
-  that cannot be written after five attempts ([§12](#12--storage)).
+- The application **always** opens here — recent locations, *Open…*, and *New file…*. It never reopens the last file on its own.
+- ***New file…* asks where to put it, and creates it there and then.** It opens the platform's own save dialog, and the file — with the categories of [§6.3](06-categories.md#63-category-list) seeded and nothing else in it — is **written at the moment the location is chosen**, before any screen is shown. Cancelling the dialog writes nothing and leaves the launch screen up.
+- A recent entry whose file has moved or been deleted is shown struck through with the reason, and stays in the list until it is dismissed.
+- The upgrade dialog is the second panel. It names both schema versions, states the backup in the sentence rather than a footnote, says that the rules will be re-applied to every automatically categorised transaction as part of the upgrade ([§12](#12--storage)), and says plainly what stops working afterwards. Cancelling writes nothing at all. **A pre-upgrade backup that cannot be written stops the upgrade**: the dialog states the reason the system gave, offers *Retry* and *Cancel*, and nothing has been written to the file either way ([§12](#12--storage)).
+- This is the only *screen* whose errors can keep you out of the rest of the application ([§14](14-empty-and-error-states.md)). The one other blocking error belongs to no screen: a file that cannot be written after five attempts ([§12](#12--storage)).
 
 ## 12.2 The menu bar, and which file is open
 
 > **Mockup —** [The File menu · switching files](../mockups/12-storage.html#conflicts)
 
-- **The window title is where the current file is named.** It carries the file's name and nothing
-  else — *finances — Spiccioli*. The full path is on Settings ([§10](10-settings.md)), a click away.
-- **The sidebar carries the eight screens, the failing-check badge beside *Checks*
-  ([§9](09-checks.md)), and the save state** — *Saved 14:32* in the ordinary case, and **the only
-  other things it ever says are that a write is being retried and that one has failed**
-  ([§12](#12--storage)). There is no third state and no spinner for the ordinary debounced write.
-  **What it does not carry is the file name.**
-- **Opening another file is a menu action, not a restart.** The launch screen
-  ([§12.1](#121-the-launch-screen)) is what the application opens *with*; the File menu is how you
-  leave one file for another once it is running. Both reach the same code.
-- **An opened file lands on Portfolio, with no filter set anywhere.** Which screen was last looked
-  at, which filters were on it and which row was selected are not remembered — not between files and
-  not between sessions.
+- **The window title is where the current file is named.** It carries the file's name and nothing else — *finances — Spiccioli*. The full path is on Settings ([§10](10-settings.md)), a click away.
+- **The sidebar carries the eight screens, the failing-check badge beside *Checks* ([§9](09-checks.md)), and the save state** — *Saved 14:32* in the ordinary case, and **the only other things it ever says are that a write is being retried and that one has failed** ([§12](#12--storage)). There is no third state and no spinner for the ordinary debounced write. **What it does not carry is the file name.**
+- **Opening another file is a menu action, not a restart.** The launch screen ([§12.1](#121-the-launch-screen)) is what the application opens *with*; the File menu is how you leave one file for another once it is running. Both reach the same code.
+- **An opened file lands on Portfolio, with no filter set anywhere.** Which screen was last looked at, which filters were on it and which row was selected are not remembered — not between files and not between sessions.
 - **Two things the menu bar must carry, and everything else is the platform's business.**
-  - **A File menu of four actions**: *New…*, which asks where to put a fresh seeded file and writes
-    it there ([§12.1](#121-the-launch-screen)); *Open…*, which browses for one; *Open Recent*, which
-    is the same list the launch screen offers; and *Quit*. Those four are the same three files and
-    one exit on every platform ([§1](01-premise-and-constraints.md)). **All four end the current
-    session and all four take its closing backup**, as does closing the window without quitting
-    ([§12](#12--storage)).
-  - **An About item naming the application and its version.** It is the only place a version number
-    appears.
-- **Everything else is left to the implementation and to the platform's conventions** — where
-  *About* and *Quit* sit, whether there is a Window or a Help menu, the standard edit-field items a
-  toolkit puts in by default. What is *not* left open is that **there is no application-specific menu
-  beyond File**: no Edit menu, and no View menu.
+  - **A File menu of four actions**: *New…*, which asks where to put a fresh seeded file and writes it there ([§12.1](#121-the-launch-screen)); *Open…*, which browses for one; *Open Recent*, which is the same list the launch screen offers; and *Quit*. Those four are the same three files and one exit on every platform ([§1](01-premise-and-constraints.md)). **All four end the current session and all four take its closing backup**, as does closing the window without quitting ([§12](#12--storage)).
+  - **An About item naming the application and its version.** It is the only place a version number appears.
+- **Everything else is left to the implementation and to the platform's conventions** — where *About* and *Quit* sit, whether there is a Window or a Help menu, the standard edit-field items a toolkit puts in by default. What is *not* left open is that **there is no application-specific menu beyond File**: no Edit menu, and no View menu.
 
 ---
 
 ## Why it is this way
 
-- **Preferences stay out of the file** because a format you like reading is a fact about you;
-  carrying it inside the file would mean two files disagreeing about how to print a date, and opening
-  one of them silently changing the other's appearance.
-- **Atomic writes and external-modification detection are not paranoia about a specific setup**: they
-  are what makes the file safe in a folder that something else — a sync client, a backup agent, an
-  encrypted volume — may also be touching. They cost little and they are the reason the application
-  does not care where the file is.
-- **A failed write is retried before anything stops** because the causes are almost always momentary
-  and not the user's doing — a sync client holding the file open, a volume that has gone away for a
-  second, an antivirus pass — so the first answer is to try again rather than to stop the session.
-  The attempts are spaced because a lock that is going to clear needs a moment to clear in.
-- **Five failures earn the block**: every keystroke after a write that will not land is work the file
-  does not have, and an application that let the user go on typing over a dead file would be lying
-  with every *Saved* it printed. The message names the file and the system's reason so that a full
-  disk and a permission problem are not the same sentence. One file is the model, which is why there
-  is no *Save As…* to escape into.
-- **An external modification is reported, not put to a vote.** The session in front of the user is
-  the one being worked on and is never silently discarded; the copy means the other version is
-  recoverable if the overwrite turns out to be the wrong call. The user has one version in front of
-  them and no way to judge the other from a dialog, so the application does the safe thing and tells
-  them precisely where to find what it displaced. The count is quoted from the current preference
-  because the one thing the line exists to tell the user is how long the displaced version will last,
-  and a message that said ten to someone keeping three would be worse than saying nothing. This is
-  what [§1](01-premise-and-constraints.md) means by not coordinating two of itself: the folder is
-  allowed to be a synced one, so the situation is ordinary rather than exotic.
-- **The rotation is per file** because one folder for all of them would have meant two ledgers sharing
-  ten slots, and the one opened less often losing its history to the one opened daily.
-- **The names say when and why, in that order**, so the folder sorts chronologically by name and the
-  two unusual copies are still findable by eye. Reversing them would have grouped the three kinds
-  together and scattered the timeline, which is the wrong way round for a folder whose whole content
-  is one file at ten moments.
-- **Lowering `backupCount` deletes nothing immediately** because a preference change is not a
-  decision to destroy the copies already made, and someone reducing ten to three has no reason to
-  expect seven files to disappear as they tab away from the field. Letting the count take effect as
-  new copies arrive reaches the same folder within a week of ordinary use, and does it at moments
-  where a backup was being written anyway.
-- **A failed backup is reported where there is somewhere to report it, and not otherwise.** The two
-  unusual copies already interrupt with something to say, so adding a clause costs nothing and their
-  failure matters most — an external modification whose displaced version was not copied is the one
-  case where the other version is genuinely gone. The upgrade is the only one that stops, because
-  the copy is what the confirmation was really about: an upgrade with no fallback is the operation
-  the user agreed to on the strength of having one. A close, by contrast, may have no window left to
-  draw a banner in, and requiring one would mean holding the application open to complain about a
-  copy of a file that is itself already safely written.
-- **The four doors are listed on purpose**: a backup that depended on which of them was used would be
-  missing precisely when someone worked all afternoon and then opened last year's ledger to compare
-  something. A read-only session writes nothing because an identical copy is not a backup, it is a
-  leak in the rotation, and it would push out the one version that was worth keeping.
-- **Backups are not taken per save** because autosave fires every few seconds while typing; backing
-  up on each would cycle the whole rotation away within a minute and leave nothing older than
-  lunchtime.
-- **A crash losing its backup costs less than it looks**: the copy written when the *previous*
-  session closed is precisely the state this one started from, so the folder already holds the
-  version to fall back to, and the file itself is on disk autosaved to within a few seconds of the
-  crash. What is lost is the copy that would have marked where the crashed session got to.
-  Guaranteeing it would mean backing up on a timer, which is the per-save rotation the rule exists to
-  avoid.
-- **There is no protected shelf** because a second class of backup that never expires would fill the
-  folder with the files nobody chose to keep, and `backupCount` would stop meaning what it says. The
-  two unusual copies announce themselves at the moment the user can still decide to move one
-  somewhere safe.
-- **An upgrade asks first** because it is the one operation that makes a file unreadable by the
-  version the user was running yesterday.
-- **The upgrade re-applies the rules** because the category list is seeded by the application and
-  changing it is a change to the application ([§6.3](06-categories.md#63-category-list)), so a new
-  version is exactly the thing that can add a category, retire one or move a role — any of which
-  leaves the stored category of an `automatic` transaction disagreeing with what the rule list now
-  produces. Without it the invariant of [§2](02-domain-model.md) would hold for every file except the
-  ones that had just been upgraded, and it is that invariant which lets every total read the stored
-  category instead of re-deriving it.
-- **A retired category cannot be handled generically** because a `manual` transaction points at a
-  category id by hand, so re-running the rules cannot speak for it, and which remedy is right depends
-  entirely on why the category was retired. A dangling reference is the one outcome not available,
-  since the next open would refuse the file it had just written. **A rule is the same reference from
-  a different record** — required, by id, and equally undisplayable if it dangles — so it gets the
-  same treatment and the same prohibition. Settling the rules *before* the re-application pass is
-  what stops the upgrade re-categorising the file through a rule it is about to remove, which would
-  put every affected row through two categories to reach the one it ends at. The dialog mentions the
-  rules, the retired categories and the rows that moved because all three are changes to figures the
-  user knows they did not make.
-- **A file that is not understood is not opened at all.** Half-open is a state that would have to be
-  explained on every screen, and the alternative it exists to avoid — writing back a file with the
-  unknown parts quietly removed — is already prevented by refusing. Files outlive versions, and the
-  way to honour that is to leave alone the ones you cannot fully read.
-- **A new file is written the moment its location is chosen** so there is no unsaved,
-  not-yet-anywhere ledger to lose: the application has one file open at a time and it is a file on
-  disk from its first second, which is what makes autosave the only saving mechanism there is and
-  *Save As…* a thing that does not need to exist.
-- **A missing recent entry is kept in the list** because a file that has vanished from a synced
-  folder is news, not something to tidy away.
-- **A file that will not open and a file that will not save are the same problem seen from two ends**,
-  and they are the only two that block.
-- **The window title answers “which file am I in?” and the sidebar does not**, which would put the
-  answer in two places and make the sidebar as wide as the longer of them.
-- **The save state has no spinner** because a save takes no perceptible time, and an indicator that
-  flickered on every keystroke would train the user to stop reading the one line that will one day
-  carry bad news.
-- **Launch and the File menu reach the same code**, so there is nothing you can do at launch that you
-  cannot do afterwards.
-- **Nothing about the last session is remembered** because there is nowhere for that state to live
-  ([§10](10-settings.md), [§12](#12--storage)), and it is worth nothing: Portfolio is the screen that
-  says what the file contains and carries the failing-check banner, which is the thing to read on
-  arriving at a ledger whatever was being done in it last time.
-- **There is no Edit menu because there is no undo, and no View menu because there is nothing to
-  configure about the view** — everything the application does, it does on a screen. Specifying where
-  the platform's own items sit would be specifying the operating system.
+- **Preferences stay out of the file** because a format you like reading is a fact about you; carrying it inside the file would mean two files disagreeing about how to print a date, and opening one of them silently changing the other's appearance.
+- **Atomic writes and external-modification detection are not paranoia about a specific setup**: they are what makes the file safe in a folder that something else — a sync client, a backup agent, an encrypted volume — may also be touching. They cost little and they are the reason the application does not care where the file is.
+- **A failed write is retried before anything stops** because the causes are almost always momentary and not the user's doing — a sync client holding the file open, a volume that has gone away for a second, an antivirus pass — so the first answer is to try again rather than to stop the session. The attempts are spaced because a lock that is going to clear needs a moment to clear in.
+- **Five failures earn the block**: every keystroke after a write that will not land is work the file does not have, and an application that let the user go on typing over a dead file would be lying with every *Saved* it printed. The message names the file and the system's reason so that a full disk and a permission problem are not the same sentence. One file is the model, which is why there is no *Save As…* to escape into.
+- **An external modification is reported, not put to a vote.** The session in front of the user is the one being worked on and is never silently discarded; the copy means the other version is recoverable if the overwrite turns out to be the wrong call. The user has one version in front of them and no way to judge the other from a dialog, so the application does the safe thing and tells them precisely where to find what it displaced. The count is quoted from the current preference because the one thing the line exists to tell the user is how long the displaced version will last, and a message that said ten to someone keeping three would be worse than saying nothing. This is what [§1](01-premise-and-constraints.md) means by not coordinating two of itself: the folder is allowed to be a synced one, so the situation is ordinary rather than exotic.
+- **The rotation is per file** because one folder for all of them would have meant two ledgers sharing ten slots, and the one opened less often losing its history to the one opened daily.
+- **The names say when and why, in that order**, so the folder sorts chronologically by name and the two unusual copies are still findable by eye. Reversing them would have grouped the three kinds together and scattered the timeline, which is the wrong way round for a folder whose whole content is one file at ten moments.
+- **Lowering `backupCount` deletes nothing immediately** because a preference change is not a decision to destroy the copies already made, and someone reducing ten to three has no reason to expect seven files to disappear as they tab away from the field. Letting the count take effect as new copies arrive reaches the same folder within a week of ordinary use, and does it at moments where a backup was being written anyway.
+- **A failed backup is reported where there is somewhere to report it, and not otherwise.** The two unusual copies already interrupt with something to say, so adding a clause costs nothing and their failure matters most — an external modification whose displaced version was not copied is the one case where the other version is genuinely gone. The upgrade is the only one that stops, because the copy is what the confirmation was really about: an upgrade with no fallback is the operation the user agreed to on the strength of having one. A close, by contrast, may have no window left to draw a banner in, and requiring one would mean holding the application open to complain about a copy of a file that is itself already safely written.
+- **The four doors are listed on purpose**: a backup that depended on which of them was used would be missing precisely when someone worked all afternoon and then opened last year's ledger to compare something. A read-only session writes nothing because an identical copy is not a backup, it is a leak in the rotation, and it would push out the one version that was worth keeping.
+- **Backups are not taken per save** because autosave fires every few seconds while typing; backing up on each would cycle the whole rotation away within a minute and leave nothing older than lunchtime.
+- **A crash losing its backup costs less than it looks**: the copy written when the *previous* session closed is precisely the state this one started from, so the folder already holds the version to fall back to, and the file itself is on disk autosaved to within a few seconds of the crash. What is lost is the copy that would have marked where the crashed session got to. Guaranteeing it would mean backing up on a timer, which is the per-save rotation the rule exists to avoid.
+- **There is no protected shelf** because a second class of backup that never expires would fill the folder with the files nobody chose to keep, and `backupCount` would stop meaning what it says. The two unusual copies announce themselves at the moment the user can still decide to move one somewhere safe.
+- **An upgrade asks first** because it is the one operation that makes a file unreadable by the version the user was running yesterday.
+- **The upgrade re-applies the rules** because the category list is seeded by the application and changing it is a change to the application ([§6.3](06-categories.md#63-category-list)), so a new version is exactly the thing that can add a category, retire one or move a role — any of which leaves the stored category of an `automatic` transaction disagreeing with what the rule list now produces. Without it the invariant of [§2](02-domain-model.md) would hold for every file except the ones that had just been upgraded, and it is that invariant which lets every total read the stored category instead of re-deriving it.
+- **A retired category cannot be handled generically** because a `manual` transaction points at a category id by hand, so re-running the rules cannot speak for it, and which remedy is right depends entirely on why the category was retired. A dangling reference is the one outcome not available, since the next open would refuse the file it had just written. **A rule is the same reference from a different record** — required, by id, and equally undisplayable if it dangles — so it gets the same treatment and the same prohibition. Settling the rules *before* the re-application pass is what stops the upgrade re-categorising the file through a rule it is about to remove, which would put every affected row through two categories to reach the one it ends at. The dialog mentions the rules, the retired categories and the rows that moved because all three are changes to figures the user knows they did not make.
+- **A file that is not understood is not opened at all.** Half-open is a state that would have to be explained on every screen, and the alternative it exists to avoid — writing back a file with the unknown parts quietly removed — is already prevented by refusing. Files outlive versions, and the way to honour that is to leave alone the ones you cannot fully read.
+- **A new file is written the moment its location is chosen** so there is no unsaved, not-yet-anywhere ledger to lose: the application has one file open at a time and it is a file on disk from its first second, which is what makes autosave the only saving mechanism there is and *Save As…* a thing that does not need to exist.
+- **A missing recent entry is kept in the list** because a file that has vanished from a synced folder is news, not something to tidy away.
+- **A file that will not open and a file that will not save are the same problem seen from two ends**, and they are the only two that block.
+- **The window title answers “which file am I in?” and the sidebar does not**, which would put the answer in two places and make the sidebar as wide as the longer of them.
+- **The save state has no spinner** because a save takes no perceptible time, and an indicator that flickered on every keystroke would train the user to stop reading the one line that will one day carry bad news.
+- **Launch and the File menu reach the same code**, so there is nothing you can do at launch that you cannot do afterwards.
+- **Nothing about the last session is remembered** because there is nowhere for that state to live ([§10](10-settings.md), [§12](#12--storage)), and it is worth nothing: Portfolio is the screen that says what the file contains and carries the failing-check banner, which is the thing to read on arriving at a ledger whatever was being done in it last time.
+- **There is no Edit menu because there is no undo, and no View menu because there is nothing to configure about the view** — everything the application does, it does on a screen. Specifying where the platform's own items sit would be specifying the operating system.
 
 ---
 

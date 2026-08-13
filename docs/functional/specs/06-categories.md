@@ -2,8 +2,7 @@
 
 *[Index](../README.md) · [mockups for this section](../mockups/06-categories.html)*
 
-Three tabs: Report, Rules, Category list. The report answers where the money goes, the rules put it
-there, and the list is what both are made of.
+Three tabs: Report, Rules, Category list. The report answers where the money goes, the rules put it there, and the list is what both are made of.
 
 ---
 
@@ -13,138 +12,59 @@ The categories × years matrix — the one screen that answers where the money g
 
 > **Mockup —** [Report tab](../mockups/06-categories.html#report)
 
-- Rows are categories, **in the fixed `order` of [§2](02-domain-model.md)** — never by amount, and
-  never alphabetically. Columns are calendar years plus a total. **The whole table is shown; there is
-  no paging.**
-- **`order` exists for this table and is numbered to suit it.** It runs down the report's own reading
-  order — the Income group, then Expense, then Internal, then the Investments group below Net — so
-  the table ascends in it from top to bottom and the group boundaries fall where the numbering
-  changes type. Nothing else in the application reads the field ([§6.3](#63-category-list)).
-- **This is the one table that reads in `order`; everywhere else categories are alphabetical** — the
-  list tab, every picker and every filter ([§6.3](#63-category-list)).
-- **Four groups, and every category appears in exactly one of them.** *Income*, *Expense* and
-  *Internal* each list the categories of the type they are named after and end in a subtotal; **Net**
-  is the sum of those three subtotals and is the emphasised line the table exists to produce.
-  *Investments* follows below it, holding the `Investment`, `Divestment` and `Revaluation` types
-  together, **ending in nothing**, and excluded from Net. Seven plus sixteen plus one plus three is
-  twenty-seven ([§6.3](#63-category-list)): the report accounts for the whole taxonomy, once each.
-- Amounts **carry the sign and colour of the transactions behind them** — income green and positive,
-  expense red and negative — exactly as on the Transactions screen.
-- **Internal is inside Net.** With the account filter on *All* its **row total** is zero, both legs
-  of every transfer being in scope and cancelling. **Filtered to one account it stops being zero by
-  design**, because a transfer in or out of that account has only one leg in view, and Net then reads
-  as what actually happened to the money in the account selected.
-- **A single year's cell is a different matter, and one exception is ordinary.** A transfer sent in
-  December and received in January has its two legs in two calendar years, so both years' Internal
-  cells are non-zero and the two cancel only in the row total. Nothing is wrong: the money did leave
-  one year and arrive in the next, and Net reads it that way in both. **Only the row total is
-  expected to be zero.**
-- **Beyond that, a non-zero Internal row total with the account filter on *All* means a leg is
-  missing**, and
-  it moves Net by that amount. Check 1 is failing while it is true — an unpaired leg is exactly what
-  that check reports — so the Portfolio banner is already up and the Checks screen already names the
-  leg ([§9](09-checks.md)); the row is where the damage is quantified. **The implication runs one way
-  only:** check 1 also fails on two legs that cancel perfectly but sit further apart than
-  `transferMatchWindowDays` ([§10](10-settings.md)), and those leave the row total at zero.
-- **Every figure in a category row is a link.** Clicking a cell opens Transactions filtered to that
-  category and to that year — the period set to its first and last day — **plus the report's account
-  filter, which is one account or *All* and transfers as it stands**
-  ([§5.3](05-transactions.md#53-filters)). **Clicking the row total carries the same category and
-  account with no period at all**: the year column is what the period expressed, and the row total
-  spans every year the report holds, so the filter that says *some* years is cleared rather than
-  widened to the report's year range. What opens is the ordinary Transactions screen on its last
-  page, with those filters set and nothing else different about it
-  ([§5.2](05-transactions.md#52-ordering-and-paging)).
-- **The three subtotals and Net are not links.** **Every other row in the table is a category, and
-  therefore is a link** — transfers, purchases, sales and revaluations included.
-- A cell with no transactions shows an em dash, not `€ 0,00`, so a real zero stays distinguishable
-  from nothing recorded — and an em dash is not a link.
-- Filters: year range, and **account — one account or *All***, **cash accounts only**, since a
-  brokerage account holds no transactions to report ([§2](02-domain-model.md),
-  [§5.3](05-transactions.md#53-filters)). A partial year is labelled with the months it covers.
-- **Closed accounts are in the report and in its account filter**, marked and last like everywhere
-  else ([§4.3](04-accounts.md#43-creating-and-editing)). Closing an account takes nothing out of
-  anything — not its past here and not its balance on Portfolio
-  ([§11.4](11-calculations.md#114-balances-and-net-worth)); it marks the account and sorts it last.
-- The screen carries three tabs: this report, the categorisation rules ([§6.2](#62-rules)), and a
-  read-only list of the twenty-seven categories with their types and roles
-  ([§6.3](#63-category-list)).
-- Uncategorised transactions appear in no row. Their existence is a failing check
-  ([§9](09-checks.md)).
-- **Total income is money that arrived, not money that was earned.** It adds the pay that reached
-  the bank, the pension fund contributions and the meal-voucher top-ups. It is not comparable to
-  gross pay, not a tax base, and not what anyone means by an annual salary —
-  [§8.1](08-salaries.md#81-payslips) is the screen for those.
-- **Salary** here is the sum of *Salary* transactions: what the bank actually received, which is a
-  payslip's `netPayment` ([§2](02-domain-model.md)) and the figure check 4 pairs against. **It is
-  not the *netSalary* of [§11.7](11-calculations.md#117-salary-figures)**, which adds the car
-  deduction back and takes the refunds out. Gross figures live on Salaries as well
-  ([§8.1](08-salaries.md#81-payslips)). Because a payslip for December is typically paid in January,
-  a calendar year of Salary transactions need not line up exactly with that year's payslips;
-  [§8.1](08-salaries.md#81-payslips) is the screen that reads payslip by payslip.
+- Rows are categories, **in the fixed `order` of [§2](02-domain-model.md)** — never by amount, and never alphabetically. Columns are calendar years plus a total. **The whole table is shown; there is no paging.**
+- **`order` exists for this table and is numbered to suit it.** It runs down the report's own reading order — the Income group, then Expense, then Internal, then the Investments group below Net — so the table ascends in it from top to bottom and the group boundaries fall where the numbering changes type. Nothing else in the application reads the field ([§6.3](#63-category-list)).
+- **This is the one table that reads in `order`; everywhere else categories are alphabetical** — the list tab, every picker and every filter ([§6.3](#63-category-list)).
+- **Four groups, and every category appears in exactly one of them.** *Income*, *Expense* and *Internal* each list the categories of the type they are named after and end in a subtotal; **Net** is the sum of those three subtotals and is the emphasised line the table exists to produce. *Investments* follows below it, holding the `Investment`, `Divestment` and `Revaluation` types together, **ending in nothing**, and excluded from Net. Seven plus sixteen plus one plus three is twenty-seven ([§6.3](#63-category-list)): the report accounts for the whole taxonomy, once each.
+- Amounts **carry the sign and colour of the transactions behind them** — income green and positive, expense red and negative — exactly as on the Transactions screen.
+- **Internal is inside Net.** With the account filter on *All* its **row total** is zero, both legs of every transfer being in scope and cancelling. **Filtered to one account it stops being zero by design**, because a transfer in or out of that account has only one leg in view, and Net then reads as what actually happened to the money in the account selected.
+- **A single year's cell is a different matter, and one exception is ordinary.** A transfer sent in December and received in January has its two legs in two calendar years, so both years' Internal cells are non-zero and the two cancel only in the row total. Nothing is wrong: the money did leave one year and arrive in the next, and Net reads it that way in both. **Only the row total is expected to be zero.**
+- **Beyond that, a non-zero Internal row total with the account filter on *All* means a leg is missing**, and it moves Net by that amount. Check 1 is failing while it is true — an unpaired leg is exactly what that check reports — so the Portfolio banner is already up and the Checks screen already names the leg ([§9](09-checks.md)); the row is where the damage is quantified. **The implication runs one way only:** check 1 also fails on two legs that cancel perfectly but sit further apart than `transferMatchWindowDays` ([§10](10-settings.md)), and those leave the row total at zero.
+- **Every figure in a category row is a link.** Clicking a cell opens Transactions filtered to that category and to that year — the period set to its first and last day — **plus the report's account filter, which is one account or *All* and transfers as it stands** ([§5.3](05-transactions.md#53-filters)). **Clicking the row total carries the same category and account with no period at all**: the year column is what the period expressed, and the row total spans every year the report holds, so the filter that says *some* years is cleared rather than widened to the report's year range. What opens is the ordinary Transactions screen on its last page, with those filters set and nothing else different about it ([§5.2](05-transactions.md#52-ordering-and-paging)).
+- **The three subtotals and Net are not links.** **Every other row in the table is a category, and therefore is a link** — transfers, purchases, sales and revaluations included.
+- A cell with no transactions shows an em dash, not `€ 0,00`, so a real zero stays distinguishable from nothing recorded — and an em dash is not a link.
+- Filters: year range, and **account — one account or *All***, **cash accounts only**, since a brokerage account holds no transactions to report ([§2](02-domain-model.md), [§5.3](05-transactions.md#53-filters)). A partial year is labelled with the months it covers.
+- **Closed accounts are in the report and in its account filter**, marked and last like everywhere else ([§4.3](04-accounts.md#43-creating-and-editing)). Closing an account takes nothing out of anything — not its past here and not its balance on Portfolio ([§11.4](11-calculations.md#114-balances-and-net-worth)); it marks the account and sorts it last.
+- The screen carries three tabs: this report, the categorisation rules ([§6.2](#62-rules)), and a read-only list of the twenty-seven categories with their types and roles ([§6.3](#63-category-list)).
+- Uncategorised transactions appear in no row. Their existence is a failing check ([§9](09-checks.md)).
+- **Total income is money that arrived, not money that was earned.** It adds the pay that reached the bank, the pension fund contributions and the meal-voucher top-ups. It is not comparable to gross pay, not a tax base, and not what anyone means by an annual salary — [§8.1](08-salaries.md#81-payslips) is the screen for those.
+- **Salary** here is the sum of *Salary* transactions: what the bank actually received, which is a payslip's `netPayment` ([§2](02-domain-model.md)) and the figure check 4 pairs against. **It is not the *netSalary* of [§11.7](11-calculations.md#117-salary-figures)**, which adds the car deduction back and takes the refunds out. Gross figures live on Salaries as well ([§8.1](08-salaries.md#81-payslips)). Because a payslip for December is typically paid in January, a calendar year of Salary transactions need not line up exactly with that year's payslips; [§8.1](08-salaries.md#81-payslips) is the screen that reads payslip by payslip.
 
 ## 6.2 Rules
 
 > **Mockup —** [Rules tab](../mockups/06-categories.html#rules)
 
-- Ordered, draggable, numbered. **First match wins**, so order is the logic and is visible. A rule is
-  created with the substring and the category; nothing else.
+- Ordered, draggable, numbered. **First match wins**, so order is the logic and is visible. A rule is created with the substring and the category; nothing else.
 
 ### The list is edited as a session, and applied once
 
-- **Editing the list changes nothing until *Apply changes* is pressed.** Add a rule, edit another,
-  delete a third, drag two into a different order — all of it accumulates on the screen as a
-  **draft**, and neither the rules nor a single transaction's category is written while it does. The
-  header says how many changes are pending, *Apply changes* is enabled only while there are some,
-  and *Discard changes* puts the list back to what the file holds.
-- **Apply asks first, and what it shows is the consequence rather than the diff.** Pressing it runs
-  the draft list over every transaction whose `categorySource = automatic`, compares the result with
-  what those rows carry now, and reports:
+- **Editing the list changes nothing until *Apply changes* is pressed.** Add a rule, edit another, delete a third, drag two into a different order — all of it accumulates on the screen as a **draft**, and neither the rules nor a single transaction's category is written while it does. The header says how many changes are pending, *Apply changes* is enabled only while there are some, and *Discard changes* puts the list back to what the file holds.
+- **Apply asks first, and what it shows is the consequence rather than the diff.** Pressing it runs the draft list over every transaction whose `categorySource = automatic`, compares the result with what those rows carry now, and reports:
   - **how many transactions change from one category to another**;
   - **how many lose their category**, the rows a deleted or narrowed rule was the only match for;
   - **how many currently uncategorised gain one**;
   - **how many are unchanged**;
   - and **a line per rule that was added, edited, moved or deleted**, with what each accounted for.
-- Confirm and the rules and every affected category are written **together, in one step**. Cancel
-  and nothing at all is written: the draft is still on the screen, exactly as it was, and can be
-  edited further or discarded. **A `manual` category is never touched by any of this**
-  ([§2](02-domain-model.md)).
-- **Leaving the tab, closing the file or quitting with a draft pending asks what to do with it** —
-  apply, discard, or stay.
-- **The *Applies to* column describes the applied list**, not the draft: it counts the transactions
-  each rule currently accounts for in the file. While a draft is pending it is dimmed and labelled
-  as such.
+- Confirm and the rules and every affected category are written **together, in one step**. Cancel and nothing at all is written: the draft is still on the screen, exactly as it was, and can be edited further or discarded. **A `manual` category is never touched by any of this** ([§2](02-domain-model.md)).
+- **Leaving the tab, closing the file or quitting with a draft pending asks what to do with it** — apply, discard, or stay.
+- **The *Applies to* column describes the applied list**, not the draft: it counts the transactions each rule currently accounts for in the file. While a draft is pending it is dimmed and labelled as such.
 - **There is no per-rule tester.**
-- **Deleting a rule un-categorises the rows only it matched**, unless a rule further down the list
-  picks them up. That is the second figure in the summary.
-- **The mockup's eleven rules are not the expectation.** A real file runs to several dozen, and the
-  target is that **the rules categorise about 95% of transactions**, the remaining twentieth being
-  set by hand — one-off transfers, gifts, the payment whose description is a reference number.
+- **Deleting a rule un-categorises the rows only it matched**, unless a rule further down the list picks them up. That is the second figure in the summary.
+- **The mockup's eleven rules are not the expectation.** A real file runs to several dozen, and the target is that **the rules categorise about 95% of transactions**, the remaining twentieth being set by hand — one-off transfers, gifts, the payment whose description is a reference number.
 
 ## 6.3 Category list
 
-Twenty-seven, seeded into every new file and not editable at runtime. Adding, renaming or removing
-one is a change to the application, not a setting ([§15](15-out-of-scope.md)). **Role** is what
-[§9](09-checks.md) keys off; a blank one means no check cares about the category. **Was** records the
-old Italian label for reference only — the migration script maps the two lists by hand, and the
-application stores no alias.
+Twenty-seven, seeded into every new file and not editable at runtime. Adding, renaming or removing one is a change to the application, not a setting ([§15](15-out-of-scope.md)). **Role** is what [§9](09-checks.md) keys off; a blank one means no check cares about the category. **Was** records the old Italian label for reference only — the migration script maps the two lists by hand, and the application stores no alias.
 
 > **Mockup —** [Category list tab](../mockups/06-categories.html#category-list)
 
 - **Read-only, and the only place the whole taxonomy is visible at once.**
-- **This list is alphabetical by name**, and so is every picker and every filter — the category
-  picker on a transaction, the category filter, the category on a rule. The `order` value is a column
-  here rather than the arrangement of the page.
+- **This list is alphabetical by name**, and so is every picker and every filter — the category picker on a transaction, the category filter, the category on a rule. The `order` value is a column here rather than the arrangement of the page.
 - **The report is the one table that reads in `order` instead** ([§6.1](#61-report)).
-- Only the entries that are not categories sit outside the alphabet: *Automatic* at the top of the
-  transaction picker and *Uncategorised* at the top of the filter
-  ([§5.3](05-transactions.md#53-filters), [§5.4](05-transactions.md#54-editing)).
-- The **Transactions** column is a live count: a category with none is one the rules never reach, and
-  the total across all 27 is every categorised transaction in the file — 4.811 of 4.812 in the
-  mockup, the missing one being the failure of check 2.
+- Only the entries that are not categories sit outside the alphabet: *Automatic* at the top of the transaction picker and *Uncategorised* at the top of the filter ([§5.3](05-transactions.md#53-filters), [§5.4](05-transactions.md#54-editing)).
+- The **Transactions** column is a live count: a category with none is one the rules never reach, and the total across all 27 is every categorised transaction in the file — 4.811 of 4.812 in the mockup, the missing one being the failure of check 2.
 
-Listed as the tab lists them, **alphabetically**. `Order` is the report's row order
-([§6.1](#61-report)) and is the only thing that reads in a sequence of its own.
+Listed as the tab lists them, **alphabetically**. `Order` is the report's row order ([§6.1](#61-report)) and is the only thing that reads in a sequence of its own.
 
 | Category | Type | Role | Order | Was | Receipt tracked |
 | --- | --- | --- | --- | --- | --- |
@@ -176,120 +96,34 @@ Listed as the tab lists them, **alphabetically**. `Order` is the report's row or
 | Voucher top-up | Income | — | 7 | Aggiunta voucher | |
 | Wealth tax | Expense | wealth tax | 20 | Tassa patrimoniale | |
 
-**Read down the `Order` column and the report appears**: 1 – 7 are the Income group, 8 – 23 the
-Expense group, 24 the Internal group, and 25 – 27 the Investments group that sits below Net
-([§6.1](#61-report)). The numbering is contiguous and every category has one, which is what lets the
-report sort on a single field and still come out grouped.
+**Read down the `Order` column and the report appears**: 1 – 7 are the Income group, 8 – 23 the Expense group, 24 the Internal group, and 25 – 27 the Investments group that sits below Net ([§6.1](#61-report)). The numbering is contiguous and every category has one, which is what lets the report sort on a single field and still come out grouped.
 
-- **Value adjustment** carries the manual correction that realigns an account's balance with its
-  real value when that value moves on its own — the pension fund's underlying investments being the
-  only current case. It counts towards balances and the portfolio total and is excluded from every
-  income and expense aggregate. Historical rows that used *Contribuzione fondo pensione* for this
-  purpose must be remapped on migration.
-- The **receipt tracked** column marks categories whose transactions are *expected* to carry a
-  receipt state other than `na` — the document that ought to exist somewhere for that payment: the
-  invoice for the electricity, the contract for the rent, and for *Salary* the payslip itself, which
-  is also the record [§8.1](08-salaries.md#81-payslips) is built from. It changes nothing about what
-  gets recorded: **receipt state is entered by hand and by nothing else**. It defaults to `na`
-  everywhere, and the add-transaction form is the one place it can be given another value as the row
-  is created ([§5.5](05-transactions.md#55-add-transaction)) — a row that arrives imported or
-  duplicated is created `na` and moved on the row itself
-  ([§5.1](05-transactions.md#51-columns)). **That is a statement about the application, not about the
-  file**: the ten years of history are written by the migration script, which sets each row's state
-  along with everything else it knows ([§12](12-storage.md),
-  [§13.1](13-validation.md#131-how-it-behaves)).
-- **Check 13 therefore fails the moment a receipt-tracked row is imported.** **Check 14 says nothing
-  at that moment** — it reads only rows already moved to `pending`
-  ([§9](09-checks.md)).
+- **Value adjustment** carries the manual correction that realigns an account's balance with its real value when that value moves on its own — the pension fund's underlying investments being the only current case. It counts towards balances and the portfolio total and is excluded from every income and expense aggregate. Historical rows that used *Contribuzione fondo pensione* for this purpose must be remapped on migration.
+- The **receipt tracked** column marks categories whose transactions are *expected* to carry a receipt state other than `na` — the document that ought to exist somewhere for that payment: the invoice for the electricity, the contract for the rent, and for *Salary* the payslip itself, which is also the record [§8.1](08-salaries.md#81-payslips) is built from. It changes nothing about what gets recorded: **receipt state is entered by hand and by nothing else**. It defaults to `na` everywhere, and the add-transaction form is the one place it can be given another value as the row is created ([§5.5](05-transactions.md#55-add-transaction)) — a row that arrives imported or duplicated is created `na` and moved on the row itself ([§5.1](05-transactions.md#51-columns)). **That is a statement about the application, not about the file**: the ten years of history are written by the migration script, which sets each row's state along with everything else it knows ([§12](12-storage.md), [§13.1](13-validation.md#131-how-it-behaves)).
+- **Check 13 therefore fails the moment a receipt-tracked row is imported.** **Check 14 says nothing at that moment** — it reads only rows already moved to `pending` ([§9](09-checks.md)).
 - An amount whose sign contradicts its category type is **legal and not flagged**.
 
 ---
 
 ## Why it is this way
 
-- **The report's row order never moves.** Sorting by total would have put the biggest number at the
-  top of each group, which reads well once and badly forever: change the year filter and every row
-  jumps, so the eye has to find *Groceries* again instead of going straight to where it was last
-  time. A table read every month is worth more when its shape is memorised, and that is only possible
-  if the shape is a constant.
-- **The category list and every picker are alphabetical instead**, because those are looked up in
-  rather than read down: this tab is opened to see what type *Voucher top-up* is, whether *Wealth
-  tax* carries a role, why a figure landed where it did — the same action a picker serves, and the
-  place to look a name up is the alphabet. The two orders serve two different actions and neither is
-  improved by matching the other.
-- **Investments is one group rather than three** because buying, selling and revaluing are one
-  activity to a reader and three types only to the model — and because three groups of one category
-  each, stacked, would have been three headings for three rows. It sits below Net because none of it
-  is income or expenditure: a purchase is not a cost, it is the same money in a different shape. It
-  answers the question Net provokes — *where did the surplus go?*
-- **Amounts keep their signs** because absolute values with the direction implied by the group header
-  would have read fine for Income and Expense and lied about the two groups that have no fixed
-  direction: inside *Investments* a purchase goes out and a sale comes back, and a pension fund that
-  lost value produces a negative value adjustment; inside *Internal* the two legs are a plus and a
-  minus by definition.
-- **Internal belongs above the line, not beside it.** Folding it into Net changes nothing over the
-  whole row on *All*, which is precisely why it is safe, and a year filtered to one savings
-  account should say the balance went up by what arrived — most of which is a transfer. The
-  year-straddling transfer is the same property seen in one column: a December leg is money that
-  left that year, and a Net that pretended otherwise would be describing a calendar the money did not
-  keep to.
-- **Investments carries no subtotal, and that is the point of it.** Securities purchase and sale are
-  cash that moved through a bank account; a value adjustment is not — it is the pension fund being
-  marked to its real value, and no money changed hands. Adding the three together would produce a
-  figure that is neither the cash invested nor the change in what the investments are worth, and it
-  would be smaller than the cash invested by exactly the revaluation. **A subtotal exists where
-  something is built out of it**: Income, Expense and Internal have one because *Net* is their sum.
-- **The cells are links** because the matrix always provokes the question *what is in there?*
-  Without it the user has to reconstruct the filter by hand on another screen, which is the sort of
-  small friction that ends with a spreadsheet being opened instead. The subtotals and Net are not
-  links because no filter expresses them: the category filter takes one category
-  ([§5.3](05-transactions.md#53-filters)), and *Net* is a sum of sums rather than a selection.
-  Nothing is offered that cannot then be shown — which is also why a row total clears the period
-  rather than setting it to the report's year range: the range is what the report is showing, not
-  what the row total is made of, and a filter carried over from one screen to the other has to
-  select the same rows the figure was.
-- **Closed accounts stay in the report** because the money that went through an account shut in 2021
-  went somewhere: leaving it out would make every year before that one disagree with itself depending
-  on what has been closed since.
-- **Rules sit on this screen** because what a rule change does is move figures in this report, and
-  the two are worth being a tab apart.
-- **The unit of work is the edit session, not the keystroke.** A rule list is reasoned about as a
-  whole — a new rule usually wants to sit above an existing one, which means an edit and a drag that
-  are only correct together — and applying each half as it happens would re-categorise the file
-  twice, the first time into a state nobody asked for. It is also the only way a drag can be part of
-  the same decision as the rule it moves. A draft is the one thing in the application that is not in
-  the file the moment it is typed, so it is the one thing that has to be asked about before it can be
-  lost.
-- **The *Applies to* count describes the file rather than the draft** because a count that silently
-  switched between describing the file and describing a proposal would be the one number on the
-  screen nobody could trust.
-- **There is no per-rule tester** because the question worth answering is what the *list* will do,
-  and a panel that answered it one rule at a time could not answer it for a drag at all — reordering
-  is the edit most likely to change a category, and it has no rule under edit to hang a preview on.
-  One summary over the whole draft says everything the per-rule counts said and the thing they could
-  not.
-- **The 95% target is what makes the absence of a bulk edit tolerable**
-  ([§5.6](05-transactions.md#56-selecting-and-deleting-in-bulk)): if a quarter of the file needed
-  touching by hand, the rules would be the thing that was wrong.
-- **What an apply costs.** One apply is one pass of several dozen rules over ten years of
-  transactions, and the pass that produces the summary is the same pass that produces the result —
-  compute it once, show the figures, and write what was already computed if the user confirms.
-  Nothing is recomputed on confirmation. That is the whole reason the summary is affordable at all,
-  and the reason the list is applied once at the end rather than re-run behind every keystroke.
-- **The category list tab is worth a tab even though nothing on it can be changed**, because its
-  types and roles decide how every other screen adds things up and being able to look at them without
-  reading this document is worth something. The live transaction count is what makes it more than
-  decoration.
-- **Check 13 failing straight after an import is the point.** The rent that was just imported *is*
-  outstanding until someone has looked for the invoice, and the check is the list of what to look
-  for. A row typed by hand can be given its state on the form and need never appear in that list at
-  all, which is the difference between one row and two hundred. An application that set the state to
-  `pending` on the user's behalf would have been guessing, and one that set it to `checked` would
-  have been lying; the only honest default is the one that says nobody has been near this yet. The
-  migration script setting each historical row's state is what makes check 13 on day one report what
-  is genuinely outstanding rather than the whole decade.
-- **A sign contradicting its category type is not flagged** because a refund routinely zeroes out a
-  purchase inside an expense category.
+- **The report's row order never moves.** Sorting by total would have put the biggest number at the top of each group, which reads well once and badly forever: change the year filter and every row jumps, so the eye has to find *Groceries* again instead of going straight to where it was last time. A table read every month is worth more when its shape is memorised, and that is only possible if the shape is a constant.
+- **The category list and every picker are alphabetical instead**, because those are looked up in rather than read down: this tab is opened to see what type *Voucher top-up* is, whether *Wealth tax* carries a role, why a figure landed where it did — the same action a picker serves, and the place to look a name up is the alphabet. The two orders serve two different actions and neither is improved by matching the other.
+- **Investments is one group rather than three** because buying, selling and revaluing are one activity to a reader and three types only to the model — and because three groups of one category each, stacked, would have been three headings for three rows. It sits below Net because none of it is income or expenditure: a purchase is not a cost, it is the same money in a different shape. It answers the question Net provokes — *where did the surplus go?*
+- **Amounts keep their signs** because absolute values with the direction implied by the group header would have read fine for Income and Expense and lied about the two groups that have no fixed direction: inside *Investments* a purchase goes out and a sale comes back, and a pension fund that lost value produces a negative value adjustment; inside *Internal* the two legs are a plus and a minus by definition.
+- **Internal belongs above the line, not beside it.** Folding it into Net changes nothing over the whole row on *All*, which is precisely why it is safe, and a year filtered to one savings account should say the balance went up by what arrived — most of which is a transfer. The year-straddling transfer is the same property seen in one column: a December leg is money that left that year, and a Net that pretended otherwise would be describing a calendar the money did not keep to.
+- **Investments carries no subtotal, and that is the point of it.** Securities purchase and sale are cash that moved through a bank account; a value adjustment is not — it is the pension fund being marked to its real value, and no money changed hands. Adding the three together would produce a figure that is neither the cash invested nor the change in what the investments are worth, and it would be smaller than the cash invested by exactly the revaluation. **A subtotal exists where something is built out of it**: Income, Expense and Internal have one because *Net* is their sum.
+- **The cells are links** because the matrix always provokes the question *what is in there?* Without it the user has to reconstruct the filter by hand on another screen, which is the sort of small friction that ends with a spreadsheet being opened instead. The subtotals and Net are not links because no filter expresses them: the category filter takes one category ([§5.3](05-transactions.md#53-filters)), and *Net* is a sum of sums rather than a selection. Nothing is offered that cannot then be shown — which is also why a row total clears the period rather than setting it to the report's year range: the range is what the report is showing, not what the row total is made of, and a filter carried over from one screen to the other has to select the same rows the figure was.
+- **Closed accounts stay in the report** because the money that went through an account shut in 2021 went somewhere: leaving it out would make every year before that one disagree with itself depending on what has been closed since.
+- **Rules sit on this screen** because what a rule change does is move figures in this report, and the two are worth being a tab apart.
+- **The unit of work is the edit session, not the keystroke.** A rule list is reasoned about as a whole — a new rule usually wants to sit above an existing one, which means an edit and a drag that are only correct together — and applying each half as it happens would re-categorise the file twice, the first time into a state nobody asked for. It is also the only way a drag can be part of the same decision as the rule it moves. A draft is the one thing in the application that is not in the file the moment it is typed, so it is the one thing that has to be asked about before it can be lost.
+- **The *Applies to* count describes the file rather than the draft** because a count that silently switched between describing the file and describing a proposal would be the one number on the screen nobody could trust.
+- **There is no per-rule tester** because the question worth answering is what the *list* will do, and a panel that answered it one rule at a time could not answer it for a drag at all — reordering is the edit most likely to change a category, and it has no rule under edit to hang a preview on. One summary over the whole draft says everything the per-rule counts said and the thing they could not.
+- **The 95% target is what makes the absence of a bulk edit tolerable** ([§5.6](05-transactions.md#56-selecting-and-deleting-in-bulk)): if a quarter of the file needed touching by hand, the rules would be the thing that was wrong.
+- **What an apply costs.** One apply is one pass of several dozen rules over ten years of transactions, and the pass that produces the summary is the same pass that produces the result — compute it once, show the figures, and write what was already computed if the user confirms. Nothing is recomputed on confirmation. That is the whole reason the summary is affordable at all, and the reason the list is applied once at the end rather than re-run behind every keystroke.
+- **The category list tab is worth a tab even though nothing on it can be changed**, because its types and roles decide how every other screen adds things up and being able to look at them without reading this document is worth something. The live transaction count is what makes it more than decoration.
+- **Check 13 failing straight after an import is the point.** The rent that was just imported *is* outstanding until someone has looked for the invoice, and the check is the list of what to look for. A row typed by hand can be given its state on the form and need never appear in that list at all, which is the difference between one row and two hundred. An application that set the state to `pending` on the user's behalf would have been guessing, and one that set it to `checked` would have been lying; the only honest default is the one that says nobody has been near this yet. The migration script setting each historical row's state is what makes check 13 on day one report what is genuinely outstanding rather than the whole decade.
+- **A sign contradicting its category type is not flagged** because a refund routinely zeroes out a purchase inside an expense category.
 
 ---
 

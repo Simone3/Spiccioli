@@ -2,8 +2,7 @@
 
 *[Index](../README.md) · no mockups for this section*
 
-Each of these was raised and deliberately declined. They are listed so they are not reintroduced by
-accident.
+Each of these was raised and deliberately declined. They are listed so they are not reintroduced by accident.
 
 ---
 
@@ -42,36 +41,19 @@ accident.
 
 ## Why it is this way
 
-- **Currency** is a version of its own: a second one needs a rate table and a decision at every total
-  about what is being added to what — and a one-valued field stored in advance would not have bought
-  that version anything.
-- **Another tax system** is a change to
-  [§11.3](11-calculations.md#113-hypothetical-liquidation) alone, since the rate is already a
-  parameter on the instrument; anything beyond that is future work.
-- **Bulk import of trades** is declined because pasting is for bank exports, which arrive by the
-  hundred every month ([§5.7](05-transactions.md#57-bulk-import)). Trades arrive a few dozen a year,
-  one confirmation at a time, and each one carries a security that may not exist yet — the paste
-  would need a column for that too, and a way to say what to do when it does not match.
-- **Bulk import of payslips** is the same reasoning, more so: a dozen a year, ten fields each, and no
-  export to paste from — a payslip is read off a PDF by eye whatever the application offers.
+- **Currency** is a version of its own: a second one needs a rate table and a decision at every total about what is being added to what — and a one-valued field stored in advance would not have bought that version anything.
+- **Another tax system** is a change to [§11.3](11-calculations.md#113-hypothetical-liquidation) alone, since the rate is already a parameter on the instrument; anything beyond that is future work.
+- **Bulk import of trades** is declined because pasting is for bank exports, which arrive by the hundred every month ([§5.7](05-transactions.md#57-bulk-import)). Trades arrive a few dozen a year, one confirmation at a time, and each one carries a security that may not exist yet — the paste would need a column for that too, and a way to say what to do when it does not match.
+- **Bulk import of payslips** is the same reasoning, more so: a dozen a year, ten fields each, and no export to paste from — a payslip is read off a PDF by eye whatever the application offers.
 - **Category groups** would add a concept for no gain.
-- **Automatic generation between trades and transactions** is refused because the independence of the
-  two sources is what makes the checks meaningful.
+- **Automatic generation between trades and transactions** is refused because the independence of the two sources is what makes the checks meaningful.
 - **A warning tier** would become a place for things to sit unfixed.
 - **Bulk edit** is refused because rules do the same job repeatably and leave a reason behind.
-- **Transferring a position between brokers** is not modelled, and the two failing checks are the
-  price of not building it.
+- **Transferring a position between brokers** is not modelled, and the two failing checks are the price of not building it.
 - **Merging two securities** is a handful of edits for something that happens once.
-- **An oversold position is not shown** because there is no reading of its figures that would be
-  true, and checks 8 and 9 are the report the situation actually calls for.
-- **A file is not re-validated on open** because the migration script is written once, for one file,
-  by the one person who will run it.
-- **The import stays strict about shape, and infers nothing at all.** What a row's characters mean is
-  said by three controls the user can see and move ([§5.7](05-transactions.md#57-bulk-import)), and
-  anything that does not fit what they say is reported as a row that cannot be read rather than
-  guessed at. The two decorations that *are* read — a leading `+` and a `€`/`EUR` marker — are the
-  two that cannot be mistaken for anything else, and a fourth column is tolerated because ignoring it
-  cannot misread anything.
+- **An oversold position is not shown** because there is no reading of its figures that would be true, and checks 8 and 9 are the report the situation actually calls for.
+- **A file is not re-validated on open** because the migration script is written once, for one file, by the one person who will run it.
+- **The import stays strict about shape, and infers nothing at all.** What a row's characters mean is said by three controls the user can see and move ([§5.7](05-transactions.md#57-bulk-import)), and anything that does not fit what they say is reported as a row that cannot be read rather than guessed at. The two decorations that *are* read — a leading `+` and a `€`/`EUR` marker — are the two that cannot be mistaken for anything else, and a fourth column is tolerated because ignoring it cannot misread anything.
 
 ---
 
