@@ -1,0 +1,39 @@
+docs/functional/mockups/12-storage.html
+  s_fd820f3656f846::t_1282e264fc310c 64
+docs/functional/specs/02-domain-model.md
+  s_fd820f3656f846::t_f01d32207e8002 28
+docs/functional/specs/04-accounts.md
+  s_fd820f3656f846::t_31bd462986e524 26
+docs/functional/specs/06-categories.md
+  s_fd820f3656f846::t_6397098fdec97d 29,32-37,121-122,130
+docs/functional/specs/07-investments.md
+  s_fd820f3656f846::t_30b817febf260a 23,93
+docs/functional/specs/08-salaries.md
+  s_fd820f3656f846::t_8e431878f8389e 26
+docs/functional/specs/09-checks.md
+  s_fd820f3656f846::t_36f8cc0ceedc87 23,44
+docs/functional/specs/11-calculations.md
+  s_fd820f3656f846::t_d6c20831915414 85,89,99-101,181,232-235,262,282
+docs/functional/specs/12-storage.md
+  s_fd820f3656f846::t_2e8174db669247 17,19-22,25
+docs/functional/specs/13-validation.md
+  s_fd820f3656f846::t_6ed3025eea7c1f 11,48,164
+docs/functional/specs/15-out-of-scope.md
+  s_fd820f3656f846::t_fd8f0d0fb11405 41,79-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "8935838bb95616a66e53378061a6b45ebcef7f0e",
+  "prompts": {},
+  "sessions": {
+    "s_fd820f3656f846": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cfbb755e-dc6c-4221-a74f-f3ca651cba32",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
