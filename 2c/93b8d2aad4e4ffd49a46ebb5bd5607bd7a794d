@@ -1,0 +1,49 @@
+docs/functional/README.md
+  s_a3164ce6c7687b::t_46c48067c126c3 5,40-44,52
+docs/functional/specs/01-premise-and-constraints.md
+  s_a3164ce6c7687b::t_11b301917698d6 7-11,13-15,21-24
+docs/functional/specs/02-domain-model.md
+  s_a3164ce6c7687b::t_b696817930734c 7,35-37,51,53,63,80-84,103,105,145,147,160,190,192,194,200-209
+docs/functional/specs/03-portfolio.md
+  s_a3164ce6c7687b::t_e0b3ddc366846d 13-29,35-42
+docs/functional/specs/04-accounts.md
+  s_a3164ce6c7687b::t_46602a8f2b84a9 5,13-14,16-17,23-27,32,36-40,42-44,46,48,54-62
+docs/functional/specs/05-transactions.md
+  s_a3164ce6c7687b::t_0217edd67c12a9 13-15,17,22-25,29-39,45-49,51-53,59-64,68-69,71-72,76,82-87,91-95,99-104,108-113,117-121,125-126,128,132,134,136,138,144-173
+docs/functional/specs/06-categories.md
+  s_a3164ce6c7687b::t_d29032f31166a5 5,15-31,37,41-42,48-50,52-53,57,62,64-65,67,99,101-103,110-126
+docs/functional/specs/07-investments.md
+  s_a3164ce6c7687b::t_531c66070691cf 5,13-19,21,27-30,32-34,40-45,51-57,59,65-70,76-83,86-96,102-125
+docs/functional/specs/08-salaries.md
+  s_a3164ce6c7687b::t_dcfb4a00042c3d 13-20,22-24,31-35,41-52
+docs/functional/specs/09-checks.md
+  s_a3164ce6c7687b::t_a4f9dee0d5e66b 29-39,41-44,58-66,68-71
+docs/functional/specs/10-settings.md
+  s_a3164ce6c7687b::t_19cc1dde54ef17 5,11,26-36,43-48
+docs/functional/specs/11-calculations.md
+  s_a3164ce6c7687b::t_18cdc2eb961f5c 5-12,16-22,28-30,33,35,39-41,43,47-49,51,54-62,67-71,75-85,89,91,101-118,124-128,135-165
+docs/functional/specs/12-storage.md
+  s_a3164ce6c7687b::t_01735348fff495 7-10,14-19,25,29,33-37,39-45,51-55,61-64,66-68,74-98
+docs/functional/specs/13-validation.md
+  s_a3164ce6c7687b::t_1bb260ce780418 5,7,9,11-14,20-30,161-170,172-181
+docs/functional/specs/14-empty-and-error-states.md
+  s_a3164ce6c7687b::t_48de93a6bf2eb3 5,11-14,43-44
+docs/functional/specs/15-out-of-scope.md
+  s_a3164ce6c7687b::t_f3dba1e43473e3 5,44-47,49,52,54-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "2c93b8d2aad4e4ffd49a46ebb5bd5607bd7a794d",
+  "prompts": {},
+  "sessions": {
+    "s_a3164ce6c7687b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4fa57207-b328-4336-83cf-7dcc0d95d2be",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
