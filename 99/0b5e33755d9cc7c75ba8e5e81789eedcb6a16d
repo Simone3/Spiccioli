@@ -1,0 +1,29 @@
+docs/functional/specs/02-domain-model.md
+  s_670ae197d4ca25::t_df163bb95daed2 52-53,207-208
+docs/functional/specs/03-portfolio.md
+  s_670ae197d4ca25::t_65524e12d003a0 26
+docs/functional/specs/07-investments.md
+  s_670ae197d4ca25::t_b06da583ea829b 52,68
+docs/functional/specs/11-calculations.md
+  s_670ae197d4ca25::t_08fcf289220756 83,209
+docs/functional/specs/13-validation.md
+  s_670ae197d4ca25::t_02ff755fdbf5da 86
+docs/functional/specs/15-out-of-scope.md
+  s_670ae197d4ca25::t_2b812b2084f66f 39,52-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "990b5e33755d9cc7c75ba8e5e81789eedcb6a16d",
+  "prompts": {},
+  "sessions": {
+    "s_670ae197d4ca25": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fa6a0df4-ba68-4e9f-94da-55c0849e47ab",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
