@@ -83,7 +83,7 @@ What the forms refuse. Everything here is enforced at the point of entry, by the
 | --- | --- |
 | isin | Required, unique, 12 characters, two letters then nine alphanumerics then a digit. The format is checked; the check digit is not recomputed. |
 | ticker, name | Required, trimmed. |
-| type | Required, one of the five of [§2](02-domain-model.md). Freely editable afterwards. |
+| type | Required, one of the four of [§2](02-domain-model.md). Freely editable afterwards. **There is no `Bond`** ([§15](15-out-of-scope.md)). |
 | taxRate | Required. **Entered and shown as a percentage**, 0 – 100 with at most 1 decimal, and stored as the fraction it names — 12,5 is typed and `0,125` is kept ([§11](11-calculations.md)). |
 | delete | Refused while any **trade** points at it. Prices are not dependent data — they go with the security, and deleting it deletes its price history in the same breath, the confirmation saying how many records that is. |
 
