@@ -23,6 +23,7 @@
 <nav class="toc">
   <a href="#launch"><b>§12.1</b> The launch screen</a>
   <a href="#conflicts"><b>§12.2</b> The File menu · switching files</a>
+  <a href="#external"><b>§12</b> When something else changes the file</a>
   <a href="#write-failure"><b>§12</b> When the file cannot be written</a>
 </nav>
 
@@ -40,7 +41,7 @@
         <tbody>
           <tr><td>finances.spiccioli</td><td class="d">~/Documents · yesterday 18:04</td></tr>
           <tr><td>finances-2016.spiccioli</td><td class="d">~/Documents/old · 12/03/2026</td></tr>
-          <tr><td>test.spiccioli</td><td class="d">~/Desktop · 02/01/2026</td></tr>
+          <tr><td><s>test.spiccioli</s></td><td class="d">~/Desktop · not found — moved or deleted &nbsp;✕</td></tr>
         </tbody>
       </table></div>
       <div class="dlgfoot">
@@ -64,6 +65,16 @@
       says why. <b>The categorisation rules will be re-applied</b> to every automatically categorised
       transaction as part of the upgrade; rows you categorised by hand are left alone. After the
       upgrade, Spiccioli 1.2 and earlier will no longer be able to open it.</p>
+      <hr class="sep">
+      <h4 class="subhead">What it changes in the file</h4>
+      <div class="tblwrap"><table class="spec">
+        <tbody>
+          <tr><td>Bollo e imposte</td><td class="d">retired — its 42 rows move to Wealth tax</td></tr>
+          <tr><td>Rimborso spese</td><td class="d">retired — its 18 rows are left with no category, and check 2 will list them</td></tr>
+          <tr><td>rule BOLLO</td><td class="d">repointed to Wealth tax</td></tr>
+          <tr><td>rule RIMBORSO SPESE</td><td class="d">removed</td></tr>
+        </tbody>
+      </table></div>
       <div class="dlgfoot">
         <button class="btn ghost">Cancel</button>
         <button class="btn primary">Back up and upgrade</button>
@@ -100,6 +111,32 @@
         <div class="fig"><span>3 · schema</span><b>checked as at launch</b></div>
         <div class="fig"><span>4 · the screen</span><b>Portfolio, filters cleared</b></div>
         <div class="fig"><span>· if the new file is refused</span><b>the file you had stays open</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="doc" id="external">
+  <header>
+    <div class="num">§12</div>
+    <h2>When something else changes the file</h2>
+  </header>
+  <div class="dlgrow">
+    <div class="dlg" style="max-width:none">
+      <h5>External modification</h5>
+      <div class="dsub">a line on whatever screen you are on · not a modal, and not a choice between two versions</div>
+      <div class="alert">
+        <span class="dot"></span>
+        <p>This file was changed by something else while you had it open. That version has been
+        saved to the backup folder as <b>finances-2026-08-08-143207-848-external</b>, and your work
+        has been kept. That copy is one of the 10 backups kept there, so it will be rotated out in
+        time — move it somewhere else if you want to keep it.</p>
+        <a href="#">Dismiss</a>
+      </div>
+      <div class="figs">
+        <div class="fig"><span>The session in front of you</span><b>kept, and saves over the file next</b></div>
+        <div class="fig"><span>The version found on disk</span><b>copied to the backup folder</b></div>
+        <div class="fig"><span>The line</span><b>stays until dismissed</b></div>
       </div>
     </div>
   </div>
