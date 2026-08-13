@@ -4,7 +4,7 @@
 
 Every formula in one place. **All amounts are EUR and every monetary figure is printed with `€` before it** — fixed, not a preference ([§1](01-premise-and-constraints.md), [§10](10-settings.md)). Rounding is to 2 decimals at display, never in intermediate steps. **Every monetary figure carries exactly two decimals** — single amounts, column totals, yearly aggregates, hourly rates — so a round thousand reads `€ 21.900,00` and never `€ 21.900`, and a column of figures always aligns on the same decimal place. Quantities and unit prices carry four; percentages carry one. The only figures written short are the axis labels on a chart, where `100k` is the point.
 
-**A percentage is stored as a fraction and displayed as a percentage.** `taxRate`, `defaultTaxRate`, `netGrossPct`, `gainPct` and `netGainPct` all hold a number between 0 and 1 — 26% is `0,26` and 12,5% is `0,125` — and the × 100 happens once, at display. Every formula in this section therefore applies a rate by multiplying: `taxableGain × security.taxRate` is the tax, not a hundred times it. A field that is *entered* as a percentage says so where it is defined ([§13](13-validation.md)); what is stored underneath it is the fraction.
+**A percentage is stored as a fraction and displayed as a percentage.** `taxRate`, `defaultTaxRate`, `exitTaxRate`, `gainPct` and `netGainPct` all hold a number between 0 and 1 — 26% is `0,26` and 12,5% is `0,125` — and the × 100 happens once, at display. Every formula in this section therefore applies a rate by multiplying: `taxableGain × security.taxRate` is the tax, not a hundred times it. A field that is *entered* as a percentage says so where it is defined ([§13](13-validation.md)); what is stored underneath it is the fraction.
 
 **There are exactly three exceptions to the no-intermediate-rounding rule, and all three round to the cent:**
 
@@ -16,7 +16,7 @@ Nothing else rounds until it is displayed.
 
 **“Today” is the computer's own clock** — its current local date, read at the moment a figure is computed and never cached. Every age in the application rests on it: the staleness of a price, the months since a pension revaluation, how long a receipt has been pending. Checks run at startup and after every change ([§9](09-checks.md)), so a session left open across midnight goes on reporting yesterday's ages until something changes or the application is restarted. **There is no timer and no midnight refresh.**
 
-**A formula that cannot be evaluated produces *undefined*, not zero and not blank.** That covers a division by zero — hourly pay for a year whose working days were never entered, a net-to-gross ratio on a gross of zero, a percentage gain on a position that cost nothing — and equally a formula one of whose inputs does not exist, which is the realised gain on a sale in a position that has no average cost ([§11.2](#112-realised-gain-on-a-sale)). Each reads `undefined` where the figure would go, and whatever would make it computable is left visibly empty or is named by a check ([§8.1](08-salaries.md#81-payslips), [§9](09-checks.md), [§13](13-validation.md)).
+**A formula that cannot be evaluated produces *undefined*, not zero and not blank.** That covers a division by zero — hourly pay for a year whose working days were never entered, a percentage gain on a position that cost nothing — and equally a formula one of whose inputs does not exist, which is the realised gain on a sale in a position that has no average cost ([§11.2](#112-realised-gain-on-a-sale)). Each reads `undefined` where the figure would go, and whatever would make it computable is left visibly empty or is named by a check ([§8.1](08-salaries.md#81-payslips), [§9](09-checks.md), [§13](13-validation.md)).
 
 **A total made of figures that may be undefined states what it left out.** It sums the ones that exist and says how many it could not — never treating an undefined figure as zero, and never refusing to produce a total because one row is broken.
 
@@ -172,33 +172,20 @@ Records that ought to correspond are paired heuristically, with **no linking eff
 ## 11.7 Salary figures
 
 - `netSalary = netPayment − refunds + carPayment`
-- `netGrossPct = netSalary ÷ gross`
 - `yearContractGross = contractGross of the year's **last** payslip × contract.monthsPerYear`, in the ordering of [§8.1](08-salaries.md#81-payslips), and **0 for a year with no payslips**. The last one is the terms as they stood at the end of the year, which is what the contract line on the totals chart is read against; a year that recorded nothing draws no line rather than an *undefined* ([§11](#11--calculations)).
 - `yearAvgGross = Σ gross in year ÷ count of payslips in year`, and the same over `netSalary` for `yearAvgNet`. **The divisor is the payslips there were**, not twelve and not `monthsPerYear`: a year with five payslips averages over five. A year carrying a tredicesima averages over thirteen rows, so strictly the figure is the average **payslip** rather than the average calendar month. The payslip count in the per-year table is what makes the divisor visible.
-- Both feed the averages chart of [§8.1](08-salaries.md#81-payslips) and appear nowhere else. The per-year table carries totals and rates.
+- Both feed the averages chart of [§8.1](08-salaries.md#81-payslips) and appear nowhere else. The per-year table carries totals and hourly rates.
 - `grossPerHour = Σ gross in year ÷ (workingDays × contract.hoursPerDay)`, and the same with `Σ netSalary`. `workingDays` is the whole calendar year ([§2](02-domain-model.md)), so a partial year understates both — accepted, see [§8.1](08-salaries.md#81-payslips).
-- Per-year `netGrossPct = Σ netSalary in year ÷ Σ gross in year`, not the average of the monthly percentages.
+- **There is no net-to-gross ratio anywhere**, on a payslip or on a year ([§15](15-out-of-scope.md)). Nothing in the application divides a net figure by a gross one.
 - All of the above are computed within the selected contract only.
 
-### What `gross` is, and what that does to every ratio built on it
+### What `gross` is
 
-**`netGrossPct` divides two figures that may not be on the same basis, and nothing in the file can tell whether they are.** `netSalary` is defined exactly — refunds out, car back in — while `gross` is whatever the employer prints on the *totale lordo* line ([§2](02-domain-model.md)). Two properties of that line move the ratio, in opposite directions, and neither is recorded:
+**`gross` is the payslip's own *totale lordo* line, copied as printed** ([§2](02-domain-model.md)), and what an employer's payroll puts in that line — whether reimbursed expenses sit inside it, whether the car deduction reduces it — is a convention the file does not record.
 
-- **If reimbursed expenses are inside it**, the denominator carries something the numerator has just taken out, and the ratio reads **too low** in every month there is a reimbursement.
-- **If the car deduction reduces it**, the denominator is missing something the numerator has just added back, and the ratio reads **too high** — in exactly the months the first case pushes it down.
+**Every figure that reads it reads it the same way**, which is what keeps the consequence small: `Σ gross`, `yearAvgGross` and `grossPerHour` are a sum, a mean and a rate over one field, so they are consistent with each other and with themselves across years. What they are not is comparable with somebody else's idea of gross pay, and a year with unusual reimbursements will sit a little high or low against its own neighbours. **`yearContractGross` is unaffected**, being built from `contractGross`.
 
-**That the two point opposite ways is what makes this worth writing down.** A payslip carrying both produces a ratio that looks entirely ordinary and is wrong at both ends, and no check can catch it: the payslip's own breakdown of its gross line is not in the file, so there is nothing to compare against. **The same question governs `grossPerHour` and the per-year `netGrossPct`**, which read the same field; only `yearContractGross` is unaffected, being built from `contractGross`.
-
-**The test is two payslips and takes a minute**, and it is worth doing once per employer:
-
-1. Take a month with a reimbursement and one without, and compare each `gross` against its `contractGross`. If the reimbursement month is higher by about the reimbursement, **refunds are inside the gross line**.
-2. Take a month with the car deduction and one without. If the car month's `gross` is *lower* by about the car amount, **the deduction is inside it too**.
-
-**If the answer is yes to either, the correction is one line, and it is recorded here rather than applied:**
-
-`netGrossPct = netSalary ÷ (gross − refunds + carPayment)`
-
-which puts the denominator on precisely the basis the numerator is already on and makes the figure a ratio of like to like. **It is not applied now** because it is wrong on a payslip whose gross line already excludes both — which is what the figures in [§8.1](08-salaries.md#81-payslips) assume — and which of the two conventions an employer prints is a fact about that employer rather than something this document can settle ([§15](15-out-of-scope.md)).
+**Nothing mixes `gross` with a figure defined on a different basis**, which is the case that would have made the convention matter, and it is the reason a net-to-gross ratio is not offered ([§15](15-out-of-scope.md)).
 
 ## 11.8 Annualised return
 
