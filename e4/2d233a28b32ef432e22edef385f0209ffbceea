@@ -1,0 +1,35 @@
+docs/functional/mockups/06-categories.html
+  s_670ae197d4ca25::t_ab7c3947c65c85 91-99
+docs/functional/mockups/08-salaries.html
+  s_670ae197d4ca25::t_6623ee317f786e 117-128
+docs/functional/specs/02-domain-model.md
+  s_670ae197d4ca25::t_5b0a976c0974ac 138-142,150-151
+docs/functional/specs/06-categories.md
+  s_670ae197d4ca25::t_4c474a1b2338ba 19-24,121
+docs/functional/specs/08-salaries.md
+  s_670ae197d4ca25::t_20225b7188ce5c 22-23
+docs/functional/specs/09-checks.md
+  s_670ae197d4ca25::t_66f1036eb36b14 16
+docs/functional/specs/11-calculations.md
+  s_670ae197d4ca25::t_2bde6993b5d2f5 142,160,183-202
+docs/functional/specs/13-validation.md
+  s_670ae197d4ca25::t_475687bba42538 124,181-182
+docs/functional/specs/15-out-of-scope.md
+  s_670ae197d4ca25::t_aa1842fa00d1e2 36-37,63-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e42d233a28b32ef432e22edef385f0209ffbceea",
+  "prompts": {},
+  "sessions": {
+    "s_670ae197d4ca25": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fa6a0df4-ba68-4e9f-94da-55c0849e47ab",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
