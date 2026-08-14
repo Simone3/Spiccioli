@@ -1,6 +1,6 @@
 # §8 — Salaries
 
-*[Index](../README.md) · [mockups for this section](../mockups/08-salaries.html)*
+*[Index](../README.md) · [why it is this way](../why/08-salaries.md) · [mockups for this section](../mockups/08-salaries.html)*
 
 Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
 
@@ -37,24 +37,6 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
 - **The dates cannot be narrowed past the records that depend on them.** The form refuses it and names what is in the way ([§13](13-validation.md)). Widening is always fine, and is what an employer extending a contract looks like.
 - **Payslips** counts what points at the contract, and is what decides whether it can be deleted: at zero it can, otherwise it cannot ([§4.3](04-accounts.md#43-creating-and-editing)). Its ContractYear records go with it.
 - Changing `monthsPerYear` or `hoursPerDay` re-computes every derived figure on the Payslips tab for every year, **including years already closed**. There is no history of contract terms — the current values are applied to the whole contract.
-
----
-
-## Why it is this way
-
-- **The screen is scoped to one contract** so that figures depending on contract terms never mix across employers.
-- **The per-year table is built from the contract's dates rather than from the payslips** because a year with nothing recorded in it is a fact worth seeing, and because it is the only way that year's ContractYear can be created at all — a table built from the payslips would have no row to type into for the year whose payslips are the thing that is missing.
-- **A missing working-days figure reads *undefined*** because nothing is invented and nothing is hidden: a year whose denominator is missing has no hourly pay, and saying so is more use than a plausible figure computed from a guess. The empty cell is the invitation.
-- **Whole-calendar-year working days are accepted, understatement and all**, because a year-to-date denominator would have to be re-entered every month to stay true, and the years that matter for comparison are the complete ones. Full years carry the tredicesima in the numerator and no extra hours in the denominator, so hourly pay reads as total pay per hour worked, which is the intended reading.
-- **The one derived payslip column sits where it does** because it reads against the entered figures to its left: net salary next to the payment and the two adjustments it is made of. Appending it instead would have put the whole of the monthly pay on one side of the table and its summary at the far end, past three pension figures that have nothing to do with it.
-- **There is no net-to-gross ratio, and dropping it removed a problem rather than a feature** ([§15](15-out-of-scope.md)). It was a percentage nobody acted on — the wedge between gross and net is set by tax law and does not move month to month in any way this screen could respond to — and it was the only figure in the application that divided an exactly-defined number by one copied off a document, which is what made the composition of the *totale lordo* line matter at all ([§11.7](11-calculations.md#117-salary-figures)). Everything still reading `gross` reads it the same way, so the question it raised no longer has anywhere to bite.
-- **The pension contribution is three columns rather than one** because the fund credits the three parts separately, and a payslip prints them separately ([§2](02-domain-model.md)). Recording them as they are printed is what lets check 5 pair each one against the credit that carries it ([§9](09-checks.md)) instead of reconciling a total nobody's statement shows.
-- **The label breaks the ordering tie** because a label is what distinguishes the second payslip of a month from the first; and the ordinary monthly payslip is the one that has none, which puts December's pay above December's tredicesima — the order they were earned in, and the order they are read in.
-- **The two charts answer different questions and neither replaces the other.** The averages say what a month of that year was worth and are the only salary figures a partial year does not distort, because they divide by the payslips there actually were. The totals say what the year paid, which is the figure the contract line can be read against — and a partial first or last year shows visibly below that line, which is correct, not a defect.
-- **Duplicate exists for the tredicesima**, the case where a month legitimately holds a second payslip. It is also the answer to the form proposing nothing: a payslip that is mostly last month's is copied from last month's, where every figure comes across and is visibly a copy, rather than typed into a form that had quietly filled two boxes in from a record the user was not looking at. **A default nobody sees themselves accept is a figure that gets saved unread**, and a payslip is a dozen amounts read off a PDF once a month — a wrong contract gross carried forward silently is exactly the kind of thing that survives for a year ([§5.5](05-transactions.md#55-add-transaction)).
-- **Contracts are ordered by start date** because employment reads as a sequence — this job, then that one — so the list is the working life in the order it happened, and the current contract is the last row rather than wherever the alphabet put it. The tie-break exists only to make the order total; two contracts starting on one day is someone holding two jobs at once, which the model allows and nothing else in the application cares about.
-- **Narrowing a contract's dates is refused** because the per-year table is built from `startDate` and `endDate`, so moving either inwards would take rows off that table and leave the payslips and working days in them with nowhere to be seen.
-- **Contract terms have no history** because applying the current values to the whole contract is correct for a term that has never changed, and is the reason a genuine change of terms is a new contract.
 
 ---
 

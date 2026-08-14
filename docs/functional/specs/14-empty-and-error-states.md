@@ -1,6 +1,6 @@
 # §14 — Empty and error states
 
-*[Index](../README.md) · no mockups for this section*
+*[Index](../README.md) · [why it is this way](../why/14-empty-and-error-states.md) · no mockups for this section*
 
 A file starts empty and stays that way for a while. Every screen therefore has a state with no data behind it, and every one of them says what to do next rather than showing a blank card.
 
@@ -35,13 +35,6 @@ A file starts empty and stays that way for a while. Every screen therefore has a
 | Settings | Never empty; every preference has a default ([§10](10-settings.md)). | A value that cannot be applied is rejected in place, leaving the previous one in force. |
 | Launch | No recent files: only *New file…* and *Open…*. | File missing, unreadable, written by a newer schema version, or carrying something unrecognised: stated on the launch screen, with the other files still openable. A file written by an *older* version is not an error — it asks for confirmation to upgrade, naming both versions and the backup taken first ([§12.1](12-storage.md#121-the-launch-screen)). One of the two places an error blocks a screen. |
 | Every screen | — | **A write that failed** is the error no screen owns, so it appears on whichever one is in front of the user: a line while it is being retried, saying the file could not be written and the work is safe in memory, and after five failures a blocking message naming the file, the reason and a *Retry* ([§12](12-storage.md)). The save state in the sidebar carries the same two states ([§12.2](12-storage.md#122-the-menu-bar-and-which-file-is-open)). This is the other place an error blocks. **A backup that failed is the same shape and never blocks**: a banner naming the file and the reason, on whichever screen is in front of the user, or in the external-modification line and the upgrade dialog where those are already speaking ([§12](12-storage.md)). |
-
----
-
-## Why it is this way
-
-- **Empty-because-filtered and empty-because-nothing-exists are kept apart** because confusing the two makes a user hunt for data that was never there.
-- **The two blocking errors are the exceptions because neither leaves anything worth doing.** Every other error still allows the next action to be a good one; those two mean the ledger in front of the user is not the ledger on disk, and every keystroke after that point is work being typed into something that cannot keep it.
 
 ---
 

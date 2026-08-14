@@ -1,6 +1,6 @@
 # §1 — Premise and constraints
 
-*[Index](../README.md) · no mockups for this section*
+*[Index](../README.md) · [why it is this way](../why/01-premise-and-constraints.md) · no mockups for this section*
 
 ---
 
@@ -14,16 +14,6 @@
 - **The application replaces a spreadsheet** holding ten years of history. Data entry speed and the ability to spot a mistake matter more than features.
 - **Derived data is never stored.** Balances, holdings, averages, totals and pairings are recomputed from records every time they are shown, never persisted. Plenty of figures are still entered by hand — opening balances, prices, payslip lines, working days, sell fees — but none of them is something the application could have calculated for itself. **One value is computed and then written down, deliberately:** the category a rule assigns to a transaction is stored on the transaction and held in step with the rule list at all times, so that every total can read it instead of re-deriving it ([§2](02-domain-model.md)). It is the exception, and it is the only one.
 - **Two independent sources of truth are kept deliberately unlinked** — bank transactions come from account exports, trades and payslips are entered by hand — and the application's job is to tell you when they disagree. **Nothing is auto-generated from anything else** ([§9](09-checks.md)).
-
----
-
-## Why it is this way
-
-- **The organising principle** is the unlinked pair of sources. Because neither side is generated from the other, a disagreement between them is real evidence rather than a bookkeeping artefact, and reporting those disagreements is what [§9](09-checks.md) exists to do.
-- **Currency is left out rather than recorded against the future.** A second currency will be a real piece of work when it comes — a field on accounts and securities, a rate table, and a decision at every total about what is being added to what — and recording a currency now, on the strength of that, would have been one value with one possible setting, present on two forms and read by nothing. It would not have made that day any easier. Because nothing records a currency, there is nothing that could be set to another one and then be wrong.
-- **The platform-shaped exceptions are kept to two** so that “the same build behaves identically on each” stays a statement that can be checked. Preferences have to live somewhere the platform dictates, and the menu bar has to be drawn where the platform draws it; neither changes what the application does, which is why neither is put to the user as a question.
-- **Assets-only is recorded as a premise rather than discovered as a gap.** A figure called net worth in an application that cannot hold a debt is correct for a person with none and quietly wrong for everyone else, and the difference is not visible on any screen. Saying so here costs a line; a `Liability` account type carrying a negative balance is most of what it would take to lift the restriction, and it is deliberately not built ([§15](15-out-of-scope.md)).
-- **The one stored derived value earns its exception** by being read constantly: holding a rule-assigned category in step with the rule list lets every total read the stored value instead of re-deriving it behind each figure ([§2](02-domain-model.md)).
 
 ---
 
