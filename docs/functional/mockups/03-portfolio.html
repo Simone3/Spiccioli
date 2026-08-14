@@ -42,27 +42,27 @@
       </div>
       <div class="cols a">
         <div class="card">
-          <div class="hero"><span class="label">Net worth</span><span class="val">€ 182.040,01 <span class="cav">ⓘ</span></span></div>
-          <div class="tip"><b>An estimate.</b> Holdings are valued after the capital-gains tax and
-          the sell fee they would carry if sold today, and pension funds after their exit tax. The
-          tax is worked out one holding at a time, so a loss on one does not reduce the tax on
-          another, and the sell fee is charged once per holding — both push this figure down. A
-          pension fund netted for tax is still money that cannot be had before retirement.</div>
+          <div class="hero"><span class="label">Net worth</span><span class="val">€ 182.040,01</span></div>
           <hr class="sep">
           <div class="figs">
-            <div class="fig"><span>Cash</span><b>€ 71.945,22</b></div>
-            <div class="fig"><span>Securities at cost</span><b>€ 82.938,57</b></div>
-            <div class="fig"><span>Unrealised net investment gain</span><b class="pos">+ € 7.290,47</b></div>
-            <div class="fig"><span>Pension funds, net</span><b>€ 19.865,75</b></div>
+            <div class="fig"><span>Cash <span class="hint" tabindex="0"><span class="cav">ⓘ</span><span class="tip"><b>Nothing is estimated here.</b> Every cash account that is not a pension fund, at its opening balance plus every transaction on it. Money that is already money: no haircut, no cost basis and no rate anywhere in this figure. Opening balances are in it, and an opening balance is not a transaction.</span></span></span><b>€ 71.945,22</b></div>
+            <div class="fig"><span>Securities at cost <span class="hint" tabindex="0"><span class="cav">ⓘ</span><span class="tip"><b>What the ledger recorded going in.</b> Every holding still open, valued at what was paid for it with the purchase fees included. It is not what the positions are worth now, and it is not a sum of transactions — a holding is carried at its cost basis, which no single row holds.</span></span></span><b>€ 82.938,57</b></div>
+            <div class="fig"><span>Unrealised net investment gain <span class="hint" tabindex="0"><span class="cav">ⓘ</span><span class="tip"><b>An estimate.</b> What selling every holding today would add to the portfolio or take out of it, after the capital-gains tax and the sell fee. The tax is worked out one holding at a time, so a loss on one does not reduce the tax on another, and the fee is charged once per holding — both push this figure down. The gross picture is on Investments.</span></span></span><b class="pos">+ € 7.290,47</b></div>
+            <div class="fig"><span>Pension funds, net <span class="hint" tabindex="0"><span class="cav">ⓘ</span><span class="tip"><b>An estimate.</b> Every pension fund at its balance less the exit tax, which falls on what was paid in rather than on what the fund earned, at a rate typed by hand. Netting a fund for tax does not make it liquid: this is still money that cannot be had before retirement.</span></span></span><b>€ 19.865,75</b></div>
           </div>
         </div>
         <div class="card">
-          <h4>All time</h4>
+          <h4>Gains and costs, all time</h4>
           <div class="figs">
             <div class="fig"><span>Bank fees</span><b class="neg">− € 1.284,50</b></div>
             <div class="fig"><span>Wealth tax</span><b class="neg">− € 742,20</b></div>
             <div class="fig"><span>Interest, dividends &amp; bonuses</span><b class="pos">+ € 5.276,40</b></div>
+            <div class="fig"><span>Value adjustments</span><b class="pos">+ € 8.815,75</b></div>
             <div class="fig"><span>Realised gain on sales</span><b class="pos">+ € 1.333,57</b></div>
+          </div>
+          <hr class="sep">
+          <div class="figs">
+            <div class="fig tot"><span>Total</span><b class="pos">+ € 13.399,02</b></div>
           </div>
         </div>
       </div>
@@ -116,24 +116,24 @@
         </div>
       </div>
       <div class="card">
-        <h4>Accounts</h4>
+        <h4>Breakdown by account</h4>
         <div class="tblwrap"><table>
-          <thead><tr><th>Institution</th><th>Account</th><th>Type</th><th class="r">Balance</th><th>Notes</th></tr></thead>
+          <thead><tr><th>Institution</th><th>Account</th><th>Type</th><th class="r">Balance <span class="hint r" tabindex="0"><span class="cav">ⓘ</span><span class="tip"><b>Opening balance plus every transaction on the account.</b> A pension fund is shown after its exit tax, and a brokerage account holds no money of its own — it reads as the net value of its holdings, after the capital-gains tax and the sell fee. Closed accounts are computed like any other, which is why the total is the headline net worth.</span></span></th></tr></thead>
           <tbody>
-            <tr><td class="dim">—</td><td class="desc">Wallet</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 340,57</td><td class="dim">physical cash</td></tr>
-            <tr><td>Amundi</td><td class="desc">Fondo Pensione</td><td><span class="chip type">Pension fund</span></td><td class="n r">€ 19.865,75</td><td class="dim">comparto bilanciato</td></tr>
-            <tr><td>Banca Sella</td><td class="desc">Conto Titoli</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 0,00</td><td class="dim">uninvested</td></tr>
-            <tr><td>Banca Sella</td><td class="desc">Deposito Vincolato 24m</td><td><span class="chip type">Term deposit</span></td><td class="n r">€ 25.000,00</td><td class="dim">matures 03/2027</td></tr>
-            <tr><td>Banca Sella</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 5.362,39</td><td class="dim"></td></tr>
-            <tr><td>Edenred</td><td class="desc">Buoni Pasto</td><td><span class="chip type">Voucher</span></td><td class="n r">€ 260,00</td><td class="dim">26 × € 10,00</td></tr>
-            <tr><td>Fineco</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.840,55</td><td class="dim">main account</td></tr>
-            <tr><td>Fineco</td><td class="desc">Conto Titoli</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.800,00</td><td class="dim">uninvested, awaiting next purchase</td></tr>
-            <tr><td>Fineco</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 84.866,65</td><td class="dim"></td></tr>
-            <tr><td>ING</td><td class="desc">Conto Arancio</td><td><span class="chip type">Deposit account</span></td><td class="n r">€ 12.500,00</td><td class="dim">2,00%</td></tr>
-            <tr><td>Intesa Sanpaolo</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 8.204,10</td><td class="dim">household bills</td></tr>
-            <tr><td class="dim">Unicredit</td><td class="desc dim">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r dim">€ 0,00</td><td class="dim">moved everything to Fineco</td></tr>
+            <tr><td class="dim">—</td><td class="desc">Wallet</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 340,57</td></tr>
+            <tr><td>Amundi</td><td class="desc">Fondo Pensione</td><td><span class="chip type">Pension fund</span></td><td class="n r">€ 19.865,75</td></tr>
+            <tr><td>Banca Sella</td><td class="desc">Conto Titoli</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 0,00</td></tr>
+            <tr><td>Banca Sella</td><td class="desc">Deposito Vincolato 24m</td><td><span class="chip type">Term deposit</span></td><td class="n r">€ 25.000,00</td></tr>
+            <tr><td>Banca Sella</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 5.362,39</td></tr>
+            <tr><td>Edenred</td><td class="desc">Buoni Pasto</td><td><span class="chip type">Voucher</span></td><td class="n r">€ 260,00</td></tr>
+            <tr><td>Fineco</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.840,55</td></tr>
+            <tr><td>Fineco</td><td class="desc">Conto Titoli</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.800,00</td></tr>
+            <tr><td>Fineco</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 84.866,65</td></tr>
+            <tr><td>ING</td><td class="desc">Conto Arancio</td><td><span class="chip type">Deposit account</span></td><td class="n r">€ 12.500,00</td></tr>
+            <tr><td>Intesa Sanpaolo</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 8.204,10</td></tr>
+            <tr><td class="dim">Unicredit</td><td class="desc dim">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r dim">€ 0,00</td></tr>
           </tbody>
-          <tfoot><tr><td colspan="3">12 accounts · 1 closed · 7 institutions</td><td class="r tot">€ 182.040,01</td><td></td></tr></tfoot>
+          <tfoot><tr><td colspan="3">12 accounts · 1 closed · 7 institutions</td><td class="r tot">€ 182.040,01</td></tr></tfoot>
         </table></div>
       </div>
     </main>
