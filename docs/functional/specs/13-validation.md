@@ -132,7 +132,7 @@ What the forms refuse. Everything here is enforced at the point of entry, by the
 | --- | --- |
 | substring | Required, trimmed, at least 2 characters. |
 | categoryId | Required, and a real category — *Automatic* is not offered. |
-| duplicates | A substring already used by an earlier rule is **allowed but flagged** on the row itself, and again in the apply summary, where it accounts for nothing ([§6.2](06-categories.md#62-rules)). |
+| duplicates | A substring already used by an earlier rule is **allowed but flagged** on the row itself, where it reads *0 transactions* once applied: first match wins, so the earlier rule has claimed every row it could match ([§6.2](06-categories.md#62-rules)). |
 | the draft | Nothing in a rule editing session reaches the file until *Apply changes* is confirmed, and a draft that cannot be applied — a rule with no substring, or none with a category — marks the offending row and disables the button, exactly as any other form does ([§6.2](06-categories.md#62-rules)). |
 
 ### Preferences

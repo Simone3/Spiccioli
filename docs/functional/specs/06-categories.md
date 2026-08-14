@@ -36,7 +36,7 @@ The categories × years matrix — the one screen that answers where the money g
   - **Account — one account or *All***, **cash accounts only**, since a brokerage account holds no transactions to report ([§2](02-domain-model.md), [§5.3](05-transactions.md#53-filters)).
 - A partial year is labelled with the months it covers.
 - **Closed accounts are in the report and in its account filter**, marked and last like everywhere else ([§4.3](04-accounts.md#43-creating-and-editing)). Closing an account takes nothing out of anything — not its past here and not its balance on Portfolio ([§11.4](11-calculations.md#114-balances-and-net-worth)); it marks the account and sorts it last.
-- The screen carries three tabs: this report, the categorisation rules ([§6.2](#62-rules)), and a read-only list of the twenty-seven categories with their types and roles ([§6.3](#63-category-list)).
+- The screen carries three tabs: this report, the categorisation rules ([§6.2](#62-rules)), and a read-only list of the twenty-seven categories with their types ([§6.3](#63-category-list)).
 - Uncategorised transactions appear in no row. Their existence is a failing check ([§9](09-checks.md)).
 - **Total income is money that arrived, not money that was earned.** It adds the pay that reached the bank, the pension fund contributions and the meal-voucher top-ups. It is not comparable to gross pay, not a tax base, and not what anyone means by an annual salary — [§8.1](08-salaries.md#81-payslips) is the screen for those.
 - **Salary** here is the sum of *Salary* transactions: what the bank actually received, which is a payslip's `netPayment` ([§2](02-domain-model.md)) and the figure check 4 pairs against. **It is not the *netSalary* of [§11.7](11-calculations.md#117-salary-figures)**, which adds the car deduction back and takes the refunds out. Gross figures live on Salaries as well ([§8.1](08-salaries.md#81-payslips)). Because a payslip for December is typically paid in January, a calendar year of Salary transactions need not line up exactly with that year's payslips; [§8.1](08-salaries.md#81-payslips) is the screen that reads payslip by payslip.
@@ -54,8 +54,8 @@ The categories × years matrix — the one screen that answers where the money g
   - **how many transactions change from one category to another**;
   - **how many lose their category**, the rows a deleted or narrowed rule was the only match for;
   - **how many currently uncategorised gain one**;
-  - **how many are unchanged**;
-  - and **a line per rule that was added, edited, moved or deleted**, with what each accounted for.
+  - **how many are unchanged**.
+- **Those four figures are the whole summary, and there is no breakdown by edit.** The decision being taken is whether to apply the list as it now stands, and the four totals are what the file looks like once it has been.
 - Confirm and the rules and every affected category are written **together, in one step**. Cancel and nothing at all is written: the draft is still on the screen, exactly as it was, and can be edited further or discarded. **A `manual` category is never touched by any of this** ([§2](02-domain-model.md)).
 - **Leaving the tab, closing the file or quitting with a draft pending warns that the changes are unsaved**, and offers exactly two ways out: **discard**, which throws the draft away and proceeds, and **stay**, which cancels the departure and leaves the draft on screen untouched. **There is no *apply* on that prompt.** Applying is a decision taken against the consequence summary above, which states how many transactions change, lose a category or gain one before anything is written; a dialog raised by walking away is the wrong place to take it, and an *apply* button there would let a rule change be committed by someone whose actual intention was to leave.
 - **The *Applies to* column describes the applied list**, not the draft: it counts the transactions each rule currently accounts for in the file. While a draft is pending it is dimmed and labelled as such.
@@ -66,17 +66,18 @@ The categories × years matrix — the one screen that answers where the money g
 
 ## 6.3 Category list
 
-Twenty-seven, seeded into every new file and not editable at runtime. Adding, renaming or removing one is a change to the application, not a setting ([§15](15-out-of-scope.md)). **Role** is what [§9](09-checks.md) and the *gains and costs* card of [§3.1](03-portfolio.md#31-behaviour) key off; a blank one means no check and no card cares about the category. **Was** records the old Italian label for reference only — the migration script maps the two lists by hand, and the application stores no alias.
+Twenty-seven, seeded into every new file and not editable at runtime. Adding, renaming or removing one is a change to the application, not a setting ([§15](15-out-of-scope.md)). **The tab shows four columns — name, type, receipt tracked and a live transaction count.** The table further down carries what the screen does not: **role**, which is what [§9](09-checks.md) and the *gains and costs* card of [§3.1](03-portfolio.md#31-behaviour) key off — a blank one means no check and no card cares about the category — **order**, the report's row order ([§6.1](#61-report)), and **was**, the old Italian label, recorded for reference only: the migration script maps the two lists by hand, and the application stores no alias.
 
 > **Mockup —** [Category list tab](../mockups/06-categories.html#category-list)
 
 - **Read-only, and the only place the whole taxonomy is visible at once.**
-- **This list is alphabetical by name**, and so is every picker and every filter — the category picker on a transaction, the category filter, the category on a rule. The `order` value is a column here rather than the arrangement of the page.
+- **This list is alphabetical by name**, and so is every picker and every filter — the category picker on a transaction, the category filter, the category on a rule.
 - **The report is the one table that reads in `order` instead** ([§6.1](#61-report)).
+- **Neither `role` nor `order` is shown.** Both are wiring rather than facts about the money: nothing on any screen can set them, and a column of mostly blank roles reads as a setting somebody forgot to fill in. They are stored, they are what the checks and the report read ([§2](02-domain-model.md)), and they are written down in the table below.
 - Only the entries that are not categories sit outside the alphabet: *Automatic* at the top of the transaction picker and *Uncategorised* at the top of the filter ([§5.3](05-transactions.md#53-filters), [§5.4](05-transactions.md#54-editing)).
 - The **Transactions** column is a live count: a category with none is one the rules never reach, and the total across all 27 is every categorised transaction in the file — 4.811 of 4.812 in the mockup, the missing one being the failure of check 2.
 
-Listed as the tab lists them, **alphabetically**. `Order` is the report's row order ([§6.1](#61-report)) and is the only thing that reads in a sequence of its own.
+Listed as the tab lists them, **alphabetically**, and with `Role` and `Order` alongside — the two the tab does not show ([§9](09-checks.md), [§6.1](#61-report)).
 
 | Category | Type | Role | Order | Was | Receipt tracked |
 | --- | --- | --- | --- | --- | --- |
