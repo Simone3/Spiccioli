@@ -1,0 +1,23 @@
+docs/functional/specs/06-categories.md
+  s_67fec166547746::t_7f0928ff9e214b 64
+docs/functional/specs/08-salaries.md
+  s_67fec166547746::t_388cadb696b793 15,38
+docs/functional/specs/13-validation.md
+  s_67fec166547746::t_809ac2fb81e2e9 115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4c0fb3c08adab3e8da730021b6362017b49029ea",
+  "prompts": {},
+  "sessions": {
+    "s_67fec166547746": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7725be50-4044-4121-a410-77527e969b59",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
