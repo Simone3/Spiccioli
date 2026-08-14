@@ -1,0 +1,25 @@
+docs/functional/mockups/06-categories.html
+  s_5a7044169a13aa::t_bea93d095d89b2 175,177-203,205
+docs/functional/specs/06-categories.md
+  s_5a7044169a13aa::t_346b6004fd5fb2 39,57-58,69,74,76,80
+docs/functional/specs/13-validation.md
+  s_5a7044169a13aa::t_97578b2219754b 135
+docs/functional/why/06-categories.md
+  s_5a7044169a13aa::t_85bba21a2d33a1 10,21-22,25-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "cffa859305388127a65207a141434202a80dda96",
+  "prompts": {},
+  "sessions": {
+    "s_5a7044169a13aa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48a2a07b-e2b8-4127-a57e-a942ca202f3b",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
