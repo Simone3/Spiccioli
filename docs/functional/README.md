@@ -38,7 +38,7 @@ docs/functional/
 ```
 
 - **The written specification is Markdown, the mockups are HTML.** A section's prose lives in `specs/NN-name.md`; the screens and dialogs it describes live in `mockups/NN-name.html`, each one under its own anchor, so the spec can point at exactly the screen under discussion.
-- **The numbers are the specification's vocabulary and never change.** `§7.6` means section 7, subsection 6, and it names the same thing here as it did before the document was split. File names carry the same number so a directory listing reads in document order.
+- **The numbers are the specification's vocabulary and never change.** `§7.6` means section 7, subsection 6. File names carry the same number so a directory listing reads in document order.
 - **Every file states the specification first and the reasoning last.** The body of a file — its numbered subsections, tables and lists — is the specification: what the application does, with no argument in it. Every file then ends with **an unnumbered *Why it is this way* section**: why each decision is the one taken, what was rejected and what it would have cost. **The closing section introduces nothing new** — every fact lives in the specification above it. Read the specification to build the screen, read the closing section before changing anything on it, and treat a disagreement between the two as a defect in this document.
 - **Implementing one screen means reading two files**: the spec for that section and its mockups. [§2](specs/02-domain-model.md) is the one other file worth having open, since every screen's fields come from it.
 - **Sections 1, 2, 11, 13, 14 and 15 have no mockups.** They are the model, the formulas and the cross-cutting rules.

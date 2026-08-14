@@ -10,10 +10,10 @@ The home screen. No tabs.
 
 ## 3.1 Behaviour
 
-- **Failing-check banner.** Shown whenever any check fails, above everything else, naming each failing check in one line and linking to [§9](09-checks.md). Absent when all pass.
+- **Failing-check banner.** Shown whenever any check fails, above everything else, with the count of failing checks and linking to [§9](09-checks.md). Absent when all pass.
 - **Net worth is the headline** and is what the portfolio is worth in hand ([§11.4](11-calculations.md#114-balances-and-net-worth)): ordinary cash at its balance, holdings at their latest known price *less* the hypothetical capital-gains tax and sell fee of [§11.3](11-calculations.md#113-hypothetical-liquidation), and pension funds *less* the hypothetical exit tax of the same section.
 - **Five figures, in this order, and the lower four add up to the headline.** *Net worth* is the headline. The four beneath it are the decomposition of [§11.4](11-calculations.md#114-balances-and-net-worth):
-  - **Cash** — Σ balances of every cash account that is not a pension fund. Money that is already money, at its face balance: no haircut, no cost basis and no rate anywhere in it. **It is the one figure on this screen that is not an estimate in any sense.**
+  - **Cash** — Σ balances of every cash account that is not a pension fund. Money that is already money, at its face balance: no haircut, no cost basis and no rate anywhere in it.
   - **Securities at cost** — Σ holdings at what was paid for them, purchase fees included ([§11.1](11-calculations.md#111-weighted-average-cost)). What the ledger recorded going in, which is not what the positions are worth now.
   - **Unrealised net investment gain** — what selling every holding today would add to the portfolio or take out of it, net of the tax and the fees of [§11.3](11-calculations.md#113-hypothetical-liquidation).
   - **Pension funds, net** — Σ balances of the pension fund accounts, after the exit tax of [§11.3](11-calculations.md#113-hypothetical-liquidation). Contributions and the fund's own revaluation together, in one figure.
