@@ -127,11 +127,12 @@
   </header>
   <div class="dlgrow">
     <div class="dlg">
-      <h5>Add payslip — 2025</h5>
-      <div class="dsub">Acme S.p.A. · the year selected on the per-year table</div>
+      <h5>Add payslip</h5>
+      <div class="dsub">Acme S.p.A.</div>
       <div class="frm">
+        <label>Year</label><div class="inp sel">2025</div>
         <label>Month</label><div class="inp ph">1 – 12</div>
-        <label>Label</label><div class="inp ph">optional — “13th” for the tredicesima</div>
+        <label>Label</label><div class="inp ph">optional</div>
         <label>Contract gross</label><div class="inp ph"></div>
         <label>Gross</label><div class="inp ph"></div>
         <label>Net payment</label><div class="inp ph"></div>
@@ -142,6 +143,8 @@
         <label>TFR</label><div class="inp ph"></div>
         <label>Notes</label><div class="inp ph">optional</div>
       </div>
+      <p class="hint"><b>Year</b> opens on the row selected in the per-year table and lists that
+      contract's years only. It is the one field that arrives filled in — everything else is empty.</p>
       <div class="dlgfoot"><button class="btn ghost">Cancel</button><button class="btn primary">Save</button></div>
     </div>
   </div>
@@ -174,7 +177,7 @@
             <tbody>
               <tr class="sel"><td class="desc">Acme S.p.A.</td><td class="n r">13</td><td class="n r">8</td><td class="n r">01/08/2017</td><td class="n r dim">—</td><td class="n r dim">117</td><td class="dim">full time, permanent</td><td class="rowact">···</td></tr>
             </tbody>
-            <tfoot><tr><td colspan="5">1 contract · by start date, then name · none ended</td><td class="r tot">117</td><td></td><td></td></tr></tfoot>
+            <tfoot><tr><td colspan="5">1 contract · none ended</td><td class="r tot">117</td><td></td><td></td></tr></tfoot>
           </table></div>
         </div>
         <div class="dlg" style="box-shadow:none">

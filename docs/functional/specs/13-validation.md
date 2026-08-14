@@ -119,7 +119,7 @@ What the forms refuse. Everything here is enforced at the point of entry, by the
 | Field | Rule |
 | --- | --- |
 | contractId | Required. |
-| year, month | Required; month 1 – 12. The month must fall **within the contract's start and end dates**. |
+| year, month | Required; month 1 – 12. **Year is a picker over the contract's own years** — the rows of the per-year table ([§8.1](08-salaries.md#81-payslips)) — so no year outside the contract is offerable. The month must fall **within the contract's start and end dates**, which is what a partial first or last year is caught by. |
 | label | Optional, trimmed, not unique. It is what distinguishes a second payslip in a month from the first and what orders the two ([§8.1](08-salaries.md#81-payslips)); nothing reads it but the eye. |
 | gross, contractGross | Amount fields, required, > 0. |
 | netPayment | Amount field, required, **either sign**. Negative is rare and legal — a month whose deductions exceeded its earnings ([§2](02-domain-model.md)). |
