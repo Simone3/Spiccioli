@@ -4,7 +4,7 @@
 
 ---
 
-- **The account column names the account rather than the institution** because one institution routinely holds several accounts, and which one a row belongs to is what the matching of [§11.6](../specs/11-calculations.md#116-derived-matching) turns on.
+- **The account column carries the bank as well as the account** on the general rule of [§4](../specs/04-accounts.md), this screen having no institution column to put it in.
 - **The automatic category chip is violet and deliberately not green**: it says where the category came from, not that it is right.
 - **The *Matched* column covers every kind of pairing** because a row that a check has quietly paired and a row nothing has touched must not look the same, or the column answers a different question in each half of the file.
 - **Receipt state is chosen directly rather than cycled** because a transaction is not on its way anywhere: it simply has one of three states and the user says which.

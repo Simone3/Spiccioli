@@ -10,7 +10,7 @@ The screen with the most hours on it. No tabs.
 
 ## 5.1 Columns
 
-- **Account** names the account, not the institution — *Fineco · Conto Corrente*, never *Fineco*. The same rule holds everywhere an account is shown.
+- **Account** is one column carrying both halves — *Fineco · Conto Corrente*, never *Fineco* and never *Conto Corrente* — on the general rule of [§4](04-accounts.md), this screen having no institution column of its own. It is the account the row sits on, and what the matching of [§11.6](11-calculations.md#116-derived-matching) turns on.
 - **Category** chip is violet when `categorySource = automatic` and a rule matched, neutral when `manual`, red when no category was assigned. Violet denotes provenance, not correctness.
 - **Matched** is derived and read-only, and it names the counterpart for **every** kind of pairing [§11.6](11-calculations.md#116-derived-matching) makes: the counterpart account for a paired internal transfer, the security for a trade-matched securities transaction, and the **payslip** for a salary transaction or a pension-fund credit paired with one — its month and its label, *December 2025* or *December 2025 · 13th*. An em dash otherwise.
 - **Notes** is free text the user owns. **The application never writes to it.**

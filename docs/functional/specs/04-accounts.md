@@ -4,6 +4,12 @@
 
 Two tabs: Accounts, Institutions. The spine of the file — transactions, balances and net worth all hang off an account, so it sits second in the sidebar and everything else refers back to it.
 
+> **How an account is written, everywhere in the application.** *Institution · Account* — *Fineco · Conto Corrente*, never *Fineco* and never *Conto Corrente* on its own. Both halves earn their place: two banks may each hold a *Conto Corrente* and the name rules permit it ([§13](13-validation.md)), so the institution is what tells them apart, while which account of a bank's several a record sits on is what the matching of [§11.6](11-calculations.md#116-derived-matching) turns on. The order is the institution first, which is also the order the accounts table sorts in ([§4.1](#41-accounts)).
+>
+> **A `Cash` account is written with its name alone** — *Wallet*, with no separator and nothing standing in for the bank. It has no institution to name ([§2](02-domain-model.md)), and the em dash of [§4.1](#41-accounts) is a table column that cannot be filled rather than a piece of the name that is missing.
+>
+> **The exception is a screen that gives the institution a field or a column of its own, and there are three**: the accounts table ([§4.1](#41-accounts)), the Portfolio breakdown by account ([§3.1](03-portfolio.md#31-behaviour)) and the account form ([§4.3](#43-creating-and-editing)). There the account is named on its own and the institution is beside it. Everywhere else — every other table, every picker, the *Matched* column ([§5.1](05-transactions.md#51-columns)) and the records a failing check names ([§9](09-checks.md)) — an account is one string in two halves.
+
 ---
 
 ## 4.1 Accounts

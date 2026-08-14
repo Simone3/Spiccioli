@@ -27,7 +27,7 @@ Four tabs: Holdings, Purchases, Sales, Securities. Holdings is entirely derived 
 > **Mockup —** [Purchases tab](../mockups/07-investments.html#purchases)
 
 - Where purchase trades are created, edited in place and deleted. Every column but *Total cost* and *Matched* is editable.
-- **Account** is the brokerage account the security sits in. The cash for the trade moved through a different account — a cash one at the same institution — and pairing the two is what [§11.6](11-calculations.md#116-derived-matching) does.
+- **Account** is the brokerage account the security sits in, written *Institution · Account* like every account column that has no institution column beside it ([§4](04-accounts.md)) — which is what makes the shared institution visible on the row. The cash for the trade moved through a different account — a cash one at the same institution — and pairing the two is what [§11.6](11-calculations.md#116-derived-matching) does.
 - **Total cost** is `qty × price + fees`, derived, never entered. It is the figure [§11.6](11-calculations.md#116-derived-matching) pairs against the bank transaction.
 - **Matched** shows the date of the bank transaction the application paired the trade with ([§11.6](11-calculations.md#116-derived-matching)). A dash is what check 6 reports.
 - Recording a trade **does not** create a transaction.
