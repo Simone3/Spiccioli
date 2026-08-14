@@ -112,7 +112,7 @@ What the forms refuse. Everything here is enforced at the point of entry, by the
 | Field | Rule |
 | --- | --- |
 | workingDays | Integer 1 – 366, **or empty**. Empty is a legitimate state meaning “not entered yet”, and is what makes the hourly columns read *undefined* rather than wrong ([§11.7](11-calculations.md#117-salary-figures)). Zero is refused. |
-| the record | **Created by typing into the cell and deleted by emptying it** ([§8.1](08-salaries.md#81-payslips)). Emptying returns the year to exactly the state it had before anything was typed. It is the one delete that is **not confirmed** ([§4.3](04-accounts.md#43-creating-and-editing)). |
+| the record | **Created by typing into the cell and deleted by emptying it** ([§8.1](08-salaries.md#81-payslips)). Emptying returns the year to exactly the state it had before anything was typed. It is the one delete that is **not confirmed**, everywhere else there being no undo and therefore a confirmation ([§12](12-storage.md)). |
 
 ### Payslip
 
