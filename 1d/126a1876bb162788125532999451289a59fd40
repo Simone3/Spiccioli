@@ -1,0 +1,27 @@
+docs/functional/mockups/07-investments.html
+  s_9c7ddb74ba4ac8::t_72d4dcd04a5c45 58,60-64,67-68
+docs/functional/mockups/_mockups.css
+  s_9c7ddb74ba4ac8::t_a5691ac3d1a93b 129
+docs/functional/specs/07-investments.md
+  s_9c7ddb74ba4ac8::t_1838b6a8962aaa 17-18
+docs/functional/specs/10-settings.md
+  s_9c7ddb74ba4ac8::t_dc8699d0fbb73e 19
+docs/functional/why/07-investments.md
+  s_9c7ddb74ba4ac8::t_d9cb4d9f8d9af1 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "1d126a1876bb162788125532999451289a59fd40",
+  "prompts": {},
+  "sessions": {
+    "s_9c7ddb74ba4ac8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0386f0a9-de0a-47c0-b37e-b66d65914e4b",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
