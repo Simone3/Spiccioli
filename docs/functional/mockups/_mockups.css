@@ -3,8 +3,9 @@
   --text:#E8E4D8; --muted:#948E7E; --faint:#6B665A;
   --brass:#D8A657; --brass-dim:#8C6E38; --pos:#6FBE8C; --neg:#E4675F;
   --auto:#A99AD6; --auto-bg:#221F2C; --auto-line:#3B3452;
-  --c-setf:#D8A657; --c-liq:#5B9EA6; --c-term:#3F6480; --c-pens:#A8607A; --c-betf:#8FA05C;
+  --c-setf:#D8A657; --c-cur:#5B9EA6; --c-term:#3F6480; --c-pens:#A8607A; --c-betf:#8FA05C;
   --c-dep:#4E7FA0; --c-stock:#C97B4A; --c-etc:#7E6BA8; --c-vou:#6E6A5E;
+  --c-bcash:#41847A; --c-cash:#B3AA95;
   --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
   --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;

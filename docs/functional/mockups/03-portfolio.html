@@ -72,26 +72,30 @@
           <div class="donut">
             <svg viewBox="0 0 40 40" aria-label="Portfolio split by type">
               <circle cx="20" cy="20" r="15.9155" stroke="var(--c-setf)" stroke-dasharray="36.2 63.8" stroke-dashoffset="25"></circle>
-              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-liq)" stroke-dasharray="18.8 81.2" stroke-dashoffset="-11.2"></circle>
-              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-term)" stroke-dasharray="13.7 86.3" stroke-dashoffset="-30.0"></circle>
-              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-pens)" stroke-dasharray="10.9 89.1" stroke-dashoffset="-43.7"></circle>
-              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-betf)" stroke-dasharray="10.4 89.6" stroke-dashoffset="-54.6"></circle>
-              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-dep)" stroke-dasharray="6.9 93.1" stroke-dashoffset="-65.0"></circle>
-              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-stock)" stroke-dasharray="2.6 97.4" stroke-dashoffset="-71.9"></circle>
-              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-etc)" stroke-dasharray="0.3 99.7" stroke-dashoffset="-74.5"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-term)" stroke-dasharray="13.7 86.3" stroke-dashoffset="-11.2"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-cur)" stroke-dasharray="11.6 88.4" stroke-dashoffset="-24.9"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-pens)" stroke-dasharray="10.9 89.1" stroke-dashoffset="-36.5"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-betf)" stroke-dasharray="10.4 89.6" stroke-dashoffset="-47.4"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-bcash)" stroke-dasharray="7.0 93.0" stroke-dashoffset="-57.8"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-dep)" stroke-dasharray="6.9 93.1" stroke-dashoffset="-64.8"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-stock)" stroke-dasharray="2.6 97.4" stroke-dashoffset="-71.7"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-etc)" stroke-dasharray="0.3 99.7" stroke-dashoffset="-74.3"></circle>
+              <circle cx="20" cy="20" r="15.9155" stroke="var(--c-cash)" stroke-dasharray="0.2 99.8" stroke-dashoffset="-74.6"></circle>
               <circle cx="20" cy="20" r="15.9155" stroke="var(--c-vou)" stroke-dasharray="0.1 99.9" stroke-dashoffset="-74.8"></circle>
             </svg>
-            <div class="center"><b>9</b><small>types</small></div>
+            <div class="center"><b>11</b><small>types</small></div>
           </div>
           <div class="breakdown">
             <div class="brk"><i style="background:var(--c-setf)"></i><span>Stock ETF</span><span class="amt">€ 65.955,05</span><span class="pct">36,2%</span></div>
-            <div class="brk"><i style="background:var(--c-liq)"></i><span>Liquidity</span><span class="amt">€ 34.185,22</span><span class="pct">18,8%</span></div>
             <div class="brk"><i style="background:var(--c-term)"></i><span>Term deposit</span><span class="amt">€ 25.000,00</span><span class="pct">13,7%</span></div>
+            <div class="brk"><i style="background:var(--c-cur)"></i><span>Current account</span><span class="amt">€ 21.044,65</span><span class="pct">11,6%</span></div>
             <div class="brk"><i style="background:var(--c-pens)"></i><span>Pension fund</span><span class="amt">€ 19.865,75</span><span class="pct">10,9%</span></div>
             <div class="brk"><i style="background:var(--c-betf)"></i><span>Bond ETF</span><span class="amt">€ 18.911,60</span><span class="pct">10,4%</span></div>
+            <div class="brk"><i style="background:var(--c-bcash)"></i><span>Brokerage cash</span><span class="amt">€ 12.800,00</span><span class="pct">7,0%</span></div>
             <div class="brk"><i style="background:var(--c-dep)"></i><span>Deposit account</span><span class="amt">€ 12.500,00</span><span class="pct">6,9%</span></div>
             <div class="brk"><i style="background:var(--c-stock)"></i><span>Stock</span><span class="amt">€ 4.747,70</span><span class="pct">2,6%</span></div>
             <div class="brk"><i style="background:var(--c-etc)"></i><span>ETC</span><span class="amt">€ 614,69</span><span class="pct">0,3%</span></div>
+            <div class="brk"><i style="background:var(--c-cash)"></i><span>Cash</span><span class="amt">€ 340,57</span><span class="pct">0,2%</span></div>
             <div class="brk"><i style="background:var(--c-vou)"></i><span>Voucher</span><span class="amt">€ 260,00</span><span class="pct">0,1%</span></div>
           </div>
         </div>
@@ -120,18 +124,18 @@
         <div class="tblwrap"><table>
           <thead><tr><th>Institution</th><th>Account</th><th>Type</th><th class="r">Balance <span class="hint r" tabindex="0"><span class="cav">ⓘ</span><span class="tip">Opening balance plus every transaction on standard accounts. A pension fund is shown after its exit tax. A brokerage account reads as the net value of its holdings, after the capital-gains tax and the sell fee.</span></span></th></tr></thead>
           <tbody>
-            <tr><td class="dim">—</td><td class="desc">Wallet</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 340,57</td></tr>
+            <tr><td class="dim">—</td><td class="desc">Wallet</td><td><span class="chip type">Cash</span></td><td class="n r">€ 340,57</td></tr>
             <tr><td>Amundi</td><td class="desc">Fondo Pensione</td><td><span class="chip type">Pension fund</span></td><td class="n r">€ 19.865,75</td></tr>
-            <tr><td>Banca Sella</td><td class="desc">Conto Titoli</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 0,00</td></tr>
+            <tr><td>Banca Sella</td><td class="desc">Conto Titoli</td><td><span class="chip type">Brokerage cash</span></td><td class="n r">€ 0,00</td></tr>
             <tr><td>Banca Sella</td><td class="desc">Deposito Vincolato 24m</td><td><span class="chip type">Term deposit</span></td><td class="n r">€ 25.000,00</td></tr>
             <tr><td>Banca Sella</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 5.362,39</td></tr>
             <tr><td>Edenred</td><td class="desc">Buoni Pasto</td><td><span class="chip type">Voucher</span></td><td class="n r">€ 260,00</td></tr>
-            <tr><td>Fineco</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.840,55</td></tr>
-            <tr><td>Fineco</td><td class="desc">Conto Titoli</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 12.800,00</td></tr>
+            <tr><td>Fineco</td><td class="desc">Conto Corrente</td><td><span class="chip type">Current account</span></td><td class="n r">€ 12.840,55</td></tr>
+            <tr><td>Fineco</td><td class="desc">Conto Titoli</td><td><span class="chip type">Brokerage cash</span></td><td class="n r">€ 12.800,00</td></tr>
             <tr><td>Fineco</td><td class="desc">Dossier Titoli</td><td><span class="chip type">Brokerage</span></td><td class="n r">€ 84.866,65</td></tr>
             <tr><td>ING</td><td class="desc">Conto Arancio</td><td><span class="chip type">Deposit account</span></td><td class="n r">€ 12.500,00</td></tr>
-            <tr><td>Intesa Sanpaolo</td><td class="desc">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r">€ 8.204,10</td></tr>
-            <tr><td class="dim">Unicredit</td><td class="desc dim">Conto Corrente</td><td><span class="chip type">Liquidity</span></td><td class="n r dim">€ 0,00</td></tr>
+            <tr><td>Intesa Sanpaolo</td><td class="desc">Conto Corrente</td><td><span class="chip type">Current account</span></td><td class="n r">€ 8.204,10</td></tr>
+            <tr><td class="dim">Unicredit</td><td class="desc dim">Conto Corrente</td><td><span class="chip type">Current account</span></td><td class="n r dim">€ 0,00</td></tr>
           </tbody>
           <tfoot><tr><td colspan="3">12 accounts · 1 closed · 7 institutions</td><td class="r tot">€ 182.040,01</td></tr></tfoot>
         </table></div>
