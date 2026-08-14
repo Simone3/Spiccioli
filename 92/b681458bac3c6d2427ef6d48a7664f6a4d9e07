@@ -1,0 +1,53 @@
+docs/functional/mockups/03-portfolio.html
+  s_a6108c53673c10::t_d38fa1d981be14 75-83,86,91,94,98,127,129,133-134,137-138
+docs/functional/mockups/04-accounts.html
+  s_a6108c53673c10::t_49c945d67e121b 54,56,60-61,64-65,145-146
+docs/functional/mockups/08-salaries.html
+  s_a6108c53673c10::t_9c17a06a747247 58-59,62,71,73,76
+docs/functional/mockups/_mockups.css
+  s_a6108c53673c10::t_fdf19d86ef603b 6,8
+docs/functional/specs/02-domain-model.md
+  s_a6108c53673c10::t_9916aed25bc26f 26-27,38,40-42
+docs/functional/specs/03-portfolio.md
+  s_a6108c53673c10::t_03f1ce77f18f2d 36
+docs/functional/specs/04-accounts.md
+  s_8d36925f341d32::t_d5372213b8764b 16,18,38
+docs/functional/specs/11-calculations.md
+  s_a6108c53673c10::t_b348dc7e1f026f 49,160-161
+docs/functional/specs/13-validation.md
+  s_a6108c53673c10::t_d3cc2d835c74db 48-49
+docs/functional/specs/14-empty-and-error-states.md
+  s_a6108c53673c10::t_207444a1dff3d7 22
+docs/functional/why/02-domain-model.md
+  s_a6108c53673c10::t_b7a9124927018a 8-10
+docs/functional/why/03-portfolio.md
+  s_a6108c53673c10::t_4932f1c540bfd6 8,23,27
+docs/functional/why/04-accounts.md
+  s_a6108c53673c10::t_c95524d1af60ac 10,13
+docs/functional/why/13-validation.md
+  s_a6108c53673c10::t_e5461f9ebf04e7 10,20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "92b681458bac3c6d2427ef6d48a7664f6a4d9e07",
+  "prompts": {},
+  "sessions": {
+    "s_8d36925f341d32": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b59c5fda-a817-4d04-bd59-d2eefef80d74",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    },
+    "s_a6108c53673c10": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b30b691-2b10-4972-899a-ba932402ba87",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
