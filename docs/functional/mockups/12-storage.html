@@ -61,20 +61,8 @@
       <p class="hint">Opening it will convert it to schema 5. <b>A copy of the file as it stands is
       written to the backup folder first</b>, as <code>finances-2016-2026-08-08-143207-848-pre-upgrade</code>
       and as one of the ten kept there — it will be rotated out in time, so move it elsewhere if you
-      want to keep it. <b>If that copy cannot be written the upgrade does not run</b>, and this dialog
-      says why. <b>The categorisation rules will be re-applied</b> to every automatically categorised
-      transaction as part of the upgrade; rows you categorised by hand are left alone. After the
+      want to keep it. <b>If that copy cannot be written the upgrade does not run</b>. After the
       upgrade, Spiccioli 1.2 and earlier will no longer be able to open it.</p>
-      <hr class="sep">
-      <h4 class="subhead">What it changes in the file</h4>
-      <div class="tblwrap"><table class="spec">
-        <tbody>
-          <tr><td>Bollo e imposte</td><td class="d">retired — its 42 rows move to Wealth tax</td></tr>
-          <tr><td>Rimborso spese</td><td class="d">retired — its 18 rows are left with no category, and check 2 will list them</td></tr>
-          <tr><td>rule BOLLO</td><td class="d">repointed to Wealth tax</td></tr>
-          <tr><td>rule RIMBORSO SPESE</td><td class="d">removed</td></tr>
-        </tbody>
-      </table></div>
       <div class="dlgfoot">
         <button class="btn ghost">Cancel</button>
         <button class="btn primary">Back up and upgrade</button>
@@ -91,27 +79,14 @@
   <div class="dlgrow">
     <div class="dlg">
       <h5>File</h5>
-      <div class="dsub">the whole menu</div>
       <div class="tblwrap"><table class="spec">
         <tbody>
-          <tr><td>New…</td><td class="d">a fresh file, categories seeded</td></tr>
-          <tr><td>Open…</td><td class="d">browse for one</td></tr>
-          <tr><td>Open Recent ▸</td><td class="d">the same list the launch screen offers</td></tr>
-          <tr><td>Quit</td><td class="d">ends the session</td></tr>
+          <tr><td>New…</td></tr>
+          <tr><td>Open…</td></tr>
+          <tr><td>Open Recent ▸</td></tr>
+          <tr><td>Quit</td></tr>
         </tbody>
       </table></div>
-    </div>
-
-    <div class="dlg">
-      <h5>Switching files</h5>
-      <div class="dsub">Open… or Open Recent, mid-session</div>
-      <div class="figs">
-        <div class="fig"><span>1 · the open file</span><b>autosaved, backed up, closed</b></div>
-        <div class="fig"><span>2 · the new file</span><b>opened, nothing written</b></div>
-        <div class="fig"><span>3 · schema</span><b>checked as at launch</b></div>
-        <div class="fig"><span>4 · the screen</span><b>Portfolio, filters cleared</b></div>
-        <div class="fig"><span>· if the new file is refused</span><b>the file you had stays open</b></div>
-      </div>
     </div>
   </div>
 </section>
@@ -124,19 +99,13 @@
   <div class="dlgrow">
     <div class="dlg" style="max-width:none">
       <h5>External modification</h5>
-      <div class="dsub">a line on whatever screen you are on · not a modal, and not a choice between two versions</div>
       <div class="alert">
         <span class="dot"></span>
-        <p>This file was changed by something else while you had it open. That version has been
+        <p>This file was changed while you had it open. That version has been
         saved to the backup folder as <b>finances-2026-08-08-143207-848-external</b>, and your work
         has been kept. That copy is one of the 10 backups kept there, so it will be rotated out in
         time — move it somewhere else if you want to keep it.</p>
         <a href="#">Dismiss</a>
-      </div>
-      <div class="figs">
-        <div class="fig"><span>The session in front of you</span><b>kept, and saves over the file next</b></div>
-        <div class="fig"><span>The version found on disk</span><b>copied to the backup folder</b></div>
-        <div class="fig"><span>The line</span><b>stays until dismissed</b></div>
       </div>
     </div>
   </div>
@@ -150,15 +119,11 @@
   <div class="dlgrow">
     <div class="dlg">
       <h5>Retrying</h5>
-      <div class="dsub">attempt 2 of 5 · a line on whatever screen you are on</div>
+      <div class="dsub">attempt 2 of 5</div>
       <div class="alert">
         <span class="dot"></span>
         <p><b>The file could not be written.</b> Trying again — your work is here and nothing has
         been lost.</p>
-      </div>
-      <div class="figs">
-        <div class="fig"><span>Sidebar save state</span><b>Not saved — retrying</b></div>
-        <div class="fig"><span>The session</span><b>carries on, fully editable</b></div>
       </div>
     </div>
 
@@ -168,7 +133,6 @@
       <div class="figs">
         <div class="fig"><span>Location</span><b>~/Documents</b></div>
         <div class="fig"><span>The system said</span><b>No space left on device</b></div>
-        <div class="fig"><span>Your work</span><b>still in memory, unwritten</b></div>
       </div>
       <div class="dlgfoot"><button class="btn primary">Retry</button></div>
     </div>
