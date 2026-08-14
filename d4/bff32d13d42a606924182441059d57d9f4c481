@@ -1,0 +1,79 @@
+docs/functional/README.md
+  s_8d36925f341d32::t_83f178246d33e7 11-27,37,43-44
+docs/functional/specs/01-premise-and-constraints.md
+  s_8d36925f341d32::t_daa92a0fbdf153 3
+docs/functional/specs/02-domain-model.md
+  s_8d36925f341d32::t_a8a35ea98a1e35 3
+docs/functional/specs/03-portfolio.md
+  s_8d36925f341d32::t_c7d9f5f2c3dbad 3
+docs/functional/specs/04-accounts.md
+  s_8d36925f341d32::t_add1c55198a965 3
+docs/functional/specs/05-transactions.md
+  s_8d36925f341d32::t_241ee5c641258c 3
+docs/functional/specs/06-categories.md
+  s_8d36925f341d32::t_f0c5dd6d7076cf 3
+docs/functional/specs/07-investments.md
+  s_8d36925f341d32::t_c7085025f48f7a 3
+docs/functional/specs/08-salaries.md
+  s_8d36925f341d32::t_478c99ba98175b 3
+docs/functional/specs/09-checks.md
+  s_8d36925f341d32::t_5cf57a127deaf3 3
+docs/functional/specs/10-settings.md
+  s_8d36925f341d32::t_9237b77045e663 3
+docs/functional/specs/11-calculations.md
+  s_8d36925f341d32::t_b5b738b70bace5 3,175
+docs/functional/specs/12-storage.md
+  s_8d36925f341d32::t_9e884624c1711c 3
+docs/functional/specs/13-validation.md
+  s_8d36925f341d32::t_7d9492cbb84ac9 3
+docs/functional/specs/14-empty-and-error-states.md
+  s_8d36925f341d32::t_e965e8a3cdd5ad 3
+docs/functional/specs/15-out-of-scope.md
+  s_8d36925f341d32::t_d9ff1e3a0755d0 3,49-50
+docs/functional/why/01-premise-and-constraints.md
+  s_8d36925f341d32::t_7ba933cd51c156 1-15
+docs/functional/why/02-domain-model.md
+  s_8d36925f341d32::t_39d87408a72f74 1-22
+docs/functional/why/03-portfolio.md
+  s_8d36925f341d32::t_6f591aa2f8000f 1-32
+docs/functional/why/04-accounts.md
+  s_8d36925f341d32::t_908a267a5995b2 1-20
+docs/functional/why/05-transactions.md
+  s_8d36925f341d32::t_5d1a6d37283912 1-41
+docs/functional/why/06-categories.md
+  s_8d36925f341d32::t_08d8dc0de7b63c 1-30
+docs/functional/why/07-investments.md
+  s_8d36925f341d32::t_e4bb3ebf616acb 1-35
+docs/functional/why/08-salaries.md
+  s_8d36925f341d32::t_c367b74652f376 1-23
+docs/functional/why/09-checks.md
+  s_8d36925f341d32::t_05e832aab1dbee 1-25
+docs/functional/why/10-settings.md
+  s_8d36925f341d32::t_c150cab9ad2c3a 1-17
+docs/functional/why/11-calculations.md
+  s_8d36925f341d32::t_d9bc688fa4377b 1-57
+docs/functional/why/12-storage.md
+  s_8d36925f341d32::t_d1c5a11e3fed50 1-35
+docs/functional/why/13-validation.md
+  s_8d36925f341d32::t_77cc5f7ebf37ca 1-34
+docs/functional/why/14-empty-and-error-states.md
+  s_8d36925f341d32::t_ce21afb26b8883 1-12
+docs/functional/why/15-out-of-scope.md
+  s_8d36925f341d32::t_4073079707a8ec 1-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "d4bff32d13d42a606924182441059d57d9f4c481",
+  "prompts": {},
+  "sessions": {
+    "s_8d36925f341d32": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b59c5fda-a817-4d04-bd59-d2eefef80d74",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
