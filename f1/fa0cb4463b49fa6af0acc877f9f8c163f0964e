@@ -1,0 +1,32 @@
+CLAUDE.md
+  s_ac3a09f039bc11::t_fdbe3e28ac695d 58-59
+docs/functional/specs/02-domain-model.md
+  s_ac3a09f039bc11::t_9bcf9c18122894 52-53,61-64
+docs/functional/specs/07-investments.md
+  s_ac3a09f039bc11::t_0b1d6e50972daf 56,72,102-104
+docs/functional/specs/13-validation.md
+  s_ac3a09f039bc11::t_e379b4bf935214 86-88
+docs/technical/08-implementation-plan.md
+  s_ac3a09f039bc11::t_0bc4c4ece14037 7,39,45,115-152,185,264,270-277,279,321-322,329
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "f1fa0cb4463b49fa6af0acc877f9f8c163f0964e",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_ac3a09f039bc11": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "12947cd1-38f8-4545-924d-77cac6ce3a17",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
