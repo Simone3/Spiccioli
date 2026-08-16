@@ -81,7 +81,7 @@ A development run keeps its own root so it never touches the real preferences, t
 ## 1.7 What is deliberately not here yet
 
 - **No storage.** The format is settled — one JSON document, read whole and written whole ([§8.2](08-implementation-plan.md#82-decisions)) — but nothing implements it yet: no persistence layer, no autosave, no backup rotation and no external-modification detection. All of it is Phase 1, split between `src/framework/main/storage` for the generic file handling, `src/main/storage` for where a ledger's backups go, and `src/logic` for the document itself.
-- **No router and no sidebar.** The eight screens of the functional analysis need one; a routing dependency arrives with the first two screens, not before.
+- **No router and no sidebar.** The eight screens of the functional analysis need one, and it is settled which: `react-router` in declarative mode over a `HashRouter`, a path-based history having nothing to resolve against on a packaged run's `file://` page ([§8.2](08-implementation-plan.md#82-decisions)). It arrives with the shell in Phase 2, not before.
 - **No application menu.** [§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open) fixes a File menu of four actions and an About item, and it is built with the launch screen that gives those actions something to act on. Until then the window carries the menu Electron installs by itself.
 - **No single-instance lock.** Spiccioli is allowed to run twice. Two ledgers open side by side is ordinary use, and two sessions on *one* ledger is the case [§12](../functional/specs/12-storage.md) settles by detecting the external modification and keeping the displaced version — not by refusing to start.
 
