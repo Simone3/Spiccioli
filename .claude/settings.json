@@ -27,8 +27,8 @@
 			"Bash(wc:*)"
 		],
 		"deny": [
+			"Read(./TODO.md)",
 			"Edit(./package-lock.json)",
-			"Edit(./docs/functional/**)",
 			"Read(./node_modules/**)",
 			"Read(./build/**)",
 			"Read(./dist/**)",

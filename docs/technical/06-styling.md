@@ -31,7 +31,7 @@ The groups are:
 | Fonts | The one family: Inter, self-hosted through `@fontsource/inter`, with a system fallback |
 | Focus | The one ring, described below |
 
-The accent is amber rather than SPOT's blue, which is the only substantive difference between the two palettes today.
+The accent is amber.
 
 Inter is imported in `src/index.tsx` at weights 300 and 700 and bundled with the application: nothing is fetched from a font CDN at runtime, which the Content-Security-Policy would refuse anyway.
 
