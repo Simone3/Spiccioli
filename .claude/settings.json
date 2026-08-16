@@ -1,0 +1,43 @@
+{
+	"permissions": {
+		"allow": [
+			"Bash(npm run lint)",
+			"Bash(npm run lint:*)",
+			"Bash(npm run typecheck)",
+			"Bash(npm test)",
+			"Bash(npm test:*)",
+			"Bash(npm run build)",
+			"Bash(npm run build-react)",
+			"Bash(npm run build-electron)",
+			"Bash(npx tsc:*)",
+			"Bash(npx eslint:*)",
+			"Bash(git status:*)",
+			"Bash(git diff:*)",
+			"Bash(git log:*)",
+			"Bash(git show:*)",
+			"Bash(git add:*)",
+			"Bash(git commit:*)",
+			"Bash(git branch:*)",
+			"Bash(git stash:*)",
+			"Bash(ls:*)",
+			"Bash(find:*)",
+			"Bash(grep:*)",
+			"Bash(rg:*)",
+			"Bash(cat:*)",
+			"Bash(wc:*)"
+		],
+		"deny": [
+			"Edit(./package-lock.json)",
+			"Edit(./docs/functional/**)",
+			"Read(./node_modules/**)",
+			"Read(./build/**)",
+			"Read(./dist/**)",
+			"Read(./out/**)",
+			"Bash(git push:*)",
+			"Bash(git reset --hard:*)",
+			"Bash(git commit --amend:*)",
+			"Bash(git rebase:*)",
+			"Bash(rm -rf:*)"
+		]
+	}
+}

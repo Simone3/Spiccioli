@@ -1,0 +1,61 @@
+
+/* Theme variables. Spiccioli has one theme and it is dark, so these are the colors and not a light theme's counterparts. */
+body {
+	/* Main colors */
+	--colors-background-primary: #212529;
+	--colors-background-secondary: #2D3136;
+	--colors-text-primary: #FFFFFF;
+	--colors-text-secondary: #BFBFBF;
+	--colors-accent-primary: #E9A21B;
+	--colors-accent-secondary: #FFFFFF;
+	--colors-border-subtle: rgba(255, 255, 255, 0.08);
+	--colors-border-strong: rgba(255, 255, 255, 0.16);
+	--colors-modal-overlay: rgba(0, 0, 0, 0.65);
+	--colors-modal-shadow: rgba(0, 0, 0, 0.45);
+	--colors-popup-shadow: rgba(0, 0, 0, 0.35);
+	--colors-interactive-hover-background: rgba(255, 255, 255, 0.08);
+	--colors-interactive-active-background: rgba(255, 255, 255, 0.12);
+
+	/* States */
+	--colors-danger: #D92D3A;
+	--colors-danger-hover: #F0444F;
+	--colors-danger-text: #FF6B75;
+	--colors-danger-border: rgba(255, 107, 117, 0.35);
+	--colors-danger-background-muted: rgba(255, 107, 117, 0.12);
+	--colors-text-on-danger: #FFFFFF;
+	--colors-warn: #FFA500;
+	--colors-disabled: #808080;
+
+	/* Fonts */
+	--font-family: Inter, system-ui, sans-serif;
+
+	/* Focus. The ring is separated from what it surrounds by a dark hairline, so that it is visible on every control,
+	   including the ones that are themselves filled with the accent color */
+	--focus-ring: 0 0 0 1px var(--colors-background-primary), 0 0 0 2px var(--colors-accent-primary), 0 0 5px var(--colors-accent-primary);
+}
+
+/* Every focusable control draws the same ring and none of them draws the one the browser would draw. The ring is a
+   shadow rather than an outline so that it follows the shape the control already has, whether or not it has a border.
+   `:focus-visible` is what draws it, so a control lights up when the keyboard reaches it and stays quiet when the
+   pointer clicks it; a field the user is about to type into matches `:focus-visible` on a click too, which is exactly
+   where a ring is expected. A control that draws its own focus UI overrides this rule and says why. */
+:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+}
+
+/* HTML body */
+body {
+	margin: 0;
+	background-color: var(--colors-background-primary);
+	color: var(--colors-text-primary);
+	overflow: hidden;
+	font-family: var(--font-family);
+}
+
+/* React root. It is a column, because the sidebar and the screen beside it sit under whatever the window puts above them. */
+#root {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+}
