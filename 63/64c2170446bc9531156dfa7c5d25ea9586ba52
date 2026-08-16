@@ -1,0 +1,21 @@
+CLAUDE.md
+  s_a085df758753aa::t_c6eb4e09f729a8 54
+docs/technical/08-implementation-plan.md
+  s_a085df758753aa::t_462c02f2fd4a88 31,75-98,110,124,141,143,156,262
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "6364c2170446bc9531156dfa7c5d25ea9586ba52",
+  "prompts": {},
+  "sessions": {
+    "s_a085df758753aa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8d9fd986-114c-42c5-bd30-db8c9b542fbf",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
