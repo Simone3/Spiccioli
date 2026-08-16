@@ -1,0 +1,30 @@
+CLAUDE.md
+  s_4bb0f94b75cacc::t_4c57f1dd480dce 16
+docs/technical/07-testing.md
+  s_4bb0f94b75cacc::t_7207c3529d6002 52
+docs/technical/08-implementation-plan.md
+  s_4bb0f94b75cacc::t_a66ecbde722a23 1-214
+docs/technical/README.md
+  s_4bb0f94b75cacc::t_8feece0eb06d8f 22,43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "b526c60c7e513ad622a864957b8ac4ee629b1bf2",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_4bb0f94b75cacc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ddd0874a-701c-42c8-9c72-0ad84ecfdc55",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
