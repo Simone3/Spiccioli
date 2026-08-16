@@ -28,6 +28,7 @@ Each of these has to be settled before the phase that names it can start. The fi
 | --- | --- | --- | --- | --- |
 | D1 | **The ledger file format**, and its extension ([§12](../functional/specs/12-storage.md)) | Phase 1, and the file-format document | **JSON, one document, extension `.spiccioli`** | D2 puts the whole model in memory, so the file is only ever read whole and written whole — and a database engine then carries all of its costs and delivers none of its benefits. Argued and measured in [*Why D1 went the way it did*](#why-d1-went-the-way-it-did) below |
 | D2 | **Which process holds the ledger** | Phase 1 | **The renderer holds the model.** The main process owns the file and nothing else | Every figure in [§11](../functional/specs/11-calculations.md) is derived on read and none of it is expressible as a query — the weighted-average-cost walk terminates early on its own running total ([§11.1](../functional/specs/11-calculations.md#111-weighted-average-cost)), the annualised return is a bisection ([§11.8](../functional/specs/11-calculations.md#118-annualised-return)), and the five matchers are greedy one-to-one claims with stated tie-breaks ([§11.6](../functional/specs/11-calculations.md#116-derived-matching)). All of it wants the whole history as an ordered array in the process the screens are in |
+| D3 | **How money, quantities and rates are represented** | Phase 1, every entity | **Integer minor units** — cents for amounts, ten-thousandths for quantities, prices and rates, with a working scale of eight decimal places for what a product lands in. Set out field by field in [*What D3 fixes*](#what-d3-fixes) below | [§13](../functional/specs/13-validation.md) admits a fixed number of decimals in every numeric field, so each stored figure already *is* an integer at its own scale, and storing it as one makes the limit a property of the type rather than a check on a float. It is also what [§11](../functional/specs/11-calculations.md) rests on: sums and differences stay exact, so net worth divides into four "by construction and not by reconciliation" ([§11.4](../functional/specs/11-calculations.md#114-balances-and-net-worth)) and the matchers compare cent-exact totals with no tolerance to invent ([§11.6](../functional/specs/11-calculations.md#116-derived-matching)). **Binary64 cannot honour a rule that names three mid-calculation roundings**, because under it every operation is one; [§11.8](../functional/specs/11-calculations.md#118-annualised-return) is the single place the specification requires it, and it stays so |
 | D4 | **The schema version scheme**, and what "not understood" means concretely ([§12](../functional/specs/12-storage.md)) | Phase 1 | **An integer `schemaVersion`**, the first key of the document, incremented once per shape change | A semantic version implies a compatibility rule this format does not have: [§12](../functional/specs/12-storage.md) gives a file exactly three positions — current, older, not understood — and an integer expresses all three. **"Not understood" is exhaustive validation**: the reader rejects an unknown key, an unknown category, an unknown role and an unknown enum value rather than ignoring extras, which is the natural shape of a reader over a parsed document |
 | D5 | **Where the new storage layer lives** | Phase 1 | **`src/framework/main/storage/`.** Only what is Spiccioli-specific stays in `src/main` | Atomic whole-file autosave, five spaced retries, rotation by count and external-modification detection are described without ever naming a ledger, which is [§4.5](04-framework.md#45-adding-to-it)'s test. The ledger document, its schema and its reader and writer are Spiccioli's and stay in `src/logic`; the framework moves bytes and knows nothing of what is in them |
 | D6 | **What becomes of the framework's unused storage modules** ([§4.3](04-framework.md#43-what-is-present-and-not-used-yet)) | Phase 1 | **Keep all of them, none deleted** | [§4.1](04-framework.md#41-what-it-is) keeps this folder byte-identical to SPOT's copy on purpose. Deleting the modules Spiccioli happens not to use would diverge the two for no gain and make the next carried fix more expensive than the unused code is. They stay compiled, linted and tested, and [§4.3](04-framework.md#43-what-is-present-and-not-used-yet) records why each is idle |
@@ -38,7 +39,6 @@ Each of these has to be settled before the phase that names it can start. The fi
 
 | # | Decision | Blocks | Options | Leaning |
 | --- | --- | --- | --- | --- |
-| D3 | **How money, quantities and rates are represented** | Phase 1, every entity | Integer minor units; a decimal helper; binary64 | **Integer minor units** — cents for amounts, 1/10 000 for quantities, prices and rates. [§11](../functional/specs/11-calculations.md) rounds only at display and names three mid-calculation roundings; binary64 cannot honour that. [§11.8](../functional/specs/11-calculations.md#118-annualised-return) is the one place binary64 is **specified** and stays so |
 | D7 | **Routing between the eight screens** | Phase 2 | `react-router`; hand-rolled screen state | **Hand-rolled.** [§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open) remembers no screen, no tab, no filter and no selection between files or sessions, and no URL is ever shared — which leaves a router with nothing to do that a context does not |
 | D8 | **How the four charts are drawn** ([§3.1](../functional/specs/03-portfolio.md#31-behaviour), [§8.1](../functional/specs/08-salaries.md#81-payslips)) | Phase 11, Phase 9 | A charting dependency; hand-rolled SVG | Undecided, and the one dependency question worth real argument. Four charts, one of them per-point dashed with a legend explaining why ([§11.5](../functional/specs/11-calculations.md#115-net-worth-over-time)); a library makes three of them trivial and the fourth a fight |
 | D9 | **The date picker** | Phase 2 | Native `<input type="date">`; custom | **Custom.** A native picker renders in the browser's locale, and [§10](../functional/specs/10-settings.md) requires `dateFormat` to decide it. It also has to offer no day after today ([§13](../functional/specs/13-validation.md)) |
@@ -72,6 +72,30 @@ At **ten times that scale** — 40 000 transactions, further past anything this 
 
 **The one thing that would reopen this is the model not fitting in memory.** It is 2 MB at real scale and 22 MB at ten times it, and the largest table is bounded by securities × days.
 
+### What D3 fixes
+
+Recorded because the representation reaches every entity, every formula and the file format, and because **"integer minor units" by itself does not say what happens at a division**, which is the only thing in [§11](../functional/specs/11-calculations.md) that cannot be exact.
+
+**Every stored number is an integer**, at the scale its [§2](../functional/specs/02-domain-model.md) type fixes. [§13](../functional/specs/13-validation.md) is what makes that free: it already admits a fixed number of decimals in each field, so nothing legal is lost.
+
+| [§2](../functional/specs/02-domain-model.md) type | Fields | Stored as |
+| --- | --- | --- |
+| `amount` | every monetary field — balances, amounts, fees, taxes, prices paid, every figure on a payslip | **cents**, two decimal places |
+| `decimal(4)` | `quantity`, `unitPrice`, a Price's `value` | **ten-thousandths**, four decimal places |
+| `fraction` | `taxRate`, `exitTaxRate`, `defaultTaxRate` | **ten-thousandths**. [§13](../functional/specs/13-validation.md) enters them as a percentage with at most one decimal, so 26% is `2600` and 12,5% is `1250`, with a digit to spare |
+| `decimal(2)` | `hoursPerDay` | **hundredths** |
+| `int` | `workingDays`, `monthsPerYear`, a category's `order`, the match windows of [§10](../functional/specs/10-settings.md), `insertionSeq`, `schemaVersion` | as they are |
+
+**Two things follow at once.** A file round-trips exactly, because no figure in it was ever the nearest binary64 to something else. And **rounding at display is a no-op on every figure that is a sum of stored amounts** — an account balance, a table footer, a yearly total, net worth and the four lines that decompose it — so [§11.4](../functional/specs/11-calculations.md#114-balances-and-net-worth)'s "by construction and not by reconciliation" is arithmetic rather than an aspiration, and the exact-total comparisons of [§11.6](../functional/specs/11-calculations.md#116-derived-matching) need no epsilon and therefore no tie-break rule the specification does not have.
+
+**The working scale is eight decimal places, and only a division ever leaves it.** A quantity times a unit price lands there exactly — four decimals by four — and an amount widens into it, so every sum, difference and product in [§11](../functional/specs/11-calculations.md) is exact. **Division is the only inexact operation in the application**: it rounds half away from zero at the working scale, six orders of magnitude below the cent anything is ever shown at, and it is what `avgCost = costBasis ÷ quantity` and the cost basis a sale leaves behind ([§11.1](../functional/specs/11-calculations.md#111-weighted-average-cost)), the gain percentages, the salary averages and the hourly rates ([§11.7](../functional/specs/11-calculations.md#117-salary-figures)) are computed with.
+
+**The deliberate roundings to the cent stay exactly the three [§11](../functional/specs/11-calculations.md) names** — the hypothetical capital-gains tax, the pension exit tax and the totals the matchers compare — plus the display. All of them round half away from zero, which is symmetric on a negative figure where the language's own `Math.round` is not, and [§11.6](../functional/specs/11-calculations.md#116-derived-matching) compares signed totals.
+
+**Nothing here needs a dependency.** A `number` holds an integer exactly to 2⁵³, which is just over 90 000 000 000 000 € in cents and just over 90 000 000 € at the working scale. **The second is the one that binds**, being the ceiling on any single figure a product or a division touches — a holding's value, an account's balance, net worth itself — and it is orders of magnitude past what a personal ledger holds. No `bigint`, no decimal library, and the arithmetic lives in `src/logic` beside the formatters that read it. **[§11.8](../functional/specs/11-calculations.md#118-annualised-return) is the one exception and is specified as one**: the bisection is IEEE-754 binary64 throughout, because a fixed count of halvings is only a fixed answer if the halving is the same operation on every machine.
+
+**The conversion happens once at each boundary, and there are four of them** — the amount field of [§13.1](../functional/specs/13-validation.md#131-how-it-behaves), the import parser of [§5.7](../functional/specs/05-transactions.md#57-bulk-import), the reader and the writer. **The reader refuses a figure that is not an integer at its field's scale exactly as it refuses an unknown key** (D4): a fraction of a cent in the file is a file this application did not write, and it is not silently rounded away.
+
 ## 8.3 What is already fixed, and is not up for decision
 
 Restated here so a phase does not reopen it: everything in [`CLAUDE.md`](../../CLAUDE.md), and from the analysis — EUR only with no currency anywhere, English only through the translation layer, one dark theme, derived data never stored except the assigned category, twenty-seven seeded categories that no runtime editor touches, no undo, checks that report and never prevent, and the whole of [§15](../functional/specs/15-out-of-scope.md).
@@ -83,7 +107,7 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 | Path | Holds |
 | --- | --- |
 | `src/types/` | The eleven stored entities and the derived holding of [§2](../functional/specs/02-domain-model.md), the ledger document, the preferences |
-| `src/logic/` | Everything pure and testable with no React in it: **the ledger document — its schema, its reader and its writer** (D1, D5) — the categorisation pass, the [§11](../functional/specs/11-calculations.md) calculations, the [§11.6](../functional/specs/11-calculations.md#116-derived-matching) matchers, the fourteen checks, the import parser, and the formatters that turn a stored figure into what [§10](../functional/specs/10-settings.md) says it looks like |
+| `src/logic/` | Everything pure and testable with no React in it: **the ledger document — its schema, its reader and its writer** (D1, D5) — the categorisation pass, the [§11](../functional/specs/11-calculations.md) calculations, the [§11.6](../functional/specs/11-calculations.md#116-derived-matching) matchers, the fourteen checks, the import parser, **the money arithmetic of D3** — the scales, the one division rule and the roundings [§11](../functional/specs/11-calculations.md) names — and the formatters that turn a stored figure into what [§10](../functional/specs/10-settings.md) says it looks like |
 | `src/contexts/` | The ledger in memory, the preferences, the save state, the check results — the four things every screen reads |
 | `src/components/common/` | The kit of [§8.5](#85-the-phases) phase 2: the amount field, the date picker, the table, the row menu, the confirm dialog, the filter bar, the empty state |
 | `src/components/<screen>/` | One folder per sidebar item, plus `launch/` and `import/` |
@@ -97,7 +121,7 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 
 | # | Phase | Specification | Depends on |
 | --- | --- | --- | --- |
-| 1 | [The file](#phase-1--the-file) | [§2](../functional/specs/02-domain-model.md), [§12](../functional/specs/12-storage.md) | D3 |
+| 1 | [The file](#phase-1--the-file) | [§2](../functional/specs/02-domain-model.md), [§12](../functional/specs/12-storage.md) | — |
 | 2 | [The shell and the kit](#phase-2--the-shell-and-the-kit) | [§10](../functional/specs/10-settings.md), [§13.1](../functional/specs/13-validation.md#131-how-it-behaves), [§14](../functional/specs/14-empty-and-error-states.md) | 1, D7, D9 |
 | 3 | [Accounts and institutions](#phase-3--accounts-and-institutions) | [§4](../functional/specs/04-accounts.md) | 2 |
 | 4 | [Transactions](#phase-4--transactions) | [§5.1](../functional/specs/05-transactions.md#51-columns) – [§5.6](../functional/specs/05-transactions.md#56-selecting-and-deleting-in-bulk) | 3 |
@@ -114,9 +138,9 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 
 The domain model and everything [§12](../functional/specs/12-storage.md) asks of the file. No screens beyond the launch one.
 
-- The eleven stored entities of [§2](../functional/specs/02-domain-model.md) as types, with the representation of D3. `id` generation, and `insertionSeq` monotonic per entity and never reused.
+- The eleven stored entities of [§2](../functional/specs/02-domain-model.md) as types, **every number an integer at the scale D3 fixes**, and the money arithmetic beside them — the widening into the working scale, the one rounding rule for a division, and the conversions the amount field and the reader go through. `id` generation, and `insertionSeq` monotonic per entity and never reused.
 - **The ledger document as JSON** (D1), extension `.spiccioli`, with the integer `schemaVersion` of D4 as its first key. Its reader and writer live in `src/logic` and are pure: bytes in, model out, and nothing about a filesystem in either.
-- **The reader validates exhaustively** (D4). **A file at a later version, or at a known version carrying an unrecognised key, category, role or enum value, is refused with a statement of what was not understood.** Ignoring extras is what this must not do. There is no read-only mode.
+- **The reader validates exhaustively** (D4). **A file at a later version, or at a known version carrying an unrecognised key, category, role or enum value — or a figure that is not an integer at its field's scale (D3) — is refused with a statement of what was not understood.** Ignoring extras is what this must not do. There is no read-only mode.
 - **The storage layer split of D5**: the framework gets whole-file read and write, atomic replace, the retries, the rotation and the hash comparison, all of it knowing nothing about ledgers; `src/main/storage` supplies the ledger's paths, its backup names and the IPC, and `src/logic` supplies the document.
 - **The twenty-seven categories of [§6.3](../functional/specs/06-categories.md#63-category-list) seeded**, with their types, roles, order and `receiptTracked`, into every new file.
 - Autosave: debounced, written to a temporary file in the same directory and renamed. **Five retries, spaced**, with the save state and the on-screen line while they run and the blocking *Retry* after the fifth. The three figures of D12 come from `AppConfig`.
@@ -129,7 +153,7 @@ The domain model and everything [§12](../functional/specs/12-storage.md) asks o
 
 *Done when* a file can be created, closed, reopened, backed up, rotated, displaced by an external write and refused when unreadable — and the storage layer's tests say so without a screen.
 
-**The file-format document is a deliverable of this phase** and becomes `docs/technical/09-file-format.md`: [§12](../functional/specs/12-storage.md) requires the format documented well enough for the one-off migration script to write it. With D1 taken it is writable — the shape of the document, every key of every entity with the representation of D3, the `schemaVersion` rule, what makes a file *not understood*, and a worked example small enough to read and complete enough to open.
+**The file-format document is a deliverable of this phase** and becomes `docs/technical/09-file-format.md`: [§12](../functional/specs/12-storage.md) requires the format documented well enough for the one-off migration script to write it. With D1 and D3 taken it is writable in full — the shape of the document, every key of every entity with the scale its figure is written at, the `schemaVersion` rule, what makes a file *not understood*, and a worked example small enough to read and complete enough to open.
 
 ### Phase 2 — The shell and the kit
 
@@ -235,14 +259,13 @@ Not repeated in the phases above, and true of all of them.
 
 - **The price provider (D11) may have no qualifying candidate.** [§7.6](../functional/specs/07-investments.md#76-prices) requires no credential to configure and a stated currency, and most free quote APIs meet neither. Phase 8 is isolated for exactly this reason — the application is fully usable without ever pressing the button — but shipping without it needs a specification amendment, not a quiet omission.
 - **Rule reordering has no keyboard path.** [§6.2](../functional/specs/06-categories.md#62-rules) reorders by drag, [§15](../functional/specs/15-out-of-scope.md) declines keyboard-shortcut work, and `CLAUDE.md` requires every control to be reachable and activatable by keyboard. The three are reconcilable — a drag handle can be a real button — but the reconciliation has to be designed rather than assumed.
-- **D3 reaches every entity.** Choosing the money representation late means rewriting the model. It is in Phase 1 for that reason.
+- **The representation of D3 has to hold at every boundary.** It is taken and it reaches every entity, so what is left is the four places a binary64 could put a fraction of a cent into the file — the amount field, the import parser, the reader and the writer — and nothing downstream would notice it. The reader refusing a non-integer is what turns that from a convention into a check, and it is the only one of the four that also catches a file somebody else wrote.
 - **The [§11.6](../functional/specs/11-calculations.md#116-derived-matching) matchers are the subtlest code in the application** — five greedy pairings whose determinism the specification is explicit about. They are where a test suite earns its keep, and where a shortcut is most expensive.
 
 ## 8.8 Sections to be completed
 
 | Where | Waiting on |
 | --- | --- |
-| The field-by-field half of `docs/technical/09-file-format.md` | D3 — the format is settled, how a figure is written inside it is not |
 | [Phase 8 — Update prices](#phase-8--update-prices) | D11 |
 | The chart approach in phases 9 and 11 | D8 |
 
