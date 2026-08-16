@@ -13,7 +13,7 @@ Only the scaffolding exists so far. `src/components/common/PlaceholderPage.tsx` 
 There are two documentation sets and they answer different questions.
 
 - **`docs/functional/`** is the specification: what Spiccioli does, screen by screen, with the reasoning behind every decision in its `why/` files.
-- **`docs/technical/`** is the implementation reference: architecture, repository map, how to build and run, the framework layer, and the conventions that only make sense next to the code.
+- **`docs/technical/`** is the implementation reference: architecture, repository map, how to build and run, the framework layer, the conventions that only make sense next to the code, and the implementation plan of [§8](docs/technical/08-implementation-plan.md) — the decisions still open and the phases from here to v1.
 
 This file holds only the rules and the commands; the reasoning behind them lives in those two places.
 

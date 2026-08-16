@@ -49,4 +49,4 @@ Vitest is configured inside `vite.config.mts`, so the tests resolve `src/...` th
 
 ---
 
-[← §6 Styling](06-styling.md)
+[← §6 Styling](06-styling.md) · [§8 Implementation plan →](08-implementation-plan.md)

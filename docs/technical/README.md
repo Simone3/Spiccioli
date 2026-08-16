@@ -19,6 +19,7 @@ This is the counterpart to [`docs/functional/`](../functional/README.md). The fu
 | 5 | [Text and languages](05-text-and-languages.md) | How wording reaches the screen |
 | 6 | [Styling](06-styling.md) | The theme, the variables, and the focus ring |
 | 7 | [Testing](07-testing.md) | What is tested, where the tests live, and what they may depend on |
+| 8 | [Implementation plan](08-implementation-plan.md) | The decisions still open, and the twelve phases from here to v1 |
 
 Sections are added as the application grows: persistence, the data model and the screens get theirs when they are built.
 
@@ -39,4 +40,4 @@ docs/technical/
 
 - A cross-reference within these pages is written `§N` and links to the file it names. A reference into the functional analysis is written the way that document writes it, `§N` or `§N.M`, and links there.
 - File paths are written relative to the repository root, in backticks: `src/main/Main.ts`.
-- A statement about behaviour that is not implemented yet says so. These pages describe the code as it is, never as it is planned to be.
+- A statement about behaviour that is not implemented yet says so. These pages describe the code as it is, never as it is planned to be. **[§8](08-implementation-plan.md) is the one exception and is entirely about what is planned** — which is why it is a section of its own rather than a paragraph in each of the others, and why it is kept current as phases land.
