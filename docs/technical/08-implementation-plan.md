@@ -4,7 +4,7 @@
 
 The route from the scaffolding that exists today to the application [`docs/functional/`](../functional/README.md) specifies. **This is the one page in this set that describes work not yet done**, and it is kept current: a phase that lands is marked done here in the same commit, and the pages it changed are updated with it.
 
-It carries three things: the **decisions** ([§8.2](#82-decisions)) — those taken, with what they were taken on, and those still open — the **shape the code is heading towards** ([§8.4](#84-the-shape-of-the-code)), and the **twelve phases** the work is cut into ([§8.5](#85-the-phases)). Where a section cannot be written until a decision is taken it says **to be completed** and names the decision.
+It carries three things: the **decisions** ([§8.2](#82-decisions)) — every one of them now taken, with what it was taken on — the **shape the code is heading towards** ([§8.4](#84-the-shape-of-the-code)), and the **twelve phases** the work is cut into ([§8.5](#85-the-phases)). A section that cannot be written until a decision is taken says **to be completed** and names it; none does today.
 
 ---
 
@@ -36,14 +36,13 @@ Each of these has to be settled before the phase that names it can start. The fi
 | D8 | **How the four charts are drawn** ([§3.1](../functional/specs/03-portfolio.md#31-behaviour), [§8.1](../functional/specs/08-salaries.md#81-payslips)) | Phase 11, Phase 9 | **`recharts`** | **SVG, which is what settles it**: a colour stays `var(--…)` in the markup and the one dark theme stays in `src/index.css`, where a canvas library would have every colour read out with `getComputedStyle` and passed in as a string — the inline colour [§6](06-styling.md) refuses. Charts as components rather than an instance held in a ref is the rest of this code. **And the fourth chart stops being a fight**: the per-point dashed line of [§11.5](../functional/specs/11-calculations.md#115-net-worth-over-time) is two series over one array — one *from prices*, one *from cost*, each `null` where the other holds, both carrying the boundary points — and [§11.5](../functional/specs/11-calculations.md#115-net-worth-over-time) **already requires the legend to name those two stretches**, so the two series are the specified legend rather than a workaround. **The cost is the transitive tree**: recharts keeps its own state in Redux, so `@reduxjs/toolkit`, `react-redux` and `immer` come with it. They are the library's and never the application's — the ledger stays in a context (D2) |
 | D9 | **The date picker** | Phase 2 | **Our own control, built on `react-datepicker`** | A native picker renders in the browser's locale and [§10](../functional/specs/10-settings.md) requires `dateFormat` to decide it. The library covers what a calendar has to get right — the popup, keyboard navigation, focus return — and the three `dateFormat` values map one-to-one onto its format strings, while `maxDate` is [§13](../functional/specs/13-validation.md)'s no-day-after-today. **The wrapper is the point**: `customInput` keeps typing and refusal ours ([§13.1](../functional/specs/13-validation.md#131-how-it-behaves)), and every screen sees our control and never the library, so swapping in a hand-rolled calendar stays a one-file change. **It ships a stylesheet of its own**, overridden to the theme variables and back to the single focus ring — the exception [`CLAUDE.md`](../../CLAUDE.md) allows a control that draws its own |
 | D10 | **How rules are reordered** ([§6.2](../functional/specs/06-categories.md#62-rules)) | Phase 6 | **`@dnd-kit/react`** | Eleven-to-fifty rows do not need a library for the dragging; they need one for everything around it, and HTML5 drag events supply none of it. **What decided it is the keyboard**: `@dnd-kit/dom`, which comes with it, exports a `KeyboardSensor` and an `Accessibility` plugin, so a reorder has a keyboard path and a live region announcing it — and [§15](../functional/specs/15-out-of-scope.md) declining keyboard-shortcut work never meant a control the keyboard cannot reach. It **retires the risk this decision used to carry** ([§8.7](#87-risks)), on the condition that the drag handle is a real button |
+| D11 | **The price provider** ([§7.6](../functional/specs/07-investments.md#76-prices)) | Phase 8, and the `exchange` field of Phase 7 | **Yahoo Finance's `v8/finance/chart` endpoint**, one request per listing, keyless, addressed by `ticker` + `exchange` | It is the only free source that answers all three of [§7.6](../functional/specs/07-investments.md#76-prices)'s demands in one call — **a European listing, the day the quote belongs to, and the currency it is quoted in** — and the currency is what disqualified almost everything else. **The survey also overturned the premise the decision was written on**: an ISIN does not identify a currency, so the identifier had to change and [§2](../functional/specs/02-domain-model.md) gained a field. Surveyed and measured in [*What D11 settles*](#what-d11-settles) below |
 | D12 | **The autosave debounce, the retry spacing and the write timeouts** | Phase 1 | **Debounce 2 s · 5 attempts spaced 3 s · write timeout 10 s**, all in `AppConfig` | [§12](../functional/specs/12-storage.md) fixes only the five attempts and "spaced a few seconds apart". **The debounce is a sync-traffic figure rather than a performance one** — a save costs 3 ms, but it rewrites the whole file, and a folder being synced re-uploads it every time. Two seconds is short enough that a crash loses nothing worth naming and long enough that typing a row does not queue an upload per keystroke |
 | D13 | **How external modification is detected** | Phase 1 | **A SHA-256 of the whole file**, recorded at every read and every write and re-checked before the next write | mtime and size is the cheaper comparison and the wrong one: a sync client that preserves timestamps, a restore that puts back a same-sized file, and a filesystem with coarse mtime granularity each defeat it silently, and a *missed* external modification is the one failure in [§12](../functional/specs/12-storage.md) that destroys the other version without saying so. The hash costs **0,7 ms at real scale and 6,9 ms at ten times it**, against a write the user is not waiting on, and it removes the whole class rather than the common case |
 
 ### Still to be taken
 
-| # | Decision | Blocks | Options | Leaning |
-| --- | --- | --- | --- | --- |
-| D11 | **The price provider** ([§7.6](../functional/specs/07-investments.md#76-prices)) | Phase 8 | — | **Open, and the riskiest item here.** The spec requires one built-in provider, named on screen, with **no endpoint, key or credential to configure**, taking an ISIN or a ticker and returning a quote, its date and **its currency**. A provider that cannot state the currency does not qualify. A compiled-in API key in a public repository is not a way to meet "nothing to configure". If no provider qualifies, that is a specification question to raise, not a thing to work around |
+**None.** D11 was the last one open and is settled above; the agenda is empty and every phase can start on what this page already says.
 
 ### Why D1 went the way it did
 
@@ -113,6 +112,44 @@ Four libraries, and they are the whole of what v1 adds to the five runtime depen
 
 **`@dnd-kit/react` is the one to re-check.** At 0.5.0 it is pre-1.0 — the project's newer React package, whose API can still move under a minor bump — and Phase 6 is a long way off. It is pinned exactly like everything else, and **if it is still 0.x when Phase 6 starts, the fallback is the same project's settled pair**, `@dnd-kit/core` with `@dnd-kit/sortable`: the keyboard sensor and the accessibility layer that decided D10 are in both, so the fallback costs an API and no capability.
 
+### What D11 settles
+
+Recorded at length because it was the riskiest decision on this page, because the survey behind it dates quickly, and because **it changed the specification rather than merely satisfying it**.
+
+**Three requirements, and the third is what does the work.** [§7.6](../functional/specs/07-investments.md#76-prices) asks for a free provider that covers the listing, states the day a quote belongs to, and **states the currency of that quote** — the last one because [§13](../functional/specs/13-validation.md) records no currency anywhere, so a dollar quote written into a Price record is wrong by the exchange rate and invisible to every check in [§9](../functional/specs/09-checks.md). Surveyed August 2026, each candidate tried against real EUR-denominated listings rather than read off its marketing:
+
+| Candidate | Free tier | European listings | States the currency | |
+| --- | --- | --- | --- | --- |
+| **Yahoo Finance** `v8/finance/chart` | keyless | yes | **yes** | **taken** |
+| Twelve Data | 800/day | **paid plans only** | yes | out on coverage |
+| EODHD | 20/day | yes | **no** — response is `code, timestamp, open, high, low, close, volume, previousClose, change, change_p` | out |
+| Financial Modeling Prep | 250/day | top plan only | — | out on coverage |
+| Alpha Vantage | 25/day | partial | no | out |
+| API Ninjas | free tier | yes | `price` is a paid field, and it will not take an ISIN | out |
+| marketstack | 100/month | yes | no per-quote currency | out |
+| Stooq | keyless | yes | no | out |
+| Börse Frankfurt (undocumented) | keyless | Frankfurt only | no | out |
+| portfolio-report.net | — | — | — | **API host no longer resolves** |
+| OpenFIGI | keyless | ISIN → ticker, no prices | n/a | a resolver, not a provider |
+
+**The API-key question turned out not to be the question.** [§7.6](../functional/specs/07-investments.md#76-prices) used to forbid any credential, and that clause was relaxed on the assumption it was what stood in the way. It was not: nothing in the table is gated behind a key that would otherwise qualify. **What disqualifies a provider is coverage or the missing currency field**, and a key buys neither. The relaxation stays because it costs nothing and removes a clause that was never the real constraint — but v1 configures no key, and the *free* requirement it replaced is the one that now carries the weight.
+
+**An ISIN does not identify a currency, and that is the finding that reshaped the decision.** `IE00B4L5Y983` is quoted in EUR on Milan, XETRA and Amsterdam and in **USD** in London — and Yahoo's own ISIN search returns the London line first. An ISIN-keyed fetch on the most widely held ETF in Europe would therefore return a dollar quote, [§7.6](../functional/specs/07-investments.md#76-prices)'s currency check would correctly refuse it, and the user would see a perfectly ordinary holding reported as unfetchable. **So the identifier is `ticker` + `exchange`**, [§2](../functional/specs/02-domain-model.md) gained a required `exchange` enum of eighteen eurozone venues, and `ticker` was tightened from free text to the code its exchange lists it under. The ISIN stays what it always was — the key to recognising a security during trade entry — and **no longer leaves the machine at all**.
+
+**The file stores neither Yahoo's symbols nor its suffixes.** `exchange` is our own enum and the suffix table (`Milan → .MI`, `XETRA → .DE`) lives in the provider adapter. That is what keeps [§7.6](../functional/specs/07-investments.md#76-prices)'s closing line affordable: when the provider has to change, a new version brings a new mapping table and every existing file still reads.
+
+**Verified, August 2026** — one keyless `GET` each, all returning `meta.currency`, `meta.regularMarketPrice` and `meta.regularMarketTime`:
+
+```
+ENI.MI   EUR 23.695 | Milan      VWCE.DE  EUR 168.88 | XETRA
+SWDA.MI  EUR 128.86 | Milan      IWDA.AS  EUR 128.84 | Amsterdam
+SGLD.MI  EUR 364.44 | Milan      TTE.PA   EUR 75.78  | Paris
+```
+
+**The eighteen venues were verified one by one**, and two that might have been expected are absent because Yahoo does not carry them: **Berlin and Riga**, 0 for 4 and 0 for 2 on symbols that resolve elsewhere.
+
+**What this decision is honest about.** The endpoint is **undocumented and unsanctioned** — Yahoo's terms do not permit it, `v7/finance/quote` already answers 401 without a crumb, and `v8` can go the same way without notice. Three things make that a tolerable risk rather than a reckless one, and none of them is a guarantee: [§7.6](../functional/specs/07-investments.md#76-prices) already treats a provider failure as **a line in the review panel and never a blocked screen**; the application is **fully usable without ever pressing the button**, every price typed by hand; and the adapter is one file behind one interface, so replacing the provider is the size of a mapping table and a parser. **It is also the least surprising choice available** — it is what the comparable open-source trackers ship as their default — which is evidence about availability and none at all about permission. **`v8` going away is the event that reopens this**, and the table above is the shortlist to re-run when it does.
+
 ## 8.3 What is already fixed, and is not up for decision
 
 Restated here so a phase does not reopen it: everything in [`CLAUDE.md`](../../CLAUDE.md), and from the analysis — EUR only with no currency anywhere, English only through the translation layer, one dark theme, derived data never stored except the assigned category, twenty-seven seeded categories that no runtime editor touches, no undo, checks that report and never prevent, and the whole of [§15](../functional/specs/15-out-of-scope.md).
@@ -145,7 +182,7 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 | 5 | [Bulk import](#phase-5--bulk-import) | [§5.7](../functional/specs/05-transactions.md#57-bulk-import) | 4 |
 | 6 | [Categories](#phase-6--categories) | [§6](../functional/specs/06-categories.md) | 4 |
 | 7 | [Investments](#phase-7--investments) | [§7.1](../functional/specs/07-investments.md#71-holdings) – [§7.5](../functional/specs/07-investments.md#75-recording-a-trade-and-where-securities-come-from), [§11.1](../functional/specs/11-calculations.md#111-weighted-average-cost) – [§11.3](../functional/specs/11-calculations.md#113-hypothetical-liquidation), [§11.8](../functional/specs/11-calculations.md#118-annualised-return) | 3 |
-| 8 | [Update prices](#phase-8--update-prices) | [§7.6](../functional/specs/07-investments.md#76-prices) | 7, D11 |
+| 8 | [Update prices](#phase-8--update-prices) | [§7.6](../functional/specs/07-investments.md#76-prices) | 7 |
 | 9 | [Salaries](#phase-9--salaries) | [§8](../functional/specs/08-salaries.md), [§11.7](../functional/specs/11-calculations.md#117-salary-figures) | 2 |
 | 10 | [Matching and checks](#phase-10--matching-and-checks) | [§9](../functional/specs/09-checks.md), [§11.6](../functional/specs/11-calculations.md#116-derived-matching) | 4, 7, 9 |
 | 11 | [Portfolio](#phase-11--portfolio) | [§3](../functional/specs/03-portfolio.md), [§11.4](../functional/specs/11-calculations.md#114-balances-and-net-worth), [§11.5](../functional/specs/11-calculations.md#115-net-worth-over-time) | 10 |
@@ -224,15 +261,22 @@ Self-contained, and the only text the application parses.
 The largest calculation surface in the application, and written test-first.
 
 - `src/logic`: **the walk of [§11.1](../functional/specs/11-calculations.md#111-weighted-average-cost)** in its exact order, purchases before sales on a shared date, ending the moment a position goes below zero and deriving nothing thereafter; the realised gain of [§11.2](../functional/specs/11-calculations.md#112-realised-gain-on-a-sale) and its *undefined*; the hypothetical liquidation of a holding ([§11.3](../functional/specs/11-calculations.md#113-hypothetical-liquidation)); the annualised return of [§11.8](../functional/specs/11-calculations.md#118-annualised-return) by bisection over `[−0,999 , 10]`, halved 100 times, in binary64, with every one of its *undefined* cases.
-- **Securities tab**: creation, correction, the full editable price history newest-first with its `source` column, deletion taking the prices with it.
+- **Securities tab**: creation, correction, the full editable price history newest-first with its `source` column, deletion taking the prices with it. **`exchange` is a field here from the start** (D11) — the picker over the eighteen eurozone venues of [§2](../functional/specs/02-domain-model.md), required, with `ticker` validated as the code that venue lists the security under. It arrives a phase before the fetch that reads it, because it is a required field and adding one after v1 is a migration.
 - **Purchases and Sales**: creation with inline security creation, in-place editing, the filters, the footers, `kind` locked once the trade exists.
 - **Holdings**: the derived table, the inline price editor writing a Price for a day and replacing what it held, *Last priced* with the staleness highlight, the detail panel with the full liquidation breakdown and its caveat, and the two footers — the gross money totals, and the portfolio-wide annualised return that states what it left out.
 
 ### Phase 8 — Update prices
 
-Gated on D11, and the only thing in the application that touches the network.
+The only thing in the application that touches the network, and the whole of it lives behind one interface.
 
-**To be completed — depends on D11.** What is fixed regardless: one button, no selection and no setting; **nothing written before the review panel is confirmed**; the panel reporting what got a quote with the day it belongs to and what that day currently holds, what had no quote, what could not be fetched with each reason, and the provider's reference date; refusal of a future-dated quote, of a quote of zero or less, and of any quote not stated in EUR; a cancelled or failed pass leaving no trace in the file; and the statement of what leaves the machine, beside the button and again in the panel.
+- **The provider adapter** (D11), in the main process, because the renderer is where the ledger is and a network call has no business there. It is the one place that knows Yahoo: the suffix table mapping the `exchange` enum onto `.MI`, `.DE`, `.AS` and the rest, the `v8/finance/chart` request per listing, and the parse of `meta.currency`, `meta.regularMarketPrice` and `meta.regularMarketTime`. **Everything above it sees a listing in and a quote-or-a-reason out**, so replacing the provider is this file and its tests.
+- **The pass**: one request per security in the file, held or fully sold, **paced** rather than fired at once, each failing on its own without taking the pass down. A security whose listing the provider does not carry is a *no quote*, not an error.
+- **The four refusals of [§7.6](../functional/specs/07-investments.md#76-prices), applied to what came back before the user ever sees it**: a quote dated in the future, a quote of zero or less, a quote stated in anything but EUR, and a quote with no currency stated at all. Each puts its security among the ones that could not be fetched, **with its reason named**.
+- **The review panel**: what got a quote with the day it belongs to and what that day currently holds — a value it would replace, marked `manual` or `fetched`, or nothing at all — what had no quote, what could not be fetched with each reason, and the provider's reference date where it gives one. **Nothing is written before it is confirmed**, one confirmation covers the pass, there is no row to tick, and a pass with nothing to write still shows its panel and offers only *Close*.
+- **Cancel and a failed pass leave no trace in the file** — no record, no marker, nothing to clean up on the next open.
+- The statement of what leaves the machine, **beside the button and again in the panel**: a `ticker` and an `exchange`, never the ISIN, never an amount, a quantity or an account.
+
+*Done when* a pass over a file of real securities writes what the panel showed and nothing else, and the adapter's tests cover each of the four refusals without a network.
 
 ### Phase 9 — Salaries
 
@@ -274,16 +318,15 @@ Not repeated in the phases above, and true of all of them.
 
 ## 8.7 Risks
 
-- **The price provider (D11) may have no qualifying candidate.** [§7.6](../functional/specs/07-investments.md#76-prices) requires no credential to configure and a stated currency, and most free quote APIs meet neither. Phase 8 is isolated for exactly this reason — the application is fully usable without ever pressing the button — but shipping without it needs a specification amendment, not a quiet omission.
+- **The price provider is an unsanctioned endpoint and can go away without notice** (D11). Yahoo's terms do not permit it and `v7/finance/quote` already answers 401; `v8/finance/chart` is what the decision rests on and nothing obliges it to survive. **The risk is contained rather than removed**: [§7.6](../functional/specs/07-investments.md#76-prices) makes a provider failure a line in the review panel and never a blocked screen, the application is fully usable with every price typed by hand, and the adapter is one file behind one interface. What it costs if it breaks after release is **a new version**, which is what [§7.6](../functional/specs/07-investments.md#76-prices) already says a change of provider is. The shortlist to re-run is in [*What D11 settles*](#what-d11-settles).
+- **`exchange` is a required field and has to land in Phase 7, not Phase 8.** It is only read by the fetch, which makes it tempting to defer to the phase that needs it — and deferring it past v1 turns a field into a migration over files that already exist. The phase that builds the Securities tab is the last free moment to add it.
 - **Rule reordering had no keyboard path, and D10 is what supplies one.** [§6.2](../functional/specs/06-categories.md#62-rules) reorders by drag, [§15](../functional/specs/15-out-of-scope.md) declines keyboard-shortcut work, and [`CLAUDE.md`](../../CLAUDE.md) requires every control to be reachable and activatable by keyboard. `@dnd-kit/react` reconciles the three, its keyboard sensor and its live region being the part nobody would have built by hand — **on the condition that the handle is a real button rather than a draggable row**, which is a design decision Phase 6 has to make rather than inherit.
 - **The representation of D3 has to hold at every boundary.** It is taken and it reaches every entity, so what is left is the four places a binary64 could put a fraction of a cent into the file — the amount field, the import parser, the reader and the writer — and nothing downstream would notice it. The reader refusing a non-integer is what turns that from a convention into a check, and it is the only one of the four that also catches a file somebody else wrote.
 - **The [§11.6](../functional/specs/11-calculations.md#116-derived-matching) matchers are the subtlest code in the application** — five greedy pairings whose determinism the specification is explicit about. They are where a test suite earns its keep, and where a shortcut is most expensive.
 
 ## 8.8 Sections to be completed
 
-| Where | Waiting on |
-| --- | --- |
-| [Phase 8 — Update prices](#phase-8--update-prices) | D11 |
+**None.** Every decision is taken and every phase is written out; the last section waiting on one was Phase 8, released by D11.
 
 ---
 

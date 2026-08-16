@@ -83,7 +83,9 @@ What the forms refuse. Everything here is enforced at the point of entry, by the
 | Field | Rule |
 | --- | --- |
 | isin | Required, unique, 12 characters, two letters then nine alphanumerics then a digit. The format is checked; the check digit is not recomputed. |
-| ticker, name | Required, trimmed. |
+| ticker | Required, trimmed. **The code the security's `exchange` lists it under** ([§2](02-domain-model.md)), since the two together are what *Update prices* asks the provider for ([§7.6](07-investments.md#76-prices)). **It is not checked against the provider and nothing here contacts the network**: a code no provider carries is a security with no quote available, which is not an invalid security. |
+| exchange | Required, one of the eighteen of [§2](02-domain-model.md). Freely editable afterwards, like `ticker` — a listing corrected here is the same instrument, and its price history stays with it. **There is no *none***: every security the model admits is exchange-traded ([§2](02-domain-model.md)). |
+| name | Required, trimmed. |
 | type | Required, one of the four of [§2](02-domain-model.md). Freely editable afterwards. **There is no `Bond`** ([§15](15-out-of-scope.md)). |
 | taxRate | Required. **Entered and shown as a percentage**, 0 – 100 with at most 1 decimal, and stored as the fraction it names — 12,5 is typed and `0,125` is kept ([§11](11-calculations.md)). |
 | delete | Refused while any **trade** points at it. Prices are not dependent data — they go with the security, and deleting it deletes its price history in the same breath, the confirmation saying how many records that is. |
