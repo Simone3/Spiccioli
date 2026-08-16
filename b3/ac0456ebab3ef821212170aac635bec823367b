@@ -1,0 +1,20 @@
+TODO.md
+  h_08e8a5184a38af 1-48
+CLAUDE.md
+  h_08e8a5184a38af 5-12,20,22,24,47,50,59
+.claude/settings.json
+  h_08e8a5184a38af 30
+docs/technical/06-styling.md
+  h_08e8a5184a38af 34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "b3ac0456ebab3ef821212170aac635bec823367b",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
