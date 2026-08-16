@@ -4,7 +4,7 @@
 
 The route from the scaffolding that exists today to the application [`docs/functional/`](../functional/README.md) specifies. **This is the one page in this set that describes work not yet done**, and it is kept current: a phase that lands is marked done here in the same commit, and the pages it changed are updated with it.
 
-It carries three things: the **decisions still to be taken** ([§8.2](#82-decisions-still-to-be-taken)), the **shape the code is heading towards** ([§8.4](#84-the-shape-of-the-code)), and the **twelve phases** the work is cut into ([§8.5](#85-the-phases)). Where a section cannot be written until a decision is taken it says **to be completed** and names the decision.
+It carries three things: the **decisions** ([§8.2](#82-decisions)) — those taken, with what they were taken on, and those still open — the **shape the code is heading towards** ([§8.4](#84-the-shape-of-the-code)), and the **twelve phases** the work is cut into ([§8.5](#85-the-phases)). Where a section cannot be written until a decision is taken it says **to be completed** and names the decision.
 
 ---
 
@@ -18,25 +18,59 @@ Three constraints fix the order, and everything else follows from them.
 
 Each phase leaves the application **running, linted, typechecked and tested**. A phase is not a branch and not a release; it is a unit of review.
 
-## 8.2 Decisions still to be taken
+## 8.2 Decisions
 
-Each of these has to be settled before the phase that names it can start. **None of them is settled here** — this table is the agenda.
+Each of these has to be settled before the phase that names it can start. The first table is what has been settled, and what it was settled on; the second is what is left, and is the agenda.
+
+### Taken
+
+| # | Decision | Blocks | Taken | On what grounds |
+| --- | --- | --- | --- | --- |
+| D1 | **The ledger file format**, and its extension ([§12](../functional/specs/12-storage.md)) | Phase 1, and the file-format document | **JSON, one document, extension `.spiccioli`** | D2 puts the whole model in memory, so the file is only ever read whole and written whole — and a database engine then carries all of its costs and delivers none of its benefits. Argued and measured in [*Why D1 went the way it did*](#why-d1-went-the-way-it-did) below |
+| D2 | **Which process holds the ledger** | Phase 1 | **The renderer holds the model.** The main process owns the file and nothing else | Every figure in [§11](../functional/specs/11-calculations.md) is derived on read and none of it is expressible as a query — the weighted-average-cost walk terminates early on its own running total ([§11.1](../functional/specs/11-calculations.md#111-weighted-average-cost)), the annualised return is a bisection ([§11.8](../functional/specs/11-calculations.md#118-annualised-return)), and the five matchers are greedy one-to-one claims with stated tie-breaks ([§11.6](../functional/specs/11-calculations.md#116-derived-matching)). All of it wants the whole history as an ordered array in the process the screens are in |
+| D4 | **The schema version scheme**, and what "not understood" means concretely ([§12](../functional/specs/12-storage.md)) | Phase 1 | **An integer `schemaVersion`**, the first key of the document, incremented once per shape change | A semantic version implies a compatibility rule this format does not have: [§12](../functional/specs/12-storage.md) gives a file exactly three positions — current, older, not understood — and an integer expresses all three. **"Not understood" is exhaustive validation**: the reader rejects an unknown key, an unknown category, an unknown role and an unknown enum value rather than ignoring extras, which is the natural shape of a reader over a parsed document |
+| D5 | **Where the new storage layer lives** | Phase 1 | **`src/framework/main/storage/`.** Only what is Spiccioli-specific stays in `src/main` | Atomic whole-file autosave, five spaced retries, rotation by count and external-modification detection are described without ever naming a ledger, which is [§4.5](04-framework.md#45-adding-to-it)'s test. The ledger document, its schema and its reader and writer are Spiccioli's and stay in `src/logic`; the framework moves bytes and knows nothing of what is in them |
+| D6 | **What becomes of the framework's unused storage modules** ([§4.3](04-framework.md#43-what-is-present-and-not-used-yet)) | Phase 1 | **Keep all of them, none deleted** | [§4.1](04-framework.md#41-what-it-is) keeps this folder byte-identical to SPOT's copy on purpose. Deleting the modules Spiccioli happens not to use would diverge the two for no gain and make the next carried fix more expensive than the unused code is. They stay compiled, linted and tested, and [§4.3](04-framework.md#43-what-is-present-and-not-used-yet) records why each is idle |
+| D12 | **The autosave debounce, the retry spacing and the write timeouts** | Phase 1 | **Debounce 2 s · 5 attempts spaced 3 s · write timeout 10 s**, all in `AppConfig` | [§12](../functional/specs/12-storage.md) fixes only the five attempts and "spaced a few seconds apart". **The debounce is a sync-traffic figure rather than a performance one** — a save costs 3 ms, but it rewrites the whole file, and a folder being synced re-uploads it every time. Two seconds is short enough that a crash loses nothing worth naming and long enough that typing a row does not queue an upload per keystroke |
+| D13 | **How external modification is detected** | Phase 1 | **A SHA-256 of the whole file**, recorded at every read and every write and re-checked before the next write | mtime and size is the cheaper comparison and the wrong one: a sync client that preserves timestamps, a restore that puts back a same-sized file, and a filesystem with coarse mtime granularity each defeat it silently, and a *missed* external modification is the one failure in [§12](../functional/specs/12-storage.md) that destroys the other version without saying so. The hash costs **0,7 ms at real scale and 6,9 ms at ten times it**, against a write the user is not waiting on, and it removes the whole class rather than the common case |
+
+### Still to be taken
 
 | # | Decision | Blocks | Options | Leaning |
 | --- | --- | --- | --- | --- |
-| D1 | **The ledger file format**, and its extension ([§12](../functional/specs/12-storage.md)) | Phase 1, and the file-format document | Electron's bundled `node:sqlite`, no dependency; or JSON, one document | **JSON.** [§12](../functional/specs/12-storage.md) wants a whole file written atomically by temp-file-and-rename, a script that can write it, and external-modification detection over the whole file — all of which a single document gives directly, while SQLite gives a live connection that has to be closed and copied around each of them. A decade of history is a few thousand transactions: single-digit megabytes, rewritten on a debounce. `node:sqlite` remains the option to beat and the decision has to be argued, not assumed |
-| D2 | **Which process holds the ledger** | Phase 1 | Renderer holds the model, main writes bytes; or main holds it and the renderer queries | **Renderer holds it.** Every figure in [§11](../functional/specs/11-calculations.md) is derived on read, so the model has to be in memory beside the screens. The main process owns the file and nothing else |
 | D3 | **How money, quantities and rates are represented** | Phase 1, every entity | Integer minor units; a decimal helper; binary64 | **Integer minor units** — cents for amounts, 1/10 000 for quantities, prices and rates. [§11](../functional/specs/11-calculations.md) rounds only at display and names three mid-calculation roundings; binary64 cannot honour that. [§11.8](../functional/specs/11-calculations.md#118-annualised-return) is the one place binary64 is **specified** and stays so |
-| D4 | **The schema version scheme**, and what "not understood" means concretely ([§12](../functional/specs/12-storage.md)) | Phase 1 | Integer; semantic version | An integer, incremented per shape change. The refusal has to catch an unknown field, category or role, so the reader validates exhaustively rather than ignoring extras |
-| D5 | **Where the new storage layer lives** — `src/framework` or `src/main` | Phase 1 | Framework, and therefore back into SPOT ([§4.1](04-framework.md#41-what-it-is)); or Spiccioli only | Atomic whole-file autosave, retry, rotation-by-count and external-modification detection are application-agnostic and belong in the framework by [§4.5](04-framework.md#45-adding-to-it). The cost is carrying them into SPOT. Decide once, for the whole layer |
-| D6 | **What becomes of the framework's unused storage modules** ([§4.3](04-framework.md#43-what-is-present-and-not-used-yet)) | Phase 1 | Delete; keep | [§4.3](04-framework.md#43-what-is-present-and-not-used-yet) defers this to the moment the replacing section is written, which is Phase 1 |
 | D7 | **Routing between the eight screens** | Phase 2 | `react-router`; hand-rolled screen state | **Hand-rolled.** [§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open) remembers no screen, no tab, no filter and no selection between files or sessions, and no URL is ever shared — which leaves a router with nothing to do that a context does not |
 | D8 | **How the four charts are drawn** ([§3.1](../functional/specs/03-portfolio.md#31-behaviour), [§8.1](../functional/specs/08-salaries.md#81-payslips)) | Phase 11, Phase 9 | A charting dependency; hand-rolled SVG | Undecided, and the one dependency question worth real argument. Four charts, one of them per-point dashed with a legend explaining why ([§11.5](../functional/specs/11-calculations.md#115-net-worth-over-time)); a library makes three of them trivial and the fourth a fight |
 | D9 | **The date picker** | Phase 2 | Native `<input type="date">`; custom | **Custom.** A native picker renders in the browser's locale, and [§10](../functional/specs/10-settings.md) requires `dateFormat` to decide it. It also has to offer no day after today ([§13](../functional/specs/13-validation.md)) |
 | D10 | **How rules are reordered** ([§6.2](../functional/specs/06-categories.md#62-rules)) | Phase 6 | HTML5 drag events; a DnD dependency | HTML5 drag events over a list of eleven-to-fifty rows. Note that [§15](../functional/specs/15-out-of-scope.md) declines keyboard-shortcut work, so drag has no keyboard equivalent in v1 — see the risk in [§8.7](#87-risks) |
 | D11 | **The price provider** ([§7.6](../functional/specs/07-investments.md#76-prices)) | Phase 8 | — | **Open, and the riskiest item here.** The spec requires one built-in provider, named on screen, with **no endpoint, key or credential to configure**, taking an ISIN or a ticker and returning a quote, its date and **its currency**. A provider that cannot state the currency does not qualify. A compiled-in API key in a public repository is not a way to meet "nothing to configure". If no provider qualifies, that is a specification question to raise, not a thing to work around |
-| D12 | **The autosave debounce, the retry spacing and the write timeouts** | Phase 1 | — | Values for `AppConfig`, chosen with the storage layer. [§12](../functional/specs/12-storage.md) fixes five attempts "spaced a few seconds apart" and nothing more |
-| D13 | **How external modification is detected** | Phase 1 | mtime and size; content hash | mtime and size is what a save can compare cheaply before every write; a hash is certain and costs a read. Decide with D1 |
+
+### Why D1 went the way it did
+
+Recorded because it is the decision every other one in Phase 1 rests on, and because the numbers are what keep it from being reopened on a hunch. Measured on a synthetic ledger built to the eleven entities of [§2](../functional/specs/02-domain-model.md), on Node 24 — the runtime Electron bundles `node:sqlite` from.
+
+**A realistic ledger is 17 656 records**: 4 000 transactions, 13 000 prices, 400 trades, 130 payslips, 15 accounts. Ten years of one person's finances.
+
+| | JSON | `node:sqlite` |
+| --- | --- | --- |
+| On disk | 2,10 MB | 1,46 MB, **plus `-wal` and `-shm` while open** |
+| Full load | **3,6 ms** | 2,5 ms |
+| Full save — stringify, write, rename | **3,0 ms** | 0,1 ms per single-row update |
+| Every account's balance | **0,1 ms**, in JS over the loaded array | 0,5 ms, in SQL |
+| Backup copy | **0,5 ms**, `copyFile` | 4,4 ms, `VACUUM INTO` |
+| JS heap for the parsed model | **2 MB** | the same, once loaded |
+
+At **ten times that scale** — 40 000 transactions, further past anything this application will hold — JSON opens in 37 ms, saves in 25 ms and occupies 22 MB of heap. The aggregation worry inverts at that size: the in-JS pass over 40 000 transactions beats the SQL `GROUP BY` 0,7 ms to 9,4 ms, because the rows are already in the process and none of them have to be marshalled across a boundary.
+
+**Three things decided it, and speed was the least of them.**
+
+- **The file may live in a synced folder, and [§12](../functional/specs/12-storage.md) requires the application to make no assumption about where it is.** That rules out WAL outright — `-wal` and `-shm` must stay byte-consistent with the main file, and a sync client uploading them at different moments produces a corrupt ledger on the other machine. The framework's own [`AppDatabase.ts`](../../src/framework/main/storage/AppDatabase.ts) says as much in a comment, and says it about a database that is *never* in a synced folder. It also costs [§12](../functional/specs/12-storage.md) its first line: **one file** stops being true the moment a sidecar exists.
+- **External-modification detection has no coherent recovery on a live connection.** Tested three ways. When something replaces the file by rename — which is what every sync client does, and what our own atomic save does — SQLite notices (`SQLITE_READONLY_DBMOVED`) but is left permanently read-only over a stale cache on an unlinked inode, with the session's work in a file that no longer has a name. When something overwrites the file in place, the stale read is **not** noticed and the next write goes straight over the incoming version, silently. **The mismatch is semantic rather than mechanical**: [§12](../functional/specs/12-storage.md) says to copy the version found on disk into the backup folder and carry on with *the session in memory, whose next save overwrites it* — and on a live connection there is no in-memory session distinct from the file for that sentence to refer to. Over a JSON document it is four lines and loses nothing on either side.
+- **[§12](../functional/specs/12-storage.md) requires refusing a file carrying an unrecognised field.** Over a parsed document that is the reader's natural shape. Over SQLite every ordinary query succeeds regardless of what extra columns or tables the file holds, so catching it means deliberate `sqlite_master` and `PRAGMA table_info` introspection — exactly the kind of check that is written once and then quietly stops covering what is added later.
+
+**What SQLite would genuinely have bought**, recorded so the decision stays argued: foreign keys enforcing the no-dangling-reference rule of [§12](../functional/specs/12-storage.md)'s upgrades in the engine rather than in a validator, row-level writes, and an [`AppDatabase.ts`](../../src/framework/main/storage/AppDatabase.ts) that already exists and is tested. The first is one rule where [§13](../functional/specs/13-validation.md) needs forty; the second is 3 ms against a debounce measured in seconds; and the third was built for a WAL database in the user-data folder with in-place migrations, which is the opposite of this file in every respect.
+
+**The one thing that would reopen this is the model not fitting in memory.** It is 2 MB at real scale and 22 MB at ten times it, and the largest table is bounded by securities × days.
 
 ## 8.3 What is already fixed, and is not up for decision
 
@@ -49,11 +83,12 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 | Path | Holds |
 | --- | --- |
 | `src/types/` | The eleven stored entities and the derived holding of [§2](../functional/specs/02-domain-model.md), the ledger document, the preferences |
-| `src/logic/` | Everything pure and testable with no React in it: the ledger reader and writer, the categorisation pass, the [§11](../functional/specs/11-calculations.md) calculations, the [§11.6](../functional/specs/11-calculations.md#116-derived-matching) matchers, the fourteen checks, the import parser, and the formatters that turn a stored figure into what [§10](../functional/specs/10-settings.md) says it looks like |
+| `src/logic/` | Everything pure and testable with no React in it: **the ledger document — its schema, its reader and its writer** (D1, D5) — the categorisation pass, the [§11](../functional/specs/11-calculations.md) calculations, the [§11.6](../functional/specs/11-calculations.md#116-derived-matching) matchers, the fourteen checks, the import parser, and the formatters that turn a stored figure into what [§10](../functional/specs/10-settings.md) says it looks like |
 | `src/contexts/` | The ledger in memory, the preferences, the save state, the check results — the four things every screen reads |
 | `src/components/common/` | The kit of [§8.5](#85-the-phases) phase 2: the amount field, the date picker, the table, the row menu, the confirm dialog, the filter bar, the empty state |
 | `src/components/<screen>/` | One folder per sidebar item, plus `launch/` and `import/` |
-| `src/main/storage/` | The file: read, write, atomic replace, retry, backups, external-modification detection — or `src/framework/main/storage/`, per D5 |
+| `src/framework/main/storage/` | **Per D5**, the generic half: reading and writing a whole file, atomic replace by temp-file-and-rename, the five spaced retries, backup rotation by count, and hash-based external-modification detection. It moves bytes and never learns what is in them; the ledger's own shape is `src/logic`'s, above |
+| `src/main/storage/` | The Spiccioli half: where a ledger's backup folder is, what a copy is named, and the IPC the renderer saves through |
 | `src/main/menu/` | The File menu and the About item of [§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open) |
 
 **Every user-facing string added anywhere goes into `src/i18n/lang/en.ts`** ([§5](05-text-and-languages.md)), and every tunable value into `src/config/AppConfig.ts`. Neither is restated in the phases below; both apply to all of them.
@@ -62,7 +97,7 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 
 | # | Phase | Specification | Depends on |
 | --- | --- | --- | --- |
-| 1 | [The file](#phase-1--the-file) | [§2](../functional/specs/02-domain-model.md), [§12](../functional/specs/12-storage.md) | D1 – D6, D12, D13 |
+| 1 | [The file](#phase-1--the-file) | [§2](../functional/specs/02-domain-model.md), [§12](../functional/specs/12-storage.md) | D3 |
 | 2 | [The shell and the kit](#phase-2--the-shell-and-the-kit) | [§10](../functional/specs/10-settings.md), [§13.1](../functional/specs/13-validation.md#131-how-it-behaves), [§14](../functional/specs/14-empty-and-error-states.md) | 1, D7, D9 |
 | 3 | [Accounts and institutions](#phase-3--accounts-and-institutions) | [§4](../functional/specs/04-accounts.md) | 2 |
 | 4 | [Transactions](#phase-4--transactions) | [§5.1](../functional/specs/05-transactions.md#51-columns) – [§5.6](../functional/specs/05-transactions.md#56-selecting-and-deleting-in-bulk) | 3 |
@@ -80,10 +115,12 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 The domain model and everything [§12](../functional/specs/12-storage.md) asks of the file. No screens beyond the launch one.
 
 - The eleven stored entities of [§2](../functional/specs/02-domain-model.md) as types, with the representation of D3. `id` generation, and `insertionSeq` monotonic per entity and never reused.
-- The ledger document, its schema version, its reader and its writer. **A file at a later version, or at a known version carrying an unrecognised category, role or field, is refused with a statement of what was not understood.** There is no read-only mode.
+- **The ledger document as JSON** (D1), extension `.spiccioli`, with the integer `schemaVersion` of D4 as its first key. Its reader and writer live in `src/logic` and are pure: bytes in, model out, and nothing about a filesystem in either.
+- **The reader validates exhaustively** (D4). **A file at a later version, or at a known version carrying an unrecognised key, category, role or enum value, is refused with a statement of what was not understood.** Ignoring extras is what this must not do. There is no read-only mode.
+- **The storage layer split of D5**: the framework gets whole-file read and write, atomic replace, the retries, the rotation and the hash comparison, all of it knowing nothing about ledgers; `src/main/storage` supplies the ledger's paths, its backup names and the IPC, and `src/logic` supplies the document.
 - **The twenty-seven categories of [§6.3](../functional/specs/06-categories.md#63-category-list) seeded**, with their types, roles, order and `receiptTracked`, into every new file.
-- Autosave: debounced, written to a temporary file in the same directory and renamed. **Five retries, spaced**, with the save state and the on-screen line while they run and the blocking *Retry* after the fifth.
-- External-modification detection before every write, the displaced version copied into the backup folder, and the line that says so in [§12](../functional/specs/12-storage.md)'s own words with `backupCount` interpolated.
+- Autosave: debounced, written to a temporary file in the same directory and renamed. **Five retries, spaced**, with the save state and the on-screen line while they run and the blocking *Retry* after the fifth. The three figures of D12 come from `AppConfig`.
+- **External-modification detection by SHA-256** (D13): the hash of the bytes is recorded at every read and every write, re-computed from the file before the next write, and a mismatch copies the displaced version into the backup folder and carries on with the session in memory. The line that says so is in [§12](../functional/specs/12-storage.md)'s own words with `backupCount` interpolated.
 - The backup folder beside the ledger, named for it; the three copy names; **rotation as copies arrive, oldest out first**; one copy per session on close, only if something changed, through all four doors.
 - Preferences and the recent-file list through `JsonConfigStore`, in the paths of [§1.6](01-architecture.md#16-where-the-installations-own-files-live).
 - The launch screen ([§12.1](../functional/specs/12-storage.md#121-the-launch-screen)): recent locations, *Open…*, *New file…* which writes the seeded file at the moment the location is chosen, struck-through entries for files that moved. `PlaceholderPage` goes away here.
@@ -92,7 +129,7 @@ The domain model and everything [§12](../functional/specs/12-storage.md) asks o
 
 *Done when* a file can be created, closed, reopened, backed up, rotated, displaced by an external write and refused when unreadable — and the storage layer's tests say so without a screen.
 
-**The file-format document is a deliverable of this phase** and becomes `docs/technical/09-file-format.md`: [§12](../functional/specs/12-storage.md) requires the format documented well enough for the one-off migration script to write it. **To be completed — depends on D1.**
+**The file-format document is a deliverable of this phase** and becomes `docs/technical/09-file-format.md`: [§12](../functional/specs/12-storage.md) requires the format documented well enough for the one-off migration script to write it. With D1 taken it is writable — the shape of the document, every key of every entity with the representation of D3, the `schemaVersion` rule, what makes a file *not understood*, and a worked example small enough to read and complete enough to open.
 
 ### Phase 2 — The shell and the kit
 
@@ -205,7 +242,7 @@ Not repeated in the phases above, and true of all of them.
 
 | Where | Waiting on |
 | --- | --- |
-| The storage design, and `docs/technical/09-file-format.md` | D1 |
+| The field-by-field half of `docs/technical/09-file-format.md` | D3 — the format is settled, how a figure is written inside it is not |
 | [Phase 8 — Update prices](#phase-8--update-prices) | D11 |
 | The chart approach in phases 9 and 11 | D8 |
 
