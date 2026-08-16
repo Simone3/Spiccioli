@@ -1,0 +1,30 @@
+CLAUDE.md
+  s_649ebbb6c7e9a1::t_d22743230ff67a 53-54
+docs/technical/01-architecture.md
+  s_649ebbb6c7e9a1::t_be8b1e37e65764 83
+docs/technical/04-framework.md
+  s_649ebbb6c7e9a1::t_e724d8b2ff7227 32-34,41,44
+docs/technical/08-implementation-plan.md
+  s_649ebbb6c7e9a1::t_b4191bf3a54c02 7,21,23-37,47-73,86,90-91,100,118-120,122-123,132,245
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "cbf46eb6e6667ce68772c4ab6c5555bb11234650",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_649ebbb6c7e9a1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5234b9a9-0531-475e-abdd-5f9f466bccdc",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
