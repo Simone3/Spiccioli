@@ -1,0 +1,24 @@
+CLAUDE.md
+  s_00c7f7361d3b7c::t_9bd4dd2e7ba661 48,53-55,58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "aa3d0a465e449c39fa139985ba0626245a5e690f",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_00c7f7361d3b7c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b08cb41b-4472-4df5-a76f-0c202aef75c4",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
