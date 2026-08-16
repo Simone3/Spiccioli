@@ -1,0 +1,209 @@
+.github/workflows/release.yml
+  s_9f75cf51af342b::t_6854d11a9781d3 1-110
+.gitignore
+  s_9f75cf51af342b::t_c7f25e3449c337 1-158
+.vscode/launch.json
+  s_9f75cf51af342b::t_1c8d87628f45b6 1-32
+.vscode/settings.json
+  s_9f75cf51af342b::t_d48453886d6ddc 1-10
+LICENSE
+  s_9f75cf51af342b::t_2fec429aa48b24 1-201
+assets/icon.svg
+  s_9f75cf51af342b::t_8728b38c4549a7 1-16
+eslint.config.js
+  s_9f75cf51af342b::t_228ac3648bf220 1-544
+forge.config.js
+  s_9f75cf51af342b::t_8754c8a399b681 1-93
+index.html
+  s_9f75cf51af342b::t_e28200004e1b07 1-20
+package.json
+  s_9f75cf51af342b::t_1dbeb49913ec44 1-84
+scripts/build-electron.js
+  s_9f75cf51af342b::t_71fa3600391667 1-13
+scripts/build-icons.js
+  s_9f75cf51af342b::t_16952a315a3c1c 1-200
+scripts/dev.js
+  s_9f75cf51af342b::t_b6091d9597c63d 1-154
+scripts/electron-bundle.js
+  s_9f75cf51af342b::t_906c286137a22f 1-34
+src/components/common/AppErrorBoundary.css
+  s_9f75cf51af342b::t_8175f6b861324f 1-53
+src/components/common/AppErrorBoundary.tsx
+  s_9f75cf51af342b::t_beee3f5c72b57e 1-43
+src/components/common/PlaceholderPage.css
+  s_9f75cf51af342b::t_078f29427161fa 1-34
+src/config/AppConfig.ts
+  s_9f75cf51af342b::t_e8466f021b1f55 1-34
+src/framework/i18n/LanguageResolution.ts
+  s_9f75cf51af342b::t_ad432a50c474a0 1-44
+src/framework/i18n/Translator.ts
+  s_9f75cf51af342b::t_e6847b35606dda 1-148
+src/framework/main/config/BackupLocationManager.ts
+  s_9f75cf51af342b::t_85d06fdbd66c0d 1-166
+src/framework/main/config/JsonConfigStore.ts
+  s_9f75cf51af342b::t_cd91ae79aea5fc 1-46
+src/framework/main/config/RuntimePaths.ts
+  s_9f75cf51af342b::t_d422e707e23349 1-42
+src/framework/main/ipc/BackupLocationIpc.ts
+  s_9f75cf51af342b::t_ddeab731878ffe 1-95
+src/framework/main/ipc/StorageCommandIpc.ts
+  s_9f75cf51af342b::t_90faae578b01be 1-354
+src/framework/main/logging/AppLogger.ts
+  s_9f75cf51af342b::t_2f6077dddd450d 1-363
+src/framework/main/logging/ProcessCrashHandlers.ts
+  s_9f75cf51af342b::t_5c04021542d805 1-69
+src/framework/main/storage/AppDatabase.ts
+  s_9f75cf51af342b::t_fc3871792cfb18 1-263
+src/framework/main/storage/BackupDirectory.ts
+  s_9f75cf51af342b::t_6109839bd72285 1-65
+src/framework/main/storage/BackupScheduler.ts
+  s_9f75cf51af342b::t_0bd363a627f631 1-132
+src/framework/main/storage/DatabaseBackup.ts
+  s_9f75cf51af342b::t_02f6a561271207 1-106
+src/framework/main/storage/DatabaseStorage.ts
+  s_9f75cf51af342b::t_598dcbf8669ec6 1-264
+src/framework/main/storage/InvalidChangeError.ts
+  s_9f75cf51af342b::t_6ab419122feba3 1-29
+src/framework/main/window/WindowLoadTarget.ts
+  s_9f75cf51af342b::t_bf748ad387ed68 1-39
+src/framework/main/window/WindowNavigationGuard.ts
+  s_9f75cf51af342b::t_c89e1006a9d9e0 1-78
+src/framework/preload/IpcBridge.ts
+  s_9f75cf51af342b::t_2b56b583c05ef3 1-27
+src/framework/renderer/ErrorBoundary.tsx
+  s_9f75cf51af342b::t_b1bf940c25f33f 1-71
+src/framework/renderer/StorageQueue.ts
+  s_9f75cf51af342b::t_66c55eadc99df8 1-287
+src/framework/renderer/TranslationContext.tsx
+  s_9f75cf51af342b::t_1680fcbc06ddf1 1-81
+src/framework/types/BackupTypes.ts
+  s_9f75cf51af342b::t_7dc35323107f61 1-48
+src/framework/types/StorageTypes.ts
+  s_9f75cf51af342b::t_24625a5631e4b3 1-70
+src/framework/types/TranslationTypes.ts
+  s_9f75cf51af342b::t_6a26a8479791eb 1-44
+src/framework/utils/DateUtils.ts
+  s_9f75cf51af342b::t_7b911ce2860768 1-206
+src/framework/utils/ErrorUtils.ts
+  s_9f75cf51af342b::t_fd1f8dc9f2439e 1-17
+src/framework/utils/ManuallySortedList.ts
+  s_9f75cf51af342b::t_b0b5a6fa936564 1-156
+src/i18n/TranslationContext.tsx
+  s_9f75cf51af342b::t_2624895e41102d 1-14
+src/i18n/Translations.ts
+  s_9f75cf51af342b::t_602c9c49c61694 1-62
+src/i18n/lang/en.ts
+  s_9f75cf51af342b::t_2f0d8459a94b69 1-31
+src/index.css
+  s_9f75cf51af342b::t_aae6452b5e0690 1-61
+src/index.tsx
+  s_9f75cf51af342b::t_0fd13e12761fec 1-19
+src/main/Main.ts
+  s_9f75cf51af342b::t_0a1724459642ea 1-174
+src/main/config/SpiccioliRuntimePaths.ts
+  s_9f75cf51af342b::t_f3deeaacb8a583 1-36
+src/main/ipc/AppInfoIpc.ts
+  s_9f75cf51af342b::t_4880708b370dd0 1-27
+src/main/preload/Preload.ts
+  s_9f75cf51af342b::t_df398f1b5a9f48 1-11
+src/main/window/WindowLoadTarget.ts
+  s_9f75cf51af342b::t_ae6a2a33a27227 1-40
+src/types/AppInfoIpcChannels.ts
+  s_9f75cf51af342b::t_99e69e36a31adb 1-3
+src/types/AppInfoTypes.ts
+  s_9f75cf51af342b::t_1da7241717be8c 1-13
+src/types/ElectronSquirrelStartup.d.ts
+  s_9f75cf51af342b::t_ce715f757c328d 1-16
+src/vite-env.d.ts
+  s_9f75cf51af342b::t_f0d03e32b066b4 1-11
+tests/framework/AppLogger.test.ts
+  s_9f75cf51af342b::t_5972768214f810 1-401
+tests/framework/BackupLocationManager.test.ts
+  s_9f75cf51af342b::t_f3d5494b3017af 1-298
+tests/framework/BackupScheduler.test.ts
+  s_9f75cf51af342b::t_96e0207b25bff6 1-170
+tests/framework/DatabaseBackup.test.ts
+  s_9f75cf51af342b::t_352a00d5697344 1-198
+tests/framework/DateUtils.test.ts
+  s_9f75cf51af342b::t_0b06ea34091ade 1-115
+tests/framework/ErrorBoundary.test.tsx
+  s_9f75cf51af342b::t_89c4c8689deae0 1-124
+tests/framework/LanguageResolution.test.ts
+  s_9f75cf51af342b::t_602c59a03924c0 1-42
+tests/framework/ManuallySortedList.test.ts
+  s_9f75cf51af342b::t_da7517f5b3b62e 1-303
+tests/framework/ProcessCrashHandlers.test.ts
+  s_9f75cf51af342b::t_474a5abef0c7bf 1-170
+tests/framework/Translator.test.ts
+  s_9f75cf51af342b::t_1ec03fa4b89d92 1-142
+tests/framework/WindowLoadTarget.test.ts
+  s_9f75cf51af342b::t_cabc638a4a70dd 1-36
+tests/framework/WindowNavigationGuard.test.ts
+  s_9f75cf51af342b::t_f08077868a444d 1-131
+tests/main/AppInfoIpc.test.ts
+  s_9f75cf51af342b::t_f8499850d39185 1-81
+tests/main/SpiccioliRuntimePaths.test.ts
+  s_9f75cf51af342b::t_ba7cb62c431d47 1-40
+tests/main/WindowLoadTarget.test.ts
+  s_9f75cf51af342b::t_01e47e4055dffe 1-59
+tests/setupTests.ts
+  s_9f75cf51af342b::t_b96f1a7b9e9839 1-33
+tests/testUtils/TranslationTestFactory.tsx
+  s_9f75cf51af342b::t_b067bb41ad2a10 1-24
+tests/testUtils/index.ts
+  s_9f75cf51af342b::t_abf7a94494bc71 1
+tests/vitest-env.d.ts
+  s_9f75cf51af342b::t_fbf7513ddb7799 1-4
+tsconfig.json
+  s_9f75cf51af342b::t_aa68747ad92ec9 1-28
+vite.config.mts
+  s_9f75cf51af342b::t_f0ef172382eb4c 1-66
+.claude/commands/check.md
+  s_9f75cf51af342b::t_f9ff906e5ca836 1-18
+.claude/commands/sync-docs.md
+  s_9f75cf51af342b::t_85a60d6414c12d 1-20
+.claude/settings.json
+  s_9f75cf51af342b::t_637fb5ec50f9d6 1-43
+CLAUDE.md
+  s_9f75cf51af342b::t_ce66053761b1f3 1-91
+README.md
+  s_9f75cf51af342b::t_12a7e456e9b2a5 2-31
+docs/technical/01-architecture.md
+  s_9f75cf51af342b::t_fffdd8f64a17c6 1-90
+docs/technical/02-repository-map.md
+  s_9f75cf51af342b::t_8d06d84d72f199 1-90
+docs/technical/03-build-and-run.md
+  s_9f75cf51af342b::t_916081145dcd30 1-97
+docs/technical/04-framework.md
+  s_9f75cf51af342b::t_5aad5ecd74a29b 1-63
+docs/technical/05-text-and-languages.md
+  s_9f75cf51af342b::t_939bd92aeda398 1-47
+docs/technical/06-styling.md
+  s_9f75cf51af342b::t_d9d0ec3eeb2418 1-61
+docs/technical/07-testing.md
+  s_9f75cf51af342b::t_4c6856b7b29b19 1-52
+docs/technical/README.md
+  s_9f75cf51af342b::t_98d88c8904e1ba 1-42
+package-lock.json
+  s_9f75cf51af342b::t_abe24d233cf7a2 1-13832
+src/components/common/PlaceholderPage.tsx
+  s_9f75cf51af342b::t_c288aec9045f58 1-56
+tests/components/PlaceholderPage.test.tsx
+  s_9f75cf51af342b::t_d31a6cf9d1a304 1-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "cf74ec12724dc96661c0811f25e1fdf766e74230",
+  "prompts": {},
+  "sessions": {
+    "s_9f75cf51af342b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "30b3a6ba-5947-4a60-bad4-240bbece4095",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
