@@ -17,11 +17,9 @@ There are two documentation sets and they answer different questions.
 
 This file holds only the rules and the commands; the reasoning behind them lives in those two places.
 
-When needed to consult functional and/or technical documentations, start from their respective `README.md` and then read ONLY the sections relevant to the current task.
+When you need either set, start from its `README.md` and then read ONLY the sections relevant to the current task. Always read the relevant `docs/technical/` section before changing an area you have not touched yet in this session.
 
-Code MUST always adhere to `docs/functional/specs`: if any defect or proposed change in the functional specs come out during development let's first discuss them and, only after my approval, we'll amend them. In contrast, `docs/functional/mockups` are guidelines rather than hard specs and can be adapted when needs arise. `docs/functional/why` will usually only be read to retrieve the original rationales when evaluating a change in the functional specs.
-
-Always read the relevant sections of `docs/technical/` before changing an area you have not touched yet in this session.
+The code MUST always adhere to `docs/functional/specs`. If a defect in a specification, or a reason to change one, comes up during development, raise it and stop there: the specification is amended only after the user has approved the change. In contrast, `docs/functional/mockups` are guidelines rather than hard specs and can be adapted when the need arises. `docs/functional/why` is read only to recover the original rationale when a change to a specification is being weighed.
 
 ## Commands
 
@@ -44,10 +42,10 @@ npm test -- tests/main/SomeFile.test.ts
 ## Hard Rules
 
 - Work only in this repository and only on the current branch.
+- Do NOT edit `docs/functional/` unless the change was discussed and approved first.
 - Do NOT edit `TODO.md`.
 - `README.md` is the landing page a user reads: what Spiccioli is and how to install it, and nothing else. Every technical detail belongs in `docs/technical/`, which it links to.
 - Keep `CLAUDE.md` and `docs/technical/` aligned and up to date. If either becomes stale or contradicts the project state, fix it as part of the task.
-- Do NOT edit `docs/functional` unless it was first discussed and approved.
 - Do NOT introduce extra libraries unless you justify them briefly and they clearly reduce work or risk.
 - `package.json` dependencies must use exact versions. No `^` or `~`.
 - Build and test tooling may own the build: Vite bundles the renderer and Vitest runs the tests. Do NOT add an application framework such as Next.js, Remix or Astro: nothing may own routing, rendering or the component model. The application code stays plain React + TypeScript + CSS.
@@ -56,7 +54,7 @@ npm test -- tests/main/SomeFile.test.ts
 - A packaged run always loads the renderer from the built `build/index.html` on disk. The development server URL is read from the environment, so it must never be honoured when `app.isPackaged`: anything able to set an environment variable would otherwise put a page of its own choosing behind the preload bridge. The strict Content-Security-Policy in `index.html` is relaxed for the development server's page only, never for the built one.
 - `src/framework` is reusable scaffolding meant to be lifted into another application as it is. It must NEVER import from `src/components`, `src/contexts`, `src/logic`, `src/main`, `src/types`, `src/utils`, or `src/config`. Anything it needs about Spiccioli is passed in through its options. ESLint enforces this.
 - Nothing leaves the machine except the security identifiers sent to a price provider when the user presses *Update prices* ([§7.6](docs/functional/specs/07-investments.md)). No telemetry, no crash reporting service, no update check.
-- Logs to filesystem must NEVER contain sensitive data like e.g. amounts or transaction descriptions, they must be redacted first.
+- Log files must NEVER contain sensitive data such as amounts or transaction descriptions. Redact it before it is written.
 - Derived data is never stored ([§1](docs/functional/specs/01-premise-and-constraints.md)). Balances, holdings, averages, totals and pairings are recomputed every time they are shown. The category a rule assigns to a transaction is the one deliberate exception, and it stays the only one.
 - Failures that reach the top of the main process must leave a trace and, once the language is resolved, reach the user. A render error must not empty the window. Neither path may be removed without replacing it: a silent failure in a released build is unreportable.
 - `productName` in `package.json` and `packagerConfig.appBundleId` in `forge.config.js` name the folder the preferences and the recent-file list live in, and macOS keeps permissions and window state under the bundle identifier. The makers must keep naming the same executable.
