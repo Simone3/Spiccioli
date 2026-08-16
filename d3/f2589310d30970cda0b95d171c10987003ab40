@@ -1,0 +1,28 @@
+CLAUDE.md
+  s_a085df758753aa::t_a1d4d4ffd1dbbe 49,51
+docs/technical/01-architecture.md
+  s_a085df758753aa::t_d438ecce2fddbc 84
+docs/technical/08-implementation-plan.md
+  s_a085df758753aa::t_2cf5729cfcf30c 35-38,99-115,142,146,149,151,179-180,219,242,256,278
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "d3f2589310d30970cda0b95d171c10987003ab40",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a085df758753aa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8d9fd986-114c-42c5-bd30-db8c9b542fbf",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
