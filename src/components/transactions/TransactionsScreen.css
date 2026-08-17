@@ -1,0 +1,65 @@
+
+/* An amount states its direction in its colour as well as in its sign */
+.transactions-screen-positive {
+	color: var(--colors-positive-text);
+}
+
+.transactions-screen-negative {
+	color: var(--colors-danger-text);
+}
+
+/* The account and the notes are context rather than the fact the row is about, so they are stated more quietly */
+.transactions-screen-account,
+.transactions-screen-notes {
+	color: var(--colors-text-secondary);
+}
+
+.transactions-screen-receipt {
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.transactions-screen-receipt-checked {
+	color: var(--colors-positive-text);
+}
+
+.transactions-screen-receipt-pending {
+	color: var(--colors-accent-primary);
+}
+
+.transactions-screen-receipt-na {
+	color: var(--colors-text-secondary);
+}
+
+.transactions-screen-row-selected td {
+	background-color: var(--colors-interactive-active-background);
+}
+
+.transactions-screen-checkbox {
+	width: 14px;
+	height: 14px;
+	margin: 0;
+	accent-color: var(--colors-accent-primary);
+	cursor: pointer;
+}
+
+/* The two ends of the period and of the amount range, which are one filter each */
+.transactions-screen-filter-pair {
+	display: flex;
+	gap: 6px;
+	align-items: flex-start;
+}
+
+.transactions-screen-pager {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	justify-content: flex-end;
+	padding-top: 4px;
+}
+
+.transactions-screen-pager-position {
+	font-size: 12px;
+	color: var(--colors-text-secondary);
+	font-variant-numeric: tabular-nums;
+}

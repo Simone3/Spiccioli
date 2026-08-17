@@ -52,7 +52,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `config/AppConfig.ts` | Every tunable constant, shared by both processes — so it must stay free of Node and Electron imports |
 | `components/SpiccioliApp.tsx` | Which of the two states the application is in: no file, or one open |
 | `components/common/AppErrorBoundary.tsx` `.css` | The crash screen the renderer draws over itself, and the report it sends to the log |
-| `components/common/` | The kit every screen is made of, one `.tsx` and one `.css` per control: `AppButton` (and the link that looks like one), `DecimalField` with the `NumericFields` it is used as, `TextField`, `DateField`, `SelectField`, `DataTable`, `RowMenu`, `TabBar`, `FormDialog` with the `FormField` rows it holds, `ConfirmDialog`, `InlineEditCell`, `FilterBar`, `EmptyState`, `Chip` |
+| `components/common/` | The kit every screen is made of, one `.tsx` and one `.css` per control: `AppButton` (and the link that looks like one), `DecimalField` with the `NumericFields` it is used as, `TextField`, `DateField`, `SelectField`, `DataTable`, `RowMenu`, `TabBar`, `FormDialog` with the `FormField` rows it holds, `ConfirmDialog`, `InlineEditCell` with the `EditableCell` that holds the value being typed into one, `FilterBar`, `EmptyState`, `Chip` |
 | `components/shell/AppRoutes.ts` | The nine paths and the eight sidebar entries, written down once |
 | `components/shell/AppShell.tsx` `.css` | The sidebar and the routed screen beside it, and the return to Portfolio when the open file changes |
 | `components/shell/Sidebar.tsx` `.css` | The eight screens, the failing-check badge and the save state ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)) |
@@ -63,13 +63,18 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/session/WriteFailurePanel.tsx` `.css` | The blocking message after five failed attempts, which belongs to no screen |
 | `components/settings/SettingsScreen.tsx` `.css` | The ten preferences, the refusals, and the two read-only paths ([§10](../functional/specs/10-settings.md)) |
 | `components/accounts/` | The Accounts screen ([§4](../functional/specs/04-accounts.md)): the two tabs and their tables, the two forms, and `AccountPicker` — **the one account picker in the application**, which every later screen takes for a transaction's, a trade's or a filter's |
-| `components/portfolio/` `transactions/` `import/` `categories/` `investments/` `salaries/` `checks/` | One folder per screen. Each holds its shell and its empty state until the phase that builds it |
+| `components/transactions/` | The Transactions screen ([§5](../functional/specs/05-transactions.md)): the list with every cell edited in place, the seven filters, the pager, and the add form |
+| `components/categories/` | The Categories screen, still a shell, and `CategoryPicker` — **the one category picker in the application**, which a transaction, a filter and later a rule all take |
+| `components/portfolio/` `import/` `investments/` `salaries/` `checks/` | One folder per screen. Each holds its shell and its empty state until the phase that builds it |
 | `contexts/LedgerContext.tsx` | The ledger in memory, the autosave, the save state, the storage lines |
 | `contexts/PreferencesContext.tsx` | The ten preferences, read once and written as they change, and the formatter they define |
 | `i18n/Translations.ts` | Turns a language into a translator; the bundle registry |
 | `i18n/TranslationContext.tsx` | The React binding of that translator |
 | `i18n/lang/en.ts` | Every word the user can read |
 | `logic/accounts/Accounts.ts` | Everything pure about accounts and institutions: the two orderings, *Institution · Account*, the two counts, the uniqueness rules and what an account picker offers |
+| `logic/categories/Categories.ts` | The one category ordering — alphabetical, which every picker, filter and list but the report reads — and the index a chip reaches a name through |
+| `logic/categories/Categorisation.ts` | The rule engine: what a rule compares, which rule claims a description, and the pass that keeps an `automatic` category the one the rules produce |
+| `logic/transactions/Transactions.ts` | Everything pure about the list: the one ordering, the seven filters, the footer total, the pages, and what a duplicate carries over |
 | `logic/format/DateFormat.ts` `NumberFormat.ts` | Printing a day and printing a figure, the way the preferences say |
 | `logic/format/Formatter.ts` | Both of those, bound once to the preferences in force |
 | `logic/format/FilePathDisplay.ts` | Reading a path apart for display |

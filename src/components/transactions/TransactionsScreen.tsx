@@ -1,29 +1,354 @@
-import type { ReactElement } from 'react';
-import { AppLinkButton } from 'src/components/common/AppButton';
+import 'src/components/transactions/TransactionsScreen.css';
+import { useMemo, useState, type ReactElement } from 'react';
+import { AppButton, AppLinkButton } from 'src/components/common/AppButton';
+import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { EmptyState } from 'src/components/common/EmptyState';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
-import { ScreenLayout, ScreenNotBuiltYet } from 'src/components/shell/ScreenLayout';
+import { ScreenLayout } from 'src/components/shell/ScreenLayout';
+import { TransactionFiltersBar } from 'src/components/transactions/TransactionFilters';
+import { TransactionForm, type TransactionFormValues } from 'src/components/transactions/TransactionForm';
+import { TransactionsPager } from 'src/components/transactions/TransactionsPager';
+import { TransactionsTable } from 'src/components/transactions/TransactionsTable';
 import { useLedger } from 'src/contexts/LedgerContext';
+import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
+import { indexInstitutions } from 'src/logic/accounts/Accounts';
+import { indexCategories } from 'src/logic/categories/Categories';
+import { categoriseTransaction } from 'src/logic/categories/Categorisation';
+import { createLedgerId, nextInsertionSeq } from 'src/logic/ledger/LedgerDocument';
+import {
+	duplicateTransaction,
+	filterTransactions,
+	isAnyTransactionFilterSet,
+	lastTransactionPage,
+	NO_TRANSACTION_FILTERS,
+	pageHoldingTransaction,
+	sortTransactions,
+	sumTransactionAmounts,
+	transactionPage,
+	transactionPageCount,
+	type TransactionFilters
+} from 'src/logic/transactions/Transactions';
+import type { Account, LedgerId, Transaction } from 'src/types/LedgerTypes';
 
 /**
- * Transactions.
+ * Transactions: the whole history in one order, seven filters over it, and every cell edited where it sits.
  *
- * The list, the seven filters and the inline editing are the phase after Accounts; what is here is the empty state, which names
- * both ways a row gets into the file.
+ * **The order is fixed and the screen opens on its last page**, so the most recent rows are in view and the pager is how the
+ * history is walked back. **Changing a filter lands on the last page of what it now matches** — a page number carried over from
+ * another filter would point at a different part of a different list.
+ *
+ * **The categorisation invariant is restored on every write from here**: a row created, duplicated, switched back to *Automatic*
+ * or given a new description carries whatever the rule list produces, and a category set by hand is never touched by any of it.
+ *
+ * **A selection survives paging and nothing else.** Changing a filter, editing a cell, duplicating, deleting and the bulk delete
+ * itself all clear it.
+ */
+
+// The one bulk action, which confirms once with the count and the total because there is no undo
+interface BulkDeletion {
+	transactions: readonly Transaction[];
+}
+
+/**
+ * The Transactions screen.
  * @returns The screen.
  */
 export const TransactionsScreen = (): ReactElement => {
-	const { t } = useTranslator();
-	const { document } = useLedger();
+	const translator = useTranslator();
+	const { t } = translator;
+	const formatter = useFormatter();
+	const { document, updateDocument } = useLedger();
+	const [ filters, setFilters ] = useState<TransactionFilters>(NO_TRANSACTION_FILTERS);
+	const [ selection, setSelection ] = useState<ReadonlySet<LedgerId>>(new Set<LedgerId>());
+	const [ rangeAnchorId, setRangeAnchorId ] = useState<LedgerId | undefined>(undefined);
+	const [ isAdding, setIsAdding ] = useState(false);
+	const [ transactionToDelete, setTransactionToDelete ] = useState<Transaction | undefined>(undefined);
+	const [ bulkDeletion, setBulkDeletion ] = useState<BulkDeletion | undefined>(undefined);
+
+	const transactions = useMemo(() => {
+		return document?.transactions ?? [];
+	}, [ document ]);
+
+	const rules = useMemo(() => {
+		return document?.rules ?? [];
+	}, [ document ]);
+
+	const ordered = useMemo(() => {
+		return sortTransactions(transactions);
+	}, [ transactions ]);
+
+	const matching = useMemo(() => {
+		return filterTransactions(ordered, filters);
+	}, [ filters, ordered ]);
+
+	// The last page of everything, which is where the screen opens
+	const [ requestedPage, setRequestedPage ] = useState(() => {
+		return lastTransactionPage(transactions.length);
+	});
+
+	const accounts = useMemo((): ReadonlyMap<LedgerId, Account> => {
+		return new Map((document?.accounts ?? []).map((account) => {
+			return [ account.id, account ];
+		}));
+	}, [ document ]);
+
+	const institutions = useMemo(() => {
+		return indexInstitutions(document?.institutions ?? []);
+	}, [ document ]);
+
+	const categories = useMemo(() => {
+		return indexCategories(document?.categories ?? []);
+	}, [ document ]);
+
+	const pageCount = transactionPageCount(matching.length);
+	const page = Math.min(requestedPage, pageCount);
+	const rows = transactionPage(matching, page);
+	const isFiltered = isAnyTransactionFilterSet(filters);
+	const selected = transactions.filter((transaction) => {
+		return selection.has(transaction.id);
+	});
+
+	const clearSelection = (): void => {
+		setSelection(new Set<LedgerId>());
+		setRangeAnchorId(undefined);
+	};
+
+	// Changing a filter recomputes the position rather than keeping it, and every filter change clears the selection
+	const changeFilters = (next: TransactionFilters): void => {
+		setFilters(next);
+		setRequestedPage(lastTransactionPage(filterTransactions(ordered, next).length));
+		clearSelection();
+	};
+
+	const toggleRow = (id: LedgerId, extend: boolean): void => {
+		const next = new Set(selection);
+		const anchorPosition = rangeAnchorId === undefined ?
+			-1 :
+			matching.findIndex((transaction) => {
+				return transaction.id === rangeAnchorId;
+			});
+		const position = matching.findIndex((transaction) => {
+			return transaction.id === id;
+		});
+
+		if(extend && anchorPosition >= 0 && position >= 0) {
+			const start = Math.min(anchorPosition, position);
+			const end = Math.max(anchorPosition, position);
+
+			for(const transaction of matching.slice(start, end + 1)) {
+				next.add(transaction.id);
+			}
+		}
+		else if(next.has(id)) {
+			next.delete(id);
+		}
+		else {
+			next.add(id);
+		}
+
+		setSelection(next);
+		setRangeAnchorId(id);
+	};
+
+	// The header's checkbox reaches everything the filters match and not just the page in view
+	const toggleEverything = (): void => {
+		if(matching.length > 0 && selected.length === matching.length) {
+			clearSelection();
+
+			return;
+		}
+
+		setSelection(new Set(matching.map((transaction) => {
+			return transaction.id;
+		})));
+		setRangeAnchorId(undefined);
+	};
+
+	// Every write from this screen goes through the pass, which is what keeps an automatic row's category the one the rules produce
+	const editTransaction = (transaction: Transaction, changes: Partial<Transaction>): void => {
+		updateDocument((current) => {
+			return {
+				...current,
+				transactions: current.transactions.map((candidate) => {
+					return candidate.id === transaction.id ? categoriseTransaction({ ...candidate, ...changes }, current.rules) : candidate;
+				})
+			};
+		});
+		clearSelection();
+	};
+
+	// A row the screen has just written is followed to wherever the ordering put it
+	const writeAndFollow = (created: Transaction): void => {
+		updateDocument((current) => {
+			return { ...current, transactions: [ ...current.transactions, created ] };
+		});
+		setRequestedPage(pageHoldingTransaction(filterTransactions(sortTransactions([ ...transactions, created ]), filters), created.id));
+		clearSelection();
+	};
+
+	const addTransaction = (values: TransactionFormValues, addAnother: boolean): void => {
+		writeAndFollow(categoriseTransaction({
+			id: createLedgerId(),
+			...values,
+			insertionSeq: nextInsertionSeq(transactions)
+		}, rules));
+
+		if(!addAnother) {
+			setIsAdding(false);
+		}
+	};
+
+	const duplicate = (transaction: Transaction): void => {
+		writeAndFollow(duplicateTransaction({ transaction, transactions, rules }));
+	};
+
+	const deleteTransactions = (going: readonly Transaction[]): void => {
+		const identities = new Set(going.map((transaction) => {
+			return transaction.id;
+		}));
+
+		updateDocument((current) => {
+			return {
+				...current,
+				transactions: current.transactions.filter((candidate) => {
+					return !identities.has(candidate.id);
+				})
+			};
+		});
+		clearSelection();
+	};
+
+	const results = t('transactions.resultCount', { count: matching.length });
+	const total = formatter.amount(sumTransactionAmounts(matching), true);
+	const footer = selected.length > 0 ?
+		t('transactions.footerWithSelection', {
+			results,
+			selected: t('transactions.selectedCount', { count: selected.length }),
+			total
+		}) :
+		t('transactions.footer', { results, total });
+
+	const subtitle = isFiltered ?
+		t('transactions.summaryFiltered', { shown: formatter.integer(matching.length), total: formatter.integer(transactions.length) }) :
+		t('transactions.count', { count: transactions.length });
+
+	const addButton = (
+		<AppButton
+			onClick={() => {
+				setIsAdding(true);
+			}}>
+			{t('transactions.add')}
+		</AppButton>
+	);
+
+	const importButton = <AppLinkButton variant='primary' to={APP_ROUTES.bulkImport}>{t('transactions.bulkImport')}</AppLinkButton>;
+
+	const actions = (
+		<>
+			{selected.length > 0 && (
+				<AppButton
+					variant='ghost'
+					onClick={() => {
+						setBulkDeletion({ transactions: selected });
+					}}>
+					{t('transactions.bulkDelete', { count: selected.length })}
+				</AppButton>
+			)}
+			{addButton}
+			{importButton}
+		</>
+	);
 
 	return (
-		<ScreenLayout title={t('screens.transactions')}>
-			{document && document.transactions.length === 0 ?
+		<ScreenLayout
+			title={t('screens.transactions')}
+			subtitle={transactions.length === 0 ? undefined : subtitle}
+			actions={transactions.length === 0 ? undefined : actions}>
+			{transactions.length === 0 ?
 				<EmptyState message={t('emptyState.transactions')}>
+					{addButton}
 					<AppLinkButton to={APP_ROUTES.bulkImport}>{t('emptyState.goToImport')}</AppLinkButton>
 				</EmptyState> :
-				<ScreenNotBuiltYet/>}
+				<>
+					<TransactionFiltersBar
+						filters={filters}
+						onChange={changeFilters}
+						onClear={() => {
+							changeFilters(NO_TRANSACTION_FILTERS);
+						}}/>
+
+					{matching.length === 0 ?
+						<EmptyState message={t('emptyState.transactionsFiltered')}>
+							<AppButton
+								onClick={() => {
+									changeFilters(NO_TRANSACTION_FILTERS);
+								}}>
+								{t('filters.clear')}
+							</AppButton>
+						</EmptyState> :
+						<>
+							<TransactionsTable
+								transactions={rows}
+								accounts={accounts}
+								institutions={institutions}
+								categories={categories}
+								selection={selection}
+								isEverythingSelected={selected.length === matching.length}
+								isAnythingSelected={selected.length > 0}
+								footer={footer}
+								onToggleRow={toggleRow}
+								onToggleEverything={toggleEverything}
+								onEdit={editTransaction}
+								onDuplicate={duplicate}
+								onDelete={setTransactionToDelete}/>
+							<TransactionsPager page={page} pageCount={pageCount} onChange={setRequestedPage}/>
+						</>}
+				</>}
+
+			{isAdding && (
+				<TransactionForm
+					onSave={addTransaction}
+					onCancel={() => {
+						setIsAdding(false);
+					}}/>
+			)}
+
+			{transactionToDelete && (
+				<ConfirmDialog
+					danger
+					title={t('transactions.deleteTitle')}
+					message={t('transactions.deleteMessage', {
+						description: transactionToDelete.description,
+						amount: formatter.amount(transactionToDelete.amount, true)
+					})}
+					confirmLabel={t('transactions.deleteConfirm')}
+					onConfirm={() => {
+						deleteTransactions([ transactionToDelete ]);
+						setTransactionToDelete(undefined);
+					}}
+					onCancel={() => {
+						setTransactionToDelete(undefined);
+					}}/>
+			)}
+
+			{bulkDeletion && (
+				<ConfirmDialog
+					danger
+					title={t('transactions.bulkDeleteTitle')}
+					message={t('transactions.bulkDeleteMessage', {
+						count: bulkDeletion.transactions.length,
+						total: formatter.amount(sumTransactionAmounts(bulkDeletion.transactions), true)
+					})}
+					confirmLabel={t('transactions.bulkDeleteConfirm')}
+					onConfirm={() => {
+						deleteTransactions(bulkDeletion.transactions);
+						setBulkDeletion(undefined);
+					}}
+					onCancel={() => {
+						setBulkDeletion(undefined);
+					}}/>
+			)}
 		</ScreenLayout>
 	);
 };

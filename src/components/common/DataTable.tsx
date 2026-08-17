@@ -11,7 +11,9 @@ import type { ReactElement, ReactNode } from 'react';
 
 export interface DataTableColumn<TRow> {
 	key: string;
-	header: string;
+
+	// What the column is called. A control rather than a word where the column holds one, which today is the selection checkbox.
+	header: ReactNode;
 
 	// Right-aligned, in tabular figures: every amount, quantity, price and count
 	numeric?: boolean;

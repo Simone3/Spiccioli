@@ -23,7 +23,11 @@ export interface AccountPickerProps {
 	// The account chosen, or undefined while none is
 	value: LedgerId | undefined;
 
-	onChange: (accountId: LedgerId) => void;
+	// Called with undefined only where choosing nothing is a value, which is a filter's "All" and never a form's empty field
+	onChange: (accountId: LedgerId | undefined) => void;
+
+	// Whether the entry that chooses no account is a choice. A form's picker opens on it and cannot be put back to it.
+	clearable?: boolean;
 
 	// Which half of the boundary this picker is on
 	side: AccountSide;
@@ -44,6 +48,7 @@ export interface AccountPickerProps {
  * @param props The picker's props.
  * @param props.value The account chosen, where one is.
  * @param props.onChange What to do with the account chosen.
+ * @param props.clearable Whether choosing no account is itself a choice.
  * @param props.side Which half of the cash/brokerage boundary it offers.
  * @param props.label What the control is called.
  * @param props.placeholder What it reads while nothing is chosen.
@@ -51,7 +56,7 @@ export interface AccountPickerProps {
  * @param props.refusal Why a choice is needed, where the form says one is.
  * @returns The picker.
  */
-export const AccountPicker = ({ value, onChange, side, label, placeholder, disabled, refusal }: AccountPickerProps): ReactElement => {
+export const AccountPicker = ({ value, onChange, clearable = false, side, label, placeholder, disabled, refusal }: AccountPickerProps): ReactElement => {
 	const translator = useTranslator();
 	const { document } = useLedger();
 
@@ -78,6 +83,9 @@ export const AccountPicker = ({ value, onChange, side, label, placeholder, disab
 			onChange={(chosen) => {
 				if(chosen !== NOTHING_CHOSEN) {
 					onChange(chosen);
+				}
+				else if(clearable) {
+					onChange(undefined);
 				}
 			}}/>
 	);

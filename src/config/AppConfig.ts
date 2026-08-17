@@ -71,6 +71,11 @@ export const SHUTDOWN_CONFIG = {
 	pollIntervalMs: 50
 } as const;
 
+// The one paginated table in the application. Every other table is shown in full, so this is the only page size there is.
+export const TRANSACTIONS_CONFIG = {
+	rowsPerPage: 50
+} as const;
+
 // A render error is worded by the renderer, so the lengths the main process will write are fixed here rather than there: nothing the
 // renderer sends can grow a log line without limit
 export const DIAGNOSTICS_CONFIG = {

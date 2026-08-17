@@ -6,12 +6,13 @@ import type { ReactElement, ReactNode } from 'react';
  * It states something and does nothing, so it is never a control and never carries a click.
  */
 
-export type ChipTone = 'neutral' | 'quiet' | 'accent' | 'danger';
+export type ChipTone = 'neutral' | 'quiet' | 'accent' | 'provenance' | 'danger';
 
 const TONE_CLASS_NAMES: Record<ChipTone, string> = {
 	neutral: '',
 	quiet: ' chip-quiet',
 	accent: ' chip-accent',
+	provenance: ' chip-provenance',
 	danger: ' chip-danger'
 };
 

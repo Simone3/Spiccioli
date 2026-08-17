@@ -1,0 +1,152 @@
+import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { makeAccount, makeInstitution, makeRule, makeSeededDocument, makeTransaction, renderOpenLedger } from '../testUtils';
+import type { LedgerDocument } from 'src/types/LedgerTypes';
+
+const withRecords = (overrides: Partial<LedgerDocument> = {}): LedgerDocument => {
+	return {
+		...makeSeededDocument(),
+		institutions: [ makeInstitution() ],
+		accounts: [ makeAccount() ],
+		...overrides
+	};
+};
+
+const openTransactions = async(document: LedgerDocument = withRecords()): Promise<void> => {
+	await renderOpenLedger(document);
+	await userEvent.click(screen.getByRole('link', { name: 'Transactions' }));
+};
+
+// Every picker on the filter bar carries the categories and the receipt states as options, so a query about a row is asked of the table
+const table = (): HTMLElement => {
+	return screen.getByRole('table', { name: 'Transactions' });
+};
+
+const groceries = makeTransaction({
+	id: 'groceries',
+	date: '2026-08-03',
+	amount: -8731,
+	description: 'PAGAMENTO POS ESSELUNGA MILANO',
+	categoryId: 'groceries',
+	insertionSeq: 1
+});
+
+const salary = makeTransaction({
+	id: 'salary',
+	date: '2026-08-01',
+	amount: 231000,
+	description: 'STIPENDIO LUGLIO 2026',
+	categoryId: 'salary',
+	categorySource: 'manual',
+	insertionSeq: 2
+});
+
+describe('the Transactions screen', () => {
+	test('names both ways a row gets into the file while there are none', async() => {
+		await openTransactions();
+
+		expect(screen.getByText('Import a bank export, or add a row by hand.')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Add transaction' })).toBeInTheDocument();
+	});
+
+	test('shows the history in its one order, with the footer totalling what is on screen', async() => {
+		await openTransactions(withRecords({ transactions: [ groceries, salary ] }));
+
+		const rows = within(table()).getAllByRole('row');
+
+		expect(within(rows[1]).getByText('STIPENDIO LUGLIO 2026')).toBeInTheDocument();
+		expect(within(rows[2]).getByText('PAGAMENTO POS ESSELUNGA MILANO')).toBeInTheDocument();
+		expect(screen.getByText('2 results · + € 2.222,69')).toBeInTheDocument();
+	});
+
+	test('records a transaction, categorised by the rules the file holds', async() => {
+		await openTransactions(withRecords({ rules: [ makeRule({ substring: 'ESSELUNGA', categoryId: 'groceries' }) ] }));
+		await userEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
+		await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Account' }), 'account-1');
+		await userEvent.type(screen.getByRole('textbox', { name: 'Description' }), 'PAGAMENTO POS ESSELUNGA');
+		await userEvent.type(screen.getByRole('textbox', { name: 'Amount' }), '-42,50');
+		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+		expect(within(table()).getByText('PAGAMENTO POS ESSELUNGA')).toBeInTheDocument();
+		expect(within(table()).getByText('Groceries')).toBeInTheDocument();
+		expect(screen.getByText('1 result · − € 42,50')).toBeInTheDocument();
+	});
+
+	test('re-runs the rules when the description of an automatic row is edited', async() => {
+		await openTransactions(withRecords({
+			transactions: [ makeTransaction({ categoryId: null, description: 'ADDEBITO DIVERSI 4471' }) ],
+			rules: [ makeRule({ substring: 'ENEL', categoryId: 'electricity' }) ]
+		}));
+
+		expect(within(table()).getByText('no category')).toBeInTheDocument();
+
+		await userEvent.click(screen.getByRole('button', { name: 'Edit the description of ADDEBITO DIVERSI 4471' }));
+		await userEvent.clear(screen.getByRole('textbox', { name: 'Description' }));
+		await userEvent.type(screen.getByRole('textbox', { name: 'Description' }), 'ADDEBITO SDD ENEL ENERGIA');
+		await userEvent.click(within(table()).getByRole('button', { name: 'Save' }));
+
+		expect(within(table()).getByText('Electricity')).toBeInTheDocument();
+	});
+
+	test('keeps a refused value out and leaves the row exactly as it was', async() => {
+		await openTransactions(withRecords({ transactions: [ groceries ] }));
+		await userEvent.click(screen.getByRole('button', { name: 'Edit the description of PAGAMENTO POS ESSELUNGA MILANO' }));
+		await userEvent.clear(screen.getByRole('textbox', { name: 'Description' }));
+		await userEvent.click(within(table()).getByRole('button', { name: 'Save' }));
+
+		expect(screen.getByRole('alert')).toHaveTextContent('This is required.');
+
+		await userEvent.click(within(table()).getByRole('button', { name: 'Cancel' }));
+
+		expect(within(table()).getByText('PAGAMENTO POS ESSELUNGA MILANO')).toBeInTheDocument();
+	});
+
+	test('hands a row back to the rules, which is what Automatic does', async() => {
+		await openTransactions(withRecords({
+			transactions: [ salary ],
+			rules: [ makeRule({ substring: 'STIPENDIO', categoryId: 'other-income' }) ]
+		}));
+
+		expect(within(table()).getByText('Salary')).toBeInTheDocument();
+
+		await userEvent.click(screen.getByRole('button', { name: 'Edit the category of STIPENDIO LUGLIO 2026' }));
+		await userEvent.selectOptions(within(table()).getByRole('combobox', { name: 'Category' }), 'automatic');
+		await userEvent.click(within(table()).getByRole('button', { name: 'Save' }));
+
+		expect(within(table()).getByText('Other income')).toBeInTheDocument();
+	});
+
+	test('says a filter is what is hiding the rows, and offers to clear it', async() => {
+		await openTransactions(withRecords({ transactions: [ groceries, salary ] }));
+		await userEvent.type(screen.getByRole('textbox', { name: 'Search' }), 'AFFITTO');
+
+		expect(screen.getByText('No transaction matches these filters.')).toBeInTheDocument();
+
+		await userEvent.click(screen.getAllByRole('button', { name: 'Clear filters' })[0]);
+
+		expect(within(table()).getByText('PAGAMENTO POS ESSELUNGA MILANO')).toBeInTheDocument();
+	});
+
+	test('duplicates a row, resetting the receipt state and taking a new sequence', async() => {
+		await openTransactions(withRecords({ transactions: [ makeTransaction({ ...groceries, receiptState: 'checked' }) ] }));
+		await userEvent.click(screen.getByRole('button', { name: 'What can be done to PAGAMENTO POS ESSELUNGA MILANO' }));
+		await userEvent.click(screen.getByRole('menuitem', { name: 'Duplicate' }));
+
+		expect(within(table()).getAllByText('PAGAMENTO POS ESSELUNGA MILANO')).toHaveLength(2);
+		expect(within(table()).getByText('checked')).toBeInTheDocument();
+		expect(within(table()).getByText('N/A')).toBeInTheDocument();
+	});
+
+	test('deletes in bulk, once the confirmation says the count and the total', async() => {
+		await openTransactions(withRecords({ transactions: [ groceries, salary ] }));
+		await userEvent.click(screen.getByRole('checkbox', { name: 'Select every transaction these filters match' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Delete 2 selected' }));
+
+		expect(screen.getByRole('dialog')).toHaveTextContent('Delete 2 transactions totalling + € 2.222,69? There is no undo.');
+
+		await userEvent.click(screen.getByRole('button', { name: 'Delete transactions' }));
+
+		expect(screen.getByText('Import a bank export, or add a row by hand.')).toBeInTheDocument();
+	});
+});

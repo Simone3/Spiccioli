@@ -26,6 +26,14 @@ body {
 	--colors-warn: #FFA500;
 	--colors-disabled: #808080;
 
+	/* An amount states its direction in its colour as well as in its sign: money in is green, money out is the danger red */
+	--colors-positive-text: #6FBE8C;
+
+	/* Where a category came from rather than whether it is right: violet marks the one a rule assigned */
+	--colors-provenance-text: #A99AD6;
+	--colors-provenance-border: rgba(169, 154, 214, 0.35);
+	--colors-provenance-background-muted: rgba(169, 154, 214, 0.12);
+
 	/* Fonts */
 	--font-family: Inter, system-ui, sans-serif;
 

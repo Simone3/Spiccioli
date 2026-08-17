@@ -88,6 +88,7 @@ export const EN_TRANSLATIONS = {
 		accounts: 'Add the first account — a current account is the usual place to start.',
 		institutions: 'Only a Cash account does without one — that is what physical cash is. Add one when a bank turns up.',
 		transactions: 'Import a bank export, or add a row by hand.',
+		transactionsFiltered: 'No transaction matches these filters.',
 		bulkImport: 'There is no account to import into yet. Add a cash account first, and the import will offer it.',
 		categories: 'Nothing is categorised automatically yet — add a rule, then apply the list and see what it would catch.',
 		investments: 'Record a purchase to start tracking holdings.',
@@ -227,6 +228,115 @@ export const EN_TRANSLATIONS = {
 		}
 	},
 
+	// The Transactions screen: the whole history in one order, seven filters over it, and every cell edited where it sits
+	transactions: {
+		add: 'Add transaction',
+		bulkImport: 'Bulk import',
+		table: 'Transactions',
+		count: {
+			one: '1 transaction',
+			other: '{count} transactions'
+		},
+		summaryFiltered: '{shown} of {total} transactions',
+		resultCount: {
+			one: '1 result',
+			other: '{count} results'
+		},
+		selectedCount: '{count} selected',
+		footer: '{results} · {total}',
+		footerWithSelection: '{results} · {selected} · {total}',
+		columns: {
+			date: 'Date',
+			account: 'Account',
+			description: 'Description',
+			amount: 'Amount',
+			category: 'Category',
+			receipt: 'Receipt',
+			notes: 'Notes'
+		},
+
+		// A cell is opened by the control that reads it, so each one says which row and which field it belongs to
+		edit: {
+			date: 'Edit the date of {description}',
+			account: 'Edit the account of {description}',
+			description: 'Edit the description of {description}',
+			amount: 'Edit the amount of {description}',
+			category: 'Edit the category of {description}',
+			receipt: 'Edit the receipt state of {description}',
+			notes: 'Edit the notes of {description}'
+		},
+		noCategory: 'no category',
+		noNotes: 'Add a note',
+		select: 'Select {description}',
+		selectAll: 'Select every transaction these filters match',
+		rowMenu: 'What can be done to {description}',
+		deleteTitle: 'Delete this transaction?',
+		deleteMessage: 'Delete {description} of {amount}? There is no undo.',
+		deleteConfirm: 'Delete transaction',
+		bulkDelete: 'Delete {count} selected',
+		bulkDeleteTitle: 'Delete these transactions?',
+		bulkDeleteMessage: {
+			one: 'Delete 1 transaction totalling {total}? There is no undo.',
+			other: 'Delete {count} transactions totalling {total}? There is no undo.'
+		},
+		bulkDeleteConfirm: 'Delete transactions',
+
+		// The one paginated table in the application, and it opens on its last page so the most recent rows are in view
+		pager: {
+			label: 'Pages',
+			position: 'Page {page} of {pages} · {rows} per page',
+			previous: 'Previous page',
+			next: 'Next page'
+		},
+		filters: {
+			account: 'Account',
+			period: 'Period',
+			from: 'From',
+			to: 'To',
+			category: 'Category',
+			setBy: 'Set by',
+			setByAnything: 'Anything',
+			setByRule: 'A rule',
+			setByHand: 'By hand',
+			amount: 'Amount',
+			amountFrom: 'Amount from',
+			amountTo: 'Amount to',
+			receipt: 'Receipt',
+			receiptAny: 'Any',
+			search: 'Search',
+			searchPlaceholder: 'Search description…',
+			accountAll: 'All'
+		},
+		form: {
+			addTitle: 'Add transaction',
+			account: 'Account',
+			accountChoose: 'Choose an account',
+			date: 'Date',
+			description: 'Description',
+			descriptionPlaceholder: 'e.g. RIMBORSO SPESE VIAGGIO',
+			amount: 'Amount',
+			amountHint: 'Signed: money out is negative, and zero is a legal amount.',
+			category: 'Category',
+			receipt: 'Receipt',
+			notes: 'Notes',
+			saveAndAddAnother: 'Save and add another'
+		}
+	},
+
+	// The three receipt states, written the same way wherever they are shown. The stored "na" is never one of them.
+	receiptStates: {
+		pending: 'pending',
+		checked: 'checked',
+		na: 'N/A'
+	},
+
+	// The category picker, and the two entries that are not categories: one on a transaction, one on a filter
+	categoryPicker: {
+		automatic: 'Automatic (let rules decide)',
+		uncategorised: 'Uncategorised',
+		all: 'All'
+	},
+
 	// The preferences, which belong to the installation and not to the open file
 	settings: {
 		preferenceCount: {
@@ -290,6 +400,7 @@ export const EN_TRANSLATIONS = {
 	rowMenu: {
 		nothingToDo: 'Nothing to do here',
 		edit: 'Edit',
+		duplicate: 'Duplicate',
 		delete: 'Delete'
 	},
 

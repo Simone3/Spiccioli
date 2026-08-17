@@ -27,7 +27,7 @@ The groups are:
 | Group | What it covers |
 | --- | --- |
 | Main | Backgrounds, text, accent, borders, overlays and the two interactive backgrounds |
-| States | Danger in its several strengths, warning, disabled |
+| States | Danger in its several strengths, warning, disabled, the green a positive amount is printed in, and the violet that marks a category a rule assigned rather than one the user set |
 | Fonts | The one family: Inter, self-hosted through `@fontsource/inter`, with a system fallback |
 | Focus | The one ring, described below |
 

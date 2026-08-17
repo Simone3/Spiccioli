@@ -25,8 +25,16 @@ export interface FormDialogProps {
 	// Whether the form holds a record that can be written. A form that cannot be saved states why beside the offending field.
 	canSave: boolean;
 
+	// A second way of saving, where the form has one: "Save and add another". It is offered on the same terms as "Save".
+	secondaryAction?: FormDialogAction;
+
 	onSave: () => void;
 	onCancel: () => void;
+}
+
+export interface FormDialogAction {
+	label: string;
+	onSelect: () => void;
 }
 
 export interface FormFieldProps {
@@ -71,11 +79,12 @@ export const FormField = ({ label, children, hint, refusal }: FormFieldProps): R
  * @param props.subtitle Where the form was opened from, where it needs saying.
  * @param props.children The fields.
  * @param props.canSave Whether what the form holds can be written.
+ * @param props.secondaryAction The form's second way of saving, where it has one.
  * @param props.onSave What saving does.
  * @param props.onCancel What cancelling does, which is also what Escape does.
  * @returns The dialog.
  */
-export const FormDialog = ({ title, subtitle, children, canSave, onSave, onCancel }: FormDialogProps): ReactElement => {
+export const FormDialog = ({ title, subtitle, children, canSave, secondaryAction, onSave, onCancel }: FormDialogProps): ReactElement => {
 	const { t } = useTranslator();
 	const titleId = useId();
 	const fieldsRef = useRef<HTMLDivElement>(null);
@@ -101,6 +110,7 @@ export const FormDialog = ({ title, subtitle, children, canSave, onSave, onCance
 				<div className='form-dialog-fields' ref={fieldsRef}>{children}</div>
 				<div className='form-dialog-actions'>
 					<AppButton variant='ghost' onClick={onCancel}>{t('dialog.cancel')}</AppButton>
+					{secondaryAction && <AppButton disabled={!canSave} onClick={secondaryAction.onSelect}>{secondaryAction.label}</AppButton>}
 					<AppButton variant='primary' disabled={!canSave} onClick={onSave}>{t('form.save')}</AppButton>
 				</div>
 			</div>

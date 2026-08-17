@@ -24,6 +24,13 @@
 	background-color: transparent;
 }
 
+/* Where the label came from rather than whether it is right: the category a rule assigned wears this and a hand-set one does not */
+.chip-provenance {
+	border-color: var(--colors-provenance-border);
+	background-color: var(--colors-provenance-background-muted);
+	color: var(--colors-provenance-text);
+}
+
 .chip-danger {
 	border-color: var(--colors-danger-border);
 	background-color: var(--colors-danger-background-muted);
