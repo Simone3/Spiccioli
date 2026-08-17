@@ -1,0 +1,23 @@
+src/components/common/RowMenu.css
+  s_97eec2e48f67c8::t_cbdda3b7d953fd 24-25,27-28
+src/components/common/RowMenu.tsx
+  s_97eec2e48f67c8::t_ce568875732b1b 2-3,10-15,35-44,55,57-65,67-77,82-84,86-88,93,95-96,100-101,103,110-115,117,130-137,156-157
+tests/components/CommonKit.test.tsx
+  s_97eec2e48f67c8::t_074a3b7d2ab108 67-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "1c668c619fdfbc19ed6021e7c18fb9cfa9532f82",
+  "prompts": {},
+  "sessions": {
+    "s_97eec2e48f67c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "790b8b77-f9d1-4ef0-ac33-595aae1a073b",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
