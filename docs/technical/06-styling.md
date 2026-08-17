@@ -56,6 +56,12 @@ Three decisions are packed into it.
 
 This is also why anything clickable is a real `<button>` or `<a>` and never a clickable `<div>`: the keyboard has to reach it and activate it, and the ring has to have something to draw around.
 
+Two overrides exist today and both say why where they are written. `DecimalField` draws the ring on the box around its input with `:focus-within`, because the box with its currency symbol and its unit is what the user sees as the field, and the bare input inside it drops the ring so there is only ever one. `DateField` puts the ring back on the calendar's days, which the library it is built on draws an outline of its own on.
+
+## 6.4 A library's stylesheet
+
+`react-datepicker` is the one dependency that ships CSS, and it ships a light calendar. `src/components/common/DateField.css` imports the library's stylesheet first and then overrides it — the surfaces, the borders, the text, the selected day and the focus outline — so that the calendar is the same dark theme as everything around it. **That override lives in the one file that imports the library**, which is what keeps replacing the date picker a change in one folder.
+
 ---
 
 [← §5 Text and languages](05-text-and-languages.md) · [§7 Testing →](07-testing.md)

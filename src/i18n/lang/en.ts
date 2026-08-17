@@ -67,10 +67,97 @@ export const EN_TRANSLATIONS = {
 		retry: 'Retry'
 	},
 
-	// What an open file looks like until the sidebar and the eight screens are built
+	// The sidebar and the eight screens it lists
+	screens: {
+		navigation: 'Screens',
+		portfolio: 'Portfolio',
+		accounts: 'Accounts',
+		transactions: 'Transactions',
+		bulkImport: 'Import transactions',
+		categories: 'Categories',
+		investments: 'Investments',
+		salaries: 'Salaries',
+		checks: 'Checks',
+		settings: 'Settings',
+		notBuiltYet: 'This screen is not built yet. Everything the file holds is safe and is read by the screens as each one is built.'
+	},
+
+	// What a screen with nothing on it says. Every one of them names the action that fills it, and none of them says "no data".
+	emptyState: {
+		portfolio: 'Nothing here yet — add the accounts you want to track.',
+		accounts: 'Add the first account — a current account is the usual place to start.',
+		transactions: 'Import a bank export, or add a row by hand.',
+		bulkImport: 'There is no account to import into yet. Add a cash account first, and the import will offer it.',
+		categories: 'Nothing is categorised automatically yet — add a rule, then apply the list and see what it would catch.',
+		investments: 'Record a purchase to start tracking holdings.',
+		salaries: 'Add the employer, its months per year and its hours per day — everything on the other tab divides by them.',
+		goToAccounts: 'Go to Accounts',
+		goToImport: 'Import a bank export'
+	},
+
+	// The preferences, which belong to the installation and not to the open file
+	settings: {
+		preferenceCount: {
+			one: '1 preference',
+			other: '{count} preferences'
+		},
+		scopeTitle: 'These settings belong to Spiccioli, not to the open file.',
+		scopeExplanation: 'They are stored with the application and apply to every file you open.',
+		formats: 'Formats',
+		thresholds: 'Thresholds',
+		file: 'File',
+		dateFormat: 'Date format',
+		decimalSeparator: 'Decimal separator',
+		thousandsSeparator: 'Thousands separator',
+		separatorsMustDiffer: 'The decimal and thousands separators must differ, so this one was not applied.',
+		separators: {
+			comma: ', comma',
+			dot: '. dot',
+			space: 'space',
+			none: 'none'
+		},
+		defaultTaxRate: 'Default tax rate',
+		priceStalenessDays: 'Stale price after',
+		pensionRevaluationMonths: 'Revalue pension every',
+		receiptPendingMonths: 'Receipt pending for',
+		transferMatchWindowDays: 'Transfer match window',
+		tradeMatchWindowDays: 'Trade match window',
+		backupCount: 'Backups kept',
+		units: {
+			days: 'days',
+			months: 'months'
+		},
+		dataFile: 'Data file',
+		backupFolder: 'Backup folder',
+		pathUnknown: 'No file is open'
+	},
+
+	// What a field says when it will not take a value. The message sits where the offending value is, and never in a modal.
+	field: {
+		required: 'This is required.',
+		tooLow: 'This cannot be less than {minimum}.',
+		tooHigh: 'This cannot be more than {maximum}.'
+	},
+
+	rowMenu: {
+		nothingToDo: 'Nothing to do here'
+	},
+
+	dialog: {
+		cancel: 'Cancel'
+	},
+
+	inlineEdit: {
+		save: 'Save',
+		cancel: 'Cancel'
+	},
+
+	filters: {
+		clear: 'Clear filters'
+	},
+
+	// What the file has to say while it is open, on whichever screen the user is on
 	session: {
-		placeholder: 'The file is open and every change is saved to it. The screens that read it are built next; what is here now is the storage layer and the states it has to be able to show.',
-		noChangesYet: 'Nothing has been changed yet',
 		saved: 'Saved {time}',
 		retrying: 'Could not save — retrying, attempt {attempt} of {attempts}',
 		retryingExplanation: 'The file could not be written. Trying again — your work is here and nothing has been lost.',

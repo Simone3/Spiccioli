@@ -2,9 +2,8 @@ import 'src/components/launch/LaunchScreen.css';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { UpgradeDialog } from 'src/components/launch/UpgradeDialog';
 import { useLedger } from 'src/contexts/LedgerContext';
-import { usePreferences } from 'src/contexts/PreferencesContext';
+import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
-import { formatDateAndTime } from 'src/logic/format/DateFormat';
 import { getDirectory, getFileName } from 'src/logic/format/FilePathDisplay';
 import { describeLedgerRefusal } from 'src/logic/ledger/LedgerRefusalMessage';
 import type { RecentLedgerFile } from 'src/types/PreferencesTypes';
@@ -24,7 +23,7 @@ import type { RecentLedgerFile } from 'src/types/PreferencesTypes';
 export const LaunchScreen = (): ReactElement => {
 	const translator = useTranslator();
 	const { t } = translator;
-	const { preferences } = usePreferences();
+	const formatter = useFormatter();
 	const { openWithDialog, openPath, createWithDialog, openFailure, dismissOpenFailure, upgradePrompt, isBusy } = useLedger();
 	const [ recentFiles, setRecentFiles ] = useState<RecentLedgerFile[]>([]);
 
@@ -99,7 +98,7 @@ export const LaunchScreen = (): ReactElement => {
 												t('launch.recentFileMissing', { directory: getDirectory(recentFile.filePath) }) :
 												t('launch.recentFileDetail', {
 													directory: getDirectory(recentFile.filePath),
-													openedAt: formatDateAndTime(new Date(recentFile.lastOpenedAt), preferences.dateFormat)
+													openedAt: formatter.dateAndTime(new Date(recentFile.lastOpenedAt))
 												})}
 										</span>
 									</button>

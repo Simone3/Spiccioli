@@ -6,7 +6,7 @@ Instructions for Claude Code when working in this repository.
 
 Spiccioli is an Electron + React desktop ledger for macOS, Windows and Linux: one person's accounts, transactions, investments and salaries, kept in one file they choose. Standalone browser mode is not a supported runtime.
 
-Phase 1 of [§8](docs/technical/08-implementation-plan.md) has landed: the domain model, the file and everything [§12](docs/functional/specs/12-storage.md) asks of it. A file can be created, opened, saved, backed up, rotated, displaced by an external write and refused when unreadable. `src/components/session/SessionScreen.tsx` is what an open file shows until the shell of phase 2 replaces it.
+Phases 1 and 2 of [§8](docs/technical/08-implementation-plan.md) have landed: the domain model and the file, then the shell around it. A file can be created, opened, saved, backed up, rotated, displaced by an external write and refused when unreadable; an open file lands on Portfolio, the sidebar reaches all eight screens, Settings is finished, and every other screen is a shell showing the empty state of [§14](docs/functional/specs/14-empty-and-error-states.md). The kit those screens are built from is `src/components/common/`; phase 3 is Accounts.
 
 ## Documentation
 

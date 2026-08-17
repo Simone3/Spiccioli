@@ -1,0 +1,84 @@
+
+.settings-screen-scope {
+	margin: 0;
+	max-width: 80ch;
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--colors-text-secondary);
+}
+
+.settings-screen-scope strong {
+	color: var(--colors-text-primary);
+	font-weight: 700;
+}
+
+.settings-screen-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 16px;
+	align-items: start;
+}
+
+.settings-screen-card {
+	padding: 16px 18px;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	min-width: 0;
+}
+
+.settings-screen-card-title {
+	margin: 0;
+	font-size: 11px;
+	font-weight: 400;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--colors-text-secondary);
+}
+
+.settings-screen-fields {
+	display: grid;
+	grid-template-columns: 1fr minmax(0, 150px);
+	gap: 10px 14px;
+	align-items: start;
+}
+
+.settings-screen-field-label {
+	padding-top: 7px;
+	font-size: 13px;
+	color: var(--colors-text-secondary);
+}
+
+.settings-screen-separator {
+	border: none;
+	border-top: 1px solid var(--colors-border-subtle);
+	margin: 0;
+}
+
+.settings-screen-paths {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.settings-screen-path {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.settings-screen-path dt {
+	font-size: 12px;
+	color: var(--colors-text-secondary);
+}
+
+.settings-screen-path dd {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	word-break: break-all;
+}

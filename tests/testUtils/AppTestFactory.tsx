@@ -1,0 +1,161 @@
+import { render, screen, type RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router';
+import type { ReactElement, ReactNode } from 'react';
+import { makeSeededDocument } from './LedgerTestFactory';
+import { SpiccioliApp } from 'src/components/SpiccioliApp';
+import { writeLedgerDocument } from 'src/logic/ledger/LedgerWriter';
+import type { LedgerDocument } from 'src/types/LedgerTypes';
+import { LedgerProvider } from 'src/contexts/LedgerContext';
+import { PreferencesProvider } from 'src/contexts/PreferencesContext';
+import { TranslationProvider } from 'src/i18n/TranslationContext';
+import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
+import type { SpiccioliDiagnosticsApi, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
+
+/**
+ * The application as a test sees it: the preload bridge stubbed, and the providers the real root puts above every screen.
+ * The router is a memory one rather than the hash one the application installs, which is the one difference and is what lets a
+ * test start on a screen without a URL.
+ */
+
+const noop = (): void => {
+	return undefined;
+};
+
+const unsubscribe = (): () => void => {
+	return noop;
+};
+
+const SAVED_AT = new Date(2026, 7, 8, 14, 32).toISOString();
+
+/**
+ * Everything the bridge publishes, stubbed. Only what a test cares about is overridden.
+ * @param overrides What this test needs the bridge to answer.
+ * @returns The bridge that was put on the window.
+ */
+export const stubLedgerBridge = (overrides: Partial<SpiccioliLedgerApi> = {}): SpiccioliLedgerApi => {
+	const bridge: SpiccioliLedgerApi = {
+		chooseFileToOpen: () => {
+			return Promise.resolve({ cancelled: true });
+		},
+		chooseFileToCreate: () => {
+			return Promise.resolve({ cancelled: true });
+		},
+		readFile: () => {
+			return Promise.resolve({ outcome: 'unreadable', filePath: '/missing.spiccioli', message: 'No such file' });
+		},
+		acceptFile: () => {
+			return Promise.resolve();
+		},
+		rejectFile: () => {
+			return Promise.resolve();
+		},
+		createFile: () => {
+			return Promise.resolve({ ok: true, savedAt: SAVED_AT });
+		},
+		save: () => {
+			return Promise.resolve({ ok: true, savedAt: SAVED_AT });
+		},
+		writePreUpgradeBackup: () => {
+			return Promise.resolve({ written: true, backupFileName: 'finances-pre-upgrade.spiccioli', retainedCount: 1 });
+		},
+		completeUpgrade: () => {
+			return Promise.resolve({ ok: true, savedAt: SAVED_AT });
+		},
+		closeSession: () => {
+			return Promise.resolve({ written: false });
+		},
+		getBackupDirectory: () => {
+			return Promise.resolve('/Documents/finances-backups');
+		},
+		getRecentFiles: () => {
+			return Promise.resolve([]);
+		},
+		dismissRecentFile: () => {
+			return Promise.resolve([]);
+		},
+		getPreferences: () => {
+			return Promise.resolve(DEFAULT_PREFERENCES);
+		},
+		setPreferences: () => {
+			return Promise.resolve();
+		},
+		onWriteAttemptFailed: unsubscribe,
+		onExternalModification: unsubscribe,
+		onMenuCommand: unsubscribe,
+		onPrepareForClose: unsubscribe,
+		...overrides
+	};
+
+	Object.defineProperty(window, 'spiccioliLedger', { configurable: true, value: bridge });
+	Object.defineProperty(window, 'spiccioliDiagnostics', {
+		configurable: true,
+		value: {
+			reportRenderError: () => {
+				return Promise.resolve();
+			}
+		} satisfies SpiccioliDiagnosticsApi
+	});
+
+	return bridge;
+};
+
+const AppTestProviders = ({ children }: { children: ReactNode }): ReactElement => {
+	return (
+		<TranslationProvider>
+			<PreferencesProvider>
+				<LedgerProvider>
+					<MemoryRouter>{children}</MemoryRouter>
+				</LedgerProvider>
+			</PreferencesProvider>
+		</TranslationProvider>
+	);
+};
+
+/**
+ * Renders something inside every provider a screen needs above it.
+ * @param ui Element to render.
+ * @returns The render result.
+ */
+export const renderWithProviders = (ui: ReactElement): RenderResult => {
+	return render(ui, { wrapper: AppTestProviders });
+};
+
+/**
+ * Renders the whole application, which starts on the launch screen because it never reopens the last file on its own.
+ * @returns The render result.
+ */
+export const renderApp = (): RenderResult => {
+	return renderWithProviders(<SpiccioliApp/>);
+};
+
+export const TEST_LEDGER_PATH = '/Documents/finances.spiccioli';
+
+/**
+ * Renders the application and opens a file through the launch screen, which is the only way into the shell.
+ * @param document What the file holds. A seeded one, unless the test needs records in it.
+ * @param overrides What else this test needs the bridge to answer.
+ * @returns The render result, with the shell up and on Portfolio.
+ */
+export const renderOpenLedger = async(document: LedgerDocument = makeSeededDocument(), overrides: Partial<SpiccioliLedgerApi> = {}): Promise<RenderResult> => {
+	stubLedgerBridge({
+		getRecentFiles: () => {
+			return Promise.resolve([ { filePath: TEST_LEDGER_PATH, lastOpenedAt: SAVED_AT, missing: false } ]);
+		},
+		readFile: () => {
+			return Promise.resolve({
+				outcome: 'read',
+				filePath: TEST_LEDGER_PATH,
+				contents: writeLedgerDocument(document),
+				sizeBytes: 100
+			});
+		},
+		...overrides
+	});
+
+	const result = renderApp();
+	await userEvent.click(await screen.findByRole('button', { name: /finances\.spiccioli/ }));
+	await screen.findByRole('heading', { name: 'Portfolio', level: 1 });
+
+	return result;
+};

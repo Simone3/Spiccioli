@@ -145,6 +145,10 @@ export const registerLedgerIpcHandlers = ({
 		return result;
 	});
 
+	ipcMain.handle(SPICCIOLI_LEDGER_IPC_CHANNELS.getBackupDirectory, () => {
+		return session.getBackupDirectory();
+	});
+
 	ipcMain.handle(SPICCIOLI_LEDGER_IPC_CHANNELS.getRecentFiles, () => {
 		return configStore.readRecentFiles();
 	});

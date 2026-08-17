@@ -1,96 +1,8 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { makeSeededDocument, renderWithTranslations } from '../testUtils';
-import { SpiccioliApp } from 'src/components/SpiccioliApp';
-import { LedgerProvider } from 'src/contexts/LedgerContext';
-import { PreferencesProvider } from 'src/contexts/PreferencesContext';
+import { makeSeededDocument, renderApp, stubLedgerBridge } from '../testUtils';
 import { LEDGER_SCHEMA_VERSION } from 'src/logic/ledger/LedgerDocument';
 import { writeLedgerDocument } from 'src/logic/ledger/LedgerWriter';
-import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
-import type { SpiccioliDiagnosticsApi, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
-
-const noop = (): void => {
-	return undefined;
-};
-
-const unsubscribe = (): () => void => {
-	return noop;
-};
-
-// Everything the bridge publishes, stubbed. Only what a test cares about is overridden.
-const stubLedgerBridge = (overrides: Partial<SpiccioliLedgerApi> = {}): SpiccioliLedgerApi => {
-	const bridge: SpiccioliLedgerApi = {
-		chooseFileToOpen: () => {
-			return Promise.resolve({ cancelled: true });
-		},
-		chooseFileToCreate: () => {
-			return Promise.resolve({ cancelled: true });
-		},
-		readFile: () => {
-			return Promise.resolve({ outcome: 'unreadable', filePath: '/missing.spiccioli', message: 'No such file' });
-		},
-		acceptFile: () => {
-			return Promise.resolve();
-		},
-		rejectFile: () => {
-			return Promise.resolve();
-		},
-		createFile: () => {
-			return Promise.resolve({ ok: true, savedAt: new Date(2026, 7, 8, 14, 32).toISOString() });
-		},
-		save: () => {
-			return Promise.resolve({ ok: true, savedAt: new Date(2026, 7, 8, 14, 32).toISOString() });
-		},
-		writePreUpgradeBackup: () => {
-			return Promise.resolve({ written: true, backupFileName: 'finances-pre-upgrade.spiccioli', retainedCount: 1 });
-		},
-		completeUpgrade: () => {
-			return Promise.resolve({ ok: true, savedAt: new Date(2026, 7, 8, 14, 32).toISOString() });
-		},
-		closeSession: () => {
-			return Promise.resolve({ written: false });
-		},
-		getRecentFiles: () => {
-			return Promise.resolve([]);
-		},
-		dismissRecentFile: () => {
-			return Promise.resolve([]);
-		},
-		getPreferences: () => {
-			return Promise.resolve(DEFAULT_PREFERENCES);
-		},
-		setPreferences: () => {
-			return Promise.resolve();
-		},
-		onWriteAttemptFailed: unsubscribe,
-		onExternalModification: unsubscribe,
-		onMenuCommand: unsubscribe,
-		onPrepareForClose: unsubscribe,
-		...overrides
-	};
-
-	Object.defineProperty(window, 'spiccioliLedger', { configurable: true, value: bridge });
-	Object.defineProperty(window, 'spiccioliDiagnostics', {
-		configurable: true,
-		value: {
-			reportRenderError: () => {
-				return Promise.resolve();
-			}
-		} satisfies SpiccioliDiagnosticsApi
-	});
-
-	return bridge;
-};
-
-const renderApp = (): void => {
-	renderWithTranslations(
-		<PreferencesProvider>
-			<LedgerProvider>
-				<SpiccioliApp/>
-			</LedgerProvider>
-		</PreferencesProvider>
-	);
-};
 
 describe('the launch screen', () => {
 	test('is what the application opens with, and never reopens the last file on its own', async() => {
@@ -129,7 +41,7 @@ describe('the launch screen', () => {
 		expect(screen.getByText(/not found — moved or deleted/)).toBeInTheDocument();
 	});
 
-	test('opens a file the reader understands and leaves the launch screen', async() => {
+	test('opens a file the reader understands and lands on Portfolio', async() => {
 		const document = makeSeededDocument();
 		stubLedgerBridge({
 			getRecentFiles: () => {
@@ -149,7 +61,7 @@ describe('the launch screen', () => {
 		await userEvent.click(await screen.findByRole('button', { name: /finances\.spiccioli/ }));
 
 		await waitFor(() => {
-			expect(screen.getByRole('heading', { name: 'finances' })).toBeInTheDocument();
+			expect(screen.getByRole('heading', { name: 'Portfolio', level: 1 })).toBeInTheDocument();
 		});
 		expect(screen.queryByText('Choose a file to open')).not.toBeInTheDocument();
 	});

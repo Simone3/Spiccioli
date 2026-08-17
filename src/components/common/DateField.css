@@ -1,0 +1,113 @@
+
+/* The library's own stylesheet is imported before this one and is overridden here to the theme: it ships a light calendar with
+   a focus style of its own, and Spiccioli has one dark theme and one focus ring. */
+
+.date-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.date-field-wrapper {
+	display: block;
+	min-width: 0;
+}
+
+.date-field-input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 6px 10px;
+	background-color: var(--colors-background-primary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 6px;
+	font: inherit;
+	font-size: 13px;
+	color: var(--colors-text-primary);
+	font-variant-numeric: tabular-nums;
+}
+
+.date-field-input:disabled {
+	color: var(--colors-disabled);
+	border-color: var(--colors-border-subtle);
+}
+
+.date-field-input[aria-invalid='true'] {
+	border-color: var(--colors-danger-border);
+	background-color: var(--colors-danger-background-muted);
+}
+
+.date-field-refusal {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--colors-danger-text);
+}
+
+.date-field-popper {
+	z-index: 20;
+}
+
+.date-field-calendar.react-datepicker {
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 8px;
+	box-shadow: 0 12px 28px var(--colors-popup-shadow);
+	font-family: var(--font-family);
+	color: var(--colors-text-primary);
+}
+
+.date-field-calendar .react-datepicker__header {
+	background-color: var(--colors-background-secondary);
+	border-bottom: 1px solid var(--colors-border-subtle);
+}
+
+.date-field-calendar .react-datepicker__current-month,
+.date-field-calendar .react-datepicker__day-name,
+.date-field-calendar .react-datepicker__day,
+.date-field-calendar .react-datepicker__year-text,
+.date-field-calendar .react-datepicker__month-text {
+	color: var(--colors-text-primary);
+}
+
+.date-field-calendar .react-datepicker__day-name {
+	color: var(--colors-text-secondary);
+}
+
+.date-field-calendar .react-datepicker__day:hover,
+.date-field-calendar .react-datepicker__year-text:hover,
+.date-field-calendar .react-datepicker__month-text:hover {
+	background-color: var(--colors-interactive-hover-background);
+}
+
+.date-field-calendar .react-datepicker__day--selected,
+.date-field-calendar .react-datepicker__day--keyboard-selected {
+	background-color: var(--colors-accent-primary);
+	color: var(--colors-background-primary);
+	font-weight: 700;
+}
+
+.date-field-calendar .react-datepicker__day--disabled,
+.date-field-calendar .react-datepicker__day--outside-month {
+	color: var(--colors-disabled);
+}
+
+.date-field-calendar .react-datepicker__day--disabled:hover {
+	background-color: transparent;
+}
+
+.date-field-calendar .react-datepicker__navigation-icon::before {
+	border-color: var(--colors-text-secondary);
+}
+
+.date-field-calendar .react-datepicker__triangle {
+	display: none;
+}
+
+/* The library draws an outline of its own on the day the keyboard is on; the one ring of "src/index.css" is what draws focus here */
+.date-field-calendar .react-datepicker__day:focus-visible,
+.date-field-calendar .react-datepicker__month-text:focus-visible,
+.date-field-calendar .react-datepicker__year-text:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+}

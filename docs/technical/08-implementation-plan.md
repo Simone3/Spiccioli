@@ -6,7 +6,7 @@ The route from the scaffolding that exists today to the application [`docs/funct
 
 It carries three things: the **decisions** ([§8.2](#82-decisions)) — every one of them now taken, stated as what a phase has to build to — the **shape the code is heading towards** ([§8.4](#84-the-shape-of-the-code)), and the **twelve phases** the work is cut into ([§8.5](#85-the-phases)). A section that cannot be written until a decision is taken says **to be completed** and names it; none does today.
 
-**Phase 1 has landed.** Everything it built is described in the pages it changed — [§1](01-architecture.md), [§2](02-repository-map.md), [§4](04-framework.md) and the new [§9](09-file-format.md) — and this page keeps only the plan.
+**Phases 1 and 2 have landed.** Everything they built is described in the pages they changed — [§1](01-architecture.md), [§2](02-repository-map.md), [§4](04-framework.md), [§6](06-styling.md), [§7](07-testing.md) and the new [§9](09-file-format.md) — and this page keeps only the plan.
 
 **What each decision was taken *on* is in [`08-implementation-plan-why.md`](08-implementation-plan-why.md)**, the companion to this page: the grounds decision by decision, the measurements behind D1, and the provider survey behind D11. This page is read on the way into every phase and states only the outcomes; that one is read when a decision is questioned.
 
@@ -67,12 +67,12 @@ Each of these had to be settled before the phase that names it could start, and 
 
 ### The dependencies D7 – D10 add
 
-Four libraries, and they are the whole of what v1 adds to the five runtime dependencies `package.json` holds today. **Each arrives in the phase that needs it and not before**, at an exact version, and none of them is installed yet. The versions below are what was published when the decisions were taken; a phase installs the current one and pins it.
+Four libraries, and they are the whole of what v1 adds to the five runtime dependencies `package.json` started with. **Each arrives in the phase that needs it and not before**, at an exact version; the first two are installed and the last two are not. The versions below are what was published when the decisions were taken; a phase installs the current one and pins it.
 
 | Package | Version then | Arrives in | What comes with it |
 | --- | --- | --- | --- |
-| `react-router` | 7.18.2 | Phase 2 | Nothing. Version 7 folds the DOM exports into the one package, so `react-router-dom` is a re-export and is not installed |
-| `react-datepicker` | 9.1.0 | Phase 2 | `date-fns` and `@floating-ui/react`. `date-fns-tz` is an **optional** peer and stays uninstalled — nothing in this application has a time zone in it |
+| `react-router` | 7.18.2 | Phase 2 — **installed at 8.3.0** | `cookie-es`. Version 7 folded the DOM exports into the one package and version 8 keeps them there, so `react-router-dom` is a re-export and is not installed |
+| `react-datepicker` | 9.1.0 | Phase 2 — **installed** | `date-fns` and `@floating-ui/react`. `date-fns-tz` is an **optional** peer and stays uninstalled — nothing in this application has a time zone in it |
 | `@dnd-kit/react` | 0.5.0 | Phase 6 | `@dnd-kit/dom`, `@dnd-kit/state` and `@dnd-kit/abstract`, all of them the same project's |
 | `recharts` | 3.10.1 | Phase 9 | `@reduxjs/toolkit`, `react-redux`, `immer`, the d3 modules of `victory-vendor` and a handful of small utilities — much the largest tree of the four |
 
@@ -152,7 +152,7 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 | # | Phase | Specification | Depends on |
 | --- | --- | --- | --- |
 | 1 | [The file](#phase-1--the-file) — **done** | [§2](../functional/specs/02-domain-model.md), [§12](../functional/specs/12-storage.md) | — |
-| 2 | [The shell and the kit](#phase-2--the-shell-and-the-kit) | [§10](../functional/specs/10-settings.md), [§13.1](../functional/specs/13-validation.md#131-how-it-behaves), [§14](../functional/specs/14-empty-and-error-states.md) | 1 |
+| 2 | [The shell and the kit](#phase-2--the-shell-and-the-kit) — **done** | [§10](../functional/specs/10-settings.md), [§13.1](../functional/specs/13-validation.md#131-how-it-behaves), [§14](../functional/specs/14-empty-and-error-states.md) | 1 |
 | 3 | [Accounts and institutions](#phase-3--accounts-and-institutions) | [§4](../functional/specs/04-accounts.md) | 2 |
 | 4 | [Transactions](#phase-4--transactions) | [§5.1](../functional/specs/05-transactions.md#51-columns) – [§5.6](../functional/specs/05-transactions.md#56-selecting-and-deleting-in-bulk) | 3 |
 | 5 | [Bulk import](#phase-5--bulk-import) | [§5.7](../functional/specs/05-transactions.md#57-bulk-import) | 4 |
@@ -192,7 +192,9 @@ What it left behind, and where: the eleven entities and the closed sets in `src/
 
 ### Phase 2 — The shell and the kit
 
-Everything every later screen is made of.
+**Done.** Everything every later screen is made of.
+
+What it left behind, and where: the routes and the sidebar in `src/components/shell/`, the kit in `src/components/common/`, the formatting in `src/logic/format/`, the Settings screen in `src/components/settings/`, and one folder per screen holding its shell. `SessionScreen` goes away here: the storage lines it held moved into `StorageNotices`, which the shell draws above whichever screen the user is on.
 
 - The sidebar: eight screens, the failing-check badge, the save state. **`react-router` in declarative mode over a `HashRouter`** (D7), one route per screen, and the router installed once at the root. **An opened file lands on Portfolio with no filter set anywhere.**
 - The kit: the amount field of [§13.1](../functional/specs/13-validation.md#131-how-it-behaves) — one control, at most two decimals, the decimal character `decimalSeparator` names and no thousands separator typeable, with the four-decimal variant for prices and quantities; the date picker of D9 — our control over `react-datepicker`, its stylesheet overridden to the theme and to the one focus ring, `maxDate` at today and `dateFormat` mapped onto its format string; the table with its footer; the row menu; the confirm dialog; the inline-edit cell that keeps a refused value out and never leaves a row half-changed; the filter bar; the empty state; the chip.
@@ -200,7 +202,11 @@ Everything every later screen is made of.
 - The Settings screen ([§10](../functional/specs/10-settings.md)): ten preferences, no save button, refusal in place, the two read-only paths, the line saying preferences do not live in the file.
 - The eight screens as shells honouring [§14](../functional/specs/14-empty-and-error-states.md): every empty state names the action that fills it, and empty-because-of-a-filter is a different state from empty-because-nothing-exists.
 
-*Done when* changing a preference re-renders every figure on screen immediately, and every screen exists with its empty state.
+*Done when* changing a preference re-renders every figure on screen immediately, and every screen exists with its empty state. **It does**, in `tests/components/`.
+
+**Three things this phase left for the phases that can finish them, and each is expected.** An empty state whose action is a form — *Add account*, *Add rule* — states the action in its sentence and carries the button only once there is a form for it to open, so the phase that builds the form adds it; the badge beside *Checks* is drawn and is handed a count that stays zero until Phase 10 computes one; and a screen whose records exist but whose table does not yet says so in a line, which each phase removes as it builds its screen. **Empty-because-of-a-filter has no screen to appear on yet** — `FilterBar` is what will raise it, from Phase 4.
+
+**Two of the four dependencies arrived here**, at the versions published when the phase ran rather than the ones the table below records: `react-router` at 8.3.0 and `react-datepicker` at 9.1.0. Version 8 of the router folds the DOM exports into the one package exactly as version 7 did, so `react-router-dom` is still not installed, and it adds one small dependency of its own, `cookie-es`. `date-fns-tz` stays uninstalled.
 
 ### Phase 3 — Accounts and institutions
 

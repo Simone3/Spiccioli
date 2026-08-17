@@ -1,0 +1,62 @@
+
+.row-menu {
+	position: relative;
+	display: inline-block;
+}
+
+.row-menu-trigger {
+	padding: 2px 8px;
+	background: none;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	font: inherit;
+	font-size: 15px;
+	line-height: 1.2;
+	letter-spacing: 0.1em;
+	color: var(--colors-text-secondary);
+	cursor: pointer;
+}
+
+.row-menu-trigger:hover {
+	background-color: var(--colors-interactive-hover-background);
+	color: var(--colors-text-primary);
+}
+
+.row-menu-list {
+	position: absolute;
+	top: calc(100% + 4px);
+	right: 0;
+	z-index: 10;
+	margin: 0;
+	padding: 4px;
+	min-width: 160px;
+	list-style: none;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 8px;
+	box-shadow: 0 12px 28px var(--colors-popup-shadow);
+	display: flex;
+	flex-direction: column;
+}
+
+.row-menu-item {
+	width: 100%;
+	padding: 7px 10px;
+	background: none;
+	border: none;
+	border-radius: 6px;
+	font: inherit;
+	font-size: 13px;
+	color: var(--colors-text-primary);
+	text-align: left;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.row-menu-item:hover {
+	background-color: var(--colors-interactive-hover-background);
+}
+
+.row-menu-item-danger {
+	color: var(--colors-danger-text);
+}

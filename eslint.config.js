@@ -465,6 +465,7 @@ module.exports = defineConfig([
 					'src/**',
 					'tests/**',
 					'@fontsource/inter/*.css',
+					'react-datepicker/dist/*.css',
 					'react-dom/client'
 				]
 			}],

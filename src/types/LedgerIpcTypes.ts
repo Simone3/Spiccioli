@@ -132,6 +132,10 @@ export interface SpiccioliLedgerApi {
 	writePreUpgradeBackup: () => Promise<LedgerBackupResult>;
 	completeUpgrade: (request: UpgradeLedgerRequest) => Promise<LedgerWriteResult>;
 	closeSession: (request: CloseLedgerSessionRequest) => Promise<LedgerBackupResult>;
+
+	// Where the open ledger's copies live. Derived from the ledger and never chosen, so the main process is what answers it.
+	getBackupDirectory: () => Promise<string | undefined>;
+
 	getRecentFiles: () => Promise<RecentLedgerFile[]>;
 	dismissRecentFile: (filePath: string) => Promise<RecentLedgerFile[]>;
 	getPreferences: () => Promise<Preferences>;

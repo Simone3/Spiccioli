@@ -6,7 +6,7 @@ No account, no server, no synchronization service of its own. The file lives whe
 
 ## Status
 
-**In development.** There is nothing to install yet: the repository holds the project scaffolding, the reusable framework layer and a placeholder screen. What Spiccioli will do is written down in full in the functional analysis below.
+**In development.** There is nothing to install yet. A file can be created, opened and saved, and the eight screens below are reachable — but only Settings is finished, and the rest are being built one at a time. What Spiccioli will do is written down in full in the functional analysis below.
 
 ## What it will do
 

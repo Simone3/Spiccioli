@@ -1,0 +1,31 @@
+
+.chip {
+	display: inline-block;
+	padding: 2px 9px;
+	border-radius: 20px;
+	border: 1px solid var(--colors-border-strong);
+	background-color: var(--colors-background-secondary);
+	font-size: 11px;
+	line-height: 1.45;
+	color: var(--colors-text-primary);
+	white-space: nowrap;
+}
+
+/* A type, a state, anything the row states about itself rather than about its own condition */
+.chip-quiet {
+	background-color: transparent;
+	border-color: var(--colors-border-subtle);
+	color: var(--colors-text-secondary);
+}
+
+.chip-accent {
+	border-color: var(--colors-accent-primary);
+	color: var(--colors-accent-primary);
+	background-color: transparent;
+}
+
+.chip-danger {
+	border-color: var(--colors-danger-border);
+	background-color: var(--colors-danger-background-muted);
+	color: var(--colors-danger-text);
+}

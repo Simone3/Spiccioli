@@ -1,0 +1,25 @@
+
+.filter-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 8px;
+}
+
+.filter-bar-filter {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	min-width: 0;
+}
+
+.filter-bar-label {
+	font-size: 11px;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--colors-text-secondary);
+}
+
+.filter-bar-clear {
+	margin-left: auto;
+}

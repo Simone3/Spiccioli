@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react';
+import { createFormatter, type Formatter } from 'src/logic/format/Formatter';
 import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
 import type { Preferences } from 'src/types/PreferencesTypes';
 
@@ -8,6 +9,9 @@ import type { Preferences } from 'src/types/PreferencesTypes';
  * They are not in the ledger and they never mark it as modified: they belong to the installation and live in the platform's own
  * application-data location. Changing one applies immediately — there is no save button — which is why the value in this context
  * is updated before the write rather than after it.
+ *
+ * The formatter is a reading of the preferences and lives here for that reason: a screen that prints a figure takes it from
+ * here, so a preference that changes produces a new formatter and re-renders every figure on screen in the same pass.
  */
 
 export interface PreferencesContextValue {
@@ -73,4 +77,16 @@ export const usePreferences = (): PreferencesContextValue => {
 	}
 
 	return value;
+};
+
+/**
+ * Reads the formatter the preferences in force define.
+ * @returns Every way a figure or a day reaches the screen.
+ */
+export const useFormatter = (): Formatter => {
+	const { preferences } = usePreferences();
+
+	return useMemo(() => {
+		return createFormatter(preferences);
+	}, [ preferences ]);
 };

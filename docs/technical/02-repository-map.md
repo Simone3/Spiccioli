@@ -34,7 +34,7 @@ Every non-generated file in the repository and what it is for. Generated folders
 | `ipc/DiagnosticsIpc.ts` | The renderer's failures, written into the operational log with each text truncated |
 | `menu/AppMenu.ts` | The File menu of four actions and the About item ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)), as a template a test can read |
 | `preload/Preload.ts` | The context bridge: what the renderer is allowed to call |
-| `storage/LedgerSession.ts` | The one open ledger: which file, what its bytes hashed to, whether anything was written — and every storage entry in the log |
+| `storage/LedgerSession.ts` | The one open ledger: which file, where its copies live, what its bytes hashed to, whether anything was written — and every storage entry in the log |
 | `storage/LedgerBackupNaming.ts` | Where a ledger's copies live, what one is called, and how to recognise one |
 | `window/WindowLoadTarget.ts` | Whether the window loads the built file or the development server, and the refusal of the latter in a packaged run |
 
@@ -52,16 +52,25 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `config/AppConfig.ts` | Every tunable constant, shared by both processes — so it must stay free of Node and Electron imports |
 | `components/SpiccioliApp.tsx` | Which of the two states the application is in: no file, or one open |
 | `components/common/AppErrorBoundary.tsx` `.css` | The crash screen the renderer draws over itself, and the report it sends to the log |
+| `components/common/` | The kit every screen is made of, one `.tsx` and one `.css` per control: `AppButton` (and the link that looks like one), `DecimalField` with the `NumericFields` it is used as, `DateField`, `SelectField`, `DataTable`, `RowMenu`, `ConfirmDialog`, `InlineEditCell`, `FilterBar`, `EmptyState`, `Chip` |
+| `components/shell/AppRoutes.ts` | The nine paths and the eight sidebar entries, written down once |
+| `components/shell/AppShell.tsx` `.css` | The sidebar and the routed screen beside it, and the return to Portfolio when the open file changes |
+| `components/shell/Sidebar.tsx` `.css` | The eight screens, the failing-check badge and the save state ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)) |
+| `components/shell/ScreenLayout.tsx` `.css` | The shape every screen has, and the note a screen that is still a shell carries |
+| `components/shell/StorageNotices.tsx` `.css` | The three lines the file can put on whichever screen the user is on |
 | `components/launch/LaunchScreen.tsx` `.css` | The screen the application always opens with ([§12.1](../functional/specs/12-storage.md#121-the-launch-screen)) |
 | `components/launch/UpgradeDialog.tsx` | Its second panel: a file written by an older version |
-| `components/session/SessionScreen.tsx` `.css` | What an open file shows until the shell is built, and where the storage lines live |
 | `components/session/WriteFailurePanel.tsx` `.css` | The blocking message after five failed attempts, which belongs to no screen |
+| `components/settings/SettingsScreen.tsx` `.css` | The ten preferences, the refusals, and the two read-only paths ([§10](../functional/specs/10-settings.md)) |
+| `components/portfolio/` `accounts/` `transactions/` `import/` `categories/` `investments/` `salaries/` `checks/` | One folder per screen. Each holds its shell and its empty state until the phase that builds it |
 | `contexts/LedgerContext.tsx` | The ledger in memory, the autosave, the save state, the storage lines |
-| `contexts/PreferencesContext.tsx` | The ten preferences, read once and written as they change |
+| `contexts/PreferencesContext.tsx` | The ten preferences, read once and written as they change, and the formatter they define |
 | `i18n/Translations.ts` | Turns a language into a translator; the bundle registry |
 | `i18n/TranslationContext.tsx` | The React binding of that translator |
 | `i18n/lang/en.ts` | Every word the user can read |
-| `logic/format/DateFormat.ts` `FilePathDisplay.ts` | Printing a day the way the preferences say, and reading a path apart for display |
+| `logic/format/DateFormat.ts` `NumberFormat.ts` | Printing a day and printing a figure, the way the preferences say |
+| `logic/format/Formatter.ts` | Both of those, bound once to the preferences in force |
+| `logic/format/FilePathDisplay.ts` | Reading a path apart for display |
 | `logic/ledger/` | The document: its version, its seed, its reader, its writer, its refusals and its upgrade ([§9](09-file-format.md)) |
 | `logic/money/Money.ts` | The scales, the one division rule and the roundings |
 | `logic/preferences/Preferences.ts` | The defaults, and the reading of whatever the configuration file holds |
@@ -82,7 +91,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `main/` | Tests for the Electron main process modules |
 | `logic/` | Tests for the pure logic: the money arithmetic, the reader, the writer, the upgrade, the autosave, the preferences |
 | `components/` | Tests that render React components |
-| `testUtils/` | Shared factories, re-exported through `testUtils/index.ts` |
+| `testUtils/` | Shared factories, re-exported through `testUtils/index.ts`: the ledger records, the translator, and the application with its bridge stubbed and its providers in place |
 
 Covered in [§7](07-testing.md).
 

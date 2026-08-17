@@ -22,7 +22,7 @@ Three groups of channels, and they all follow one pattern: the names in `src/typ
 | Group | Files | Role |
 | --- | --- | --- |
 | App info | `src/types/AppInfoIpcChannels.ts` `AppInfoTypes.ts`, `src/main/ipc/AppInfoIpc.ts` | Which build the renderer is part of |
-| The ledger | `src/types/LedgerIpcChannels.ts` `LedgerIpcTypes.ts`, `src/main/ipc/LedgerIpc.ts` | Everything about the file: the two dialogs, reading, creating, saving, the copies, the recent list, the preferences |
+| The ledger | `src/types/LedgerIpcChannels.ts` `LedgerIpcTypes.ts`, `src/main/ipc/LedgerIpc.ts` | Everything about the file: the two dialogs, reading, creating, saving, the copies, where the copies live, the recent list, the preferences |
 | Diagnostics | `src/types/LedgerIpcChannels.ts`, `src/main/ipc/DiagnosticsIpc.ts` | The renderer's failures, written into the operational log by the process that owns it |
 
 `src/main/preload/Preload.ts` publishes them as `window.spiccioliAppInfo`, `window.spiccioliLedger` and `window.spiccioliDiagnostics`, and `src/vite-env.d.ts` tells TypeScript what `window` carries.
@@ -39,7 +39,8 @@ src/index.tsx                    mounts React, in StrictMode
       └── AppErrorBoundary       catches a render failure so the window is never left empty
           └── PreferencesProvider  the ten preferences, which are not in the ledger (§10 of the analysis)
               └── LedgerProvider   the open file: the document, the save state, the storage lines
-                  └── SpiccioliApp the launch screen, or the open file
+                  └── HashRouter   the one router, installed once, over a hash history
+                      └── SpiccioliApp the launch screen, or the shell around one of the screens
 ```
 
 `AppErrorBoundary` wraps everything below the translator rather than one screen, so a failure inside a context provider is caught too. Its recovery is a reload: rendering the same tree again would usually throw the same error a second time, while a reload starts over from what is on disk.
@@ -47,6 +48,10 @@ src/index.tsx                    mounts React, in StrictMode
 The failure goes to the operational log over `window.spiccioliDiagnostics`, because the renderer console is developer-facing and an installed Spiccioli cannot open it. **The renderer chooses neither the message nor the level**: it sends three texts and `src/main/ipc/DiagnosticsIpc.ts` decides what the entry is called and how long each text may be, so nothing the renderer sends can grow a log line without limit.
 
 `LedgerProvider` is where the model lives. It reads the file the main process hands it, writes the text the main process puts on disk, debounces the autosave, and owns the three things [§12](../functional/specs/12-storage.md) puts on screen — the save state, the line while a failed write is being retried and the blocking message after the fifth attempt, and the line saying something else changed the file.
+
+`PreferencesProvider` carries a second thing besides the preferences: `useFormatter`, the reading of them that turns a stored figure or a day into what [§10](../functional/specs/10-settings.md) says it looks like. A screen never reads a separator or a date format itself, which is what makes changing a preference re-render every figure in the same pass.
+
+**The router is installed once, at the root, and the launch screen is not a route.** `SpiccioliApp` is still the two states — no file, or one open — and the routes live inside the shell, so a file that is not open has no screen to be on. `AppShell` sends the shell back to Portfolio whenever the open file changes, because which screen was last looked at is not remembered ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)).
 
 ## 1.4 What the main process does at startup
 
@@ -91,8 +96,8 @@ The configuration file holds two things, through `src/main/config/SpiccioliConfi
 
 ## 1.7 What is deliberately not here yet
 
-- **No screens beyond the launch one.** A file can be created, opened, saved, backed up and closed, and what an open file shows is a placeholder listing its record counts (`src/components/session/`). The eight screens arrive with the shell.
-- **No router and no sidebar.** The eight screens of the functional analysis need one, and it is settled which: `react-router` in declarative mode over a `HashRouter`, a path-based history having nothing to resolve against on a packaged run's `file://` page ([§8.2](08-implementation-plan.md#82-decisions)). It arrives with the shell in Phase 2, not before.
+- **No screen reads its own records yet.** The eight screens exist, the sidebar reaches them and each one shows the empty state of [§14](../functional/specs/14-empty-and-error-states.md); the tables, the forms and the calculations arrive one screen per phase. Settings is the exception and is finished.
+- **No failing-check badge.** The sidebar draws one and is handed a count, and the count is zero until the fourteen checks of [§9](../functional/specs/09-checks.md) are computed in Phase 10.
 - **No single-instance lock.** Spiccioli is allowed to run twice. Two ledgers open side by side is ordinary use, and two sessions on *one* ledger is the case [§12](../functional/specs/12-storage.md) settles by detecting the external modification and keeping the displaced version — not by refusing to start.
 
 ---

@@ -48,6 +48,10 @@ export interface CreateLedgerSessionOptions {
 
 export interface LedgerSession {
 	getOpenFilePath: () => string | undefined;
+
+	// Where the open ledger's copies live, which Settings states as a read-only fact about the session
+	getBackupDirectory: () => string | undefined;
+
 	readFile: (filePath: string) => Promise<ReadLedgerFileResult>;
 	acceptFile: (request: AcceptLedgerFileRequest) => void;
 	rejectFile: (request: RejectLedgerFileRequest) => void;
@@ -440,6 +444,9 @@ export const createLedgerSession = ({
 	return {
 		getOpenFilePath: () => {
 			return openFilePath;
+		},
+		getBackupDirectory: () => {
+			return openFilePath === undefined ? undefined : resolveLedgerBackupNaming(openFilePath).backupDirectory;
 		},
 		readFile,
 		acceptFile,

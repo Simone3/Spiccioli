@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react';
 import { LaunchScreen } from 'src/components/launch/LaunchScreen';
-import { SessionScreen } from 'src/components/session/SessionScreen';
+import { AppShell } from 'src/components/shell/AppShell';
 import { WriteFailurePanel } from 'src/components/session/WriteFailurePanel';
 import { useLedger } from 'src/contexts/LedgerContext';
 
@@ -18,7 +18,7 @@ export const SpiccioliApp = (): ReactElement => {
 
 	return (
 		<>
-			{document ? <SessionScreen/> : <LaunchScreen/>}
+			{document ? <AppShell/> : <LaunchScreen/>}
 			<WriteFailurePanel/>
 		</>
 	);

@@ -1,0 +1,67 @@
+
+.decimal-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.decimal-field-control {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	background-color: var(--colors-background-primary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 6px;
+}
+
+/* The ring goes around the whole control rather than around the bare input inside it, which is what the user sees as the field */
+.decimal-field-control:focus-within {
+	box-shadow: var(--focus-ring);
+}
+
+.decimal-field-control-invalid {
+	border-color: var(--colors-danger-border);
+	background-color: var(--colors-danger-background-muted);
+}
+
+.decimal-field-control-disabled {
+	border-color: var(--colors-border-subtle);
+	color: var(--colors-disabled);
+}
+
+.decimal-field-affix {
+	font-size: 13px;
+	color: var(--colors-text-secondary);
+	white-space: nowrap;
+}
+
+.decimal-field-input {
+	flex-grow: 1;
+	min-width: 0;
+	padding: 0;
+	background: none;
+	border: none;
+	font: inherit;
+	font-size: 13px;
+	color: inherit;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+/* The one place a control is allowed no ring of its own: the ring is drawn by the box around it, on :focus-within */
+.decimal-field-input:focus-visible {
+	box-shadow: none;
+}
+
+.decimal-field-input:disabled {
+	color: var(--colors-disabled);
+}
+
+.decimal-field-refusal {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--colors-danger-text);
+}

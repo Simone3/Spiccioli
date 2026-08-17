@@ -1,0 +1,82 @@
+
+.sidebar {
+	flex: none;
+	width: 200px;
+	box-sizing: border-box;
+	padding: 16px 0 14px;
+	background-color: var(--colors-background-secondary);
+	border-right: 1px solid var(--colors-border-subtle);
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.sidebar-brand {
+	margin: 0;
+	padding: 0 18px;
+	font-size: 18px;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+.sidebar-brand-initial {
+	color: var(--colors-accent-primary);
+}
+
+.sidebar-nav {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	padding: 0 10px;
+}
+
+.sidebar-link {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 7px 10px;
+	border-left: 2px solid transparent;
+	border-radius: 6px;
+	font-size: 13px;
+	color: var(--colors-text-secondary);
+	text-decoration: none;
+}
+
+.sidebar-link:hover {
+	background-color: var(--colors-interactive-hover-background);
+	color: var(--colors-text-primary);
+}
+
+.sidebar-link-current {
+	background-color: var(--colors-interactive-active-background);
+	border-left-color: var(--colors-accent-primary);
+	color: var(--colors-text-primary);
+}
+
+.sidebar-badge {
+	padding: 1px 7px;
+	border: 1px solid var(--colors-danger-border);
+	border-radius: 9px;
+	background-color: var(--colors-danger-background-muted);
+	font-size: 11px;
+	font-variant-numeric: tabular-nums;
+	color: var(--colors-danger-text);
+}
+
+/* The save state, and nothing else: the sidebar never carries the file's name */
+.sidebar-save-state {
+	margin: auto 0 0;
+	padding: 0 18px;
+	font-size: 11px;
+	line-height: 1.5;
+	color: var(--colors-text-secondary);
+}
+
+.sidebar-save-state-warning {
+	color: var(--colors-warn);
+}
+
+.sidebar-save-state-failed {
+	color: var(--colors-danger-text);
+}
