@@ -1,0 +1,40 @@
+
+/* A closed account is dimmed and sorted last: it keeps its history and its balance, and it is stated more quietly */
+.accounts-screen-row-closed td {
+	color: var(--colors-text-secondary);
+}
+
+.accounts-screen-not-applicable,
+.accounts-screen-notes {
+	color: var(--colors-text-secondary);
+}
+
+.accounts-screen-refusal {
+	padding: 12px;
+	border: 1px solid var(--colors-danger-border);
+	border-radius: 8px;
+	background-color: var(--colors-danger-background-muted);
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: flex-start;
+}
+
+.accounts-screen-refusal p {
+	margin: 0;
+	max-width: 90ch;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.accounts-screen-refusal-dismiss {
+	padding: 2px 4px;
+	background: none;
+	border: none;
+	border-radius: 4px;
+	font: inherit;
+	font-size: 13px;
+	color: var(--colors-accent-primary);
+	text-decoration: underline;
+	cursor: pointer;
+}

@@ -1,0 +1,39 @@
+
+.text-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.text-field-input {
+	padding: 6px 10px;
+	background-color: var(--colors-background-primary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 6px;
+	font: inherit;
+	font-size: 13px;
+	color: var(--colors-text-primary);
+	min-width: 0;
+}
+
+.text-field-input::placeholder {
+	color: var(--colors-disabled);
+}
+
+.text-field-input:disabled {
+	color: var(--colors-disabled);
+	border-color: var(--colors-border-subtle);
+}
+
+.text-field-input-invalid {
+	border-color: var(--colors-danger-border);
+	background-color: var(--colors-danger-background-muted);
+}
+
+.text-field-refusal {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--colors-danger-text);
+}

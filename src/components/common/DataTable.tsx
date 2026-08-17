@@ -27,6 +27,9 @@ export interface DataTableProps<TRow> {
 	// What the table is called, for whoever is not looking at the heading above it
 	label: string;
 
+	// What a row that is stated more quietly than the others is called: a closed account, dimmed and last
+	getRowClassName?: (row: TRow) => string | undefined;
+
 	// The line under the rule: counts, totals, whatever the screen's own specification says goes there
 	footer?: ReactNode;
 }
@@ -42,10 +45,11 @@ const cellClassName = (column: DataTableColumn<unknown>): string | undefined => 
  * @param props.rows The rows, already in the order the screen's specification fixes.
  * @param props.getRowKey What tells two rows apart.
  * @param props.label What the table is called.
+ * @param props.getRowClassName What a row is called, where the screen states one more quietly than the others.
  * @param props.footer What goes under the rule, where there is anything.
  * @returns The table.
  */
-export const DataTable = <TRow, >({ columns, rows, getRowKey, label, footer }: DataTableProps<TRow>): ReactElement => {
+export const DataTable = <TRow, >({ columns, rows, getRowKey, label, getRowClassName, footer }: DataTableProps<TRow>): ReactElement => {
 	return (
 		<div className='data-table-scroll'>
 			<table className='data-table' aria-label={label}>
@@ -63,7 +67,7 @@ export const DataTable = <TRow, >({ columns, rows, getRowKey, label, footer }: D
 				<tbody>
 					{rows.map((row) => {
 						return (
-							<tr key={getRowKey(row)}>
+							<tr key={getRowKey(row)} className={getRowClassName?.(row)}>
 								{columns.map((column) => {
 									return (
 										<td key={column.key} className={cellClassName(column as DataTableColumn<unknown>)}>

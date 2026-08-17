@@ -96,7 +96,7 @@ The configuration file holds two things, through `src/main/config/SpiccioliConfi
 
 ## 1.7 What is deliberately not here yet
 
-- **No screen reads its own records yet.** The eight screens exist, the sidebar reaches them and each one shows the empty state of [§14](../functional/specs/14-empty-and-error-states.md); the tables, the forms and the calculations arrive one screen per phase. Settings is the exception and is finished.
+- **Six of the eight screens do not read their own records yet.** They exist, the sidebar reaches them and each one shows the empty state of [§14](../functional/specs/14-empty-and-error-states.md); their tables, forms and calculations arrive one screen per phase. Settings and Accounts are the exceptions and are finished.
 - **No failing-check badge.** The sidebar draws one and is handed a count, and the count is zero until the fourteen checks of [§9](../functional/specs/09-checks.md) are computed in Phase 10.
 - **No single-instance lock.** Spiccioli is allowed to run twice. Two ledgers open side by side is ordinary use, and two sessions on *one* ledger is the case [§12](../functional/specs/12-storage.md) settles by detecting the external modification and keeping the displaced version — not by refusing to start.
 

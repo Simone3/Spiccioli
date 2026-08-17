@@ -86,6 +86,7 @@ export const EN_TRANSLATIONS = {
 	emptyState: {
 		portfolio: 'Nothing here yet — add the accounts you want to track.',
 		accounts: 'Add the first account — a current account is the usual place to start.',
+		institutions: 'Only a Cash account does without one — that is what physical cash is. Add one when a bank turns up.',
 		transactions: 'Import a bank export, or add a row by hand.',
 		bulkImport: 'There is no account to import into yet. Add a cash account first, and the import will offer it.',
 		categories: 'Nothing is categorised automatically yet — add a rule, then apply the list and see what it would catch.',
@@ -93,6 +94,137 @@ export const EN_TRANSLATIONS = {
 		salaries: 'Add the employer, its months per year and its hours per day — everything on the other tab divides by them.',
 		goToAccounts: 'Go to Accounts',
 		goToImport: 'Import a bank export'
+	},
+
+	// The Accounts screen. An account is written "Institution · Account" everywhere in the application; this screen, the
+	// Portfolio breakdown by account and the account form are the three that give the institution a column or a field of its own.
+	accounts: {
+		tabs: {
+			accounts: 'Accounts',
+			institutions: 'Institutions'
+		},
+		add: 'Add account',
+		table: 'Accounts',
+		qualifiedName: '{institution} · {name}',
+		closedOption: '{name} — closed',
+		summary: '{accounts} · {open} · {institutions}',
+		footer: '{summary} · {transactions} · {trades}',
+		count: {
+			one: '1 account',
+			other: '{count} accounts'
+		},
+		openCount: '{count} open',
+		institutionCount: {
+			one: '1 institution',
+			other: '{count} institutions'
+		},
+		transactionCount: {
+			one: '1 transaction',
+			other: '{count} transactions'
+		},
+		tradeCount: {
+			one: '1 trade',
+			other: '{count} trades'
+		},
+		columns: {
+			name: 'Name',
+			institution: 'Institution',
+			type: 'Type',
+			openingBalance: 'Opening balance',
+			exitTax: 'Exit tax',
+			opened: 'Opened',
+			closed: 'Closed',
+			transactions: 'Transactions',
+			trades: 'Trades',
+			notes: 'Notes'
+		},
+		types: {
+			'current-account': 'Current account',
+			cash: 'Cash',
+			'brokerage-cash': 'Brokerage cash',
+			'deposit-account': 'Deposit account',
+			'term-deposit': 'Term deposit',
+			'pension-fund': 'Pension fund',
+			voucher: 'Voucher',
+			brokerage: 'Brokerage'
+		},
+		rowMenu: 'What can be done to {name}',
+		deleteTitle: 'Delete this account?',
+		deleteMessage: 'Delete {name}? There is no undo.',
+		deleteConfirm: 'Delete account',
+
+		// A deletion refused because something points at the record says what does, where the record is, and never in a modal
+		deleteBlockedByTransactions: {
+			one: '{name} cannot be deleted: 1 transaction points at it. Closing it is what retiring an account looks like.',
+			other: '{name} cannot be deleted: {count} transactions point at it. Closing it is what retiring an account looks like.'
+		},
+		deleteBlockedByTrades: {
+			one: '{name} cannot be deleted: 1 trade points at it. Closing it is what retiring an account looks like.',
+			other: '{name} cannot be deleted: {count} trades point at it. Closing it is what retiring an account looks like.'
+		},
+		form: {
+			addTitle: 'Add account',
+			editTitle: 'Edit account',
+			name: 'Name',
+			namePlaceholder: 'e.g. Conto Corrente',
+			institution: 'Institution',
+			institutionNone: 'None',
+			institutionChoose: 'Choose an institution',
+			institutionOnlyCash: 'A Cash account is money held by nobody, so it has no institution.',
+			type: 'Type',
+			typeLocked: 'A cash account and a brokerage account cannot become one another. Delete this one and record it again to move it across.',
+			openingBalance: 'Opening balance',
+			openingBalanceBrokerage: 'A Brokerage account is worth its holdings, so it has no opening balance.',
+			exitTax: 'Exit tax',
+			exitTaxExplanation: 'The rate this fund’s payout would be taxed at. It moves the estimate of what the fund is worth and nothing that was ever recorded.',
+			openingDate: 'Opening date',
+			closingDate: 'Closing date',
+			closingDateHint: 'Empty while the account is open. Filling it in is what retires an account.',
+			closingBeforeOpening: 'The closing date cannot be before the opening date.',
+			notes: 'Notes',
+			nameTaken: 'Another account at this institution already uses this name.',
+			nameTakenWithoutInstitution: 'Another account without an institution already uses this name.'
+		}
+	},
+
+	// The Institutions tab of the Accounts screen. An institution groups accounts and carries a sell fee, and it is created,
+	// edited and deleted here and nowhere else.
+	institutions: {
+		add: 'Add institution',
+		table: 'Institutions',
+		summary: {
+			one: '1 institution',
+			other: '{count} institutions'
+		},
+		footer: '{institutions} · {accounts}',
+		accountCount: {
+			one: '1 account',
+			other: '{count} accounts'
+		},
+		columns: {
+			name: 'Name',
+			defaultSellFee: 'Default sell fee',
+			accounts: 'Accounts',
+			notes: 'Notes'
+		},
+		rowMenu: 'What can be done to {name}',
+		deleteTitle: 'Delete this institution?',
+		deleteMessage: 'Delete {name}? There is no undo.',
+		deleteConfirm: 'Delete institution',
+		deleteBlocked: {
+			one: '{name} cannot be deleted while an account points at it: {accounts}.',
+			other: '{name} cannot be deleted while {count} accounts point at it: {accounts}.'
+		},
+		form: {
+			addTitle: 'Add institution',
+			editTitle: 'Edit institution',
+			name: 'Name',
+			namePlaceholder: 'e.g. Banca Sella',
+			defaultSellFee: 'Default sell fee',
+			defaultSellFeeExplanation: 'The flat fee charged once per holding when estimating what a position would leave you with. It is required, so type a zero to see gross figures.',
+			notes: 'Notes',
+			nameTaken: 'An institution with this name is already recorded.'
+		}
 	},
 
 	// The preferences, which belong to the installation and not to the open file
@@ -139,8 +271,26 @@ export const EN_TRANSLATIONS = {
 		tooHigh: 'This cannot be more than {maximum}.'
 	},
 
+	// What a form and a table say wherever they appear, since neither wording belongs to one screen
+	form: {
+		save: 'Save',
+		optional: 'optional'
+	},
+
+	table: {
+		// A column a record's type cannot carry: a field that cannot be filled rather than one nobody got round to
+		notApplicable: '—'
+	},
+
+	// A line a screen puts above its list to say what it would not do. It is never a modal and it never blocks.
+	notice: {
+		dismiss: 'Dismiss'
+	},
+
 	rowMenu: {
-		nothingToDo: 'Nothing to do here'
+		nothingToDo: 'Nothing to do here',
+		edit: 'Edit',
+		delete: 'Delete'
 	},
 
 	dialog: {

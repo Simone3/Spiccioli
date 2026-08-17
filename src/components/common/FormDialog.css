@@ -1,0 +1,86 @@
+
+.form-dialog-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	background-color: var(--colors-modal-overlay);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	box-sizing: border-box;
+	overflow-y: auto;
+}
+
+.form-dialog {
+	width: 100%;
+	max-width: 480px;
+	padding: 22px;
+	box-sizing: border-box;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 10px;
+	box-shadow: 0 24px 48px var(--colors-modal-shadow);
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.form-dialog-heading {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.form-dialog-title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.form-dialog-subtitle {
+	font-size: 11px;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--colors-text-secondary);
+}
+
+.form-dialog-fields {
+	display: grid;
+	grid-template-columns: minmax(0, 130px) minmax(0, 1fr);
+	gap: 10px 14px;
+	align-items: start;
+}
+
+.form-dialog-field-label {
+	padding-top: 7px;
+	font-size: 13px;
+	color: var(--colors-text-secondary);
+}
+
+.form-dialog-field-control {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.form-dialog-field-refusal {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--colors-danger-text);
+}
+
+.form-dialog-field-hint {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--colors-text-secondary);
+}
+
+.form-dialog-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}

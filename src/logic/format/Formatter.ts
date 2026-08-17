@@ -1,6 +1,8 @@
+import { DateUtils } from 'src/framework/utils/DateUtils';
 import { formatDate, formatDateAndTime, formatTimeOfDay } from 'src/logic/format/DateFormat';
 import { formatAmount, formatInteger, formatPercentage, formatQuantity, formatUnitPrice, type SeparatorCharacters } from 'src/logic/format/NumberFormat';
 import { SEPARATOR_CHARACTERS, type Preferences } from 'src/types/PreferencesTypes';
+import type { IsoDate } from 'src/types/LedgerTypes';
 
 /**
  * Every way a figure or a day reaches the screen, bound once to the preferences in force.
@@ -21,6 +23,10 @@ export interface Formatter {
 	percentage: (fraction: number) => string;
 	integer: (value: number) => string;
 	date: (date: Date) => string;
+
+	// A day as the file holds it, which is what every table column and every detail row prints
+	storedDate: (value: IsoDate) => string;
+
 	dateAndTime: (date: Date) => string;
 
 	// The clock alone, which the save state is the only thing that reads
@@ -57,6 +63,13 @@ export const createFormatter = (preferences: Preferences): Formatter => {
 		},
 		date: (date) => {
 			return formatDate(date, preferences.dateFormat);
+		},
+
+		// A day the reader took is always a day this parses; one it did not take never reached a screen, the file having been refused
+		storedDate: (value) => {
+			const parsed = DateUtils.fromStandardYearMonthDay(value);
+
+			return parsed ? formatDate(parsed, preferences.dateFormat) : value;
 		},
 		dateAndTime: (date) => {
 			return formatDateAndTime(date, preferences.dateFormat);

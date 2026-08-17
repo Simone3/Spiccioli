@@ -6,7 +6,7 @@ The route from the scaffolding that exists today to the application [`docs/funct
 
 It carries three things: the **decisions** ([§8.2](#82-decisions)) — every one of them now taken, stated as what a phase has to build to — the **shape the code is heading towards** ([§8.4](#84-the-shape-of-the-code)), and the **twelve phases** the work is cut into ([§8.5](#85-the-phases)). A section that cannot be written until a decision is taken says **to be completed** and names it; none does today.
 
-**Phases 1 and 2 have landed.** Everything they built is described in the pages they changed — [§1](01-architecture.md), [§2](02-repository-map.md), [§4](04-framework.md), [§6](06-styling.md), [§7](07-testing.md) and the new [§9](09-file-format.md) — and this page keeps only the plan.
+**Phases 1, 2 and 3 have landed.** Everything they built is described in the pages they changed — [§1](01-architecture.md), [§2](02-repository-map.md), [§4](04-framework.md), [§6](06-styling.md), [§7](07-testing.md) and the new [§9](09-file-format.md) — and this page keeps only the plan.
 
 **What each decision was taken *on* is in [`08-implementation-plan-why.md`](08-implementation-plan-why.md)**, the companion to this page: the grounds decision by decision, the measurements behind D1, and the provider survey behind D11. This page is read on the way into every phase and states only the outcomes; that one is read when a decision is questioned.
 
@@ -153,7 +153,7 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 | --- | --- | --- | --- |
 | 1 | [The file](#phase-1--the-file) — **done** | [§2](../functional/specs/02-domain-model.md), [§12](../functional/specs/12-storage.md) | — |
 | 2 | [The shell and the kit](#phase-2--the-shell-and-the-kit) — **done** | [§10](../functional/specs/10-settings.md), [§13.1](../functional/specs/13-validation.md#131-how-it-behaves), [§14](../functional/specs/14-empty-and-error-states.md) | 1 |
-| 3 | [Accounts and institutions](#phase-3--accounts-and-institutions) | [§4](../functional/specs/04-accounts.md) | 2 |
+| 3 | [Accounts and institutions](#phase-3--accounts-and-institutions) — **done** | [§4](../functional/specs/04-accounts.md) | 2 |
 | 4 | [Transactions](#phase-4--transactions) | [§5.1](../functional/specs/05-transactions.md#51-columns) – [§5.6](../functional/specs/05-transactions.md#56-selecting-and-deleting-in-bulk) | 3 |
 | 5 | [Bulk import](#phase-5--bulk-import) | [§5.7](../functional/specs/05-transactions.md#57-bulk-import) | 4 |
 | 6 | [Categories](#phase-6--categories) | [§6](../functional/specs/06-categories.md) | 4 |
@@ -204,18 +204,24 @@ What it left behind, and where: the routes and the sidebar in `src/components/sh
 
 *Done when* changing a preference re-renders every figure on screen immediately, and every screen exists with its empty state. **It does**, in `tests/components/`.
 
-**Three things this phase left for the phases that can finish them, and each is expected.** An empty state whose action is a form — *Add account*, *Add rule* — states the action in its sentence and carries the button only once there is a form for it to open, so the phase that builds the form adds it; the badge beside *Checks* is drawn and is handed a count that stays zero until Phase 10 computes one; and a screen whose records exist but whose table does not yet says so in a line, which each phase removes as it builds its screen. **Empty-because-of-a-filter has no screen to appear on yet** — `FilterBar` is what will raise it, from Phase 4.
+**Three things this phase left for the phases that can finish them, and each is expected.** An empty state whose action is a form — *Add account*, *Add rule* — states the action in its sentence and carries the button only once there is a form for it to open, so the phase that builds the form adds it, as Phase 3 did on Accounts; the badge beside *Checks* is drawn and is handed a count that stays zero until Phase 10 computes one; and a screen whose records exist but whose table does not yet says so in a line, which each phase removes as it builds its screen. **Empty-because-of-a-filter has no screen to appear on yet** — `FilterBar` is what will raise it, from Phase 4.
 
 **Two of the four dependencies arrived here**, at the versions published when the phase ran rather than the ones the table below records: `react-router` at 8.3.0 and `react-datepicker` at 9.1.0. Version 8 of the router folds the DOM exports into the one package exactly as version 7 did, so `react-router-dom` is still not installed, and it adds one small dependency of its own, `cookie-es`. `date-fns-tz` stays uninstalled.
 
 ### Phase 3 — Accounts and institutions
 
-The spine, and the first full CRUD — which is where the validation rules of [§13](../functional/specs/13-validation.md) get built once and reused.
+**Done.** The spine, and the first full CRUD — which is where the validation rules of [§13](../functional/specs/13-validation.md) got built once and reused.
+
+What it left behind, and where: everything pure in `src/logic/accounts/Accounts.ts`, the screen in `src/components/accounts/`, and four additions to the kit — `TextField`, `TabBar`, and `FormDialog` with the `FormField` rows it holds, plus the row class `DataTable` now takes so a closed account can be dimmed. `ScreenNotBuiltYet` goes away from Accounts and stays on the six screens still waiting for their phase.
 
 - Both tabs, both forms, the orderings of [§4.1](../functional/specs/04-accounts.md#41-accounts) and [§4.2](../functional/specs/04-accounts.md#42-institutions), the transaction and trade counts, the five em-dashed columns.
 - The rules that later phases lean on: uniqueness, **deletion refused while something points at the record**, the cash/brokerage type lock, the institution field disabled on `Cash`, the exit tax field that appears only on `Pension fund`.
 - *Institution · Account* as the one way an account is written, and the three screens that are the exception.
 - **Every account picker in the application is built here**, filtered to cash or to brokerage accounts, closed ones marked and last ([§2](../functional/specs/02-domain-model.md)).
+
+*Done when* an account and an institution can be created, corrected, refused and deleted, and a deletion something points at says what points at it. **They can**, in `tests/logic/Accounts.test.ts` and `tests/components/AccountsScreen.test.tsx`.
+
+**Two things this phase built have no consumer yet, and both are expected.** `AccountPicker` is the picker every later screen takes and nothing offers accounts before Transactions; and the form panel is the shape every later add-and-correct form has, which is why it went into the kit rather than into this screen. **The refusal a blocked deletion states is a line above the list rather than a dialog** ([§14](../functional/specs/14-empty-and-error-states.md)): an error is never a modal, and the two modals the application has are the confirmation and the form panel.
 
 ### Phase 4 — Transactions
 

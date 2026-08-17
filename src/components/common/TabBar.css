@@ -1,0 +1,29 @@
+
+.tab-bar {
+	display: flex;
+	gap: 4px;
+	border-bottom: 1px solid var(--colors-border-subtle);
+}
+
+.tab-bar-tab {
+	padding: 7px 12px;
+	background: none;
+	border: none;
+	border-bottom: 2px solid transparent;
+	border-radius: 4px 4px 0 0;
+	font: inherit;
+	font-size: 13px;
+	color: var(--colors-text-secondary);
+	cursor: pointer;
+}
+
+.tab-bar-tab:hover {
+	background-color: var(--colors-interactive-hover-background);
+	color: var(--colors-text-primary);
+}
+
+.tab-bar-tab-active {
+	border-bottom-color: var(--colors-accent-primary);
+	color: var(--colors-text-primary);
+	font-weight: 700;
+}
