@@ -1,0 +1,49 @@
+docs/technical/02-repository-map.md
+  s_ef22e28947f2a1::t_db7b302d0bcd27 61,68,70,80,86
+src/components/common/DataTable.css
+  s_ef22e28947f2a1::t_038c31c09d26b0 46-58
+src/components/import/BulkImportScreen.css
+  s_ef22e28947f2a1::t_85eed61357bd61 1-135
+src/components/import/BulkImportScreen.tsx
+  s_ef22e28947f2a1::t_dec643dcda2d43 1-4,6-7,9-10,12,14-32,35,37-52,57-97,102-209,212-315
+src/components/import/ImportPreviewTable.tsx
+  s_ef22e28947f2a1::t_85ab8058dc59a6 1-154
+src/components/settings/SettingsScreen.tsx
+  s_ef22e28947f2a1::t_02a2f38a1b881d 9,110,121
+src/components/shell/TransactionHandoff.ts
+  s_ef22e28947f2a1::t_03abc692ab2456 1-47
+src/components/transactions/TransactionsScreen.tsx
+  s_ef22e28947f2a1::t_6c3ac56a2ae26d 8,63-68,91,93
+src/components/transactions/TransactionsTable.tsx
+  s_ef22e28947f2a1::t_88abec4b703852 119,133
+src/i18n/lang/en.ts
+  s_ef22e28947f2a1::t_13ba62bd275885 326-406
+src/logic/preferences/Preferences.ts
+  s_ef22e28947f2a1::t_851ad8ad97957e 6-8,35-45,73
+src/logic/transactions/TransactionImport.ts
+  s_ef22e28947f2a1::t_5d848085dd417f 1-464
+tests/components/BulkImportScreen.test.tsx
+  s_ef22e28947f2a1::t_6f2138e52b55de 1-126
+tests/logic/TransactionImport.test.ts
+  s_ef22e28947f2a1::t_bae008fc615274 1-276
+CLAUDE.md
+  s_ef22e28947f2a1::t_c4eb66c05685a4 9
+docs/technical/08-implementation-plan.md
+  s_ef22e28947f2a1::t_906a7095fa4541 9,158,245-247,254-256
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "1aed94ccf0cbebaa87ef69b1af0addf38f4da0bf",
+  "prompts": {},
+  "sessions": {
+    "s_ef22e28947f2a1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "814ed0d5-136e-48a4-b71a-19bb347f7941",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
