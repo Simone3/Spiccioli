@@ -1,0 +1,65 @@
+CLAUDE.md
+  s_97eec2e48f67c8::t_97bf2ef16f3c3e 9
+docs/technical/01-architecture.md
+  s_97eec2e48f67c8::t_684529bec63ce8 99
+docs/technical/02-repository-map.md
+  s_97eec2e48f67c8::t_e3dfc48c633dd8 55,65-66,72
+docs/technical/08-implementation-plan.md
+  s_97eec2e48f67c8::t_c14c664011bc4a 9,156,207,213-215,222-225
+src/components/accounts/AccountForm.tsx
+  s_97eec2e48f67c8::t_539ede9e239eb7 1-251
+src/components/accounts/AccountPicker.tsx
+  s_97eec2e48f67c8::t_9cf075432a209a 1-84
+src/components/accounts/AccountsScreen.css
+  s_97eec2e48f67c8::t_3d6443042317cd 1-40
+src/components/accounts/AccountsScreen.tsx
+  s_97eec2e48f67c8::t_69bd8a4595757a 1-8,10-11,14-25,28,30-52,56-229,232-324
+src/components/accounts/AccountsTable.tsx
+  s_97eec2e48f67c8::t_dc056db66a5b76 1-193
+src/components/accounts/InstitutionForm.tsx
+  s_97eec2e48f67c8::t_12a019ba73d831 1-106
+src/components/accounts/InstitutionsTable.tsx
+  s_97eec2e48f67c8::t_4dc84bd7fac17a 1-120
+src/components/common/ConfirmDialog.tsx
+  s_97eec2e48f67c8::t_7c8a9a39a9252e 10-11
+src/components/common/DataTable.tsx
+  s_97eec2e48f67c8::t_4c69157197d2ef 30-32,48,52,70
+src/components/common/FormDialog.css
+  s_97eec2e48f67c8::t_e4565c9743dfd3 1-86
+src/components/common/FormDialog.tsx
+  s_97eec2e48f67c8::t_3386ea33e331f1 1-109
+src/components/common/TabBar.css
+  s_97eec2e48f67c8::t_307bf0d4c950d1 1-29
+src/components/common/TabBar.tsx
+  s_97eec2e48f67c8::t_b92ddf2d1e0146 1-58
+src/components/common/TextField.css
+  s_97eec2e48f67c8::t_4728d14881f1e1 1-39
+src/components/common/TextField.tsx
+  s_97eec2e48f67c8::t_acb346b4dd814e 1-59
+src/i18n/lang/en.ts
+  s_97eec2e48f67c8::t_cef72619c03ae2 89,99-229,274-289,291-293
+src/logic/accounts/Accounts.ts
+  s_97eec2e48f67c8::t_3aa3f91eb791ff 1-305
+src/logic/format/Formatter.ts
+  s_97eec2e48f67c8::t_e38a61cd0618db 1,5,26-29,67-73
+tests/components/AccountsScreen.test.tsx
+  s_97eec2e48f67c8::t_aedf15b161fbd3 1-168
+tests/logic/Accounts.test.ts
+  s_97eec2e48f67c8::t_5a532be806ac0c 1-168
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "5558170474c597eb8ffe016b02d4eaa711fc3ef9",
+  "prompts": {},
+  "sessions": {
+    "s_97eec2e48f67c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "790b8b77-f9d1-4ef0-ac33-595aae1a073b",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
