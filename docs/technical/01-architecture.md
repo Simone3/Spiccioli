@@ -40,7 +40,7 @@ src/index.tsx                 mounts React, in StrictMode
 
 `AppErrorBoundary` wraps everything below the provider rather than one screen, so a failure inside a context provider is caught too. Its recovery is a reload: rendering the same tree again would usually throw the same error a second time, while a reload starts over from what is on disk.
 
-The failure is written to the renderer console for now. That console is developer-facing and an installed Spiccioli cannot open it, so this screen still has to reach the operational log; the channel that carries it there is written with the storage work.
+The failure is written to the renderer console for now. That console is developer-facing and an installed Spiccioli cannot open it, so this screen still has to reach the operational log; **the channel that carries it there is Phase 1's, and what it writes is fixed by D14** ([§8.2](08-implementation-plan.md#what-d14-logs)) — the message, the stack and the component stack, each truncated, written by the main process.
 
 ## 1.4 What the main process does at startup
 

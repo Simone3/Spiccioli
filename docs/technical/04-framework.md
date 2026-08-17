@@ -54,6 +54,8 @@ It writes NDJSON — one JSON object per line, with a timestamp, a level, a mess
 
 Spiccioli logs into `logs/spiccioli-logs.ndjson` under the runtime root of [§1.6](01-architecture.md#16-where-the-installations-own-files-live).
 
+This section is the mechanism. **What is written into it, entry by entry, is D14** ([§8.2](08-implementation-plan.md#what-d14-logs)): the startup entry, every storage operation, the renderer's failures, the price pass — and the rule that no figure or text out of the ledger is ever among the fields.
+
 ## 4.5 Adding to it
 
 Put new code in `src/framework` only when it would be just as useful to a different application, and in Spiccioli otherwise. Moving something into the framework later is easy; untangling application knowledge out of it is not.

@@ -22,7 +22,7 @@ Each phase leaves the application **running, linted, typechecked and tested**. A
 
 ## 8.2 Decisions
 
-Each of these had to be settled before the phase that names it could start, and **all thirteen are taken**: nothing on this page is waiting on one. The column below is what a phase builds to; the [grounds](08-implementation-plan-why.md#the-grounds-decision-by-decision) are the companion page's.
+Each of these had to be settled before the phase that names it could start, and **all fourteen are taken**: nothing on this page is waiting on one. The column below is what a phase builds to; the [grounds](08-implementation-plan-why.md#the-grounds-decision-by-decision) are the companion page's.
 
 | # | Decision | Blocks | Taken |
 | --- | --- | --- | --- |
@@ -39,6 +39,7 @@ Each of these had to be settled before the phase that names it could start, and 
 | D11 | **The price provider** ([§7.6](../functional/specs/07-investments.md#76-prices)) | Phase 8, and the `exchange` field of Phase 7 | **Yahoo Finance's `v8/finance/chart` endpoint**, one request per listing, keyless, addressed by **`ticker` + `exchange`** — an ISIN does not identify a currency. The file stores neither Yahoo's symbols nor its suffixes: `exchange` is our own enum of eighteen eurozone venues ([§2](../functional/specs/02-domain-model.md)) and the suffix table lives in the adapter |
 | D12 | **The autosave debounce, the retry spacing and the write timeouts** | Phase 1 | **Debounce 2 s · 5 attempts spaced 3 s · write timeout 10 s**, all in `AppConfig` |
 | D13 | **How external modification is detected** | Phase 1 | **A SHA-256 of the whole file**, recorded at every read and every write and re-checked before the next write |
+| D14 | **What is written to the operational log, and from where** | Phase 1, and the price pass of Phase 8 | **One startup entry, every storage operation, and the renderer's own failures over IPC**, through `appLogger` ([§4.4](04-framework.md#44-the-logger)) at four levels. An entry carries counts, paths, versions, durations and reasons and **never a figure or a text out of the ledger**. Set out entry by entry in [*What D14 logs*](#what-d14-logs) below |
 
 ### What D3 fixes
 
@@ -78,6 +79,50 @@ Four libraries, and they are the whole of what v1 adds to the five runtime depen
 **None of them owns anything.** `react-router` is taken in declarative mode only and the ban in [`CLAUDE.md`](../../CLAUDE.md) still stands against its framework mode; recharts' Redux store is internal to recharts and is not a state library this application may reach for — the ledger lives in a context (D2) and nothing else is allowed to hold it.
 
 **`@dnd-kit/react` is the one to re-check.** At 0.5.0 it is pre-1.0 — the project's newer React package, whose API can still move under a minor bump — and Phase 6 is a long way off. It is pinned exactly like everything else, and **if it is still 0.x when Phase 6 starts, the fallback is the same project's settled pair**, `@dnd-kit/core` with `@dnd-kit/sortable`: the keyboard sensor and the accessibility layer that decided D10 are in both, so the fallback costs an API and no capability.
+
+### What D14 logs
+
+**The log is one local NDJSON file and nothing sends it anywhere** ([§4.4](04-framework.md#44-the-logger)) — there is no telemetry, no crash reporting service and no console an installed Spiccioli can open, so this file is the whole account of a run that survives it. Nothing in the interface points at it either: the two read-only paths of [§10](../functional/specs/10-settings.md) are the ledger's and its backups'. Every entry is therefore written to be legible on its own, by whoever collects the file after something went wrong.
+
+**Four levels, meaning the same thing everywhere.** `debug` for what happens on a timer or a keystroke — a save, one listing fetched. `info` for the moments of a session — a file opened, created, upgraded, closed, a copy written. `warn` for something refused or recovered — a retried write, an external modification, a file the reader would not take. `error` for something lost — five failed attempts, a copy not written, a render error, a crash.
+
+**Every entry carries a `type`**, and new ones are named `area.event`. The five already written keep the names they have: `config.write`, `blocked-navigation`, `startup-failed`, and the crash handlers' `uncaught-exception` and `unhandled-rejection`.
+
+**One entry describes the run the rest of the file belongs to**, written the moment the logger is initialized ([§1.4](01-architecture.md#14-what-the-main-process-does-at-startup) step 4), from `src/main/config/StartupConfigurationLog.ts`.
+
+| Entry | `type` | Level | Carries |
+| --- | --- | --- | --- |
+| `Spiccioli started` | `config.startup` | `info` | The version and whether this is a development run; platform, architecture and the Electron, Chrome and Node versions; the locale asked for and the language it resolved to; **where the renderer came from** — `development-server` or `build`, with its location; the runtime paths of [§1.6](01-architecture.md#16-where-the-installations-own-files-live), the log file included and no ledger, since none is open yet; and **the settings that decide how a run behaves** — the three figures of D12, `backupCount`, and the log's own size limit and archive count |
+
+**The file, which is the whole of Phase 1's own logging.** The ledger-level entries are written from `src/main/storage`, the byte-level ones from `src/framework/main/storage` — which names no ledger and says *file* throughout (D5).
+
+| Entry | `type` | Level | Carries |
+| --- | --- | --- | --- |
+| A file opened | `ledger.open` | `info` | The path, the `schemaVersion` read, the size in bytes, the record count per entity, and how long parsing and validating took |
+| A file refused | `ledger.refused` | `warn` | The path, the `schemaVersion` found, and **what was not understood** (D4) — the reason and the key, category, role or enum name it was raised on, **never the value**, which on a rejected figure is an amount |
+| A file created | `ledger.created` | `info` | The path and the `schemaVersion` written |
+| A file upgraded | `ledger.upgraded` | `info` | From which version to which, the name of the pre-upgrade copy, and the counts the dialog showed — rows recategorised, rules repointed or deleted, categories retired. **`error` when the pre-upgrade copy failed and stopped the upgrade**, with what the system said |
+| A session closed | `ledger.closed` | `info` | Which of the four doors of [§12](../functional/specs/12-storage.md) it left by, whether anything changed, and so whether a copy was taken |
+| A save | `storage.save` | `debug` | The bytes written and how long the write and the rename took |
+| A save that failed | `storage.save` | `warn` | Which attempt of the five, what the system said, and how long until the next. **`info` when a later attempt or the blocking *Retry* succeeds, `error` after the fifth** |
+| An external modification | `storage.external` | `warn` | The path, the hash that was recorded against the hash found (D13), the name of the copy the displaced version went to, and whether that copy was written |
+| A copy written | `storage.backup` | `info` | Which of the three kinds — close, external, pre-upgrade — its name, how many copies the folder now holds and which was rotated out. **`error` with what the system said when it could not be written** |
+
+**The renderer's way into the log**, over IPC, in `src/main/ipc/DiagnosticsIpc.ts`. It is what [§1.3](01-architecture.md#13-layers-inside-the-renderer) is waiting for: `AppErrorBoundary` writes to the renderer console today, which an installed Spiccioli cannot open and which outlives nothing.
+
+| Entry | `type` | Level | Carries |
+| --- | --- | --- | --- |
+| A render error | `renderer.error` | `error` | The message, the stack and the component stack, **each truncated at a length `AppConfig` fixes**. The renderer chooses neither the message nor the level, and nothing it sends can grow a line without limit |
+
+**The price pass, in Phase 8**, written where the adapter is called and not inside it.
+
+| Entry | `type` | Level | Carries |
+| --- | --- | --- | --- |
+| A pass | `prices.pass` | `info` | At the start, how many listings it will ask for; at the end, the counts — quoted, no quote, refused, could not be fetched |
+| One listing | `prices.listing` | `debug` | The `ticker`, the `exchange`, and what came back: the quote with the day it belongs to, or which of the four refusals of [§7.6](../functional/specs/07-investments.md#76-prices) it fell to, or the transport failure |
+| What the confirmation wrote | `prices.written` | `info` | How many Price records were written and for which day. **A cancelled pass writes it with a count of nothing**: [§7.6](../functional/specs/07-investments.md#76-prices) leaves no trace in *the ledger*, and the log still says the pass happened and ended |
+
+**What never reaches the file.** Not an amount, not a description, not an institution, account, security or contract name, not an ISIN, not a payslip figure, not a rule's pattern. **The price pass is the one exception and it is exactly what already left the machine** — a `ticker` and an `exchange` (D11), with the quote that came back, which is public market data and says nothing about how much is held. **Paths are not redacted**: the ledger's is already in the recent-file list in plain text, and no storage failure can be diagnosed without knowing which file it was.
 
 ## 8.3 What is already fixed, and is not up for decision
 
@@ -133,6 +178,7 @@ The domain model and everything [§12](../functional/specs/12-storage.md) asks o
 - The launch screen ([§12.1](../functional/specs/12-storage.md#121-the-launch-screen)): recent locations, *Open…*, *New file…* which writes the seeded file at the moment the location is chosen, struck-through entries for files that moved. `PlaceholderPage` goes away here.
 - The File menu, *Open Recent*, the About item, and the window title carrying the file's name.
 - **The upgrade path is built and has nothing to upgrade yet**: version comparison, the pre-upgrade backup that stops the upgrade when it fails, and the dialog of [§12.1](../functional/specs/12-storage.md#121-the-launch-screen). No migration step is registered until there is a second schema version.
+- **The log of D14, from its first entry.** `Spiccioli started` as the logger comes up, and an entry for every storage operation this phase builds — opened, refused, created, upgraded, closed, each save and each of its five attempts, an external modification, a copy written and one rotated out. **The renderer's channel into the log lands here too**, which is what [§1.3](01-architecture.md#13-layers-inside-the-renderer) is waiting for: a render error is written by the main process with its three texts truncated, instead of going to a console nobody can open.
 
 *Done when* a file can be created, closed, reopened, backed up, rotated, displaced by an external write and refused when unreadable — and the storage layer's tests say so without a screen.
 
@@ -204,6 +250,7 @@ The only thing in the application that touches the network, and the whole of it 
 - **The review panel**: what got a quote with the day it belongs to and what that day currently holds — a value it would replace, marked `manual` or `fetched`, or nothing at all — what had no quote, what could not be fetched with each reason, and the provider's reference date where it gives one. **Nothing is written before it is confirmed**, one confirmation covers the pass, there is no row to tick, and a pass with nothing to write still shows its panel and offers only *Close*.
 - **Cancel and a failed pass leave no trace in the file** — no record, no marker, nothing to clean up on the next open.
 - The statement of what leaves the machine, **beside the button and again in the panel**: a `ticker` and an `exchange`, never the ISIN, never an amount, a quantity or an account.
+- **What the pass writes to the log** (D14): the pass with its outcome counts, one line per listing, and what the confirmation wrote. A line carries the same `ticker` and `exchange` that went to the provider and nothing else about the holding.
 
 *Done when* a pass over a file of real securities writes what the panel showed and nothing else, and the adapter's tests cover each of the four refusals without a network.
 
@@ -242,6 +289,7 @@ Not repeated in the phases above, and true of all of them.
 - **Strings into `src/i18n/lang/en.ts`**, plurals as plural entries, values through `{name}` placeholders ([§5](05-text-and-languages.md)).
 - **Tests**: new logic in `src/logic`, `src/main` and `src/framework` comes with unit tests; one or two smoke tests per critical flow ([§7](07-testing.md)).
 - **Controls, not clickable divs**, and the one focus ring ([§6](06-styling.md)).
+- **A failure the user is told about gets a log entry**, at the level and with the fields D14's inventory fixes — and a new entry is added to that inventory rather than to a call site alone.
 - **`docs/technical/` updated in the same commit**, and this page's phase marked done.
 - `npm run lint && npm run typecheck && npm test` green.
 
@@ -251,6 +299,7 @@ Not repeated in the phases above, and true of all of them.
 - **`exchange` is a required field and has to land in Phase 7, not Phase 8.** It is only read by the fetch, which makes it tempting to defer to the phase that needs it — and deferring it past v1 turns a field into a migration over files that already exist. The phase that builds the Securities tab is the last free moment to add it.
 - **Rule reordering had no keyboard path, and D10 is what supplies one.** [§6.2](../functional/specs/06-categories.md#62-rules) reorders by drag, [§15](../functional/specs/15-out-of-scope.md) declines keyboard-shortcut work, and [`CLAUDE.md`](../../CLAUDE.md) requires every control to be reachable and activatable by keyboard. `@dnd-kit/react` reconciles the three, its keyboard sensor and its live region being the part nobody would have built by hand — **on the condition that the handle is a real button rather than a draggable row**, which is a design decision Phase 6 has to make rather than inherit.
 - **The representation of D3 has to hold at every boundary.** It is taken and it reaches every entity, so what is left is the four places a binary64 could put a fraction of a cent into the file — the amount field, the import parser, the reader and the writer — and nothing downstream would notice it. The reader refusing a non-integer is what turns that from a convention into a check, and it is the only one of the four that also catches a file somebody else wrote.
+- **The log is the one place the redaction rule can be broken quietly.** `AppLogFields` takes anything, so nothing in the types stops an amount or a description from being passed to `appLogger`, and a log line is not read until something has already gone wrong. What stands against it is the inventory of D14 being per entry rather than per call site, and a review that checks the fields against it. The exposure is bounded — a file on disk that nothing sends anywhere — which is why this stays a rule rather than a mechanism.
 - **The [§11.6](../functional/specs/11-calculations.md#116-derived-matching) matchers are the subtlest code in the application** — five greedy pairings whose determinism the specification is explicit about. They are where a test suite earns its keep, and where a shortcut is most expensive.
 
 ## 8.8 Sections to be completed
