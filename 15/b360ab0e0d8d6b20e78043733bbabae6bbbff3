@@ -1,0 +1,69 @@
+CLAUDE.md
+  s_ecf335abc7e393::t_67a071e78e59e0 9
+docs/technical/02-repository-map.md
+  s_ecf335abc7e393::t_f0acbbf4e8effe 55,66-68,75-77
+docs/technical/06-styling.md
+  s_ecf335abc7e393::t_42d27e5bbe9545 30
+docs/technical/08-implementation-plan.md
+  s_ecf335abc7e393::t_21abd1a9578819 9,157,207,224,228-230,237-242
+src/components/accounts/AccountPicker.tsx
+  s_ecf335abc7e393::t_ac7419921454c8 26-30,51,59,87-89
+src/components/categories/CategoryPicker.tsx
+  s_ecf335abc7e393::t_6faa52e6ea56f5 1-78
+src/components/common/Chip.css
+  s_ecf335abc7e393::t_10a076f37f6e7d 27-33
+src/components/common/Chip.tsx
+  s_ecf335abc7e393::t_b0076d75f4001c 9,15
+src/components/common/DataTable.tsx
+  s_ecf335abc7e393::t_75504256f23fe9 14-16
+src/components/common/EditableCell.tsx
+  s_ecf335abc7e393::t_debc2dc5147572 1-74
+src/components/common/FormDialog.tsx
+  s_ecf335abc7e393::t_b8265cf85fdd43 28-30,35-39,82,87,113
+src/components/transactions/TransactionFilters.tsx
+  s_ecf335abc7e393::t_fb24af6247655f 1-151
+src/components/transactions/TransactionForm.tsx
+  s_ecf335abc7e393::t_c6329350cac2f5 1-182
+src/components/transactions/TransactionsPager.tsx
+  s_ecf335abc7e393::t_6e0ce216caf672 1-60
+src/components/transactions/TransactionsScreen.css
+  s_ecf335abc7e393::t_afc4fdd53f4254 1-65
+src/components/transactions/TransactionsScreen.tsx
+  s_ecf335abc7e393::t_1fabdf59397c4a 1-4,7-11,13,15-32,35,37-54,58-261,264-268,270,273-351
+src/components/transactions/TransactionsTable.tsx
+  s_ecf335abc7e393::t_f5b67062ca18e1 1-362
+src/config/AppConfig.ts
+  s_ecf335abc7e393::t_1817b1f8b38b80 74-78
+src/i18n/lang/en.ts
+  s_ecf335abc7e393::t_812bea5e2cc0a1 91,231-339,403
+src/index.css
+  s_ecf335abc7e393::t_e0ccb327770f0b 29-36
+src/logic/categories/Categories.ts
+  s_ecf335abc7e393::t_1203ebdf743f21 1-33
+src/logic/categories/Categorisation.ts
+  s_ecf335abc7e393::t_624eebef2c21cd 1-70
+src/logic/transactions/Transactions.ts
+  s_ecf335abc7e393::t_bb84252fb784fb 1-241
+tests/components/TransactionsScreen.test.tsx
+  s_ecf335abc7e393::t_e3c631ab0ff18d 1-152
+tests/logic/Categorisation.test.ts
+  s_ecf335abc7e393::t_5e418b1a542d4b 1-65
+tests/logic/Transactions.test.ts
+  s_ecf335abc7e393::t_8a3c4f02576d84 1-206
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "15b360ab0e0d8d6b20e78043733bbabae6bbbff3",
+  "prompts": {},
+  "sessions": {
+    "s_ecf335abc7e393": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ecb6cf07-754d-4672-8dd6-2c26912e09d1",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
