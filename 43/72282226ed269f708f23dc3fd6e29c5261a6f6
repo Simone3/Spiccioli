@@ -1,0 +1,71 @@
+src/logic/investments/Holdings.ts
+  s_164bb6fc72a688::t_ac5df627f6dd64 1-388
+src/logic/investments/Securities.ts
+  s_164bb6fc72a688::t_c2b5bfcb9313de 1-195
+src/logic/money/Money.ts
+  s_164bb6fc72a688::t_e9367f90c7ef8e 104-135
+CLAUDE.md
+  s_164bb6fc72a688::t_4206a8f131d6b4 9
+docs/technical/02-repository-map.md
+  s_164bb6fc72a688::t_71d08e836d7785 71-72,84-87
+docs/technical/08-implementation-plan.md
+  s_164bb6fc72a688::t_756a1374b0f95a 9,159-160,276-278,285-292,349
+src/components/investments/HoldingDetailPanel.tsx
+  s_164bb6fc72a688::t_0729d055320c2e 1-153
+src/components/investments/HoldingsTable.tsx
+  s_164bb6fc72a688::t_bc66c8b338015b 1-271
+src/components/investments/InvestmentsScreen.css
+  s_164bb6fc72a688::t_5d296789572514 1-197
+src/components/investments/InvestmentsScreen.tsx
+  s_164bb6fc72a688::t_0402bda421c7d1 1-4,6-17,19,21-55,58,60-77,81-642,645-734
+src/components/investments/PriceForm.tsx
+  s_164bb6fc72a688::t_33fd5541b9a6a6 1-75
+src/components/investments/PriceHistoryPanel.tsx
+  s_164bb6fc72a688::t_607bd45333ba58 1-230
+src/components/investments/SecuritiesTable.tsx
+  s_164bb6fc72a688::t_6004d85f9579b2 1-193
+src/components/investments/SecurityFields.tsx
+  s_164bb6fc72a688::t_4a13c8d96e28cb 1-212
+src/components/investments/SecurityForm.tsx
+  s_164bb6fc72a688::t_ac211d8825da55 1-70
+src/components/investments/SecurityPicker.tsx
+  s_164bb6fc72a688::t_407efdd49b7393 1-81
+src/components/investments/TradeFilters.tsx
+  s_164bb6fc72a688::t_a15800bd65e436 1-76
+src/components/investments/TradeForm.tsx
+  s_164bb6fc72a688::t_f27ec6578527c8 1-220
+src/components/investments/TradesTable.tsx
+  s_164bb6fc72a688::t_73f61b7326ab56 1-400
+src/i18n/lang/en.ts
+  s_164bb6fc72a688::t_7121fda2aa2616 96-100,569-870,931-934
+src/logic/investments/AnnualisedReturn.ts
+  s_164bb6fc72a688::t_5d90aa8fa86147 1-233
+src/logic/investments/Trades.ts
+  s_164bb6fc72a688::t_41842ade6a083c 1-205
+tests/components/InvestmentsScreen.test.tsx
+  s_164bb6fc72a688::t_ebf72eb0a5360a 1-239
+tests/logic/AnnualisedReturn.test.ts
+  s_164bb6fc72a688::t_e12aac5dc30186 1-167
+tests/logic/Holdings.test.ts
+  s_164bb6fc72a688::t_249d56b9749e2e 1-316
+tests/logic/Securities.test.ts
+  s_164bb6fc72a688::t_70d96bdf390cdc 1-122
+tests/logic/Trades.test.ts
+  s_164bb6fc72a688::t_6c3cce7ad6df27 1-144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4372282226ed269f708f23dc3fd6e29c5261a6f6",
+  "prompts": {},
+  "sessions": {
+    "s_164bb6fc72a688": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "817421fe-b31f-4c0d-8750-dd370bed7e77",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
