@@ -6,10 +6,10 @@ import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { usePreferences } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
+import { separatorsCollide } from 'src/logic/preferences/Preferences';
 import {
 	DATE_FORMATS,
 	DECIMAL_SEPARATORS,
-	SEPARATOR_CHARACTERS,
 	THOUSANDS_SEPARATORS,
 	type DateFormat,
 	type DecimalSeparator,
@@ -106,12 +106,8 @@ export const SettingsScreen = (): ReactElement => {
 	});
 
 	// The two separators must differ, and "none" never collides. A choice that collides is refused with the previous one left in force.
-	const collidesWith = (first: DecimalSeparator | ThousandsSeparator, second: DecimalSeparator | ThousandsSeparator): boolean => {
-		return SEPARATOR_CHARACTERS[first] !== '' && SEPARATOR_CHARACTERS[first] === SEPARATOR_CHARACTERS[second];
-	};
-
 	const changeDecimalSeparator = (value: DecimalSeparator): void => {
-		if(collidesWith(value, preferences.thousandsSeparator)) {
+		if(separatorsCollide(value, preferences.thousandsSeparator)) {
 			setSeparatorRefusal('decimal');
 
 			return;
@@ -122,7 +118,7 @@ export const SettingsScreen = (): ReactElement => {
 	};
 
 	const changeThousandsSeparator = (value: ThousandsSeparator): void => {
-		if(collidesWith(value, preferences.decimalSeparator)) {
+		if(separatorsCollide(value, preferences.decimalSeparator)) {
 			setSeparatorRefusal('thousands');
 
 			return;

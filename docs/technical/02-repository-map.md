@@ -58,14 +58,16 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/shell/Sidebar.tsx` `.css` | The eight screens, the failing-check badge and the save state ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)) |
 | `components/shell/ScreenLayout.tsx` `.css` | The shape every screen has, and the note a screen that is still a shell carries |
 | `components/shell/StorageNotices.tsx` `.css` | The three lines the file can put on whichever screen the user is on |
+| `components/shell/TransactionHandoff.ts` | How one screen hands its filters to Transactions, over the router's own location state ([§5.2](../functional/specs/05-transactions.md#52-ordering-and-paging)) |
 | `components/launch/LaunchScreen.tsx` `.css` | The screen the application always opens with ([§12.1](../functional/specs/12-storage.md#121-the-launch-screen)) |
 | `components/launch/UpgradeDialog.tsx` | Its second panel: a file written by an older version |
 | `components/session/WriteFailurePanel.tsx` `.css` | The blocking message after five failed attempts, which belongs to no screen |
 | `components/settings/SettingsScreen.tsx` `.css` | The ten preferences, the refusals, and the two read-only paths ([§10](../functional/specs/10-settings.md)) |
 | `components/accounts/` | The Accounts screen ([§4](../functional/specs/04-accounts.md)): the two tabs and their tables, the two forms, and `AccountPicker` — **the one account picker in the application**, which every later screen takes for a transaction's, a trade's or a filter's |
 | `components/transactions/` | The Transactions screen ([§5](../functional/specs/05-transactions.md)): the list with every cell edited in place, the seven filters, the pager, and the add form |
+| `components/import/` | Bulk import ([§5.7](../functional/specs/05-transactions.md#57-bulk-import)): the paste, the three format controls, the account, the outcome, and the preview table that marks every row |
 | `components/categories/` | The Categories screen, still a shell, and `CategoryPicker` — **the one category picker in the application**, which a transaction, a filter and later a rule all take |
-| `components/portfolio/` `import/` `investments/` `salaries/` `checks/` | One folder per screen. Each holds its shell and its empty state until the phase that builds it |
+| `components/portfolio/` `investments/` `salaries/` `checks/` | One folder per screen. Each holds its shell and its empty state until the phase that builds it |
 | `contexts/LedgerContext.tsx` | The ledger in memory, the autosave, the save state, the storage lines |
 | `contexts/PreferencesContext.tsx` | The ten preferences, read once and written as they change, and the formatter they define |
 | `i18n/Translations.ts` | Turns a language into a translator; the bundle registry |
@@ -75,12 +77,13 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `logic/categories/Categories.ts` | The one category ordering — alphabetical, which every picker, filter and list but the report reads — and the index a chip reaches a name through |
 | `logic/categories/Categorisation.ts` | The rule engine: what a rule compares, which rule claims a description, and the pass that keeps an `automatic` category the one the rules produce |
 | `logic/transactions/Transactions.ts` | Everything pure about the list: the one ordering, the seven filters, the footer total, the pages, and what a duplicate carries over |
+| `logic/transactions/TransactionImport.ts` | Everything pure about a paste: how a line becomes a row, what makes one unreadable, which rows the file already holds, and what the ticked ones are written as |
 | `logic/format/DateFormat.ts` `NumberFormat.ts` | Printing a day and printing a figure, the way the preferences say |
 | `logic/format/Formatter.ts` | Both of those, bound once to the preferences in force |
 | `logic/format/FilePathDisplay.ts` | Reading a path apart for display |
 | `logic/ledger/` | The document: its version, its seed, its reader, its writer, its refusals and its upgrade ([§9](09-file-format.md)) |
 | `logic/money/Money.ts` | The scales, the one division rule and the roundings |
-| `logic/preferences/Preferences.ts` | The defaults, and the reading of whatever the configuration file holds |
+| `logic/preferences/Preferences.ts` | The defaults, the reading of whatever the configuration file holds, and the rule that the two separators must differ — which Settings and the import's own controls both apply |
 | `logic/storage/AutosaveScheduler.ts` | The debounce, and the rule that two writes never overlap |
 | `types/AppInfoTypes.ts` `AppInfoIpcChannels.ts` | The shape and the channel names of the app-info request |
 | `types/LedgerTypes.ts` | The eleven stored entities and every closed set they take |

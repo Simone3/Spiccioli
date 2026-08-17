@@ -3,7 +3,9 @@ import {
 	DECIMAL_SEPARATORS,
 	SEPARATOR_CHARACTERS,
 	THOUSANDS_SEPARATORS,
-	type Preferences
+	type DecimalSeparator,
+	type Preferences,
+	type ThousandsSeparator
 } from 'src/types/PreferencesTypes';
 
 /**
@@ -28,6 +30,17 @@ export const DEFAULT_PREFERENCES: Preferences = {
 	transferMatchWindowDays: 5,
 	tradeMatchWindowDays: 5,
 	backupCount: 10
+};
+
+/**
+ * Says whether the two separators would be the same character, which is the one thing neither Settings nor an import will take.
+ * **None never collides**: it is the absence of a separator rather than a character.
+ * @param first One of the two separators.
+ * @param second The other one.
+ * @returns Whether a figure written with both would carry the same character in two meanings.
+ */
+export const separatorsCollide = (first: DecimalSeparator | ThousandsSeparator, second: DecimalSeparator | ThousandsSeparator): boolean => {
+	return SEPARATOR_CHARACTERS[first] !== '' && SEPARATOR_CHARACTERS[first] === SEPARATOR_CHARACTERS[second];
 };
 
 const readChoice = <TValue extends string>(value: unknown, allowedValues: readonly TValue[], fallback: TValue): TValue => {
@@ -57,9 +70,7 @@ export const parsePreferences = (value: unknown): Preferences => {
 		decimalSeparator,
 
 		// The two separators must differ, and a file holding a pair that collides falls back to the default thousands separator
-		thousandsSeparator: SEPARATOR_CHARACTERS[thousandsSeparator] === SEPARATOR_CHARACTERS[decimalSeparator] ?
-			DEFAULT_PREFERENCES.thousandsSeparator :
-			thousandsSeparator,
+		thousandsSeparator: separatorsCollide(thousandsSeparator, decimalSeparator) ? DEFAULT_PREFERENCES.thousandsSeparator : thousandsSeparator,
 		defaultTaxRate: readBoundedInteger(record.defaultTaxRate, 0, 10000, DEFAULT_PREFERENCES.defaultTaxRate),
 		priceStalenessDays: readBoundedInteger(record.priceStalenessDays, 1, Number.MAX_SAFE_INTEGER, DEFAULT_PREFERENCES.priceStalenessDays),
 		pensionRevaluationMonths: readBoundedInteger(record.pensionRevaluationMonths, 1, Number.MAX_SAFE_INTEGER, DEFAULT_PREFERENCES.pensionRevaluationMonths),

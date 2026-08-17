@@ -5,6 +5,7 @@ import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { EmptyState } from 'src/components/common/EmptyState';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
+import { useTransactionHandoff } from 'src/components/shell/TransactionHandoff';
 import { TransactionFiltersBar } from 'src/components/transactions/TransactionFilters';
 import { TransactionForm, type TransactionFormValues } from 'src/components/transactions/TransactionForm';
 import { TransactionsPager } from 'src/components/transactions/TransactionsPager';
@@ -59,7 +60,12 @@ export const TransactionsScreen = (): ReactElement => {
 	const { t } = translator;
 	const formatter = useFormatter();
 	const { document, updateDocument } = useLedger();
-	const [ filters, setFilters ] = useState<TransactionFilters>(NO_TRANSACTION_FILTERS);
+	const handoff = useTransactionHandoff();
+
+	// However the screen is reached, it is the same screen: a finished import sets the filters where the user would have set them
+	const [ filters, setFilters ] = useState<TransactionFilters>(() => {
+		return { ...NO_TRANSACTION_FILTERS, ...handoff };
+	});
 	const [ selection, setSelection ] = useState<ReadonlySet<LedgerId>>(new Set<LedgerId>());
 	const [ rangeAnchorId, setRangeAnchorId ] = useState<LedgerId | undefined>(undefined);
 	const [ isAdding, setIsAdding ] = useState(false);
@@ -82,9 +88,9 @@ export const TransactionsScreen = (): ReactElement => {
 		return filterTransactions(ordered, filters);
 	}, [ filters, ordered ]);
 
-	// The last page of everything, which is where the screen opens
+	// The last page of what the filters match, which is where the screen opens however it was reached
 	const [ requestedPage, setRequestedPage ] = useState(() => {
-		return lastTransactionPage(transactions.length);
+		return lastTransactionPage(matching.length);
 	});
 
 	const accounts = useMemo((): ReadonlyMap<LedgerId, Account> => {

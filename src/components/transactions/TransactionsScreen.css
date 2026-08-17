@@ -35,14 +35,6 @@
 	background-color: var(--colors-interactive-active-background);
 }
 
-.transactions-screen-checkbox {
-	width: 14px;
-	height: 14px;
-	margin: 0;
-	accent-color: var(--colors-accent-primary);
-	cursor: pointer;
-}
-
 /* The two ends of the period and of the amount range, which are one filter each */
 .transactions-screen-filter-pair {
 	display: flex;

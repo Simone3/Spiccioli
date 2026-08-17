@@ -6,7 +6,7 @@ The route from the scaffolding that exists today to the application [`docs/funct
 
 It carries three things: the **decisions** ([§8.2](#82-decisions)) — every one of them now taken, stated as what a phase has to build to — the **shape the code is heading towards** ([§8.4](#84-the-shape-of-the-code)), and the **twelve phases** the work is cut into ([§8.5](#85-the-phases)). A section that cannot be written until a decision is taken says **to be completed** and names it; none does today.
 
-**Phases 1, 2, 3 and 4 have landed.** Everything they built is described in the pages they changed — [§1](01-architecture.md), [§2](02-repository-map.md), [§4](04-framework.md), [§6](06-styling.md), [§7](07-testing.md) and the new [§9](09-file-format.md) — and this page keeps only the plan.
+**Phases 1, 2, 3, 4 and 5 have landed.** Everything they built is described in the pages they changed — [§1](01-architecture.md), [§2](02-repository-map.md), [§4](04-framework.md), [§6](06-styling.md), [§7](07-testing.md) and the new [§9](09-file-format.md) — and this page keeps only the plan.
 
 **What each decision was taken *on* is in [`08-implementation-plan-why.md`](08-implementation-plan-why.md)**, the companion to this page: the grounds decision by decision, the measurements behind D1, and the provider survey behind D11. This page is read on the way into every phase and states only the outcomes; that one is read when a decision is questioned.
 
@@ -155,7 +155,7 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 | 2 | [The shell and the kit](#phase-2--the-shell-and-the-kit) — **done** | [§10](../functional/specs/10-settings.md), [§13.1](../functional/specs/13-validation.md#131-how-it-behaves), [§14](../functional/specs/14-empty-and-error-states.md) | 1 |
 | 3 | [Accounts and institutions](#phase-3--accounts-and-institutions) — **done** | [§4](../functional/specs/04-accounts.md) | 2 |
 | 4 | [Transactions](#phase-4--transactions) — **done** | [§5.1](../functional/specs/05-transactions.md#51-columns) – [§5.6](../functional/specs/05-transactions.md#56-selecting-and-deleting-in-bulk) | 3 |
-| 5 | [Bulk import](#phase-5--bulk-import) | [§5.7](../functional/specs/05-transactions.md#57-bulk-import) | 4 |
+| 5 | [Bulk import](#phase-5--bulk-import) — **done** | [§5.7](../functional/specs/05-transactions.md#57-bulk-import) | 4 |
 | 6 | [Categories](#phase-6--categories) | [§6](../functional/specs/06-categories.md) | 4 |
 | 7 | [Investments](#phase-7--investments) | [§7.1](../functional/specs/07-investments.md#71-holdings) – [§7.5](../functional/specs/07-investments.md#75-recording-a-trade-and-where-securities-come-from), [§11.1](../functional/specs/11-calculations.md#111-weighted-average-cost) – [§11.3](../functional/specs/11-calculations.md#113-hypothetical-liquidation), [§11.8](../functional/specs/11-calculations.md#118-annualised-return) | 3 |
 | 8 | [Update prices](#phase-8--update-prices) | [§7.6](../functional/specs/07-investments.md#76-prices) | 7 |
@@ -242,14 +242,18 @@ What it left behind, and where: everything pure about the list in `src/logic/tra
 
 ### Phase 5 — Bulk import
 
-Self-contained, and the only text the application parses.
+**Done.** Self-contained, and the only text the application parses.
+
+What it left behind, and where: everything pure about a paste in `src/logic/transactions/TransactionImport.ts`, the screen and its preview table in `src/components/import/`, and `TransactionHandoff` in `src/components/shell/` — **the one way a screen hands its filters to Transactions**, which the report of phase 6 takes as it is. Two rules that were written twice became one: the separator collision of [§13](../functional/specs/13-validation.md) is now `separatorsCollide` in `src/logic/preferences/Preferences.ts`, read by Settings and by the import's controls, and the selection checkbox's styling moved into `DataTable.css` as `.data-table-checkbox`. `ScreenNotBuiltYet` goes away from Bulk import — which is reached from Transactions rather than from the sidebar — and stays on the five sidebar screens still waiting for their phase.
 
 - One screen, live preview, the three format controls opening at their preferences and changing nothing outside the paste.
 - The date rules, the amount rules and the `€`/`EUR` stripping of [§5.7](../functional/specs/05-transactions.md#57-bulk-import), each unreadable row marked with its reason and unticked.
 - Duplicate detection on account + date + amount + normalised description, flagged and unselected, never compared within the paste.
 - Consecutive `insertionSeq` in pasted order, `categorySource = automatic`, `receiptState = na`, and the hand-off to Transactions filtered to the account and the date range.
 
-*Done when* the parser's tests cover every unreadable case in [§5.7](../functional/specs/05-transactions.md#57-bulk-import) and [§15](../functional/specs/15-out-of-scope.md)'s list of shapes that are deliberately not read.
+*Done when* the parser's tests cover every unreadable case in [§5.7](../functional/specs/05-transactions.md#57-bulk-import) and [§15](../functional/specs/15-out-of-scope.md)'s list of shapes that are deliberately not read. **They do**, in `tests/logic/TransactionImport.test.ts`, with the screen itself in `tests/components/BulkImportScreen.test.tsx`.
+
+**Three things this phase settled that the specification leaves to the implementation.** A date's three parts must be separated by **the same character twice** — all three of `/`, `-` and `.` are read under every order, and a field mixing two of them is one nobody's export wrote; **a tick is remembered by the line it is on**, so reading the paste again — which a changed control does — hands back the ticks [§5.7](../functional/specs/05-transactions.md#57-bulk-import) says a paste arrives with, the rows a change produced not being the rows the previous ticks were about; and **the handoff travels in the router's location state** rather than in a query string or a context, which is what keeps the filters an ordinary set the user can clear.
 
 ### Phase 6 — Categories
 

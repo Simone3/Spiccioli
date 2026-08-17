@@ -1,0 +1,135 @@
+
+/* The paste and the controls that read it on one side, what is about to happen on the other */
+.bulk-import-screen-columns {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 16px;
+	align-items: start;
+}
+
+.bulk-import-screen-card {
+	padding: 16px 18px;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-width: 0;
+}
+
+.bulk-import-screen-card-title {
+	margin: 0;
+	font-size: 11px;
+	font-weight: 400;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--colors-text-secondary);
+}
+
+/* The rows as the bank wrote them: monospaced, so a column that is out of place is visible before it is parsed */
+.bulk-import-screen-paste {
+	width: 100%;
+	min-height: 180px;
+	padding: 10px;
+	box-sizing: border-box;
+	resize: vertical;
+	background-color: var(--colors-background-primary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 6px;
+	color: var(--colors-text-primary);
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.6;
+	white-space: pre;
+	overflow-wrap: normal;
+}
+
+.bulk-import-screen-fields {
+	display: grid;
+	grid-template-columns: 1fr minmax(0, 150px);
+	gap: 10px 14px;
+	align-items: start;
+}
+
+.bulk-import-screen-field-label {
+	padding-top: 7px;
+	font-size: 13px;
+	color: var(--colors-text-secondary);
+}
+
+.bulk-import-screen-note {
+	margin: 0;
+	max-width: 70ch;
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--colors-text-secondary);
+}
+
+.bulk-import-screen-figures {
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.bulk-import-screen-figure {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 13px;
+}
+
+.bulk-import-screen-figure dt {
+	color: var(--colors-text-secondary);
+}
+
+.bulk-import-screen-figure-value {
+	margin: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.bulk-import-screen-expected {
+	margin: 0;
+	padding-left: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	font-size: 13px;
+}
+
+/* An amount states its direction in its colour as well as in its sign, exactly as it does on the list */
+.bulk-import-screen-positive {
+	color: var(--colors-positive-text);
+}
+
+.bulk-import-screen-negative {
+	color: var(--colors-danger-text);
+}
+
+.bulk-import-screen-new {
+	color: var(--colors-text-secondary);
+}
+
+/* A row the file already holds and a row that cannot be read are both stated the same way: something is not going to happen */
+.bulk-import-screen-refused {
+	color: var(--colors-danger-text);
+}
+
+/* An unreadable row shows what was pasted rather than a figure, and it is stated more quietly than the rows around it */
+.bulk-import-screen-raw,
+.bulk-import-screen-row-unreadable td {
+	color: var(--colors-text-secondary);
+}
+
+.bulk-import-screen-warning {
+	margin: 0;
+	padding: 10px 12px;
+	border: 1px solid var(--colors-danger-border);
+	border-radius: 8px;
+	background-color: var(--colors-danger-background-muted);
+	max-width: 90ch;
+	font-size: 13px;
+	line-height: 1.6;
+}

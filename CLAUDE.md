@@ -6,7 +6,7 @@ Instructions for Claude Code when working in this repository.
 
 Spiccioli is an Electron + React desktop ledger for macOS, Windows and Linux: one person's accounts, transactions, investments and salaries, kept in one file they choose. Standalone browser mode is not a supported runtime.
 
-Phases 1 to 4 of [§8](docs/technical/08-implementation-plan.md) have landed: the domain model and the file, then the shell around it, then Accounts, then Transactions. A file can be created, opened, saved, backed up, rotated, displaced by an external write and refused when unreadable; an open file lands on Portfolio, the sidebar reaches all eight screens, Settings, Accounts and Transactions are finished — the categorisation rules already running over every row written — and every other screen is a shell showing the empty state of [§14](docs/functional/specs/14-empty-and-error-states.md). The kit those screens are built from is `src/components/common/`; phase 5 is Bulk import.
+Phases 1 to 5 of [§8](docs/technical/08-implementation-plan.md) have landed: the domain model and the file, then the shell around it, then Accounts, then Transactions, then Bulk import. A file can be created, opened, saved, backed up, rotated, displaced by an external write and refused when unreadable; an open file lands on Portfolio, the sidebar reaches all eight screens, Settings, Accounts, Transactions and the import reached from it are finished — the categorisation rules already running over every row written — and every other screen is a shell showing the empty state of [§14](docs/functional/specs/14-empty-and-error-states.md). The kit those screens are built from is `src/components/common/`; phase 6 is Categories.
 
 ## Documentation
 

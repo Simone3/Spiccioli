@@ -43,6 +43,19 @@
 	color: var(--colors-text-secondary);
 }
 
+/* The selection column every table that has one leads with */
+.data-table-checkbox {
+	width: 14px;
+	height: 14px;
+	margin: 0;
+	accent-color: var(--colors-accent-primary);
+	cursor: pointer;
+}
+
+.data-table-checkbox:disabled {
+	cursor: default;
+}
+
 .data-table-right {
 	text-align: right;
 }

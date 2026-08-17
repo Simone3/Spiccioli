@@ -323,6 +323,87 @@ export const EN_TRANSLATIONS = {
 		}
 	},
 
+	// Bulk import: one screen and one job, which is getting raw rows in without duplicating anything. Nothing about a paste is
+	// inferred — the three controls say what its characters mean, and a row that does not fit them is a row that cannot be read.
+	import: {
+		cancel: 'Cancel',
+		action: {
+			one: 'Import 1 transaction',
+			other: 'Import {count} transactions'
+		},
+		summary: '{pasted} · {selected}',
+		summaryWithDuplicates: '{pasted} · {selected} · {duplicates}',
+		summaryWithUnreadable: '{pasted} · {selected} · {unreadable}',
+		summaryWithBoth: '{pasted} · {selected} · {duplicates} · {unreadable}',
+		rowCount: {
+			one: '1 row pasted',
+			other: '{count} rows pasted'
+		},
+		selectedCount: '{count} selected',
+		duplicateCount: {
+			one: '1 duplicate',
+			other: '{count} duplicates'
+		},
+		unreadableCount: {
+			one: '1 unreadable',
+			other: '{count} unreadable'
+		},
+		pasteTitle: 'Paste rows — tab separated',
+		pasteLabel: 'Pasted rows',
+		pastePlaceholder: 'Paste the three columns straight out of your bank’s export.',
+		formatTitle: 'Read these rows as',
+		dateFormat: 'Date format',
+		decimalSeparator: 'Decimal separator',
+		thousandsSeparator: 'Thousands separator',
+		formatNote: 'These three start at your Settings values and apply to this paste only. Change one and every row is read again.',
+		accountTitle: 'Import into',
+		account: 'Account',
+		accountChoose: 'Choose an account',
+		accountNote: 'The account is chosen once for the whole paste, and only cash accounts are listed — a brokerage account holds no transactions to import.',
+		outcomeTitle: 'Outcome',
+		outcomePasted: 'Rows pasted',
+		outcomeSelected: 'Selected for import',
+		outcomeDuplicates: 'Already in the file',
+		outcomeUnreadable: 'Cannot be read',
+		columnsTitle: 'Expected column order',
+		columnsNote: 'Every import uses this order, one row per line with the columns separated by tabs; rearrange the export before pasting if your bank produces something else. A fourth column and beyond is ignored.',
+		previewTitle: 'Preview',
+		previewEmpty: 'Nothing has been pasted yet. Rows appear here as they are pasted, read exactly as the controls say they should be.',
+		table: 'Rows to import',
+		columns: {
+			date: 'Date',
+			description: 'Description',
+			amount: 'Amount',
+			amountSigned: 'Amount — signed',
+			status: 'Status'
+		},
+		select: 'Import the row pasted on line {line}',
+		cannotSelect: 'The row pasted on line {line} cannot be read',
+		statusNew: 'new',
+		statusDuplicate: 'already imported',
+		statusUnreadable: 'cannot be read — {reason}',
+
+		// Why a row cannot be read, as the preview states it beside the row itself
+		refusal: {
+			columns: {
+				one: '1 column, and three are needed',
+				other: '{count} columns, and three are needed'
+			},
+			date: 'the date is not a real day written as {dateFormat}',
+			futureDate: 'the date is in the future',
+			amount: 'the amount cannot be read with these separators',
+			description: 'the description is empty'
+		},
+		duplicateNotice: {
+			one: '1 row is already in the file and has been unselected — tick it anyway if the duplicate is genuine.',
+			other: '{count} rows are already in the file and have been unselected — tick one anyway if the duplicate is genuine.'
+		},
+		unreadableNotice: {
+			one: '1 row cannot be read and cannot be ticked: correct it in the paste above, or import without it.',
+			other: '{count} rows cannot be read and cannot be ticked: correct them in the paste above, or import without them.'
+		}
+	},
+
 	// The three receipt states, written the same way wherever they are shown. The stored "na" is never one of them.
 	receiptStates: {
 		pending: 'pending',

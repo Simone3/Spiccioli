@@ -116,7 +116,7 @@ export const TransactionsTable = ({
 			header: (
 				<input
 					type='checkbox'
-					className='transactions-screen-checkbox'
+					className='data-table-checkbox'
 					checked={isEverythingSelected}
 					aria-label={t('transactions.selectAll')}
 					ref={(node) => {
@@ -130,7 +130,7 @@ export const TransactionsTable = ({
 				return (
 					<input
 						type='checkbox'
-						className='transactions-screen-checkbox'
+						className='data-table-checkbox'
 						checked={selection.has(transaction.id)}
 						aria-label={t('transactions.select', { description: transaction.description })}
 						onChange={(event) => {
