@@ -64,6 +64,22 @@ describe('the row menu', () => {
 		expect(screen.queryByRole('menuitem', { name: 'Delete' })).not.toBeInTheDocument();
 		expect(trigger).toHaveFocus();
 	});
+
+	test('is drawn at the top of the document, where a scrolling table cannot clip it, with the keyboard on its first entry', async() => {
+		stubLedgerBridge();
+		renderWithProviders(
+			<div style={{ overflow: 'auto' }}>
+				<RowMenu
+					label='Actions for Conto Corrente'
+					actions={[ { key: 'edit', label: 'Edit', onSelect: () => {} } ]}/>
+			</div>
+		);
+
+		await userEvent.click(screen.getByRole('button', { name: 'Actions for Conto Corrente' }));
+
+		expect(screen.getByRole('menu', { name: 'Actions for Conto Corrente' }).parentElement).toBe(document.body);
+		expect(screen.getByRole('menuitem', { name: 'Edit' })).toHaveFocus();
+	});
 });
 
 describe('the confirmation', () => {

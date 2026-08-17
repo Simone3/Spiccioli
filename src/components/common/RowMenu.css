@@ -1,6 +1,5 @@
 
 .row-menu {
-	position: relative;
 	display: inline-block;
 }
 
@@ -22,11 +21,11 @@
 	color: var(--colors-text-primary);
 }
 
+/* Fixed rather than absolute: the menu is drawn at the top of the document, so a scrolling table cannot clip it. Its top and
+   right are set against the trigger, which is what keeps it under the row it belongs to. */
 .row-menu-list {
-	position: absolute;
-	top: calc(100% + 4px);
-	right: 0;
-	z-index: 10;
+	position: fixed;
+	z-index: 50;
 	margin: 0;
 	padding: 4px;
 	min-width: 160px;
