@@ -21,8 +21,9 @@ This is the counterpart to [`docs/functional/`](../functional/README.md). The fu
 | 7 | [Testing](07-testing.md) | What is tested, where the tests live, and what they may depend on |
 | 8 | [Implementation plan](08-implementation-plan.md) | The decisions taken, and the twelve phases from here to v1 |
 | | [ — why the decisions went this way](08-implementation-plan-why.md) | What each of §8's decisions was taken *on* — read only when one is questioned |
+| 9 | [The ledger file format](09-file-format.md) | What a `.spiccioli` file holds, key by key, and what makes one *not understood* |
 
-Sections are added as the application grows: persistence, the data model and the screens get theirs when they are built.
+Sections are added as the application grows: the screens get theirs when they are built.
 
 ## How this is organised
 

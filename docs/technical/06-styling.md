@@ -9,10 +9,10 @@
 No CSS framework, no CSS-in-JS, no preprocessor. A component that needs styles has a `.css` file of the same name beside it and imports it at the top of its module:
 
 ```tsx
-import 'src/components/common/PlaceholderPage.css';
+import 'src/components/launch/LaunchScreen.css';
 ```
 
-Vite collects those imports into one stylesheet at build time. Class names are namespaced by hand with the component's own name — `placeholder-page`, `placeholder-page-title` — because there is no scoping mechanism and a collision would be silent.
+Vite collects those imports into one stylesheet at build time. Class names are namespaced by hand with the component's own name — `launch-screen`, `launch-screen-title` — because there is no scoping mechanism and a collision would be silent.
 
 `src/index.css` is the only global stylesheet: the theme variables, the `body`, the React root, and the focus ring.
 

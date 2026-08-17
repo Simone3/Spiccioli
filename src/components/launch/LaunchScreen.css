@@ -1,0 +1,207 @@
+
+.launch-screen {
+	flex-grow: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: 40px 20px;
+	box-sizing: border-box;
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+}
+
+.launch-screen-panel {
+	width: 100%;
+	max-width: 520px;
+	padding: 28px;
+	box-sizing: border-box;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.launch-screen-title {
+	margin: 0;
+	font-size: 28px;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	color: var(--colors-accent-primary);
+}
+
+.launch-screen-subtitle {
+	margin: -12px 0 0;
+	font-size: 13px;
+	color: var(--colors-text-secondary);
+}
+
+.launch-screen-empty {
+	margin: 0;
+	color: var(--colors-text-secondary);
+}
+
+.launch-screen-recent {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	border-top: 1px solid var(--colors-border-subtle);
+}
+
+.launch-screen-recent-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	border-bottom: 1px solid var(--colors-border-subtle);
+}
+
+/* The whole row is the control that opens the file, so the keyboard reaches it in one stop and the pointer has the same target */
+.launch-screen-recent-file {
+	flex-grow: 1;
+	min-width: 0;
+	padding: 10px 8px;
+	margin: 2px 0;
+	background: none;
+	border: none;
+	border-radius: 6px;
+	font: inherit;
+	color: inherit;
+	text-align: left;
+	cursor: pointer;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.launch-screen-recent-file:hover:not(:disabled) {
+	background-color: var(--colors-interactive-hover-background);
+}
+
+.launch-screen-recent-file:disabled {
+	cursor: default;
+	color: var(--colors-disabled);
+}
+
+.launch-screen-recent-name {
+	font-weight: 700;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.launch-screen-recent-name-missing {
+	text-decoration: line-through;
+}
+
+.launch-screen-recent-detail {
+	font-size: 12px;
+	color: var(--colors-text-secondary);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.launch-screen-failure {
+	padding: 12px;
+	border: 1px solid var(--colors-danger-border);
+	border-radius: 8px;
+	background-color: var(--colors-danger-background-muted);
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: flex-start;
+}
+
+.launch-screen-failure-file {
+	margin: 0;
+	font-weight: 700;
+}
+
+.launch-screen-failure-message {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--colors-danger-text);
+}
+
+.launch-screen-link {
+	padding: 2px 4px;
+	background: none;
+	border: none;
+	border-radius: 4px;
+	font: inherit;
+	font-size: 13px;
+	color: var(--colors-accent-primary);
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.launch-screen-figures {
+	margin: 0;
+	display: flex;
+	gap: 24px;
+}
+
+.launch-screen-figure {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.launch-screen-figure dt {
+	font-size: 12px;
+	color: var(--colors-text-secondary);
+}
+
+.launch-screen-figure dd {
+	margin: 0;
+	font-size: 22px;
+	font-weight: 700;
+}
+
+.launch-screen-hint {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--colors-text-secondary);
+}
+
+.launch-screen-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.launch-screen-button {
+	padding: 8px 16px;
+	background-color: transparent;
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 6px;
+	font: inherit;
+	color: var(--colors-text-primary);
+	cursor: pointer;
+}
+
+.launch-screen-button:hover:not(:disabled) {
+	background-color: var(--colors-interactive-hover-background);
+}
+
+.launch-screen-button:disabled {
+	color: var(--colors-disabled);
+	cursor: default;
+}
+
+.launch-screen-button-primary {
+	background-color: var(--colors-accent-primary);
+	border-color: var(--colors-accent-primary);
+	color: var(--colors-background-primary);
+	font-weight: 700;
+}
+
+.launch-screen-button-primary:hover:not(:disabled) {
+	background-color: var(--colors-accent-primary);
+	filter: brightness(1.1);
+}

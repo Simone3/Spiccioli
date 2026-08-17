@@ -32,3 +32,49 @@ export const LOGGING_CONFIG = {
 	maximumFileSizeBytes: 100 * 1024 * 1024,
 	retainedArchiveCount: 5
 } as const;
+
+// The list the launch screen and File › Open Recent both show. It is bounded so that the configuration file cannot grow without
+// limit; nothing in the functional analysis fixes the number.
+export const RECENT_FILES_CONFIG = {
+	maximumEntries: 10
+} as const;
+
+// The ledger file itself: one JSON document, read whole and written whole, with its backups in a folder beside it named after it
+export const LEDGER_FILE_CONFIG = {
+	extension: '.spiccioli',
+
+	// A ledger at ".../finances.spiccioli" keeps its copies in ".../finances-backups/"
+	backupDirectorySuffix: '-backups',
+
+	// The temporary file an atomic write renames over the ledger. It is written in the ledger's own directory, so that the rename
+	// stays inside one filesystem and is therefore atomic.
+	temporaryFileSuffix: '.saving',
+
+	// What a copy's name says about which of the three moments produced it. A closing copy carries no suffix at all.
+	closeBackupSuffix: '',
+	externalBackupSuffix: '-external',
+	preUpgradeBackupSuffix: '-pre-upgrade'
+} as const;
+
+// The three figures autosave runs on, and the timeout a single write is given
+export const STORAGE_CONFIG = {
+	autosaveDebounceMs: 2000,
+	maximumWriteAttempts: 5,
+	writeRetryDelayMs: 3000,
+	writeTimeoutMs: 10000
+} as const;
+
+// A quit asks the renderer to finish saving and close the session first. The wait is bounded, because a renderer that cannot
+// answer must not be able to stop the application from exiting.
+export const SHUTDOWN_CONFIG = {
+	prepareForCloseTimeoutMs: 8000,
+	pollIntervalMs: 50
+} as const;
+
+// A render error is worded by the renderer, so the lengths the main process will write are fixed here rather than there: nothing the
+// renderer sends can grow a log line without limit
+export const DIAGNOSTICS_CONFIG = {
+	maximumRenderErrorMessageLength: 500,
+	maximumRenderErrorStackLength: 4000,
+	maximumRenderErrorComponentStackLength: 4000
+} as const;

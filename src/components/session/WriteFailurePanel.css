@@ -1,0 +1,86 @@
+
+.write-failure-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	padding: 20px;
+	box-sizing: border-box;
+	background-color: var(--colors-modal-overlay);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.write-failure-panel {
+	width: 100%;
+	max-width: 460px;
+	padding: 24px;
+	box-sizing: border-box;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-danger-border);
+	border-radius: 10px;
+	box-shadow: 0 10px 40px var(--colors-modal-shadow);
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.write-failure-title {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--colors-danger-text);
+}
+
+.write-failure-subtitle {
+	margin: -10px 0 0;
+	font-size: 13px;
+	color: var(--colors-text-secondary);
+}
+
+.write-failure-figures {
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.write-failure-figures dt {
+	font-size: 12px;
+	color: var(--colors-text-secondary);
+}
+
+.write-failure-figures dd {
+	margin: 2px 0 0;
+	font-size: 14px;
+	overflow-wrap: anywhere;
+}
+
+.write-failure-reassurance {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--colors-text-secondary);
+}
+
+.write-failure-actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.write-failure-button {
+	padding: 8px 16px;
+	background-color: var(--colors-accent-primary);
+	border: 1px solid var(--colors-accent-primary);
+	border-radius: 6px;
+	font: inherit;
+	font-weight: 700;
+	color: var(--colors-background-primary);
+	cursor: pointer;
+}
+
+.write-failure-button:disabled {
+	background-color: var(--colors-disabled);
+	border-color: var(--colors-disabled);
+	cursor: default;
+}

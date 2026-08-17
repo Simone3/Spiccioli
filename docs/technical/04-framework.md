@@ -8,6 +8,8 @@
 
 `src/framework` is scaffolding that knows nothing about Spiccioli: logging, crash handling, window safety, translation machinery, a configuration store, storage and backup building blocks, and a few utilities. It is meant to be lifted into another desktop application as it is.
 
+**It came from SPOT, and it is no longer byte-identical to that copy.** The three whole-file storage modules of [§4.2](#42-what-spiccioli-uses-today) were written here, for a model SPOT does not have, and they are the change to carry back rather than a divergence to reconcile: they are additions beside SPOT's own storage modules and none of those was edited.
+
 It came here from SPOT, the application it was first written in, and it is kept **byte-identical to that copy on purpose**. The two projects are expected to improve it in turn, and a divergence that starts as a small local edit is what makes carrying a fix from one to the other expensive later. A change that belongs in the framework is made in the framework, in both places.
 
 **The rule that keeps it liftable** is enforced by ESLint: nothing under `src/framework` may import from `src/components`, `src/contexts`, `src/logic`, `src/main`, `src/types`, `src/utils`, `src/config` or `src/index*`. Everything it needs about the application arrives through its options — configuration values, wording, clocks. It holds no module-level state either, so everything is created by a factory; the process-wide `appLogger` and the pure `Intl` memoization caches inside the translator are the only exceptions.
@@ -21,7 +23,12 @@ It came here from SPOT, the application it was first written in, and it is kept 
 | `types/TranslationTypes.ts` | The bundle shape and the typed key |
 | `renderer/TranslationContext.tsx` | The React binding of the translator |
 | `renderer/ErrorBoundary.tsx` | The catch behind `AppErrorBoundary` |
+| `main/config/JsonConfigStore.ts` | The preferences and the recent-file list, behind `src/main/config/SpiccioliConfigStore.ts` |
 | `main/logging/AppLogger.ts` | The operational log, as rotated NDJSON |
+| `main/storage/WholeFileStorage.ts` | Reading and writing a whole file, the atomic replace by temp-file-and-rename, and the SHA-256 that recognises one that changed underneath |
+| `main/storage/RetryingFileWriter.ts` | The five spaced attempts, the write timeout, and offering the displaced bytes before overwriting them |
+| `main/storage/FileBackupRotation.ts` | A folder of copies kept to a count, oldest out first as they arrive |
+| `preload/IpcBridge.ts` | `subscribeToChannel`, which is how the four main-to-renderer events reach the page |
 | `main/logging/ProcessCrashHandlers.ts` | Uncaught exceptions and unhandled rejections in the main process |
 | `main/window/WindowLoadTarget.ts` | Built file or development server |
 | `main/window/WindowNavigationGuard.ts` | Keeping the window on the page the main process chose |
@@ -35,13 +42,11 @@ The rest of the framework came along with the copy. Some of it Spiccioli will us
 
 | Module | Status |
 | --- | --- |
-| `main/config/JsonConfigStore.ts` | **Will be used.** It is what the preferences and the recent-file list of [§10](../functional/specs/10-settings.md) are written through |
-| `utils/DateUtils.ts` | **Will be used.** Dates are everywhere in the ledger, and the preferences of [§10](../functional/specs/10-settings.md) decide how they are printed |
-| `preload/IpcBridge.ts` | **Will be used.** `subscribeToChannel` is how a main-to-renderer event reaches the page; nothing pushes one yet |
+| `utils/DateUtils.ts` | **Will be used.** Dates are everywhere in the ledger, and the preferences of [§10](../functional/specs/10-settings.md) decide how they are printed. Spiccioli prints a day through `src/logic/format/DateFormat.ts` today, because the format is a preference rather than a locale |
 | `main/storage/AppDatabase.ts` | **Does not apply.** A wrapper over Electron's bundled `node:sqlite`, with migrations. The ledger is one JSON document (D1, [§8.2](08-implementation-plan.md#82-decisions)), so nothing here will open a database. Its own comment on WAL is part of why: it is safe because that database is never in a synchronized folder, and Spiccioli's ledger is allowed to be in one ([§12](../functional/specs/12-storage.md)) |
 | `main/config/RuntimePaths.ts` | **Does not apply.** Its layout resolves a database folder and a default backup folder inside the user-data folder. Spiccioli's ledger is wherever the user put it and its backups sit beside it, so both would be paths nothing writes to. `src/main/config/SpiccioliRuntimePaths.ts` resolves the two that do exist |
 | `main/config/BackupLocationManager.ts`, `main/storage/BackupDirectory.ts`, `main/ipc/BackupLocationIpc.ts`, `types/BackupTypes.ts` | **Do not apply.** They exist to let the user choose a backup folder and to refuse an unusable one. Spiccioli never asks: the backup folder is derived from the ledger's own name and directory ([§12](../functional/specs/12-storage.md)) |
-| `main/storage/DatabaseStorage.ts`, `main/storage/DatabaseBackup.ts`, `main/storage/BackupScheduler.ts`, `main/storage/InvalidChangeError.ts`, `main/ipc/StorageCommandIpc.ts`, `renderer/StorageQueue.ts`, `types/StorageTypes.ts` | **Do not apply as they are.** They implement one write per user command against a database that never moves, with periodic backups to the chosen folder. Spiccioli autosaves a whole file, debounced and atomically, retries a failed write five times, detects that something else changed the file, and takes one backup per session on close. **Phase 1 adds a second storage layer beside these rather than editing them** (D5, D6): the two models coexist in the folder, each with its own tests, and the new one is what [§12](../functional/specs/12-storage.md) is built on. `StorageQueue.ts` is the one worth reading first — debouncing and serializing writes from the renderer is a problem both models have |
+| `main/storage/DatabaseStorage.ts`, `main/storage/DatabaseBackup.ts`, `main/storage/BackupScheduler.ts`, `main/storage/InvalidChangeError.ts`, `main/ipc/StorageCommandIpc.ts`, `renderer/StorageQueue.ts`, `types/StorageTypes.ts` | **Do not apply as they are.** They implement one write per user command against a database that never moves, with periodic backups to the chosen folder. Spiccioli autosaves a whole file, debounced and atomically, retries a failed write five times, detects that something else changed the file, and takes one backup per session on close. **The second storage layer sits beside these rather than replacing them** (D5, D6): the two models coexist in the folder, each with its own tests, and the whole-file one is what [§12](../functional/specs/12-storage.md) is built on |
 | `utils/ManuallySortedList.ts` | **Does not apply.** Nothing in Spiccioli is ordered by hand |
 
 The unused modules are compiled, linted and covered by their own tests, so they stay honest while they wait. Deleting one is a decision to make when the section that replaces it is written, not before.

@@ -7,8 +7,9 @@ import { useTranslator } from 'src/i18n/TranslationContext';
 // Reloading is the recovery it offers: rendering the same tree again would usually only throw the same error a second time,
 // while a reload starts over from what is on disk.
 //
-// The failure is written to the renderer console for now. That console is developer-facing and an installed Spiccioli cannot open
-// it, so this screen still has to reach the operational log; the bridge that carries it there is written with the storage work.
+// The failure goes to the operational log by way of the main process, because the renderer console is developer-facing and an
+// installed Spiccioli cannot open it. It is still written to that console as well, which is where it is read during development.
+// The main process decides what the entry is called and how long each of the three texts may be.
 const AppErrorBoundary = ({ children }: { children: ReactNode }): ReactElement => {
 	const { t } = useTranslator();
 
@@ -16,6 +17,17 @@ const AppErrorBoundary = ({ children }: { children: ReactNode }): ReactElement =
 		<ErrorBoundary
 			onError={(error, componentStack) => {
 				console.error('The renderer failed to draw', error, componentStack);
+
+				// Reporting the failure must never be able to fail on top of it
+				void Promise.resolve().then(() => {
+					return window.spiccioliDiagnostics.reportRenderError({
+						message: error instanceof Error ? error.message : String(error),
+						stack: error instanceof Error ? error.stack : undefined,
+						componentStack: componentStack ?? undefined
+					});
+				}).catch(() => {
+					// Intentionally ignored
+				});
 			}}
 			renderFallback={() => {
 				return (

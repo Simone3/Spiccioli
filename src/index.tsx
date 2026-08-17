@@ -4,7 +4,9 @@ import 'src/index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { AppErrorBoundary } from 'src/components/common/AppErrorBoundary';
-import { PlaceholderPage } from 'src/components/common/PlaceholderPage';
+import { SpiccioliApp } from 'src/components/SpiccioliApp';
+import { LedgerProvider } from 'src/contexts/LedgerContext';
+import { PreferencesProvider } from 'src/contexts/PreferencesContext';
 import { TranslationProvider } from 'src/i18n/TranslationContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
@@ -12,7 +14,11 @@ root.render(
 	<React.StrictMode>
 		<TranslationProvider>
 			<AppErrorBoundary>
-				<PlaceholderPage/>
+				<PreferencesProvider>
+					<LedgerProvider>
+						<SpiccioliApp/>
+					</LedgerProvider>
+				</PreferencesProvider>
 			</AppErrorBoundary>
 		</TranslationProvider>
 	</React.StrictMode>

@@ -17,30 +17,36 @@ The two processes are bundled separately and by different tools, because they ar
 
 ## 1.2 What crosses the bridge
 
-Today there is one channel, and it is the pattern every later one follows.
+Three groups of channels, and they all follow one pattern: the names in `src/types/…IpcChannels.ts`, the shapes in `src/types/…IpcTypes.ts`, a handler in `src/main/ipc/`, and the preload publishing one function per thing the renderer may ask for.
 
-| Piece | File | Role |
+| Group | Files | Role |
 | --- | --- | --- |
-| Channel names | `src/types/AppInfoIpcChannels.ts` | The string constants both sides import, so neither spells one out |
-| The shape | `src/types/AppInfoTypes.ts` | The payload type and the API the preload publishes |
-| The handler | `src/main/ipc/AppInfoIpc.ts` | Registers the `ipcMain.handle` that answers |
-| The bridge | `src/main/preload/Preload.ts` | Calls `ipcRenderer.invoke` and exposes it as `window.spiccioliAppInfo` |
-| The declaration | `src/vite-env.d.ts` | Tells TypeScript what `window` carries |
+| App info | `src/types/AppInfoIpcChannels.ts` `AppInfoTypes.ts`, `src/main/ipc/AppInfoIpc.ts` | Which build the renderer is part of |
+| The ledger | `src/types/LedgerIpcChannels.ts` `LedgerIpcTypes.ts`, `src/main/ipc/LedgerIpc.ts` | Everything about the file: the two dialogs, reading, creating, saving, the copies, the recent list, the preferences |
+| Diagnostics | `src/types/LedgerIpcChannels.ts`, `src/main/ipc/DiagnosticsIpc.ts` | The renderer's failures, written into the operational log by the process that owns it |
 
-A channel is a request the renderer makes and the main process answers. For events pushed the other way, the framework's `subscribeToChannel` (`src/framework/preload/IpcBridge.ts`) is what the preload wraps a listener in, so the renderer gets the payload without an Electron event object it could not receive anyway.
+`src/main/preload/Preload.ts` publishes them as `window.spiccioliAppInfo`, `window.spiccioliLedger` and `window.spiccioliDiagnostics`, and `src/vite-env.d.ts` tells TypeScript what `window` carries.
+
+A channel is a request the renderer makes and the main process answers. For events pushed the other way, the framework's `subscribeToChannel` (`src/framework/preload/IpcBridge.ts`) is what the preload wraps a listener in, so the renderer gets the payload without an Electron event object it could not receive anyway. Four events are pushed today, all of them the ledger's: a write attempt that failed, an external modification, a File-menu command, and the request to finish saving before the session closes.
+
+**Nothing on any of these channels carries a parsed ledger.** The renderer holds the model and the main process owns the file, so what crosses is text and paths — plus, in the other direction, the schema version and record counts the renderer read out of a file, sent back only so that the main process can write them into the log.
 
 ## 1.3 Layers inside the renderer
 
 ```
-src/index.tsx                 mounts React, in StrictMode
-  └── TranslationProvider     the translator every component reads wording from (§5)
-      └── AppErrorBoundary    catches a render failure so the window is never left empty
-          └── PlaceholderPage the one screen there is so far
+src/index.tsx                    mounts React, in StrictMode
+  └── TranslationProvider        the translator every component reads wording from (§5)
+      └── AppErrorBoundary       catches a render failure so the window is never left empty
+          └── PreferencesProvider  the ten preferences, which are not in the ledger (§10 of the analysis)
+              └── LedgerProvider   the open file: the document, the save state, the storage lines
+                  └── SpiccioliApp the launch screen, or the open file
 ```
 
-`AppErrorBoundary` wraps everything below the provider rather than one screen, so a failure inside a context provider is caught too. Its recovery is a reload: rendering the same tree again would usually throw the same error a second time, while a reload starts over from what is on disk.
+`AppErrorBoundary` wraps everything below the translator rather than one screen, so a failure inside a context provider is caught too. Its recovery is a reload: rendering the same tree again would usually throw the same error a second time, while a reload starts over from what is on disk.
 
-The failure is written to the renderer console for now. That console is developer-facing and an installed Spiccioli cannot open it, so this screen still has to reach the operational log; **the channel that carries it there is Phase 1's, and what it writes is fixed by D14** ([§8.2](08-implementation-plan.md#what-d14-logs)) — the message, the stack and the component stack, each truncated, written by the main process.
+The failure goes to the operational log over `window.spiccioliDiagnostics`, because the renderer console is developer-facing and an installed Spiccioli cannot open it. **The renderer chooses neither the message nor the level**: it sends three texts and `src/main/ipc/DiagnosticsIpc.ts` decides what the entry is called and how long each text may be, so nothing the renderer sends can grow a log line without limit.
+
+`LedgerProvider` is where the model lives. It reads the file the main process hands it, writes the text the main process puts on disk, debounces the autosave, and owns the three things [§12](../functional/specs/12-storage.md) puts on screen — the save state, the line while a failed write is being retried and the blocking message after the fifth attempt, and the line saying something else changed the file.
 
 ## 1.4 What the main process does at startup
 
@@ -49,9 +55,12 @@ The failure is written to the renderer console for now. That console is develope
 1. **Installs the crash handlers** before anything can fail. An uncaught exception or an unhandled rejection would otherwise leave no window and no trace, because the startup below runs inside a promise.
 2. **Resolves the language** first of all, so that every failure from here on has wording to report itself with (see [§5](05-text-and-languages.md)).
 3. **Resolves the window load target** — the built `build/index.html` or the development server — so every window of the run loads the same page.
-4. **Resolves the runtime paths** and **initializes the logger** into them.
-5. **Registers the IPC handlers.**
-6. **Creates the window**, installs the navigation guard on it, and shows it maximized once it is ready to be shown.
+4. **Resolves the runtime paths**, **initializes the logger** into them, opens the configuration store, and writes the one entry that describes the run (`src/main/config/StartupConfigurationLog.ts`).
+5. **Creates the ledger session** and **registers the IPC handlers.**
+6. **Installs the application menu** — the File menu of four actions and the About item of [§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open), rebuilt whenever the recent list changes because Open Recent is part of it.
+7. **Creates the window**, installs the navigation guard on it, and shows it maximized once it is ready to be shown.
+
+**A quit is not immediate while a file is open.** All four File actions and the window closing are the same event — a close of the session, which takes its backup — and the renderer is the side that has to finish saving first. The main process asks it to and waits, with a bound: a renderer that cannot answer must not be able to stop the application from exiting, and what is lost by quitting anyway is a copy of a file that is already safely on disk.
 
 A failure anywhere in that sequence is logged, reported to the user if the language got as far as being resolved, and then quits the application rather than leaving a process with no window.
 
@@ -76,13 +85,14 @@ On top of both: the development server URL is read from the environment, and `sr
 
 A development run keeps its own root so it never touches the real preferences, the real recent-file list or the real logs.
 
-**The ledger is not in this table and never will be.** It lives wherever the user put it, and its backups live beside it in a folder named after it ([§12](../functional/specs/12-storage.md)). That is why the framework's own `RuntimePaths` is not used here: its layout resolves a database folder and a default backup folder inside the user-data folder, and both would be paths nothing ever writes to. See [§4](04-framework.md).
+**The ledger is not in this table and never will be.** It lives wherever the user put it, and its backups live beside it in a folder named after it — the file's own name without its extension, plus `-backups`, resolved by `src/main/storage/LedgerBackupNaming.ts` ([§12](../functional/specs/12-storage.md)). That is why the framework's own `RuntimePaths` is not used here: its layout resolves a database folder and a default backup folder inside the user-data folder, and both would be paths nothing ever writes to. See [§4](04-framework.md).
+
+The configuration file holds two things, through `src/main/config/SpiccioliConfigStore.ts`: the ten preferences and the list of recently opened files. Neither is in the ledger, so both survive switching files and neither travels with a ledger that is copied.
 
 ## 1.7 What is deliberately not here yet
 
-- **No storage.** The format is settled — one JSON document, read whole and written whole ([§8.2](08-implementation-plan.md#82-decisions)) — but nothing implements it yet: no persistence layer, no autosave, no backup rotation and no external-modification detection. All of it is Phase 1, split between `src/framework/main/storage` for the generic file handling, `src/main/storage` for where a ledger's backups go, and `src/logic` for the document itself.
+- **No screens beyond the launch one.** A file can be created, opened, saved, backed up and closed, and what an open file shows is a placeholder listing its record counts (`src/components/session/`). The eight screens arrive with the shell.
 - **No router and no sidebar.** The eight screens of the functional analysis need one, and it is settled which: `react-router` in declarative mode over a `HashRouter`, a path-based history having nothing to resolve against on a packaged run's `file://` page ([§8.2](08-implementation-plan.md#82-decisions)). It arrives with the shell in Phase 2, not before.
-- **No application menu.** [§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open) fixes a File menu of four actions and an About item, and it is built with the launch screen that gives those actions something to act on. Until then the window carries the menu Electron installs by itself.
 - **No single-instance lock.** Spiccioli is allowed to run twice. Two ledgers open side by side is ordinary use, and two sessions on *one* ledger is the case [§12](../functional/specs/12-storage.md) settles by detecting the external modification and keeping the displaced version — not by refusing to start.
 
 ---

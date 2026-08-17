@@ -16,7 +16,8 @@ New logic in `src/logic`, `src/main` and `src/framework` should come with unit t
 | --- | --- | --- |
 | `tests/framework/` | The framework's own tests | Framework modules only, so they travel with `src/framework` |
 | `tests/main/` | Electron main process modules | Anything, with Electron's own API stubbed |
-| `tests/components/` | Rendered React components | Anything |
+| `tests/logic/` | The pure logic of `src/logic` | Anything, and it needs nothing: none of it touches React, Electron or a filesystem |
+| `tests/components/` | Rendered React components | Anything, with the preload bridge stubbed on `window` |
 | `tests/testUtils/` | Shared factories, re-exported through `index.ts` | Anything |
 
 **The framework rule is the strict one.** A test under `tests/framework` that imports a Spiccioli module has broken the property the folder exists for: the framework and its tests are meant to be copied into another application together.

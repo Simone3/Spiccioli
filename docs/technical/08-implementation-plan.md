@@ -1,10 +1,12 @@
 # §8 — Implementation plan
 
-*[Index](README.md) · [← §7 Testing](07-testing.md) · [why the decisions went this way](08-implementation-plan-why.md)*
+*[Index](README.md) · [← §7 Testing](07-testing.md) · [§9 The ledger file format →](09-file-format.md) · [why the decisions went this way](08-implementation-plan-why.md)*
 
 The route from the scaffolding that exists today to the application [`docs/functional/`](../functional/README.md) specifies. **This is the one page in this set that describes work not yet done**, and it is kept current: a phase that lands is marked done here in the same commit, and the pages it changed are updated with it.
 
 It carries three things: the **decisions** ([§8.2](#82-decisions)) — every one of them now taken, stated as what a phase has to build to — the **shape the code is heading towards** ([§8.4](#84-the-shape-of-the-code)), and the **twelve phases** the work is cut into ([§8.5](#85-the-phases)). A section that cannot be written until a decision is taken says **to be completed** and names it; none does today.
+
+**Phase 1 has landed.** Everything it built is described in the pages it changed — [§1](01-architecture.md), [§2](02-repository-map.md), [§4](04-framework.md) and the new [§9](09-file-format.md) — and this page keeps only the plan.
 
 **What each decision was taken *on* is in [`08-implementation-plan-why.md`](08-implementation-plan-why.md)**, the companion to this page: the grounds decision by decision, the measurements behind D1, and the provider survey behind D11. This page is read on the way into every phase and states only the outcomes; that one is read when a decision is questioned.
 
@@ -149,7 +151,7 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 
 | # | Phase | Specification | Depends on |
 | --- | --- | --- | --- |
-| 1 | [The file](#phase-1--the-file) | [§2](../functional/specs/02-domain-model.md), [§12](../functional/specs/12-storage.md) | — |
+| 1 | [The file](#phase-1--the-file) — **done** | [§2](../functional/specs/02-domain-model.md), [§12](../functional/specs/12-storage.md) | — |
 | 2 | [The shell and the kit](#phase-2--the-shell-and-the-kit) | [§10](../functional/specs/10-settings.md), [§13.1](../functional/specs/13-validation.md#131-how-it-behaves), [§14](../functional/specs/14-empty-and-error-states.md) | 1 |
 | 3 | [Accounts and institutions](#phase-3--accounts-and-institutions) | [§4](../functional/specs/04-accounts.md) | 2 |
 | 4 | [Transactions](#phase-4--transactions) | [§5.1](../functional/specs/05-transactions.md#51-columns) – [§5.6](../functional/specs/05-transactions.md#56-selecting-and-deleting-in-bulk) | 3 |
@@ -164,7 +166,9 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 
 ### Phase 1 — The file
 
-The domain model and everything [§12](../functional/specs/12-storage.md) asks of the file. No screens beyond the launch one.
+**Done.** The domain model and everything [§12](../functional/specs/12-storage.md) asks of the file. No screens beyond the launch one.
+
+What it left behind, and where: the eleven entities and the closed sets in `src/types/LedgerTypes.ts`; the money arithmetic in `src/logic/money/Money.ts`; the document, its reader, its writer, its seed and its upgrade in `src/logic/ledger/`; the generic half of storage in `src/framework/main/storage/` and the ledger's own half in `src/main/storage/`; the launch screen in `src/components/launch/`; and the ledger in memory in `src/contexts/LedgerContext.tsx`. **The format is written up in [§9](09-file-format.md)**, which is this phase's other deliverable.
 
 - The eleven stored entities of [§2](../functional/specs/02-domain-model.md) as types, **every number an integer at the scale D3 fixes**, and the money arithmetic beside them — the widening into the working scale, the one rounding rule for a division, and the conversions the amount field and the reader go through. `id` generation, and `insertionSeq` monotonic per entity and never reused.
 - **The ledger document as JSON** (D1), extension `.spiccioli`, with the integer `schemaVersion` of D4 as its first key. Its reader and writer live in `src/logic` and are pure: bytes in, model out, and nothing about a filesystem in either.
@@ -180,9 +184,11 @@ The domain model and everything [§12](../functional/specs/12-storage.md) asks o
 - **The upgrade path is built and has nothing to upgrade yet**: version comparison, the pre-upgrade backup that stops the upgrade when it fails, and the dialog of [§12.1](../functional/specs/12-storage.md#121-the-launch-screen). No migration step is registered until there is a second schema version.
 - **The log of D14, from its first entry.** `Spiccioli started` as the logger comes up, and an entry for every storage operation this phase builds — opened, refused, created, upgraded, closed, each save and each of its five attempts, an external modification, a copy written and one rotated out. **The renderer's channel into the log lands here too**, which is what [§1.3](01-architecture.md#13-layers-inside-the-renderer) is waiting for: a render error is written by the main process with its three texts truncated, instead of going to a console nobody can open.
 
-*Done when* a file can be created, closed, reopened, backed up, rotated, displaced by an external write and refused when unreadable — and the storage layer's tests say so without a screen.
+*Done when* a file can be created, closed, reopened, backed up, rotated, displaced by an external write and refused when unreadable — and the storage layer's tests say so without a screen. **They do**, in `tests/framework/`, `tests/logic/` and `tests/main/`.
 
-**The file-format document is a deliverable of this phase** and becomes `docs/technical/09-file-format.md`: [§12](../functional/specs/12-storage.md) requires the format documented well enough for the one-off migration script to write it. With D1 and D3 taken it is writable in full — the shape of the document, every key of every entity with the scale its figure is written at, the `schemaVersion` rule, what makes a file *not understood*, and a worked example small enough to read and complete enough to open.
+**Two things this phase built have no way to be exercised from the interface yet, and that is expected.** Nothing on screen can change the document, so autosave, the retry line and the blocking *Retry* are covered by the session's and the scheduler's tests rather than by a click; and there is only one schema version, so the upgrade panel is reachable only by the upgrade's own tests. Both come to life in the phases that give the user something to change and the format something to move from.
+
+**The file-format document was a deliverable of this phase** and is [§9](09-file-format.md): [§12](../functional/specs/12-storage.md) requires the format documented well enough for the one-off migration script to write it. It carries the shape of the document, every key of every entity with the scale its figure is written at, the `schemaVersion` rule, what makes a file *not understood*, and a worked example small enough to read and complete enough to open.
 
 ### Phase 2 — The shell and the kit
 
