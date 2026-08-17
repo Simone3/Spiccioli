@@ -1,0 +1,95 @@
+package-lock.json
+  s_280b6f2d0a870c::t_b5ad0b3764a014 12-13,544-596,13030
+package.json
+  s_280b6f2d0a870c::t_1d61c094a8a4fc 40-41
+src/components/SpiccioliApp.tsx
+  s_280b6f2d0a870c::t_07ba3267ff2215 4,14-15,25
+src/components/categories/ApplyChangesDialog.tsx
+  s_280b6f2d0a870c::t_4f7677e8f77009 1-79
+src/components/categories/CategoryListTable.tsx
+  s_280b6f2d0a870c::t_4d2d38e22130cf 1-87
+src/components/categories/CategoryPicker.tsx
+  s_280b6f2d0a870c::t_e9523d09933a7e 16-18,27,60-69
+src/components/categories/RuleForm.tsx
+  s_280b6f2d0a870c::t_6fd24470392977 1-67
+src/components/categories/RulesTable.tsx
+  s_280b6f2d0a870c::t_e79dfa9bd0b38b 1-277
+src/components/common/ConfirmDialog.tsx
+  s_280b6f2d0a870c::t_a01ab8052c1fe0 23-26,40,46,69
+src/components/session/UnsavedDraftPrompt.tsx
+  s_280b6f2d0a870c::t_e8f50f1900e2c7 1-37
+src/components/shell/Sidebar.tsx
+  s_280b6f2d0a870c::t_b48a239213437f 2,7,18-20,39-40,76-81
+src/contexts/LedgerContext.tsx
+  s_280b6f2d0a870c::t_d01acb88478828 3,100,358,360-370,373-374,376-383,390
+src/contexts/UnsavedDraftContext.tsx
+  s_280b6f2d0a870c::t_2b89e25cf02138 1-156
+src/index.tsx
+  s_280b6f2d0a870c::t_2598c3bca7781a 11,22-28
+src/logic/categories/Categories.ts
+  s_280b6f2d0a870c::t_4cbe5cd24d83f6 2,34-63
+src/logic/categories/Categorisation.ts
+  s_280b6f2d0a870c::t_58803efed3dd61 1,8-13,45-64,72,90-209
+src/logic/categories/CategoryReport.ts
+  s_280b6f2d0a870c::t_4f6c83280bc226 1-247
+src/logic/categories/RuleDraft.ts
+  s_280b6f2d0a870c::t_492fee00445658 1-140
+src/main/ipc/LedgerIpc.ts
+  s_280b6f2d0a870c::t_e35d25a65db783 42-44,61-62,152-155
+src/main/preload/Preload.ts
+  s_280b6f2d0a870c::t_d1dbbfaad8a113 47-49
+src/types/LedgerIpcChannels.ts
+  s_280b6f2d0a870c::t_55cba43d59fff7 16
+src/types/LedgerIpcTypes.ts
+  s_280b6f2d0a870c::t_e59a8c75a27b01 136-139
+tests/testUtils/AppTestFactory.tsx
+  s_280b6f2d0a870c::t_1688f91d75202d 11,69-71,111-115
+CLAUDE.md
+  s_280b6f2d0a870c::t_1cd21920ee41aa 9,49
+docs/technical/01-architecture.md
+  s_280b6f2d0a870c::t_45e8bd0eadcf06 25,41-44,55-56
+docs/technical/02-repository-map.md
+  s_280b6f2d0a870c::t_7b4ca9acff41f9 65,70,74,79-82
+docs/technical/06-styling.md
+  s_280b6f2d0a870c::t_39d464a35f1555 63-65
+docs/technical/08-implementation-plan-why.md
+  s_280b6f2d0a870c::t_9873cd628f5947 24
+docs/technical/08-implementation-plan.md
+  s_280b6f2d0a870c::t_80b2e77ee7f1d7 9,40,76,83,260-263,265,268-273,340
+src/components/categories/CategoriesScreen.css
+  s_280b6f2d0a870c::t_7f0378bb17965c 1-165
+src/components/categories/CategoriesScreen.tsx
+  s_280b6f2d0a870c::t_7ff3080c9c46e8 1-9,11-15,17-18,20-37,40,42-66,71-251,254-365
+src/components/categories/CategoryReportTable.tsx
+  s_280b6f2d0a870c::t_06cc45dc6c26a3 1-158
+src/components/shell/TransactionHandoff.ts
+  s_280b6f2d0a870c::t_de8728beec89af 9-15,18,27-29
+src/i18n/lang/en.ts
+  s_280b6f2d0a870c::t_2d266950d9e5d9 94,98-99,416,420-569
+src/main/Main.ts
+  s_280b6f2d0a870c::t_6da50cbb400174 36-38,133-148,296-297
+tests/components/CategoriesScreen.test.tsx
+  s_280b6f2d0a870c::t_37f42bf8b20bc3 1-231
+tests/logic/Categorisation.test.ts
+  s_280b6f2d0a870c::t_527613b39890a1 2-11,75-144
+tests/logic/CategoryReport.test.ts
+  s_280b6f2d0a870c::t_d9efc5eb5dba9c 1-153
+tests/logic/RuleDraft.test.ts
+  s_280b6f2d0a870c::t_135c6af5706093 1-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "33d2ae6a4b927928882be4c482753bb243017c98",
+  "prompts": {},
+  "sessions": {
+    "s_280b6f2d0a870c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8c75422c-d5f5-461b-9d56-43b73697882f",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
