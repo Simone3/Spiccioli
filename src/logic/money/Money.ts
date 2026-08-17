@@ -102,6 +102,38 @@ export const divideAtWorkingScale = (numerator: number, denominator: number): nu
 };
 
 /**
+ * Multiplies a working-scale figure by a four-decimal one and lands back on the working scale.
+ *
+ * It is what a quantity times a weighted average cost is, and what a taxable gain times a tax rate is: one side has already been
+ * widened and the other is a stored `decimal(4)`, so the plain product would be four decimal places too far to the left. The
+ * working operand is split into its whole part and its remainder before it is multiplied, exactly as the division below is, so
+ * the largest intermediate figure is the size of the answer rather than ten thousand times it.
+ * @param value Figure at the working scale.
+ * @param rate Four-decimal figure, in ten-thousandths.
+ * @returns Their product, at the working scale, rounded half away from zero.
+ */
+export const multiplyWorkingScaleByRateScale = (value: number, rate: number): number => {
+	const factor = getScaleFactor(MONEY_SCALES.rate);
+	const wholePart = Math.trunc(value / factor);
+	const remainder = value - wholePart * factor;
+
+	return roundHalfAwayFromZero(wholePart * rate + remainder * rate / factor);
+};
+
+/**
+ * Rounds a working-scale figure to the cent and leaves it at the working scale.
+ *
+ * The calculations name exactly two figures that are rounded before they are subtracted rather than at display — the hypothetical
+ * capital-gains tax on a holding and the exit tax on a pension fund — and this is that rounding. Everything downstream of it goes
+ * on being combined at the working scale.
+ * @param value Figure at the working scale.
+ * @returns The same figure with nothing below the cent, still at the working scale.
+ */
+export const roundWorkingScaleToCents = (value: number): number => {
+	return widenToWorkingScale(narrowFromWorkingScale(value, MONEY_SCALES.amount), MONEY_SCALES.amount);
+};
+
+/**
  * Reads what a person typed into a figure in minor units. One of the four boundaries where a decimal becomes an integer.
  *
  * It admits exactly one shape: an optional sign, digits, and at most as many decimals as the scale allows after a single

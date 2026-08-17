@@ -93,6 +93,11 @@ export const EN_TRANSLATIONS = {
 		categories: 'Nothing is categorised automatically yet — add a rule, then apply the list and see what it would catch.',
 		report: 'There is nothing to report yet — the table fills in as transactions arrive.',
 		investments: 'Record a purchase to start tracking holdings.',
+		holdings: 'Nothing is held yet. Record a purchase and the position appears here, valued at whatever it was last priced at.',
+		purchases: 'Record the first purchase — the security can be created on the same form.',
+		sales: 'Nothing has been sold yet. A sale is recorded here, with the tax the broker actually withheld.',
+		tradesFiltered: 'No trade matches these filters.',
+		securities: 'Add the first security, or let the purchase form create one while you record the trade.',
 		salaries: 'Add the employer, its months per year and its hours per day — everything on the other tab divides by them.',
 		goToAccounts: 'Go to Accounts',
 		goToImport: 'Import a bank export',
@@ -561,6 +566,308 @@ export const EN_TRANSLATIONS = {
 		}
 	},
 
+	// The four tabs of the Investments screen. Holdings is entirely derived from the middle two, and Securities is what all three point at.
+	investmentTabs: {
+		holdings: 'Holdings',
+		purchases: 'Purchases · {count}',
+		sales: 'Sales · {count}',
+		securities: 'Securities · {count}'
+	},
+
+	// The four types a security can be, written the same way wherever one is shown
+	securityTypes: {
+		stock: 'Stock',
+		'stock-etf': 'Stock ETF',
+		'bond-etf': 'Bond ETF',
+		etc: 'ETC'
+	},
+
+	// Where a security is listed. Eurozone only, every amount in the file being EUR.
+	exchanges: {
+		milan: 'Milan',
+		xetra: 'XETRA',
+		frankfurt: 'Frankfurt',
+		amsterdam: 'Amsterdam',
+		paris: 'Paris',
+		brussels: 'Brussels',
+		lisbon: 'Lisbon',
+		madrid: 'Madrid',
+		vienna: 'Vienna',
+		helsinki: 'Helsinki',
+		dublin: 'Dublin',
+		athens: 'Athens',
+		stuttgart: 'Stuttgart',
+		dusseldorf: 'Düsseldorf',
+		munich: 'Munich',
+		hamburg: 'Hamburg',
+		tallinn: 'Tallinn',
+		vilnius: 'Vilnius'
+	},
+
+	// The Holdings tab: every figure derived, every column read-only except the price, and gross of tax and fees throughout
+	holdings: {
+		table: 'Holdings',
+		summary: '{positions} · {accounts} · {priced}',
+		summaryStale: '{positions} · {accounts} · {priced} · {stale}',
+		positionCount: {
+			one: '1 open position',
+			other: '{count} open positions'
+		},
+		accountCount: {
+			one: '1 brokerage account',
+			other: '{count} brokerage accounts'
+		},
+		latestPrice: 'latest price {date}',
+		noPrices: 'nothing priced yet',
+		staleCount: {
+			one: '1 stale',
+			other: '{count} stale'
+		},
+		columns: {
+			security: 'Security',
+			type: 'Type',
+			account: 'Where',
+			quantity: 'Qty',
+			avgCost: 'Avg cost',
+			price: 'Price',
+			lastPriced: 'Last priced',
+			value: 'Value',
+			gain: 'Gain'
+		},
+		noPrice: 'none',
+		gainWithPercentage: '{gain} · {percentage}',
+		footer: '{holdings} · by ticker · gross of tax and fees · stale after {days} · {value} · {gain}',
+		holdingCount: {
+			one: '1 holding',
+			other: '{count} holdings'
+		},
+		staleAfter: {
+			one: '1 day',
+			other: '{count} days'
+		},
+		footerReturn: 'Annualised return, every trade in the file including positions since sold — what the money has earned per year, before tax: {rate}',
+		footerReturnOmitted: {
+			one: 'Annualised return, every trade in the file including positions since sold — what the money has earned per year, before tax: {rate}. 1 position is left out whole: it is oversold, or its security has never been priced.',
+			other: 'Annualised return, every trade in the file including positions since sold — what the money has earned per year, before tax: {rate}. {count} positions are left out whole: they are oversold, or their security has never been priced.'
+		},
+		select: 'Show the detail of {security}',
+		editPrice: 'Edit the price of {security}',
+		priceValue: 'Price',
+		priceDate: 'As of',
+		priceNote: 'A price belongs to the security, not to this holding, so the same instrument held at another institution moves with it.',
+		priceMustBePositive: 'A price is more than zero.',
+
+		// The detail panel: the facts about the position's history first, and what selling it today would produce after them
+		detail: {
+			purchased: 'Purchased',
+			purchasedLots: {
+				one: 'Purchased, 1 lot',
+				other: 'Purchased, {count} lots'
+			},
+			sold: 'Sold',
+			avgCost: 'Weighted average cost',
+			invested: 'Invested, incl. fees',
+			annualisedReturn: 'Annualised return',
+			returnExplanation: 'What the money in this position has earned per year, counting when each purchase was made and not just how much went in. Before tax.',
+			ifSoldToday: 'If sold today',
+			grossProceeds: 'Gross proceeds',
+			sellFee: 'Sell fee, {institution} default',
+			taxableGain: 'Taxable gain',
+			tax: 'Tax, {rate} — {security} rate',
+			netProceeds: 'Net proceeds',
+			netGain: 'Net gain',
+			caveat: 'Average cost is an approximation, and your broker may match lots differently when it computes the taxable gain. Two things make the figure cautious rather than optimistic: the tax is worked out for this position alone, so a loss on another holding does not reduce it, and the sell fee is charged once per holding.'
+		}
+	},
+
+	// The Purchases and Sales tabs: the same table, with three columns Sales has and Purchases does not
+	trades: {
+		addPurchase: 'Add purchase',
+		addSale: 'Add sale',
+		tablePurchases: 'Purchases',
+		tableSales: 'Sales',
+		purchaseCount: {
+			one: '1 purchase',
+			other: '{count} purchases'
+		},
+		saleCount: {
+			one: '1 sale',
+			other: '{count} sales'
+		},
+		securityCount: {
+			one: '1 security',
+			other: '{count} securities'
+		},
+		summary: '{trades} · {range}',
+		summaryFiltered: '{shown} of {trades}',
+		range: '{from} – {to}',
+		shownCount: '{shown} of {total} shown',
+		footerPurchases: '{purchases} · {securities} · fees {fees} · total cost {total}',
+		footerSales: '{sales} · {securities} · fees {fees} · taxes {taxes} · net proceeds {total} · realised gain {gain}',
+		footerSalesOmitted: {
+			one: '{footer}, which leaves out 1 sale with no cost basis behind it',
+			other: '{footer}, which leaves out {count} sales with no cost basis behind them'
+		},
+		columns: {
+			date: 'Date',
+			security: 'Security',
+			account: 'Account',
+			quantity: 'Qty',
+			unitPrice: 'Unit price',
+			fees: 'Fees',
+			taxes: 'Taxes',
+			totalCost: 'Total cost',
+			netProceeds: 'Net proceeds',
+			realisedGain: 'Realised gain',
+			notes: 'Notes'
+		},
+		edit: {
+			date: 'Edit the date of the {security} trade of {date}',
+			security: 'Edit the security of the trade of {date}',
+			account: 'Edit the account of the {security} trade of {date}',
+			quantity: 'Edit the quantity of the {security} trade of {date}',
+			unitPrice: 'Edit the unit price of the {security} trade of {date}',
+			fees: 'Edit the fees of the {security} trade of {date}',
+			taxes: 'Edit the taxes of the {security} trade of {date}',
+			notes: 'Edit the notes of the {security} trade of {date}'
+		},
+		noNotes: 'Add a note',
+		rowMenu: 'What can be done to the {security} trade of {date}',
+		deleteTitle: 'Delete this trade?',
+		deleteMessage: 'Delete the {security} trade of {date} for {total}? There is no undo.',
+		deleteConfirm: 'Delete trade',
+		filters: {
+			security: 'Security',
+			securityAll: 'All',
+			account: 'Account',
+			accountAll: 'All',
+			period: 'Period',
+			from: 'From',
+			to: 'To'
+		},
+		form: {
+			addPurchaseTitle: 'Add purchase',
+			addSaleTitle: 'Add sale',
+			editPurchaseTitle: 'Edit purchase',
+			editSaleTitle: 'Edit sale',
+			purchaseSubtitle: 'from the Purchases tab',
+			saleSubtitle: 'from the Sales tab',
+			date: 'Date',
+			account: 'Account',
+			accountChoose: 'Choose an account',
+			security: 'Security',
+			securityChoose: 'Choose a security',
+			securitySearch: 'ISIN or ticker',
+			securitySearchHint: 'Type an ISIN or a ticker. If no security matches, the fields to create one appear below and it is saved with the trade.',
+			securityNotFound: '{text} — not found',
+			newSecurity: 'New security',
+			quantity: 'Quantity',
+			unitPrice: 'Unit price',
+			fees: 'Fees',
+			taxes: 'Taxes',
+			taxesHint: 'What the broker actually withheld, from the trade confirmation. Zero, not blank, when nothing was.',
+			notes: 'Notes',
+			totalCost: 'Total cost',
+			netProceeds: 'Net proceeds',
+			derived: 'Computed as you type, and never entered.',
+			noBrokerageAccount: 'There is no brokerage account yet. Add one on Accounts, and this form will offer it.'
+		}
+	},
+
+	// The Securities tab: where a security is created and corrected, and where its whole price history lives
+	securities: {
+		add: 'Add security',
+		table: 'Securities',
+		option: '{ticker} · {name}',
+		summary: '{securities} · {held} held · {sold} fully sold',
+		summaryPlain: '{securities}',
+		count: {
+			one: '1 security',
+			other: '{count} securities'
+		},
+		footer: '{securities} · by ticker · {sold} no longer held',
+		columns: {
+			ticker: 'Ticker',
+			isin: 'ISIN',
+			exchange: 'Exchange',
+			type: 'Type',
+			taxRate: 'Tax rate',
+			held: 'Held',
+			trades: 'Trades',
+			prices: 'Prices'
+		},
+		oversold: 'Oversold — no quantity can be stated',
+		select: 'Show the price history of {ticker}',
+		rowMenu: 'What can be done to {ticker}',
+		deleteTitle: 'Delete this security?',
+		deleteMessage: {
+			one: 'Delete {ticker}? Its 1 price record goes with it. There is no undo.',
+			other: 'Delete {ticker}? Its {count} price records go with it. There is no undo.'
+		},
+		deleteMessageNoPrices: 'Delete {ticker}? There is no undo.',
+		deleteConfirm: 'Delete security',
+		deleteBlockedByTrades: {
+			one: '{ticker} cannot be deleted: 1 trade points at it.',
+			other: '{ticker} cannot be deleted: {count} trades point at it.'
+		},
+		form: {
+			addTitle: 'Add security',
+			editTitle: 'Edit security',
+			isin: 'ISIN',
+			isinPlaceholder: 'e.g. IE00B4L5Y983',
+			isinTaken: 'A security with this ISIN is already recorded.',
+			ticker: 'Ticker',
+			tickerPlaceholder: 'e.g. SWDA',
+			tickerHint: 'The code the exchange below lists this security under, not a label of your own: the two together are what a price lookup asks for.',
+			exchange: 'Exchange',
+			exchangeHint: 'Where this security is quoted. Getting it wrong costs nothing that is recorded — only a quote that does not arrive.',
+			name: 'Name',
+			namePlaceholder: 'e.g. iShares Core MSCI World',
+			type: 'Type',
+			taxRate: 'Tax rate',
+			taxRateHint: 'Pre-filled from your default. A Bond ETF holding government paper is the one that is not the default, carrying a blend below the ordinary rate.',
+			notes: 'Notes'
+		}
+	},
+
+	// The price history of one security: the only table in the application that reads newest first, and the only place a price is deleted
+	prices: {
+		add: 'Add price',
+		table: 'Price history',
+		heading: {
+			one: 'Price history — 1 record',
+			other: 'Price history — {count} records'
+		},
+		empty: 'Nothing has been priced yet. Add a price, or record one on the Holdings tab.',
+		footer: '{count} · newest first · {range}',
+		range: '{from} – {to}',
+		columns: {
+			date: 'Date',
+			value: 'Value',
+			source: 'Source'
+		},
+		sources: {
+			manual: 'manual',
+			fetched: 'fetched'
+		},
+		edit: {
+			date: 'Edit the date of the price of {date}',
+			value: 'Edit the value of the price of {date}'
+		},
+		rowMenu: 'What can be done to the price of {date}',
+		deleteTitle: 'Delete this price?',
+		deleteMessage: 'Delete the price of {date}, {value}? There is no undo.',
+		deleteConfirm: 'Delete price',
+		form: {
+			addTitle: 'Add price',
+			subtitle: '{ticker} — one price per day, and a second one for a day replaces it',
+			date: 'As of',
+			value: 'Value',
+			replaces: 'This day already holds {value}, and saving replaces it.'
+		},
+		mustBePositive: 'A price is more than zero.'
+	},
+
 	// What is said when something on screen has not been written and the user is leaving anyway. There is no *apply* here.
 	unsavedDraft: {
 		title: 'These changes have not been applied',
@@ -621,7 +928,10 @@ export const EN_TRANSLATIONS = {
 
 	table: {
 		// A column a record's type cannot carry: a field that cannot be filled rather than one nobody got round to
-		notApplicable: '—'
+		notApplicable: '—',
+
+		// A figure that cannot be evaluated. It is never zero and never blank, and whatever would make it computable is named by a check.
+		undefined: 'undefined'
 	},
 
 	// A line a screen puts above its list to say what it would not do. It is never a modal and it never blocks.

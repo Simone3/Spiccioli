@@ -1,0 +1,197 @@
+
+/* The table and the panel beside it, on Holdings and on Securities alike. The panel drops under the table where there is no room. */
+.investments-screen-columns {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+	gap: 16px;
+	align-items: start;
+}
+
+@media (width <= 1100px) {
+	.investments-screen-columns {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+.investments-screen-detail {
+	padding: 16px;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 6px;
+}
+
+.investments-screen-detail-head {
+	display: flex;
+	gap: 12px;
+	align-items: start;
+	justify-content: space-between;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--colors-border-subtle);
+}
+
+.investments-screen-detail-subtitle {
+	display: block;
+	margin-top: 4px;
+	font-size: 12px;
+	color: var(--colors-text-secondary);
+}
+
+.investments-screen-detail-actions {
+	display: flex;
+	gap: 12px;
+	align-items: baseline;
+	justify-content: space-between;
+}
+
+.investments-screen-subhead {
+	margin: 18px 0 10px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--colors-text-secondary);
+}
+
+/* The figures of a detail panel: what each one is on the left, what it reads on the right */
+.investments-screen-figures {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 14px 0 0;
+}
+
+.investments-screen-figure {
+	display: flex;
+	gap: 16px;
+	align-items: baseline;
+	justify-content: space-between;
+}
+
+.investments-screen-figure dt {
+	color: var(--colors-text-secondary);
+}
+
+.investments-screen-figure dd {
+	margin: 0;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+/* What the specification says about a figure, next to the figure it qualifies */
+.investments-screen-note {
+	margin: 12px 0 0;
+	font-size: 12px;
+	color: var(--colors-text-secondary);
+}
+
+/* A figure the form computes as it is typed, which is never a field */
+.investments-screen-derived {
+	margin: 0;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	color: var(--colors-accent-primary);
+}
+
+.investments-screen-positive {
+	color: var(--colors-positive-text);
+}
+
+.investments-screen-negative {
+	color: var(--colors-danger-text);
+}
+
+/* A zero is a figure and not an absence, and so is a name beside a ticker */
+.investments-screen-quiet {
+	color: var(--colors-text-secondary);
+}
+
+/* A holding nobody has ever priced. It is louder than a stale date because the row is wrong rather than merely old. */
+.investments-screen-nothing {
+	color: var(--colors-warn);
+}
+
+/* The date is the thing that has gone wrong, so the date is what is marked */
+.investments-screen-stale {
+	padding: 1px 5px;
+	background-color: var(--colors-danger-background-muted);
+	border: 1px solid var(--colors-danger-border);
+	border-radius: 3px;
+	color: var(--colors-danger-text);
+}
+
+/* A security oversold in some account: nothing can be said about what is held, which is not the same as nothing being held */
+.investments-screen-oversold {
+	padding: 1px 5px;
+	background-color: var(--colors-danger-background-muted);
+	border-radius: 3px;
+	color: var(--colors-danger-text);
+}
+
+.investments-screen-row-selected td {
+	background-color: var(--colors-interactive-active-background);
+}
+
+/* The cell that opens a row's detail. It is a real button, so it draws the one focus ring. */
+.investments-screen-link {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 0;
+	background: none;
+	border: none;
+	border-radius: 3px;
+	font: inherit;
+	color: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.investments-screen-link:hover {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+/* The two ends of the period filter, side by side under the one label */
+.investments-screen-filter-pair {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+/* The inline price editor: a value, the day it is as of, and what a price belongs to */
+.investments-screen-price-editor {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 220px;
+	text-align: left;
+}
+
+/* A refusal a screen states above its list. It is never a modal and it never blocks. */
+.investments-screen-refusal {
+	display: flex;
+	gap: 16px;
+	align-items: baseline;
+	justify-content: space-between;
+	margin-bottom: 16px;
+	padding: 12px 14px;
+	background-color: var(--colors-danger-background-muted);
+	border: 1px solid var(--colors-danger-border);
+	border-radius: 6px;
+	color: var(--colors-danger-text);
+}
+
+.investments-screen-refusal p {
+	margin: 0;
+}
+
+.investments-screen-refusal-dismiss {
+	padding: 0;
+	background: none;
+	border: none;
+	border-radius: 3px;
+	font: inherit;
+	color: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+}
