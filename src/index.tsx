@@ -8,6 +8,7 @@ import { AppErrorBoundary } from 'src/components/common/AppErrorBoundary';
 import { SpiccioliApp } from 'src/components/SpiccioliApp';
 import { LedgerProvider } from 'src/contexts/LedgerContext';
 import { PreferencesProvider } from 'src/contexts/PreferencesContext';
+import { UnsavedDraftProvider } from 'src/contexts/UnsavedDraftContext';
 import { TranslationProvider } from 'src/i18n/TranslationContext';
 
 // The router is installed once, here. It is a hash history because a packaged run loads the built page over "file://", where a
@@ -18,11 +19,13 @@ root.render(
 		<TranslationProvider>
 			<AppErrorBoundary>
 				<PreferencesProvider>
-					<LedgerProvider>
-						<HashRouter>
-							<SpiccioliApp/>
-						</HashRouter>
-					</LedgerProvider>
+					<UnsavedDraftProvider>
+						<LedgerProvider>
+							<HashRouter>
+								<SpiccioliApp/>
+							</HashRouter>
+						</LedgerProvider>
+					</UnsavedDraftProvider>
 				</PreferencesProvider>
 			</AppErrorBoundary>
 		</TranslationProvider>

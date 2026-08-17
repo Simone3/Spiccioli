@@ -33,6 +33,9 @@ let fatalErrorTranslator: SpiccioliTranslator | undefined;
 // Once it has answered, or the wait has run out, the quit is let through.
 let isShuttingDown = false;
 
+// What the wait is made of, kept so that a renderer holding something unwritten can call the whole shutdown off
+let shutdownTimers: { quitAnyway: ReturnType<typeof setTimeout>; waitForRenderer: ReturnType<typeof setInterval> } | undefined;
+
 /**
  * Tells the user about a failure that reached the top of the main process.
  * The log always has it by the time this runs, so this only decides whether there is anything worth putting in front of the user.
@@ -127,6 +130,22 @@ const beginShutdown = (session: LedgerSession, door: LedgerCloseDoor): void => {
 			app.quit();
 		}
 	}, SHUTDOWN_CONFIG.pollIntervalMs);
+
+	shutdownTimers = { quitAnyway, waitForRenderer };
+};
+
+/**
+ * Calls a shutdown off, which is the renderer's other answer: something on screen has not been written and the user chose to
+ * stay with it rather than lose it. The quit that was asked for is abandoned and asking for one again starts it over.
+ */
+const cancelShutdown = (): void => {
+	if(shutdownTimers) {
+		clearTimeout(shutdownTimers.quitAnyway);
+		clearInterval(shutdownTimers.waitForRenderer);
+		shutdownTimers = undefined;
+	}
+
+	isShuttingDown = false;
 };
 
 // What the window loads, resolved once at startup so that every window of this run loads the same page
@@ -274,7 +293,8 @@ const startApplication = (): void => {
 			onOpenFileChanged: (filePath) => {
 				setWindowTitleForFile(translator, filePath);
 				installApplicationMenu(translator, configStore);
-			}
+			},
+			onCloseCancelled: cancelShutdown
 		});
 
 		installApplicationMenu(translator, configStore);

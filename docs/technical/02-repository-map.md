@@ -62,20 +62,24 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/launch/LaunchScreen.tsx` `.css` | The screen the application always opens with ([§12.1](../functional/specs/12-storage.md#121-the-launch-screen)) |
 | `components/launch/UpgradeDialog.tsx` | Its second panel: a file written by an older version |
 | `components/session/WriteFailurePanel.tsx` `.css` | The blocking message after five failed attempts, which belongs to no screen |
+| `components/session/UnsavedDraftPrompt.tsx` | The other thing that belongs to no screen: what is said when something unwritten is being walked away from, offering discard and stay and no apply |
 | `components/settings/SettingsScreen.tsx` `.css` | The ten preferences, the refusals, and the two read-only paths ([§10](../functional/specs/10-settings.md)) |
 | `components/accounts/` | The Accounts screen ([§4](../functional/specs/04-accounts.md)): the two tabs and their tables, the two forms, and `AccountPicker` — **the one account picker in the application**, which every later screen takes for a transaction's, a trade's or a filter's |
 | `components/transactions/` | The Transactions screen ([§5](../functional/specs/05-transactions.md)): the list with every cell edited in place, the seven filters, the pager, and the add form |
 | `components/import/` | Bulk import ([§5.7](../functional/specs/05-transactions.md#57-bulk-import)): the paste, the three format controls, the account, the outcome, and the preview table that marks every row |
-| `components/categories/` | The Categories screen, still a shell, and `CategoryPicker` — **the one category picker in the application**, which a transaction, a filter and later a rule all take |
+| `components/categories/` | The Categories screen ([§6](../functional/specs/06-categories.md)): the three tabs, the categories × years matrix, the rule list with its drag reorder and its draft session, the rule form and the consequence summary — and `CategoryPicker`, **the one category picker in the application**, which a transaction, a filter and a rule all take |
 | `components/portfolio/` `investments/` `salaries/` `checks/` | One folder per screen. Each holds its shell and its empty state until the phase that builds it |
 | `contexts/LedgerContext.tsx` | The ledger in memory, the autosave, the save state, the storage lines |
 | `contexts/PreferencesContext.tsx` | The ten preferences, read once and written as they change, and the formatter they define |
+| `contexts/UnsavedDraftContext.tsx` | The guard every departure goes through, and the draft a screen registers with it ([§1.3](01-architecture.md#13-layers-inside-the-renderer)) |
 | `i18n/Translations.ts` | Turns a language into a translator; the bundle registry |
 | `i18n/TranslationContext.tsx` | The React binding of that translator |
 | `i18n/lang/en.ts` | Every word the user can read |
 | `logic/accounts/Accounts.ts` | Everything pure about accounts and institutions: the two orderings, *Institution · Account*, the two counts, the uniqueness rules and what an account picker offers |
-| `logic/categories/Categories.ts` | The one category ordering — alphabetical, which every picker, filter and list but the report reads — and the index a chip reaches a name through |
-| `logic/categories/Categorisation.ts` | The rule engine: what a rule compares, which rule claims a description, and the pass that keeps an `automatic` category the one the rules produce |
+| `logic/categories/Categories.ts` | The two category orderings — alphabetical, which every picker, filter and list reads, and the stored `order`, which only the report does — the index a chip reaches a name through, and the live count the list tab shows |
+| `logic/categories/Categorisation.ts` | The rule engine: what a rule compares, which rule claims a description, the pass that keeps an `automatic` category the one the rules produce, what each rule accounts for, and the four figures applying a list would produce |
+| `logic/categories/RuleDraft.ts` | The draft the rule list is edited as, and what tells it apart from the list the file holds |
+| `logic/categories/CategoryReport.ts` | The categories × years matrix: the columns, the four groups, the three subtotals and Net |
 | `logic/transactions/Transactions.ts` | Everything pure about the list: the one ordering, the seven filters, the footer total, the pages, and what a duplicate carries over |
 | `logic/transactions/TransactionImport.ts` | Everything pure about a paste: how a line becomes a row, what makes one unreadable, which rows the file already holds, and what the ticked ones are written as |
 | `logic/format/DateFormat.ts` `NumberFormat.ts` | Printing a day and printing a figure, the way the preferences say |

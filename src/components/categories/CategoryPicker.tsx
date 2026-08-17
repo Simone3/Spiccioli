@@ -13,6 +13,9 @@ import type { LedgerId } from 'src/types/LedgerTypes';
  * categories — *Automatic* at the top of the picker that assigns one, *Uncategorised* at the top of the one that filters by one.
  * **The assigning picker carries no clearing entry**, which is what makes the only empty category in the file one no rule
  * matched: a category set by hand can be handed back to the rules and never taken away.
+ *
+ * **A rule's picker carries neither of the two.** A rule points at a category and at nothing else, so the only entry outside the
+ * alphabet there is the one saying none has been chosen yet — which is a form that cannot be saved rather than a value.
  */
 
 // The entry that hands a transaction back to the rules. It is a value the picker returns and never a category id.
@@ -21,7 +24,7 @@ export const AUTOMATIC_CATEGORY = 'automatic';
 // The entry a filter opens on, which is no category filter at all
 const ALL_CATEGORIES = '';
 
-export type CategoryPickerMode = 'assign' | 'filter';
+export type CategoryPickerMode = 'assign' | 'filter' | 'rule';
 
 export interface CategoryPickerProps {
 
@@ -54,9 +57,16 @@ export const CategoryPicker = ({ value, onChange, mode, label, disabled }: Categ
 	const categories = document?.categories;
 
 	const options = useMemo((): readonly SelectOption<string>[] => {
-		const leading: SelectOption<string> = mode === 'assign' ?
-			{ value: AUTOMATIC_CATEGORY, label: t('categoryPicker.automatic') } :
-			{ value: ALL_CATEGORIES, label: t('categoryPicker.all') };
+		const leadingLabelKey = {
+			assign: 'categoryPicker.automatic',
+			filter: 'categoryPicker.all',
+			rule: 'categoryPicker.choose'
+		} as const;
+
+		const leading: SelectOption<string> = {
+			value: mode === 'assign' ? AUTOMATIC_CATEGORY : ALL_CATEGORIES,
+			label: t(leadingLabelKey[mode])
+		};
 
 		const uncategorised: readonly SelectOption<string>[] = mode === 'filter' ?
 			[ { value: UNCATEGORISED_FILTER, label: t('categoryPicker.uncategorised') } ] :

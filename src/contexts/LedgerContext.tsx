@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { STORAGE_CONFIG } from 'src/config/AppConfig';
+import { useUnsavedDraftGuard } from 'src/contexts/UnsavedDraftContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { createSeededLedgerDocument, LEDGER_SCHEMA_VERSION } from 'src/logic/ledger/LedgerDocument';
 import { readLedgerDocument } from 'src/logic/ledger/LedgerReader';
@@ -96,6 +97,7 @@ const countRecords = (document: LedgerDocument): Record<LedgerEntityKey, number>
  */
 export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElement => {
 	const translator = useTranslator();
+	const { requestDeparture } = useUnsavedDraftGuard();
 	const [ document, setDocument ] = useState<LedgerDocument | undefined>();
 	const [ filePath, setFilePath ] = useState<string | undefined>();
 	const [ saveState, setSaveState ] = useState<LedgerSaveState>({ state: 'idle' });
@@ -353,28 +355,39 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 	}, []);
 
 	useEffect(() => {
+		// All three menu actions end the current session, so all three are a departure and go through the guard first
 		const unsubscribeMenu = window.spiccioliLedger.onMenuCommand((command) => {
-			if(command.command === 'new-file') {
-				void createWithDialog();
-			}
-			else if(command.command === 'open-file') {
-				void openWithDialog();
-			}
-			else {
-				void openPath(command.filePath);
-			}
+			requestDeparture(() => {
+				if(command.command === 'new-file') {
+					void createWithDialog();
+				}
+				else if(command.command === 'open-file') {
+					void openWithDialog();
+				}
+				else {
+					void openPath(command.filePath);
+				}
+			});
 		});
 
-		// A quit or a closed window is a close like any other: everything pending is written, and the closing copy is taken
+		// A quit or a closed window is a close like any other: everything pending is written, and the closing copy is taken.
+		// Staying is the one answer that is not a close, and the main process has to be told so it can call the quit off.
 		const unsubscribeClose = window.spiccioliLedger.onPrepareForClose((door) => {
-			void endSession(door);
+			requestDeparture(
+				() => {
+					void endSession(door);
+				},
+				() => {
+					void window.spiccioliLedger.cancelClose();
+				}
+			);
 		});
 
 		return () => {
 			unsubscribeMenu();
 			unsubscribeClose();
 		};
-	}, [ createWithDialog, endSession, openPath, openWithDialog ]);
+	}, [ createWithDialog, endSession, openPath, openWithDialog, requestDeparture ]);
 
 	const value = useMemo((): LedgerContextValue => {
 		return {

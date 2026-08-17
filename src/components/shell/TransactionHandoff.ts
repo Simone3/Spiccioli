@@ -6,13 +6,16 @@ import type { IsoDate, LedgerId } from 'src/types/LedgerTypes';
 /**
  * How one screen hands its filters to Transactions.
  *
- * **However the screen is reached, it is the same screen.** Arriving from a finished import sets the filters where the user
- * would have set them and changes nothing else: the same ordering, the last page of what they now match, and every control free
- * to be changed or cleared. **An import leaves no trace on the transactions it created** — the filters are an ordinary
- * account-and-period pair, reachable by hand like any other.
+ * **However the screen is reached, it is the same screen.** Arriving from a finished import or from a report cell sets the
+ * filters where the user would have set them and changes nothing else: the same ordering, the last page of what they now match,
+ * and every control free to be changed or cleared. **An import leaves no trace on the transactions it created** — the filters
+ * are an ordinary set, reachable by hand like any other.
+ *
+ * **A filter handed over has to select the rows the figure was made of**, which is why a report's period is set rather than
+ * cleared: the row total is the sum of the columns on screen, so it hands over the whole of what the table is showing.
  *
  * The handoff travels in the router's own location state, which is why it lives beside the routes rather than on either screen:
- * the router is the shell's, and the report of a later phase hands over the same way.
+ * the router is the shell's, and both screens that hand over hand over the same way.
  */
 
 export interface TransactionHandoff {
@@ -21,6 +24,9 @@ export interface TransactionHandoff {
 	// Both ends inclusive, exactly as the period filter is
 	fromDate?: IsoDate;
 	toDate?: IsoDate;
+
+	// One category, which is what a report cell hands over along with the year it covers
+	category?: LedgerId;
 }
 
 /**

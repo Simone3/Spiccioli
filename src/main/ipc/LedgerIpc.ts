@@ -39,6 +39,9 @@ export interface RegisterLedgerIpcHandlersOptions {
 
 	// Called whenever the open file changes, so that the window title follows it
 	onOpenFileChanged: (filePath: string | undefined) => void;
+
+	// Called when the renderer answers a shutdown with a refusal, which is the user choosing to stay with something unwritten
+	onCloseCancelled: () => void;
 }
 
 const LEDGER_EXTENSION_WITHOUT_DOT = LEDGER_FILE_CONFIG.extension.replace(/^\./, '');
@@ -55,7 +58,8 @@ export const registerLedgerIpcHandlers = ({
 	configStore,
 	translator,
 	getWindow,
-	onOpenFileChanged
+	onOpenFileChanged,
+	onCloseCancelled
 }: RegisterLedgerIpcHandlersOptions): void => {
 	const fileFilters = [ {
 		name: translator.t('storage.fileTypeName'),
@@ -143,6 +147,10 @@ export const registerLedgerIpcHandlers = ({
 		onOpenFileChanged(undefined);
 
 		return result;
+	});
+
+	ipcMain.handle(SPICCIOLI_LEDGER_IPC_CHANNELS.cancelClose, () => {
+		onCloseCancelled();
 	});
 
 	ipcMain.handle(SPICCIOLI_LEDGER_IPC_CHANNELS.getBackupDirectory, () => {

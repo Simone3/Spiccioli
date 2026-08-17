@@ -1,9 +1,10 @@
 import 'src/components/shell/Sidebar.css';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import type { ReactElement } from 'react';
 import { APP_ROUTES, SIDEBAR_ENTRIES } from 'src/components/shell/AppRoutes';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter } from 'src/contexts/PreferencesContext';
+import { useUnsavedDraftGuard } from 'src/contexts/UnsavedDraftContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 
 /**
@@ -14,6 +15,9 @@ import { useTranslator } from 'src/i18n/TranslationContext';
  * The save state says *Saved 14:32* in the ordinary case, and **the only other things it ever says are that a write is being
  * retried and that one has failed**. There is no third state and no spinner for the ordinary debounced write, so before anything
  * has been written there is nothing here to read.
+ *
+ * **A screen holding an unwritten draft is left through the guard**, so the link asks before it navigates rather than after: the
+ * router is declarative here and has no blocker of its own, and the sidebar is the only way off a screen.
  */
 
 export interface SidebarProps {
@@ -32,6 +36,8 @@ export const Sidebar = ({ failingCheckCount }: SidebarProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
 	const { saveState } = useLedger();
+	const { requestDeparture } = useUnsavedDraftGuard();
+	const navigate = useNavigate();
 
 	const describeSaveState = (): ReactElement | undefined => {
 		switch(saveState.state) {
@@ -67,6 +73,12 @@ export const Sidebar = ({ failingCheckCount }: SidebarProps): ReactElement => {
 							end={entry.isRoot}
 							className={({ isActive }) => {
 								return isActive ? 'sidebar-link sidebar-link-current' : 'sidebar-link';
+							}}
+							onClick={(event) => {
+								event.preventDefault();
+								requestDeparture(() => {
+									void navigate(entry.route);
+								});
 							}}>
 							<span>{t(entry.labelKey)}</span>
 							{entry.route === APP_ROUTES.checks && failingCheckCount > 0 && (

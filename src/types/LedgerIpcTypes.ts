@@ -133,6 +133,10 @@ export interface SpiccioliLedgerApi {
 	completeUpgrade: (request: UpgradeLedgerRequest) => Promise<LedgerWriteResult>;
 	closeSession: (request: CloseLedgerSessionRequest) => Promise<LedgerBackupResult>;
 
+	// The one answer to "prepare for close" that is not a close: the renderer is holding something unwritten and the user chose
+	// to stay with it. The quit that was asked for is abandoned, and asking again starts it over.
+	cancelClose: () => Promise<void>;
+
 	// Where the open ledger's copies live. Derived from the ledger and never chosen, so the main process is what answers it.
 	getBackupDirectory: () => Promise<string | undefined>;
 

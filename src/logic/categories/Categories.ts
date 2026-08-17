@@ -1,5 +1,5 @@
 import { compareNames } from 'src/logic/accounts/Accounts';
-import type { Category, LedgerId } from 'src/types/LedgerTypes';
+import type { Category, LedgerId, Transaction } from 'src/types/LedgerTypes';
 
 /**
  * Everything pure about the twenty-seven categories: how they are reached and the one order every list of them is in.
@@ -30,4 +30,34 @@ export const sortCategories = (categories: readonly Category[]): Category[] => {
 	return [ ...categories ].sort((first, second) => {
 		return compareNames(first.name, second.name);
 	});
+};
+
+/**
+ * Orders the categories the way the report reads them, which is the stored `order` and is that field's only reader.
+ * The numbering is contiguous and runs down the report's own groups, so sorting on the one field comes out grouped.
+ * @param categories The categories.
+ * @returns The categories, in the report's row order.
+ */
+export const sortCategoriesForReport = (categories: readonly Category[]): Category[] => {
+	return [ ...categories ].sort((first, second) => {
+		return first.order - second.order;
+	});
+};
+
+/**
+ * Counts how many transactions each category holds, which is the live count the list tab shows.
+ * A row with no category is counted under none of them: its existence is a failing check rather than a category of its own.
+ * @param transactions The transactions.
+ * @returns How many transactions each category id holds.
+ */
+export const countTransactionsPerCategory = (transactions: readonly Transaction[]): Map<LedgerId, number> => {
+	const counts = new Map<LedgerId, number>();
+
+	for(const transaction of transactions) {
+		if(transaction.categoryId !== null) {
+			counts.set(transaction.categoryId, (counts.get(transaction.categoryId) ?? 0) + 1);
+		}
+	}
+
+	return counts;
 };

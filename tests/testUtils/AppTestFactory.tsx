@@ -8,6 +8,7 @@ import { writeLedgerDocument } from 'src/logic/ledger/LedgerWriter';
 import type { LedgerDocument } from 'src/types/LedgerTypes';
 import { LedgerProvider } from 'src/contexts/LedgerContext';
 import { PreferencesProvider } from 'src/contexts/PreferencesContext';
+import { UnsavedDraftProvider } from 'src/contexts/UnsavedDraftContext';
 import { TranslationProvider } from 'src/i18n/TranslationContext';
 import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
 import type { SpiccioliDiagnosticsApi, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
@@ -65,6 +66,9 @@ export const stubLedgerBridge = (overrides: Partial<SpiccioliLedgerApi> = {}): S
 		closeSession: () => {
 			return Promise.resolve({ written: false });
 		},
+		cancelClose: () => {
+			return Promise.resolve();
+		},
 		getBackupDirectory: () => {
 			return Promise.resolve('/Documents/finances-backups');
 		},
@@ -104,9 +108,11 @@ const AppTestProviders = ({ children }: { children: ReactNode }): ReactElement =
 	return (
 		<TranslationProvider>
 			<PreferencesProvider>
-				<LedgerProvider>
-					<MemoryRouter>{children}</MemoryRouter>
-				</LedgerProvider>
+				<UnsavedDraftProvider>
+					<LedgerProvider>
+						<MemoryRouter>{children}</MemoryRouter>
+					</LedgerProvider>
+				</UnsavedDraftProvider>
 			</PreferencesProvider>
 		</TranslationProvider>
 	);

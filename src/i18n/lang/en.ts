@@ -91,10 +91,12 @@ export const EN_TRANSLATIONS = {
 		transactionsFiltered: 'No transaction matches these filters.',
 		bulkImport: 'There is no account to import into yet. Add a cash account first, and the import will offer it.',
 		categories: 'Nothing is categorised automatically yet — add a rule, then apply the list and see what it would catch.',
+		report: 'There is nothing to report yet — the table fills in as transactions arrive.',
 		investments: 'Record a purchase to start tracking holdings.',
 		salaries: 'Add the employer, its months per year and its hours per day — everything on the other tab divides by them.',
 		goToAccounts: 'Go to Accounts',
-		goToImport: 'Import a bank export'
+		goToImport: 'Import a bank export',
+		goToTransactions: 'Go to Transactions'
 	},
 
 	// The Accounts screen. An account is written "Institution · Account" everywhere in the application; this screen, the
@@ -411,11 +413,160 @@ export const EN_TRANSLATIONS = {
 		na: 'N/A'
 	},
 
-	// The category picker, and the two entries that are not categories: one on a transaction, one on a filter
+	// The category picker, and the entries that are not categories: one on a transaction, one on a filter, one on a rule
 	categoryPicker: {
 		automatic: 'Automatic (let rules decide)',
 		uncategorised: 'Uncategorised',
-		all: 'All'
+		all: 'All',
+		choose: 'Choose a category'
+	},
+
+	// The three tabs of the Categories screen: the report, the rules that fill it, and the list both are made of
+	categoryTabs: {
+		report: 'Report',
+		rules: 'Rules',
+		list: 'Category list'
+	},
+
+	// The six types a category can be, written the same way wherever one is shown
+	categoryTypes: {
+		income: 'Income',
+		expense: 'Expense',
+		investment: 'Investment',
+		divestment: 'Divestment',
+		internal: 'Internal',
+		revaluation: 'Revaluation'
+	},
+
+	// The category list tab: read-only, alphabetical, and the only place the whole taxonomy is visible at once
+	categoryList: {
+		table: 'Categories',
+		summary: {
+			one: '1 category',
+			other: '{count} categories'
+		},
+		footer: '{categories} · {transactions} categorised',
+		tracked: 'Receipt tracked',
+		columns: {
+			name: 'Category',
+			type: 'Type',
+			receiptTracked: 'Receipt tracked',
+			transactions: 'Transactions'
+		}
+	},
+
+	// The report tab: the categories × years matrix, the one screen that answers where the money goes
+	report: {
+		table: 'Where the money goes, by category and year',
+		range: '{from} – {to}',
+		noYears: 'No year has anything in it yet',
+		partialYear: {
+			one: '1 month so far',
+			other: '{count} months so far'
+		},
+		net: 'Net',
+		openCell: 'Show the {category} transactions of {year}',
+		openTotal: 'Show every {category} transaction in this table',
+		columns: {
+			category: 'Category',
+			total: 'Total'
+		},
+		groups: {
+			income: 'Income',
+			expense: 'Expense',
+			internal: 'Internal',
+			investments: 'Investments'
+		},
+		subtotals: {
+			income: 'Total income',
+			expense: 'Total expense',
+			internal: 'Total internal'
+		},
+		filters: {
+			years: 'Years',
+			account: 'Account',
+			accountAll: 'All'
+		},
+		years: {
+			'last-5': 'Last 5',
+			all: 'All'
+		}
+	},
+
+	// The rules tab: ordered, draggable, numbered, and edited as a session that writes nothing until it is applied
+	rules: {
+		add: 'Add rule',
+		discard: 'Discard changes',
+		table: 'Categorisation rules',
+		summary: {
+			one: '1 rule · first match wins · case and accent insensitive',
+			other: '{count} rules · first match wins · case and accent insensitive'
+		},
+		summaryPending: '{rules} · {pending}',
+		pendingCount: {
+			one: '1 unapplied change',
+			other: '{count} unapplied changes'
+		},
+		footerApplied: '“Applies to” still counts the list as applied',
+		footerPending: '{rules} after these edits · nothing written yet · {applied}',
+		reorder: 'Reorder {rule}',
+		rowMenu: 'What can be done to {rule}',
+		columns: {
+			order: 'Order',
+			position: '#',
+			substring: 'Matches description containing',
+			category: 'Category',
+			appliesTo: 'Applies to'
+		},
+
+		// What a rule is doing that the file does not know about yet
+		marker: {
+			added: 'added',
+			edited: 'edited'
+		},
+
+		// What the drag says out loud, for whoever is moving a rule with the keyboard rather than with a pointer
+		drag: {
+			instructions: 'Press Space to pick a rule up, the arrow keys to move it, Space again to drop it and Escape to leave it where it was.',
+			picked: 'Picked up {rule}. It is rule {position} of {of}.',
+			over: 'Moving {rule} to position {position} of {of}.',
+			dropped: 'Dropped {rule} at position {position} of {of}.',
+			cancelled: 'Left {rule} where it was.'
+		},
+		form: {
+			addTitle: 'Add rule',
+			editTitle: 'Edit rule',
+			subtitle: 'The rule joins the draft. Nothing is written until the list is applied.',
+			substring: 'Matches description containing',
+			substringPlaceholder: 'e.g. ESSELUNGA',
+			substringHint: 'Matched anywhere in the description, ignoring case and accents.',
+			category: 'Category'
+		},
+
+		// What applying the draft would do, as the four figures the confirmation states
+		apply: {
+			action: 'Apply changes',
+			title: 'Apply these changes?',
+			lead: {
+				one: '1 edit in this session. Nothing has been written yet.',
+				other: '{count} edits in this session. Nothing has been written yet.'
+			},
+			changed: 'Change category',
+			lost: 'Lose their category',
+			gained: 'Uncategorised → categorised',
+			unchanged: 'Unchanged',
+			unchangedOf: '{unchanged} of {total}',
+			note: 'Hand-set categories are never touched.',
+			confirm: 'Apply'
+		}
+	},
+
+	// What is said when something on screen has not been written and the user is leaving anyway. There is no *apply* here.
+	unsavedDraft: {
+		title: 'These changes have not been applied',
+		message: 'The rule list has been edited and nothing has been written. Leaving now throws those edits away.',
+		discard: 'Discard changes',
+		stay: 'Stay'
 	},
 
 	// The preferences, which belong to the installation and not to the open file

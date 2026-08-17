@@ -13,6 +13,7 @@ export const SPICCIOLI_LEDGER_IPC_CHANNELS = {
 	writePreUpgradeBackup: 'spiccioli:ledger:write-pre-upgrade-backup',
 	completeUpgrade: 'spiccioli:ledger:complete-upgrade',
 	closeSession: 'spiccioli:ledger:close-session',
+	cancelClose: 'spiccioli:ledger:cancel-close',
 	getBackupDirectory: 'spiccioli:ledger:get-backup-directory',
 	getRecentFiles: 'spiccioli:ledger:get-recent-files',
 	dismissRecentFile: 'spiccioli:ledger:dismiss-recent-file',

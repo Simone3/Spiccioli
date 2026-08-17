@@ -1,0 +1,165 @@
+
+/* An amount carries the sign and the colour of the transactions behind it, exactly as it does on Transactions */
+.categories-screen-positive {
+	color: var(--colors-positive-text);
+}
+
+.categories-screen-negative {
+	color: var(--colors-danger-text);
+}
+
+/* A zero is a figure and not an absence, so it is stated quietly rather than coloured either way */
+.categories-screen-nothing {
+	color: var(--colors-text-secondary);
+}
+
+.categories-screen-tracked {
+	color: var(--colors-positive-text);
+}
+
+/* The report: the row heading column reads like a cell rather than like a heading, the group lines break the table up */
+.categories-screen-report tbody th {
+	padding: 7px 10px;
+	border-bottom: 1px solid var(--colors-border-subtle);
+	font-weight: 400;
+	text-align: left;
+	white-space: nowrap;
+}
+
+.categories-screen-report-group th {
+	padding-top: 18px;
+	font-size: 11px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--colors-text-secondary);
+}
+
+.categories-screen-report-subtotal td,
+.categories-screen-report-subtotal th {
+	border-top: 1px solid var(--colors-border-strong);
+	font-weight: 700;
+}
+
+/* The line the table exists to produce */
+.categories-screen-report-net td,
+.categories-screen-report-net th {
+	border-top: 1px solid var(--colors-accent-primary);
+	border-bottom: 1px solid var(--colors-accent-primary);
+	font-size: 14px;
+	font-weight: 700;
+}
+
+.categories-screen-partial {
+	display: block;
+	font-size: 10px;
+	font-weight: 400;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--colors-text-secondary);
+}
+
+/* Every figure in a category row is a link into Transactions. It is a real button, so it draws the one focus ring. */
+.categories-screen-link {
+	padding: 0;
+	background: none;
+	border: none;
+	border-radius: 3px;
+	font: inherit;
+	font-variant-numeric: tabular-nums;
+	color: inherit;
+	text-decoration: underline;
+	text-decoration-color: var(--colors-border-strong);
+	text-underline-offset: 3px;
+	cursor: pointer;
+}
+
+.categories-screen-link:hover {
+	text-decoration-color: currentcolor;
+}
+
+/* The rules: the handle, the position, and what a draft says about a row */
+.categories-screen-handle {
+	padding: 0 4px;
+	background: none;
+	border: none;
+	border-radius: 3px;
+	font: inherit;
+	font-size: 15px;
+	line-height: 1;
+	color: var(--colors-text-secondary);
+	cursor: grab;
+	touch-action: none;
+}
+
+.categories-screen-handle:hover {
+	color: var(--colors-text-primary);
+}
+
+.categories-screen-handle:active {
+	cursor: grabbing;
+}
+
+/* The column the handle sits in is a control rather than a word, so its heading is read and not shown */
+.categories-screen-handle-header {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.categories-screen-rule-number {
+	color: var(--colors-text-secondary);
+}
+
+.categories-screen-rule-dragging td {
+	background-color: var(--colors-interactive-active-background);
+}
+
+.categories-screen-marker {
+	margin-left: 8px;
+}
+
+/* The counts describe the applied list, so while a draft is pending they are stated as being about something else */
+.categories-screen-stale {
+	color: var(--colors-disabled);
+}
+
+/* The consequence summary: four figures, and the one sentence about what is never touched */
+.categories-screen-apply-lead {
+	margin: 0 0 14px;
+}
+
+.categories-screen-apply-figures {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 0;
+	padding: 14px 0;
+	border-top: 1px solid var(--colors-border-subtle);
+	border-bottom: 1px solid var(--colors-border-subtle);
+}
+
+.categories-screen-apply-figure {
+	display: flex;
+	gap: 16px;
+	align-items: baseline;
+	justify-content: space-between;
+}
+
+.categories-screen-apply-figure dt {
+	color: var(--colors-text-secondary);
+}
+
+.categories-screen-apply-figure dd {
+	margin: 0;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.categories-screen-apply-note {
+	margin: 14px 0 0;
+	font-size: 12px;
+	color: var(--colors-text-secondary);
+}

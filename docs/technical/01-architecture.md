@@ -22,7 +22,7 @@ Three groups of channels, and they all follow one pattern: the names in `src/typ
 | Group | Files | Role |
 | --- | --- | --- |
 | App info | `src/types/AppInfoIpcChannels.ts` `AppInfoTypes.ts`, `src/main/ipc/AppInfoIpc.ts` | Which build the renderer is part of |
-| The ledger | `src/types/LedgerIpcChannels.ts` `LedgerIpcTypes.ts`, `src/main/ipc/LedgerIpc.ts` | Everything about the file: the two dialogs, reading, creating, saving, the copies, where the copies live, the recent list, the preferences |
+| The ledger | `src/types/LedgerIpcChannels.ts` `LedgerIpcTypes.ts`, `src/main/ipc/LedgerIpc.ts` | Everything about the file: the two dialogs, reading, creating, saving, the copies, where the copies live, the recent list, the preferences, and the one answer to a shutdown that is not a close |
 | Diagnostics | `src/types/LedgerIpcChannels.ts`, `src/main/ipc/DiagnosticsIpc.ts` | The renderer's failures, written into the operational log by the process that owns it |
 
 `src/main/preload/Preload.ts` publishes them as `window.spiccioliAppInfo`, `window.spiccioliLedger` and `window.spiccioliDiagnostics`, and `src/vite-env.d.ts` tells TypeScript what `window` carries.
@@ -38,9 +38,10 @@ src/index.tsx                    mounts React, in StrictMode
   └── TranslationProvider        the translator every component reads wording from (§5)
       └── AppErrorBoundary       catches a render failure so the window is never left empty
           └── PreferencesProvider  the ten preferences, which are not in the ledger (§10 of the analysis)
-              └── LedgerProvider   the open file: the document, the save state, the storage lines
-                  └── HashRouter   the one router, installed once, over a hash history
-                      └── SpiccioliApp the launch screen, or the shell around one of the screens
+              └── UnsavedDraftProvider  the guard every departure goes through, above the file because closing it is one
+                  └── LedgerProvider   the open file: the document, the save state, the storage lines
+                      └── HashRouter   the one router, installed once, over a hash history
+                          └── SpiccioliApp the launch screen, or the shell around one of the screens
 ```
 
 `AppErrorBoundary` wraps everything below the translator rather than one screen, so a failure inside a context provider is caught too. Its recovery is a reload: rendering the same tree again would usually throw the same error a second time, while a reload starts over from what is on disk.
@@ -50,6 +51,8 @@ The failure goes to the operational log over `window.spiccioliDiagnostics`, beca
 `LedgerProvider` is where the model lives. It reads the file the main process hands it, writes the text the main process puts on disk, debounces the autosave, and owns the three things [§12](../functional/specs/12-storage.md) puts on screen — the save state, the line while a failed write is being retried and the blocking message after the fifth attempt, and the line saying something else changed the file.
 
 `PreferencesProvider` carries a second thing besides the preferences: `useFormatter`, the reading of them that turns a stored figure or a day into what [§10](../functional/specs/10-settings.md) says it looks like. A screen never reads a separator or a date format itself, which is what makes changing a preference re-render every figure in the same pass.
+
+`UnsavedDraftProvider` sits **above** `LedgerProvider`, because two of the three departures it guards are the file's: **the rule list of [§6.2](../functional/specs/06-categories.md#62-rules) is the one thing on screen that is not in the file**, so leaving the screen, closing the file and quitting all ask first, and each offers discard and stay and nothing else. A screen holding a draft registers it, the sidebar routes its links through the guard because the router is declarative and has no blocker of its own, and a quit that is stayed is called off in the main process over `cancelClose` — the only answer to *prepare for close* that is not a close.
 
 **The router is installed once, at the root, and the launch screen is not a route.** `SpiccioliApp` is still the two states — no file, or one open — and the routes live inside the shell, so a file that is not open has no screen to be on. `AppShell` sends the shell back to Portfolio whenever the open file changes, because which screen was last looked at is not remembered ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)).
 

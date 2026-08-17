@@ -44,6 +44,9 @@ const spiccioliLedger: SpiccioliLedgerApi = {
 	closeSession: (request) => {
 		return ipcRenderer.invoke(SPICCIOLI_LEDGER_IPC_CHANNELS.closeSession, request);
 	},
+	cancelClose: () => {
+		return ipcRenderer.invoke(SPICCIOLI_LEDGER_IPC_CHANNELS.cancelClose);
+	},
 	getBackupDirectory: () => {
 		return ipcRenderer.invoke(SPICCIOLI_LEDGER_IPC_CHANNELS.getBackupDirectory);
 	},

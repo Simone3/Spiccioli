@@ -20,6 +20,10 @@ export interface ConfirmDialogProps {
 	message: ReactNode;
 
 	confirmLabel: string;
+
+	// What the cancelling button says, where "Cancel" is not what staying is called: the unsaved-draft prompt says *Stay*
+	cancelLabel?: string;
+
 	onConfirm: () => void;
 	onCancel: () => void;
 
@@ -33,12 +37,13 @@ export interface ConfirmDialogProps {
  * @param props.title What it is about.
  * @param props.message What is about to happen.
  * @param props.confirmLabel What the confirming button says.
+ * @param props.cancelLabel What the cancelling button says, where it is not called cancelling.
  * @param props.onConfirm What confirming does.
  * @param props.onCancel What cancelling does, which is also what Escape does.
  * @param props.danger Whether what is about to happen is a delete.
  * @returns The dialog.
  */
-export const ConfirmDialog = ({ title, message, confirmLabel, onConfirm, onCancel, danger = false }: ConfirmDialogProps): ReactElement => {
+export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, onConfirm, onCancel, danger = false }: ConfirmDialogProps): ReactElement => {
 	const { t } = useTranslator();
 	const titleId = useId();
 	const cancelRef = useRef<HTMLDivElement>(null);
@@ -61,7 +66,7 @@ export const ConfirmDialog = ({ title, message, confirmLabel, onConfirm, onCance
 				<div className='confirm-dialog-message'>{message}</div>
 				<div className='confirm-dialog-actions'>
 					<div ref={cancelRef}>
-						<AppButton onClick={onCancel}>{t('dialog.cancel')}</AppButton>
+						<AppButton onClick={onCancel}>{cancelLabel ?? t('dialog.cancel')}</AppButton>
 					</div>
 					<AppButton variant={danger ? 'danger' : 'primary'} onClick={onConfirm}>{confirmLabel}</AppButton>
 				</div>
