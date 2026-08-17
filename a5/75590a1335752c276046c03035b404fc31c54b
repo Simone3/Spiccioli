@@ -1,0 +1,32 @@
+docs/technical/01-architecture.md
+  s_d09ebb21d6372d::t_84bf1a3264bee1 43
+docs/technical/04-framework.md
+  s_d09ebb21d6372d::t_0265ca6ceb2945 57-58
+docs/technical/08-implementation-plan-why.md
+  s_d09ebb21d6372d::t_955d340bf3c681 5,28
+docs/technical/08-implementation-plan.md
+  s_d09ebb21d6372d::t_c3e07018fe3514 25,42,83-126,181,253,292,302
+docs/technical/README.md
+  s_d09ebb21d6372d::t_ef250ac5ac160b 40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "a575590a1335752c276046c03035b404fc31c54b",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d09ebb21d6372d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "098ee31c-e588-4efe-bb11-5b53ceb77cef",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
