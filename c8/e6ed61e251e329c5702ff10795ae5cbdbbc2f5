@@ -1,0 +1,86 @@
+src/components/common/PieChart.css
+  s_2d6ad024d96859::t_8f622640500f59 1-33
+src/components/common/PieChart.tsx
+  s_2d6ad024d96859::t_f2551ed5aa4fb9 1-96
+src/components/portfolio/GainsAndCostsCard.tsx
+  s_2d6ad024d96859::t_41c29a9c3d4142 1-82
+src/components/portfolio/NetWorthCard.tsx
+  s_2d6ad024d96859::t_63347e3cbe5b88 1-72
+src/index.css
+  s_2d6ad024d96859::t_89086cc9a79818 48-63
+src/logic/checks/CheckDates.ts
+  s_2d6ad024d96859::t_ec60642e483042 5,66-76,85
+src/logic/investments/Securities.ts
+  s_2d6ad024d96859::t_b64f86d10160cf 152-198
+src/logic/portfolio/NetWorth.ts
+  s_2d6ad024d96859::t_7a237e435cbe47 1-260
+CLAUDE.md
+  s_2d6ad024d96859::t_525fb8a7573970 9,49,79
+docs/technical/02-repository-map.md
+  s_2d6ad024d96859::t_78bf8453e58fde 60,80,95-99
+docs/technical/06-styling.md
+  s_2d6ad024d96859::t_6f0c38acae2526 31,37-39
+docs/technical/07-testing.md
+  s_2d6ad024d96859::t_ff92e8f41095d9 39
+docs/technical/08-implementation-plan.md
+  s_2d6ad024d96859::t_0231618320bff5 9,317,324,328,349-351,354-356
+src/components/common/HintNote.css
+  s_2d6ad024d96859::t_6653cdb291630e 1-61
+src/components/common/HintNote.tsx
+  s_2d6ad024d96859::t_198321ad3947e5 1-45
+src/components/portfolio/AccountBalancesTable.tsx
+  s_2d6ad024d96859::t_b969b77b624e0a 1-118
+src/components/portfolio/NetWorthChart.tsx
+  s_2d6ad024d96859::t_f18359414cb674 1-92
+src/components/portfolio/PortfolioScreen.css
+  s_2d6ad024d96859::t_d49ca5420be73e 1-214
+src/components/portfolio/PortfolioScreen.tsx
+  s_2d6ad024d96859::t_926cb99559e9a4 1-3,6-10,12-13,16-22,27-36,40-41,43,45-68,71-107
+src/components/portfolio/TypeBreakdownCard.tsx
+  s_2d6ad024d96859::t_ec06547251a17b 1-80
+src/i18n/lang/en.ts
+  s_2d6ad024d96859::t_a433221fb94573 81,108-193
+src/logic/investments/Holdings.ts
+  s_2d6ad024d96859::t_05a179d3dff8a0 14,118-144,212-215,217,220,223-227,229,292-329,367-373,390-398
+src/logic/portfolio/GainsAndCosts.ts
+  s_2d6ad024d96859::t_4765321829a3d3 1-97
+src/logic/portfolio/NetWorthSeries.ts
+  s_2d6ad024d96859::t_9a8afafea4a06d 1-249
+src/logic/portfolio/TypeBreakdown.ts
+  s_2d6ad024d96859::t_552374e1bd1adc 1-147
+tests/components/LineChart.test.tsx
+  s_2d6ad024d96859::t_e86b4c38b5417c 3,10,24
+tests/components/PieChart.test.tsx
+  s_2d6ad024d96859::t_e4e91fd4a10126 1-46
+tests/components/PortfolioScreen.test.tsx
+  s_2d6ad024d96859::t_ec34b16190f7d0 1-135
+tests/logic/NetWorth.test.ts
+  s_2d6ad024d96859::t_b20b9bcf2f880d 1-328
+tests/logic/NetWorthSeries.test.ts
+  s_2d6ad024d96859::t_d764d8badf12a9 1-204
+tests/testUtils/ChartTestFactory.ts
+  s_2d6ad024d96859::t_df0bc131b61351 1-45
+tests/testUtils/index.ts
+  s_2d6ad024d96859::t_11bf51b312a6b0 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c8e6ed61e251e329c5702ff10795ae5cbdbbc2f5",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_2d6ad024d96859": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61ba9cae-2a64-4c2c-82ac-f7621b3c27fb",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
