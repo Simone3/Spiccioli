@@ -5,7 +5,7 @@ import { SPICCIOLI_DIAGNOSTICS_IPC_CHANNELS, SPICCIOLI_LEDGER_IPC_CHANNELS, SPIC
 import { SPICCIOLI_PRICES_IPC_CHANNELS } from 'src/types/PriceIpcChannels';
 import type { SpiccioliAppInfoApi } from 'src/types/AppInfoTypes';
 import type { SpiccioliDiagnosticsApi, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
-import type { SpiccioliPricesApi } from 'src/types/PriceIpcTypes';
+import type { PricePassProgress, SpiccioliPricesApi } from 'src/types/PriceIpcTypes';
 
 const spiccioliAppInfo: SpiccioliAppInfoApi = {
 	getAppInfo: () => {
@@ -86,6 +86,20 @@ const spiccioliPrices: SpiccioliPricesApi = {
 	},
 	reportPricesWritten: (report) => {
 		return ipcRenderer.invoke(SPICCIOLI_PRICES_IPC_CHANNELS.reportPricesWritten, report);
+	},
+
+	// The listener is handed the progress and never the event it arrived on: nothing of Electron's crosses the bridge. What comes
+	// back removes it again, so a pass leaves no listener behind it.
+	onPassProgress: (listener) => {
+		const handler = (_event: unknown, progress: PricePassProgress): void => {
+			listener(progress);
+		};
+
+		ipcRenderer.on(SPICCIOLI_PRICES_IPC_CHANNELS.passProgress, handler);
+
+		return () => {
+			ipcRenderer.removeListener(SPICCIOLI_PRICES_IPC_CHANNELS.passProgress, handler);
+		};
 	}
 };
 

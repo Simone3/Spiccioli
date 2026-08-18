@@ -226,6 +226,65 @@ export const writePrice = (prices: readonly Price[], price: Price): Price[] => {
 	return [ ...kept, price ];
 };
 
+// The pair a price is keyed by in the file: one price per security per day, and the reader refuses a second for either
+const toPriceKey = (securityId: LedgerId, date: IsoDate): string => {
+	return `${securityId}\t${date}`;
+};
+
+/**
+ * Indexes every price by the security and day it belongs to.
+ *
+ * **This is what makes a whole history cheap to read against.** Asking what each of four thousand days currently holds by
+ * scanning the file's prices for each of them is the same work four thousand times over; asked of a map built once, it is four
+ * thousand lookups.
+ * @param prices Every price in the file.
+ * @returns The prices, by security and day.
+ */
+export const indexPricesByDay = (prices: readonly Price[]): Map<string, Price> => {
+	const byDay = new Map<string, Price>();
+
+	for(const price of prices) {
+		byDay.set(toPriceKey(price.securityId, price.date), price);
+	}
+
+	return byDay;
+};
+
+/**
+ * Finds what a security's given day holds, out of an index rather than out of the file.
+ * @param byDay The index.
+ * @param securityId The security.
+ * @param date The day.
+ * @returns The price that day holds, or undefined when it holds none.
+ */
+export const priceOnDayIndexed = (byDay: ReadonlyMap<string, Price>, securityId: LedgerId, date: IsoDate): Price | undefined => {
+	return byDay.get(toPriceKey(securityId, date));
+};
+
+/**
+ * Writes many prices into the history at once, each replacing whatever its own day already held.
+ *
+ * **The same rule as one price, applied to thousands of them without the cost of doing it thousands of times**: writing a
+ * confirmed history one record at a time would re-read the whole history for every day of it. The records are laid over an index
+ * of what is there, so a pass costs one walk of the file and one of the pass.
+ * @param prices Every price in the file.
+ * @param records The prices being recorded, later ones winning where two name one day.
+ * @returns The prices, with each of those days holding its record.
+ */
+export const writePrices = (prices: readonly Price[], records: readonly Price[]): Price[] => {
+	if(records.length === 0) {
+		return [ ...prices ];
+	}
+
+	const written = indexPricesByDay(prices);
+
+	for(const record of records) {
+		written.set(toPriceKey(record.securityId, record.date), record);
+	}
+
+	return [ ...written.values() ];
+};
+
 /**
  * Says whether a price has aged past the threshold the preferences hold.
  *

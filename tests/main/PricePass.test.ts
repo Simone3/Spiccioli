@@ -1,5 +1,5 @@
 import { runPricePass } from 'src/main/prices/PricePass';
-import type { PriceListing, PriceProvider, ProviderQuoteResult } from 'src/main/prices/PriceProvider';
+import type { PriceListing, PriceProvider, PriceSpan, ProviderQuoteResult } from 'src/main/prices/PriceProvider';
 import type { PriceListingRequest } from 'src/types/PriceIpcTypes';
 
 /**
@@ -9,14 +9,19 @@ import type { PriceListingRequest } from 'src/types/PriceIpcTypes';
 
 const YESTERDAY = '2020-01-02';
 
-const listing = (securityId: string, ticker: string): PriceListingRequest => {
-	return { securityId, ticker, exchange: 'milan' };
+const listing = (securityId: string, ticker: string, from: string | null = null): PriceListingRequest => {
+	return { securityId, ticker, exchange: 'milan', from };
 };
 
-const providerAnswering = (answers: Record<string, ProviderQuoteResult>, asked: PriceListing[] = []): PriceProvider => {
+const providerAnswering = (
+	answers: Record<string, ProviderQuoteResult>,
+	asked: PriceListing[] = [],
+	spans: PriceSpan[] = []
+): PriceProvider => {
 	return {
-		fetchQuote: (given) => {
+		fetchQuotes: (given, span) => {
 			asked.push(given);
+			spans.push(span);
 
 			return Promise.resolve(answers[given.ticker] ?? { outcome: 'no-quote' });
 		}
@@ -24,7 +29,11 @@ const providerAnswering = (answers: Record<string, ProviderQuoteResult>, asked: 
 };
 
 const quoteOf = (price: number, date: string, currency: string | null = 'EUR'): ProviderQuoteResult => {
-	return { outcome: 'quote', quote: { price, date, currency } };
+	return { outcome: 'quotes', days: [ { price, date } ], blankDays: 0, currency };
+};
+
+const seriesOf = (days: { price: number; date: string }[], blankDays = 0): ProviderQuoteResult => {
+	return { outcome: 'quotes', days, blankDays, currency: 'EUR' };
 };
 
 const noDelay = (): Promise<void> => {
@@ -81,7 +90,7 @@ describe('a price pass', () => {
 		});
 
 		expect(result.outcomes).toEqual([
-			{ outcome: 'quoted', securityId: 'swda', value: 923100, date: YESTERDAY },
+			{ outcome: 'quoted', securityId: 'swda', days: [ { value: 923100, date: YESTERDAY } ], droppedCount: 0 },
 			{ outcome: 'refused', securityId: 'phau', refusal: 'not-euro', currency: 'USD' },
 			{ outcome: 'no-quote', securityId: 'eimi' },
 			{ outcome: 'failed', securityId: 'vwce', message: 'getaddrinfo ENOTFOUND' }
@@ -90,7 +99,7 @@ describe('a price pass', () => {
 
 	test('lets one listing fail without taking the pass down', async() => {
 		const provider: PriceProvider = {
-			fetchQuote: (given) => {
+			fetchQuotes: (given) => {
 				return Promise.resolve(given.ticker === 'BAD' ?
 					{ outcome: 'failed', message: 'Connection refused' } :
 					quoteOf(10, YESTERDAY));
@@ -127,5 +136,48 @@ describe('a price pass', () => {
 
 		expect((await runPricePass({ provider: silent, listings: [], delay: noDelay })).referenceDate).toBeNull();
 		expect((await runPricePass({ provider: speaking, listings: [], delay: noDelay })).referenceDate).toBe('2026-08-08');
+	});
+
+	test('asks each listing for the span it carries, a listing with none wanting the latest quote alone', async() => {
+		const spans: PriceSpan[] = [];
+		const provider = providerAnswering({ SWDA: quoteOf(10, YESTERDAY), VWCE: quoteOf(11, YESTERDAY) }, [], spans);
+
+		await runPricePass({
+			provider,
+			listings: [ listing('swda', 'SWDA'), listing('vwce', 'VWCE', '2019-06-01') ],
+			delay: noDelay
+		});
+
+		expect(spans).toEqual([ { kind: 'latest' }, { kind: 'since', from: '2019-06-01' } ]);
+	});
+
+	test('brings a whole series back under one outcome, with what it dropped counted beside it', async() => {
+		const provider = providerAnswering({
+			SWDA: seriesOf([ { price: 10, date: '2020-01-01' }, { price: 11, date: YESTERDAY } ], 2)
+		});
+		const result = await runPricePass({ provider, listings: [ listing('swda', 'SWDA', '2020-01-01') ], delay: noDelay });
+
+		expect(result.outcomes).toEqual([ {
+			outcome: 'quoted',
+			securityId: 'swda',
+			days: [ { value: 100000, date: '2020-01-01' }, { value: 110000, date: YESTERDAY } ],
+			droppedCount: 2
+		} ]);
+	});
+
+	test('says how far it has got, once per listing answered and in the order they were asked', async() => {
+		const provider = providerAnswering({ SWDA: quoteOf(10, YESTERDAY), VWCE: quoteOf(11, YESTERDAY) });
+		const reported: string[] = [];
+
+		await runPricePass({
+			provider,
+			listings: [ listing('swda', 'SWDA'), listing('vwce', 'VWCE') ],
+			delay: noDelay,
+			onProgress: (progress) => {
+				reported.push(`${progress.done}/${progress.total} ${progress.ticker}`);
+			}
+		});
+
+		expect(reported).toEqual([ '1/2 SWDA', '2/2 VWCE' ]);
 	});
 });

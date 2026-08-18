@@ -44,6 +44,13 @@ export const stubPricesBridge = (overrides: Partial<SpiccioliPricesApi> = {}): S
 		reportPricesWritten: () => {
 			return Promise.resolve();
 		},
+
+		// Nothing is pushed at a test that did not ask to be told, and removing the listener is what the screen calls either way
+		onPassProgress: () => {
+			return () => {
+				// Nothing was listening
+			};
+		},
 		...overrides
 	};
 

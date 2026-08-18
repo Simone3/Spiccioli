@@ -96,6 +96,9 @@ export const DIAGNOSTICS_CONFIG = {
 export const PRICES_CONFIG = {
 	requestSpacingMs: 400,
 	requestTimeoutMs: 10000,
+
+	// A span of years comes back as one response of several thousand days, so it is given longer than a single quote is
+	historyRequestTimeoutMs: 30000,
 	maximumFailureMessageLength: 200,
 	maximumCurrencyCodeLength: 12
 } as const;

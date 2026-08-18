@@ -34,10 +34,10 @@ Every non-generated file in the repository and what it is for. Generated folders
 | `ipc/DiagnosticsIpc.ts` | The renderer's failures, written into the operational log with each text truncated |
 | `ipc/PricesIpc.ts` | The one press that reaches the network, and the line the renderer sends back saying what the confirmation wrote |
 | `menu/AppMenu.ts` | The File menu of four actions and the About item ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)), as a template a test can read |
-| `prices/PriceProvider.ts` | What everything above the adapter sees: a listing in, and a quote or a reason out |
-| `prices/YahooPriceProvider.ts` | **The one place that knows Yahoo** — the suffix table, the `v8/finance/chart` request, and the parse of the three fields a quote is made of |
-| `prices/PriceQuoteReview.ts` | The four refusals of [§7.6](../functional/specs/07-investments.md#76-prices), applied to a quote before the user ever sees it |
-| `prices/PricePass.ts` | One press, end to end: one paced request per security, each failing on its own, and the three log entries D14 fixes |
+| `prices/PriceProvider.ts` | What everything above the adapter sees: a listing and a span in, and the days it carries or a reason out |
+| `prices/YahooPriceProvider.ts` | **The one place that knows Yahoo** — the suffix table, the `v8/finance/chart` request in both its shapes, and the parse of the live quote and of the daily bars |
+| `prices/PriceQuoteReview.ts` | The four refusals of [§7.6](../functional/specs/07-investments.md#76-prices), applied before the user ever sees a figure — the currency to a whole response, the date and the value to each day of it |
+| `prices/PricePass.ts` | One press, end to end: one paced request per security over the span it carries, each failing on its own, the progress it reports as it goes, and the three log entries D14 fixes |
 | `preload/Preload.ts` | The context bridge: what the renderer is allowed to call |
 | `storage/LedgerSession.ts` | The one open ledger: which file, where its copies live, what its bytes hashed to, whether anything was written — and every storage entry in the log |
 | `storage/LedgerBackupNaming.ts` | Where a ledger's copies live, what one is called, and how to recognise one |

@@ -11,7 +11,7 @@ import {
 	stubPricesBridge
 } from '../testUtils';
 import type { LedgerDocument, Trade } from 'src/types/LedgerTypes';
-import type { PriceFetchOutcome } from 'src/types/PriceIpcTypes';
+import type { PriceFetchOutcome, PriceListingRequest } from 'src/types/PriceIpcTypes';
 
 const UNITS = 10000;
 const QUANTITY_UNITS = 1000000;
@@ -251,9 +251,10 @@ describe('the Investments screen', () => {
 			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ],
 			prices: [ makePrice({ securityId: 'swda', date: '2026-08-07', value: 90 * UNITS, source: 'manual' }) ]
 		}));
-		stubPricesBridge({ updatePrices: quotedWith([ { outcome: 'quoted', securityId: 'swda', value: 923100, date: '2026-08-07' } ]) });
+		stubPricesBridge({ updatePrices: quotedWith([ { outcome: 'quoted', securityId: 'swda', days: [ { value: 923100, date: '2026-08-07' } ], droppedCount: 0 } ]) });
 
 		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
+		await userEvent.click(await screen.findByRole('button', { name: 'Just the latest quote' }));
 
 		const panel = await screen.findByRole('dialog', { name: 'Prices fetched — nothing written yet' });
 
@@ -278,14 +279,73 @@ describe('the Investments screen', () => {
 		expect(within(screen.getByRole('table', { name: 'Price history' })).getByText('fetched')).toBeInTheDocument();
 	});
 
+	test('fills a history in, reporting the days it fetched and writing every one of them', async() => {
+		await openInvestments(withRecords({
+			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ],
+			prices: [ makePrice({ securityId: 'swda', date: '2026-08-05', value: 90 * UNITS, source: 'manual' }) ]
+		}));
+
+		const asked: PriceListingRequest[][] = [];
+
+		stubPricesBridge({
+			updatePrices: (listings) => {
+				asked.push(listings);
+
+				return Promise.resolve({
+					referenceDate: null,
+					outcomes: [ {
+						outcome: 'quoted',
+						securityId: 'swda',
+						days: [
+							{ value: 91 * UNITS, date: '2026-08-06' },
+							{ value: 92 * UNITS, date: '2026-08-07' },
+							{ value: 923100, date: '2026-08-08' }
+						],
+						droppedCount: 2
+					} ]
+				});
+			}
+		});
+
+		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
+		await userEvent.click(await screen.findByRole('button', { name: 'Every day since the last price' }));
+
+		// The day after the one price the file holds, worked out per security before anything left the machine
+		expect(asked[0][0].from).toBe('2026-08-06');
+
+		const panel = await screen.findByRole('dialog', { name: 'Prices fetched — nothing written yet' });
+
+		// The row still leads with the newest quote, and says how many days came with it
+		expect(within(panel).getByText('€ 92,3100')).toBeInTheDocument();
+		expect(within(panel).getByText('08/08/2026')).toBeInTheDocument();
+		expect(within(panel).getByRole('columnheader', { name: 'Days fetched' })).toBeInTheDocument();
+		expect(within(panel).getByText(/2 days dropped/)).toBeInTheDocument();
+
+		await userEvent.click(within(panel).getByRole('button', { name: 'Write 3 prices' }));
+
+		expect(screen.getByRole('status')).toHaveTextContent('3 prices written.');
+
+		// Every day of the series is in the history, beside the hand-typed one it did not reach back to
+		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Show the price history of SWDA' }));
+
+		const history = screen.getByRole('table', { name: 'Price history' });
+
+		// The four days the security now holds, plus the header and the footer the table draws around them
+		expect(within(history).getAllByRole('row')).toHaveLength(6);
+		expect(within(history).getAllByText('fetched')).toHaveLength(3);
+		expect(within(history).getByText('manual')).toBeInTheDocument();
+	});
+
 	test('cancels a pass and leaves every price the file had standing', async() => {
 		await openInvestments(withRecords({
 			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ],
 			prices: [ makePrice({ securityId: 'swda', date: '2026-08-07', value: 90 * UNITS }) ]
 		}));
-		stubPricesBridge({ updatePrices: quotedWith([ { outcome: 'quoted', securityId: 'swda', value: 923100, date: '2026-08-07' } ]) });
+		stubPricesBridge({ updatePrices: quotedWith([ { outcome: 'quoted', securityId: 'swda', days: [ { value: 923100, date: '2026-08-07' } ], droppedCount: 0 } ]) });
 
 		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
+		await userEvent.click(await screen.findByRole('button', { name: 'Just the latest quote' }));
 		await userEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Cancel' }));
 
 		expect(screen.getByRole('status')).toHaveTextContent('Nothing was written.');
@@ -301,6 +361,7 @@ describe('the Investments screen', () => {
 		});
 
 		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
+		await userEvent.click(await screen.findByRole('button', { name: 'Just the latest quote' }));
 
 		const panel = await screen.findByRole('dialog', { name: 'Prices fetched — nothing written yet' });
 

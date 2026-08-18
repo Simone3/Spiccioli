@@ -980,7 +980,7 @@ export const EN_TRANSLATIONS = {
 
 		// Said beside the button, and again in the panel — the moment the user sees what a request brought back is the moment the
 		// question of what it took occurs to them
-		whatLeaves: 'The only thing in Spiccioli that contacts the network. It sends each security’s ticker and exchange to {provider}, and nothing else: never the ISIN, never an amount, a quantity or an account.',
+		whatLeaves: 'The only thing in Spiccioli that contacts the network. It sends each security’s ticker and exchange to {provider} — and, when fetching a history, the day to start from — and nothing else: never the ISIN, never an amount, a quantity or an account.',
 		title: 'Prices fetched — nothing written yet',
 		subtitle: '{securities} asked for',
 		subtitleWithReference: '{securities} asked for · provider reference date {date}',
@@ -988,12 +988,18 @@ export const EN_TRANSLATIONS = {
 			one: '1 security',
 			other: '{count} securities'
 		},
+		securityCountForHistory: {
+			one: '1 security, every day since its last price',
+			other: '{count} securities, every day since their last price'
+		},
 		table: 'Prices fetched',
 		columns: {
 			security: 'Security',
 			quote: 'Quote',
 			quoteDate: 'Quote is for',
-			holds: 'That day currently holds'
+			holds: 'That day currently holds',
+			days: 'Days fetched',
+			replaces: 'Days already priced'
 		},
 		newDay: 'nothing — a new day',
 		footer: '{written} · {replaced} · {quoted}',
@@ -1012,6 +1018,24 @@ export const EN_TRANSLATIONS = {
 		},
 		quotedOnOneDay: 'all quoted {date}',
 		quotedOverSeveralDays: 'quoted over several days',
+		droppedNone: 'every day the provider carried was usable',
+		dropped: {
+			one: '1 day dropped — no figure, or one that could not be written',
+			other: '{count} days dropped — no figure, or one that could not be written'
+		},
+
+		// The one question the button puts, and the two answers it takes
+		span: {
+			title: 'Update prices — how far back?',
+			subtitle: 'The answer covers every security in the file.',
+			latest: 'Just the latest quote',
+			latestNote: 'One figure per security, whatever day the provider has it for. This is what keeps an open file current.',
+			history: 'Every day since the last price',
+			historyNote: 'Each security from the day after its most recent price, or from its first purchase where it has none, through to today. This is what fills a history in — it asks for years of days at a time and takes considerably longer.'
+		},
+
+		// How far the running pass has got, which a pass over a whole file is slow enough to need
+		progress: '{done} of {total} asked · {ticker}',
 		problems: 'Nothing to write for these — they keep the prices they have',
 		reasons: {
 			noQuote: 'the provider has no quote for it',

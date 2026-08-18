@@ -14,6 +14,7 @@ import { TradeFiltersBar } from 'src/components/investments/TradeFilters';
 import { TradeForm, type TradeFormValues } from 'src/components/investments/TradeForm';
 import { TradesTable } from 'src/components/investments/TradesTable';
 import { UpdatePricesPanel } from 'src/components/investments/UpdatePricesPanel';
+import { UpdatePricesSpanDialog } from 'src/components/investments/UpdatePricesSpanDialog';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
 import { useInvestmentsHandoff } from 'src/components/shell/RecordLinks';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
@@ -36,6 +37,7 @@ import {
 	reviewPricePass,
 	toFetchedPrices,
 	toPriceListings,
+	type PricePassSpan,
 	type PriceUpdateReview
 } from 'src/logic/investments/PriceUpdate';
 import {
@@ -46,6 +48,7 @@ import {
 	priceOnDay,
 	sortSecurities,
 	writePrice,
+	writePrices,
 	type SecurityUsage
 } from 'src/logic/investments/Securities';
 import {
@@ -63,6 +66,7 @@ import {
 import { createLedgerId, nextInsertionSeq } from 'src/logic/ledger/LedgerDocument';
 import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
 import type { Account, IsoDate, LedgerId, Price, Security, Trade, TradeKind } from 'src/types/LedgerTypes';
+import type { PricePassProgress } from 'src/types/PriceIpcTypes';
 
 /**
  * Investments: four tabs, of which Holdings is entirely derived from the middle two and Securities is what all three point at.
@@ -109,7 +113,13 @@ export const InvestmentsScreen = (): ReactElement => {
 	const [ refusal, setRefusal ] = useState<string | undefined>(undefined);
 	const [ notice, setNotice ] = useState<string | undefined>(undefined);
 	const [ isFetchingPrices, setIsFetchingPrices ] = useState(false);
-	const [ pricePass, setPricePass ] = useState<{ askedCount: number; review: PriceUpdateReview } | undefined>(undefined);
+	const [ isChoosingSpan, setIsChoosingSpan ] = useState(false);
+
+	// How far the running pass has got, as the main process reports it. Undefined until the first listing has been answered.
+	const [ passProgress, setPassProgress ] = useState<PricePassProgress | undefined>(undefined);
+	const [ pricePass, setPricePass ] = useState<
+		{ askedCount: number; span: PricePassSpan; review: PriceUpdateReview } | undefined
+	>(undefined);
 
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
 
@@ -236,22 +246,32 @@ export const InvestmentsScreen = (): ReactElement => {
 	 *
 	 * **One request per security in the file, held or fully sold**, and the file is not touched: what comes back opens the review
 	 * panel, and nothing at all is written until that panel is confirmed.
+	 *
+	 * **The span is the user's answer to the one question the button puts**, and it reaches the listings already worked out per
+	 * security: the day after each one's most recent price, or the day of its first purchase where it holds none.
+	 *
+	 * **The pass says how far it has got while it runs.** The listener is removed however the pass ends, the failed and the
+	 * cancelled included, so a press leaves nothing of itself behind.
+	 * @param span Which of the two passes to run.
 	 */
-	const runPricePass = async(): Promise<void> => {
+	const runPricePass = async(span: PricePassSpan): Promise<void> => {
 		if(!document) {
 			return;
 		}
 
-		const listings = toPriceListings(document.securities);
+		const listings = toPriceListings(document.securities, span, prices, document.trades, today);
 
 		setRefusal(undefined);
 		setNotice(undefined);
+		setPassProgress(undefined);
 		setIsFetchingPrices(true);
+
+		const stopListening = window.spiccioliPrices.onPassProgress(setPassProgress);
 
 		try {
 			const result = await window.spiccioliPrices.updatePrices(listings);
 
-			setPricePass({ askedCount: listings.length, review: reviewPricePass(result, securities, prices) });
+			setPricePass({ askedCount: listings.length, span, review: reviewPricePass(result, securities, prices) });
 		}
 		catch {
 			// The pass itself reports a provider that could not be reached as a line in the panel, so reaching here is the bridge
@@ -259,6 +279,8 @@ export const InvestmentsScreen = (): ReactElement => {
 			setRefusal(t('updatePrices.passFailed'));
 		}
 		finally {
+			stopListening();
+			setPassProgress(undefined);
 			setIsFetchingPrices(false);
 		}
 	};
@@ -267,21 +289,20 @@ export const InvestmentsScreen = (): ReactElement => {
 	// whatever that day already held — a hand-typed value included
 	const confirmPricePass = (review: PriceUpdateReview): void => {
 		const records = toFetchedPrices(review.rows);
+		const dates = records.map((record) => {
+			return record.date;
+		}).sort();
 
+		// Laid over the history in one pass rather than one record at a time: a confirmed span is thousands of them, and writing
+		// each through the whole history would re-read the file once per day of it
 		updateDocument((current) => {
-			return {
-				...current,
-				prices: records.reduce((written, record) => {
-					return writePrice(written, record);
-				}, current.prices)
-			};
+			return { ...current, prices: writePrices(current.prices, records) };
 		});
 
 		void window.spiccioliPrices.reportPricesWritten({
 			writtenCount: records.length,
-			dates: [ ...new Set(records.map((record) => {
-				return record.date;
-			})) ]
+			firstDate: dates[0] ?? null,
+			lastDate: dates[dates.length - 1] ?? null
 		});
 		setNotice(t('updatePrices.wrote', { count: records.length }));
 		setPricePass(undefined);
@@ -289,7 +310,7 @@ export const InvestmentsScreen = (): ReactElement => {
 
 	// Cancel and nothing at all is written — no record, no half-finished pass. The log still hears that the pass ended.
 	const cancelPricePass = (): void => {
-		void window.spiccioliPrices.reportPricesWritten({ writtenCount: 0, dates: [] });
+		void window.spiccioliPrices.reportPricesWritten({ writtenCount: 0, firstDate: null, lastDate: null });
 		setNotice(t('updatePrices.cancelled'));
 		setPricePass(undefined);
 	};
@@ -699,18 +720,28 @@ export const InvestmentsScreen = (): ReactElement => {
 	};
 
 	const actions = (): ReactNode => {
-		// The button sits on the Holdings tab, and it is a button and nothing else: no selection first and no setting behind it.
-		// The sentence under it is what leaves the machine, stated here and again in the panel.
+		// The button sits on the Holdings tab. It puts one question — how far back — and is otherwise a button and nothing else:
+		// no selection first, no row to tick and no setting behind it. The sentence under it is what leaves the machine, stated
+		// here, again in the question and again in the panel.
 		if(tab === 'holdings' && orderedSecurities.length > 0) {
 			return (
 				<div className='investments-screen-update-prices'>
 					<AppButton
 						disabled={isFetchingPrices}
 						onClick={() => {
-							void runPricePass();
+							setIsChoosingSpan(true);
 						}}>
 						{isFetchingPrices ? t('updatePrices.busy') : t('updatePrices.button')}
 					</AppButton>
+					{isFetchingPrices && passProgress !== undefined && (
+						<span className='investments-screen-update-prices-progress' role='status'>
+							{t('updatePrices.progress', {
+								done: formatter.integer(passProgress.done),
+								total: formatter.integer(passProgress.total),
+								ticker: passProgress.ticker
+							})}
+						</span>
+					)}
 					<p>{t('updatePrices.whatLeaves', { provider: t('updatePrices.providerName') })}</p>
 				</div>
 			);
@@ -815,10 +846,22 @@ export const InvestmentsScreen = (): ReactElement => {
 			{tab === 'sales' && renderTradesTab('sale')}
 			{tab === 'securities' && renderSecuritiesTab()}
 
+			{isChoosingSpan && (
+				<UpdatePricesSpanDialog
+					onChoose={(span) => {
+						setIsChoosingSpan(false);
+						void runPricePass(span);
+					}}
+					onCancel={() => {
+						setIsChoosingSpan(false);
+					}}/>
+			)}
+
 			{pricePass && (
 				<UpdatePricesPanel
 					review={pricePass.review}
 					askedCount={pricePass.askedCount}
+					span={pricePass.span}
 					onConfirm={() => {
 						confirmPricePass(pricePass.review);
 					}}

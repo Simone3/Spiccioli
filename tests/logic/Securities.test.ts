@@ -8,7 +8,8 @@ import {
 	priceHistoryOf,
 	priceOnDay,
 	sortSecurities,
-	writePrice
+	writePrice,
+	writePrices
 } from 'src/logic/investments/Securities';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import type { Price, Security } from 'src/types/LedgerTypes';
@@ -110,6 +111,33 @@ describe('the price history', () => {
 		expect(priceOnDay(written, 'swda', '2026-03-31')).toEqual({ securityId: 'swda', date: '2026-03-31', value: 99, source: 'fetched' });
 		expect(priceHistoryOf(written, 'swda')).toHaveLength(3);
 		expect(priceOnDay(written, 'vwce', '2026-06-30')?.value).toBe(20);
+	});
+
+	test('lays a whole pass over the history at once, on the same rule as one record', () => {
+		const written = writePrices(prices, [
+			makePrice({ securityId: 'swda', date: '2026-03-31', value: 99, source: 'fetched' }),
+			makePrice({ securityId: 'swda', date: '2026-08-01', value: 101, source: 'fetched' })
+		]);
+
+		// The day one lands on holds it, the day that was new is there, and no other day moved
+		expect(priceOnDay(written, 'swda', '2026-03-31')?.value).toBe(99);
+		expect(priceOnDay(written, 'swda', '2026-08-01')?.value).toBe(101);
+		expect(priceHistoryOf(written, 'swda')).toHaveLength(4);
+		expect(priceOnDay(written, 'vwce', '2026-06-30')?.value).toBe(20);
+	});
+
+	test('lets the last word on a day win, where one pass names it twice', () => {
+		const written = writePrices(prices, [
+			makePrice({ securityId: 'swda', date: '2026-08-01', value: 101, source: 'fetched' }),
+			makePrice({ securityId: 'swda', date: '2026-08-01', value: 102, source: 'fetched' })
+		]);
+
+		expect(priceOnDay(written, 'swda', '2026-08-01')?.value).toBe(102);
+		expect(priceHistoryOf(written, 'swda')).toHaveLength(4);
+	});
+
+	test('changes nothing where a pass wrote nothing', () => {
+		expect(writePrices(prices, [])).toEqual(prices);
 	});
 });
 

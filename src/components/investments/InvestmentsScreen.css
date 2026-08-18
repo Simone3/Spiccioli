@@ -260,6 +260,40 @@
 	justify-content: flex-end;
 }
 
+/* The question the button puts before it contacts anything. Narrower than the review panel: it holds two choices, not a table. */
+.update-prices-panel-narrow {
+	max-width: 520px;
+}
+
+.update-prices-choices {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+/* Each choice is a real button with the sentence that says what it will do beneath it, rather than a label to be decoded */
+.update-prices-choice {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: flex-start;
+}
+
+.update-prices-choice p {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--colors-text-secondary);
+}
+
+/* How far a running pass has got. It replaces nothing and pushes nothing about: the sentence below it stays where it was. */
+.investments-screen-update-prices-progress {
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--colors-text-secondary);
+	font-variant-numeric: tabular-nums;
+}
+
 /* What a confirmed or a cancelled pass says it did. It states a fact rather than a problem, so it is not the refusal's colour. */
 .investments-screen-notice {
 	margin: 0 0 16px;

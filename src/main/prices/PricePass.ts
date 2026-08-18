@@ -1,9 +1,15 @@
 import { PRICES_CONFIG } from 'src/config/AppConfig';
 import { appLogger } from 'src/framework/main/logging/AppLogger';
 import { DateUtils } from 'src/framework/utils/DateUtils';
-import { reviewProviderQuote } from 'src/main/prices/PriceQuoteReview';
-import type { PriceProvider } from 'src/main/prices/PriceProvider';
-import type { PriceFetchOutcome, PriceListingRequest, PricePassResult, PricesWrittenReport } from 'src/types/PriceIpcTypes';
+import { reviewProviderQuotes } from 'src/main/prices/PriceQuoteReview';
+import type { PriceProvider, PriceSpan } from 'src/main/prices/PriceProvider';
+import type {
+	PriceFetchOutcome,
+	PriceListingRequest,
+	PricePassProgress,
+	PricePassResult,
+	PricesWrittenReport
+} from 'src/types/PriceIpcTypes';
 
 /**
  * One press of *Update prices*, from end to end.
@@ -11,6 +17,14 @@ import type { PriceFetchOutcome, PriceListingRequest, PricePassResult, PricesWri
  * **One request per security in the file, held or fully sold**, paced rather than fired at once, and **each failing on its own
  * without taking the pass down**: a security the provider has no quote for, one whose quote is refused and one whose request
  * never completed are three lines in the review panel, and the twelve securities around them are still asked about.
+ *
+ * **What each request asks for is the listing's own.** A listing carrying no first day wants the latest quote alone; one carrying
+ * a day wants every day from it onwards. The choice between the two is the user's and is made once for the whole pass, but it
+ * reaches here already resolved to a span per security, a security with no history to build having nothing to ask for but the
+ * latest quote either way.
+ *
+ * **A pass says how far it has got as it goes**, one report per listing answered. It is the only thing the main process pushes to
+ * the renderer, and a pass over a file asked day by day is slow enough to need it.
  *
  * **Nothing here writes anything.** The pass reaches the network and reports what came back; the file is the renderer's, and a
  * Price record is written only after the user has confirmed the panel.
@@ -29,6 +43,9 @@ export interface RunPricePassOptions {
 
 	// Injected so a test does not have to wait out the pacing
 	delay?: (milliseconds: number) => Promise<void>;
+
+	// Told how far the pass has got, once per listing answered. Absent where nobody is watching.
+	onProgress?: (progress: PricePassProgress) => void;
 }
 
 const sleep = (milliseconds: number): Promise<void> => {
@@ -43,10 +60,16 @@ const truncateFailure = (message: string): string => {
 		`${message.slice(0, PRICES_CONFIG.maximumFailureMessageLength)}…`;
 };
 
+// What one listing is asking for: the latest quote alone, or every day from the one it carries
+const toSpan = (listing: PriceListingRequest): PriceSpan => {
+	return listing.from === null ? { kind: 'latest' } : { kind: 'since', from: listing.from };
+};
+
 // One listing, asked about and read. The listing given to the provider is the ticker and the exchange: the identity the renderer
 // sent to match the answer back with never goes any further than this function.
 const fetchOne = async(provider: PriceProvider, listing: PriceListingRequest, today: string): Promise<PriceFetchOutcome> => {
-	const result = await provider.fetchQuote({ ticker: listing.ticker, exchange: listing.exchange });
+	const span = toSpan(listing);
+	const result = await provider.fetchQuotes({ ticker: listing.ticker, exchange: listing.exchange }, span);
 
 	if(result.outcome === 'failed') {
 		return { outcome: 'failed', securityId: listing.securityId, message: truncateFailure(result.message) };
@@ -56,11 +79,16 @@ const fetchOne = async(provider: PriceProvider, listing: PriceListingRequest, to
 		return { outcome: 'no-quote', securityId: listing.securityId };
 	}
 
-	const reviewed = reviewProviderQuote(result.quote, today);
+	const reviewed = reviewProviderQuotes(result, today, span);
 
-	return reviewed.outcome === 'quoted' ?
-		{ outcome: 'quoted', securityId: listing.securityId, value: reviewed.value, date: reviewed.date } :
-		{ outcome: 'refused', securityId: listing.securityId, refusal: reviewed.refusal, currency: reviewed.currency };
+	if(reviewed.outcome === 'refused') {
+		return { outcome: 'refused', securityId: listing.securityId, refusal: reviewed.refusal, currency: reviewed.currency };
+	}
+
+	// Every day of the span having fallen to a refusal or come back blank is the provider carrying nothing for this listing
+	return reviewed.outcome === 'no-quote' ?
+		{ outcome: 'no-quote', securityId: listing.securityId } :
+		{ outcome: 'quoted', securityId: listing.securityId, days: reviewed.days, droppedCount: reviewed.droppedCount };
 };
 
 const logListing = (listing: PriceListingRequest, outcome: PriceFetchOutcome): void => {
@@ -69,12 +97,22 @@ const logListing = (listing: PriceListingRequest, outcome: PriceFetchOutcome): v
 		ticker: listing.ticker,
 		exchange: listing.exchange,
 		outcome: outcome.outcome,
-		value: outcome.outcome === 'quoted' ? outcome.value : undefined,
-		date: outcome.outcome === 'quoted' ? outcome.date : undefined,
+		days: outcome.outcome === 'quoted' ? outcome.days.length : undefined,
+		dropped: outcome.outcome === 'quoted' ? outcome.droppedCount : undefined,
+
+		// The newest day it carries, which for the shorter pass is the whole of what came back
+		date: outcome.outcome === 'quoted' ? outcome.days[outcome.days.length - 1].date : undefined,
 		refusal: outcome.outcome === 'refused' ? outcome.refusal : undefined,
 		currency: outcome.outcome === 'refused' ? outcome.currency ?? undefined : undefined,
 		message: outcome.outcome === 'failed' ? outcome.message : undefined
 	});
+};
+
+// Every day the pass gathered, which for a span is what confirming would write
+const countDays = (outcomes: readonly PriceFetchOutcome[]): number => {
+	return outcomes.reduce((total, outcome) => {
+		return outcome.outcome === 'quoted' ? total + outcome.days.length : total;
+	}, 0);
 };
 
 const countOutcomes = (outcomes: readonly PriceFetchOutcome[], wanted: PriceFetchOutcome['outcome']): number => {
@@ -90,13 +128,15 @@ const countOutcomes = (outcomes: readonly PriceFetchOutcome[], wanted: PriceFetc
  * @param options.listings One entry per security in the file, held or fully sold.
  * @param options.spacingMs How long the pass waits between requests.
  * @param options.delay What the waiting is done with.
+ * @param options.onProgress Told how far the pass has got, once per listing answered.
  * @returns What came back, one outcome per listing, and the provider's reference date where it states one.
  */
 export const runPricePass = async({
 	provider,
 	listings,
 	spacingMs = PRICES_CONFIG.requestSpacingMs,
-	delay = sleep
+	delay = sleep,
+	onProgress
 }: RunPricePassOptions): Promise<PricePassResult> => {
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
 	const outcomes: PriceFetchOutcome[] = [];
@@ -104,7 +144,12 @@ export const runPricePass = async({
 	appLogger.info('Starting a price pass', {
 		type: 'prices.pass',
 		stage: 'start',
-		listings: listings.length
+		listings: listings.length,
+
+		// How many of them are asking for a span rather than for the latest quote alone
+		spans: listings.filter((listing) => {
+			return listing.from !== null;
+		}).length
 	});
 
 	for(const listing of listings) {
@@ -116,6 +161,7 @@ export const runPricePass = async({
 
 		logListing(listing, outcome);
 		outcomes.push(outcome);
+		onProgress?.({ done: outcomes.length, total: listings.length, ticker: listing.ticker });
 	}
 
 	appLogger.info('Finished a price pass', {
@@ -125,7 +171,8 @@ export const runPricePass = async({
 		quoted: countOutcomes(outcomes, 'quoted'),
 		noQuote: countOutcomes(outcomes, 'no-quote'),
 		refused: countOutcomes(outcomes, 'refused'),
-		failed: countOutcomes(outcomes, 'failed')
+		failed: countOutcomes(outcomes, 'failed'),
+		days: countDays(outcomes)
 	});
 
 	return {
@@ -139,12 +186,16 @@ export const runPricePass = async({
  *
  * **A cancelled pass reports a count of nothing**: the specification leaves no trace of one in *the ledger*, and the log still
  * says the pass happened and ended.
- * @param report How many records were written and for which days.
+ *
+ * **The span rather than the days.** A confirmed history is thousands of records, and a line that listed every one of them would
+ * be unreadable long before it was useful.
+ * @param report How many records were written and the span they cover.
  */
 export const logPricesWritten = (report: PricesWrittenReport): void => {
 	appLogger.info('A price pass was confirmed', {
 		type: 'prices.written',
 		written: report.writtenCount,
-		dates: report.dates
+		from: report.firstDate ?? undefined,
+		to: report.lastDate ?? undefined
 	});
 };

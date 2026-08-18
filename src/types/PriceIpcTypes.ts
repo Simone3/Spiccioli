@@ -10,6 +10,10 @@ import type { Exchange, IsoDate, LedgerId, TenThousandths } from 'src/types/Ledg
  *
  * **Nothing is written by any of this.** The renderer puts what came back to the user, and a confirmed pass writes Price records
  * the ordinary way, through the document it already holds.
+ *
+ * **One thing is pushed the other way**, and it is the only thing that ever is: how far a pass has got. A pass over a whole file
+ * asked day by day is slow enough that the screen has to say so while it runs, and a count of listings is the whole of what that
+ * takes.
  */
 
 // One security to ask about. The listing the provider is given is the "ticker" and the "exchange" and nothing else.
@@ -17,6 +21,20 @@ export interface PriceListingRequest {
 	securityId: LedgerId;
 	ticker: string;
 	exchange: Exchange;
+
+	// The first day wanted, which is the day after the security's most recent price or the day of its first purchase. Null asks
+	// for the latest quote alone, which is both what the shorter pass asks of every security and what a security with no history
+	// to build is asked for whichever pass this is.
+	from: IsoDate | null;
+}
+
+// How far a pass has got, pushed to the renderer as each listing is answered
+export interface PricePassProgress {
+	done: number;
+	total: number;
+
+	// The listing just answered, so that the screen can name what it is waiting on. It is already the renderer's own.
+	ticker: string;
 }
 
 // The four refusals of the specification, applied to what came back before the user ever sees it
@@ -24,15 +42,25 @@ export const PRICE_QUOTE_REFUSALS = [ 'future-date', 'not-positive', 'not-euro',
 
 export type PriceQuoteRefusal = typeof PRICE_QUOTE_REFUSALS[number];
 
-export type PriceFetchOutcome = {
-	outcome: 'quoted';
-	securityId: LedgerId;
+// One day that may be written, at the scale a Price is stored in
+export interface QuotedDay {
 
 	// Already at the scale a Price is stored in: the conversion from whatever the provider states happens once, in the pass
 	value: TenThousandths;
 
 	// The day the quote is for, which is the day the Price record would be filed under
 	date: IsoDate;
+}
+
+export type PriceFetchOutcome = {
+	outcome: 'quoted';
+	securityId: LedgerId;
+
+	// Oldest first, and never empty. One entry where the latest quote was asked for, and one per day of the span otherwise.
+	days: QuotedDay[];
+
+	// Days that came back and will not be written: the ones a refusal took down, and the ones carrying no figure at all
+	droppedCount: number;
 } | {
 
 	// The provider does not carry this listing. Not an error: the security keeps the price it has.
@@ -65,11 +93,19 @@ export interface PricePassResult {
 // What the confirmation did, sent back only so that the log can say how a pass ended. A cancelled pass reports nothing written.
 export interface PricesWrittenReport {
 	writtenCount: number;
-	dates: IsoDate[];
+
+	// The span the records cover rather than the days themselves: a confirmed history is thousands of them, and a log line that
+	// grew with the file would be unreadable long before it was useful. Null on both where nothing was written.
+	firstDate: IsoDate | null;
+	lastDate: IsoDate | null;
 }
 
 // What the preload publishes on "window.spiccioliPrices"
 export interface SpiccioliPricesApi {
 	updatePrices: (listings: PriceListingRequest[]) => Promise<PricePassResult>;
 	reportPricesWritten: (report: PricesWrittenReport) => Promise<void>;
+
+	// Listens for how far the running pass has got. What comes back removes the listener again, and the screen calls it when the
+	// pass ends: nothing here outlives the press that started it.
+	onPassProgress: (listener: (progress: PricePassProgress) => void) => () => void;
 }
