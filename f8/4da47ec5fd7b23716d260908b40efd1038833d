@@ -1,0 +1,78 @@
+CLAUDE.md
+  s_5ede8d54918c57::t_3feb6a9593c72c 58
+docs/functional/specs/02-domain-model.md
+  s_5ede8d54918c57::t_2cf8a0a17bf17a 107
+docs/functional/specs/13-validation.md
+  s_5ede8d54918c57::t_2228f1e0aa27a4 27,75
+docs/technical/08-decisions.md
+  s_5ede8d54918c57::t_546992acc36dc7 19,39-40,47
+docs/technical/09-file-format.md
+  s_5ede8d54918c57::t_0e0373bd744749 48-49,135,321
+scripts/write-sample-ledger.js
+  s_5ede8d54918c57::t_7168e2bca37ae2 67-68,271,284,297
+src/components/common/DecimalField.tsx
+  s_5ede8d54918c57::t_8633b73602aed1 27
+src/components/common/NumericFields.tsx
+  s_5ede8d54918c57::t_60372cf283aa6a 10-11,64,69
+src/components/investments/TradeForm.tsx
+  s_5ede8d54918c57::t_289dff0b03b55f 19,36,51,87
+src/components/investments/TradesTable.tsx
+  s_5ede8d54918c57::t_476538243bf45a 30
+src/logic/format/NumberFormat.ts
+  s_5ede8d54918c57::t_b857ae0493a748 105-106,110-111
+src/logic/investments/AnnualisedReturn.ts
+  s_5ede8d54918c57::t_0d87844f61314b 5,227
+src/logic/investments/Holdings.ts
+  s_5ede8d54918c57::t_d4e9faa5e870ba 7-8,15,44-46,77-79,107,121,251,266,312,367
+src/logic/investments/Trades.ts
+  s_5ede8d54918c57::t_5955f1befd87cf 1,12,118,123
+src/logic/money/Money.ts
+  s_5ede8d54918c57::t_cbb66e25f6357e 4-7,10-11,21,96-112,116-117,123-124,126-150
+src/logic/portfolio/NetWorthSeries.ts
+  s_5ede8d54918c57::t_569e4899099e8e 7,218
+src/types/LedgerTypes.ts
+  s_5ede8d54918c57::t_891b14147f0b0d 6-7,23,26-28,191
+tests/components/InvestmentsScreen.test.tsx
+  s_5ede8d54918c57::t_3407392ac99543 17,103,118,135,151,158,170,190,197,214,251,283,297
+tests/components/PortfolioScreen.test.tsx
+  s_5ede8d54918c57::t_03c0a133577851 28,30,46
+tests/logic/AnnualisedReturn.test.ts
+  s_5ede8d54918c57::t_ac7a3380df8871 13,87,94,108,112,121,128,140-141,152,159
+tests/logic/Checks.test.ts
+  s_5ede8d54918c57::t_9201285f4e016a 211
+tests/logic/Holdings.test.ts
+  s_5ede8d54918c57::t_80a7331f0a169a 23,25,74-76,88,98-99,104,110-111,123-124,132-133,142-145,165,168,175-176,185-187,198,233,251,289-290,298-299
+tests/logic/Money.test.ts
+  s_5ede8d54918c57::t_693e40da711eeb 5,47-54,73,80
+tests/logic/NetWorth.test.ts
+  s_5ede8d54918c57::t_cf5a1ddbc41e01 21,23,91,128,146-147,246-247,264
+tests/logic/NetWorthSeries.test.ts
+  s_5ede8d54918c57::t_d1b21c54d66968 19,21,99,115,128-129,193-194
+tests/logic/NumberFormat.test.ts
+  s_5ede8d54918c57::t_00b180313ff64e 68-70
+tests/logic/Trades.test.ts
+  s_5ede8d54918c57::t_f0928be3d249a9 19,35-36,39,41,131-132,135-136
+tests/testUtils/LedgerTestFactory.ts
+  s_5ede8d54918c57::t_2bbbf8b1e56d70 101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "f84da47ec5fd7b23716d260908b40efd1038833d",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_5ede8d54918c57": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b4a33f1f-d1f5-4119-bb69-4d87c6073636",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
