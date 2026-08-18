@@ -1,0 +1,82 @@
+src/components/common/ConfirmDialog.tsx
+  s_ee3d4a477472af::t_c13433a4ba3c57 10-11
+src/components/common/FormDialog.tsx
+  s_ee3d4a477472af::t_539a870f35d175 13
+src/components/investments/InvestmentsScreen.css
+  s_ee3d4a477472af::t_8825faeb20eef8 198-270
+src/components/investments/UpdatePricesPanel.tsx
+  s_ee3d4a477472af::t_b2ac5e52909e8b 1-210
+src/config/AppConfig.ts
+  s_ee3d4a477472af::t_b579d08129a2ed 86-94
+src/i18n/lang/en.ts
+  s_ee3d4a477472af::t_b9d25552af4700 871-933
+src/main/Main.ts
+  s_ee3d4a477472af::t_4c3927e4f5b409 17,19,286-292
+src/main/preload/Preload.ts
+  s_ee3d4a477472af::t_e24e767fe19b58 5,8,81-91,100
+src/main/prices/PricePass.ts
+  s_ee3d4a477472af::t_349dc5d9fa3f94 1-150
+src/main/prices/PriceQuoteReview.ts
+  s_ee3d4a477472af::t_a9fbf05526b8aa 1-83
+src/types/PriceIpcChannels.ts
+  s_ee3d4a477472af::t_4ea7c41bfebf5d 1-8
+src/vite-env.d.ts
+  s_ee3d4a477472af::t_0ff22d8507b889 5,11
+tests/testUtils/AppTestFactory.tsx
+  s_ee3d4a477472af::t_b3c3379cbafb5a 15,33-53,117
+CLAUDE.md
+  s_ee3d4a477472af::t_010469550dc70b 9
+docs/technical/01-architecture.md
+  s_ee3d4a477472af::t_313a109a496e10 20,27,29,35-36,105
+docs/technical/02-repository-map.md
+  s_ee3d4a477472af::t_1ebd36764d73af 35,37-40,76,93,106,118
+docs/technical/07-testing.md
+  s_ee3d4a477472af::t_0656a19bc4adf0 40
+docs/technical/08-implementation-plan.md
+  s_ee3d4a477472af::t_5c030c2f7c48e9 66,291,295-297,307-311,357
+src/components/investments/InvestmentsScreen.tsx
+  s_ee3d4a477472af::t_d0906ea4bee4c5 16,32-37,104-106,191-253,658-674,747,765-768,774-783
+src/logic/investments/PriceUpdate.ts
+  s_ee3d4a477472af::t_84463933844f36 1-169
+src/main/ipc/PricesIpc.ts
+  s_ee3d4a477472af::t_77f3e4b3170c07 1-31
+src/main/prices/PriceProvider.ts
+  s_ee3d4a477472af::t_e3593cca91f986 1-59
+src/main/prices/YahooPriceProvider.ts
+  s_ee3d4a477472af::t_9556282c1c8fdf 1-188
+src/types/PriceIpcTypes.ts
+  s_ee3d4a477472af::t_d26acc6dfa8b01 1-75
+tests/components/InvestmentsScreen.test.tsx
+  s_ee3d4a477472af::t_43448976821861 10-11,14,36-41,247-312
+tests/logic/PriceUpdate.test.ts
+  s_ee3d4a477472af::t_3396346883d7d9 1-136
+tests/main/PricePass.test.ts
+  s_ee3d4a477472af::t_0238eba1e59c4b 1-131
+tests/main/PriceQuoteReview.test.ts
+  s_ee3d4a477472af::t_b652245ca4870a 1-80
+tests/main/PricesIpc.test.ts
+  s_ee3d4a477472af::t_5113c1feba724d 1-62
+tests/main/YahooPriceProvider.test.ts
+  s_ee3d4a477472af::t_d451bbee553206 1-128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e0785dbfad1eb1c4cec226126dc5456cae4d6fe6",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_ee3d4a477472af": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "844d9f0b-5565-4ac1-9f66-ce6d90112179",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
