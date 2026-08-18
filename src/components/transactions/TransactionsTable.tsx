@@ -20,7 +20,9 @@ import { RECEIPT_STATES, type Account, type Category, type Cents, type Instituti
  * **The category chip states provenance rather than correctness**: violet where a rule assigned it, neutral where the user did,
  * red where no rule matched — which is what check 2 counts. **Notes are the user's**, and the application never writes to them.
  *
- * *Matched* is not a column yet: it is derived from the pairings, and it arrives with the checks.
+ * ***Matched* is derived and read-only**, and it names the counterpart of every kind of pairing there is: the counterpart account
+ * for a paired internal transfer, the security for a trade-matched securities transaction, and the payslip — its month and its
+ * label — for a salary payment or a pension credit. An em dash otherwise.
  */
 
 export interface TransactionsTableProps {
@@ -31,6 +33,9 @@ export interface TransactionsTableProps {
 	accounts: ReadonlyMap<LedgerId, Account>;
 	institutions: ReadonlyMap<LedgerId, Institution>;
 	categories: ReadonlyMap<LedgerId, Category>;
+
+	// What each paired row's counterpart is called, as the matching derived it. A row with no entry is one nothing paired with.
+	matchedNames: ReadonlyMap<LedgerId, string>;
 
 	// Every row ticked, across the pages: a selection may span them
 	selection: ReadonlySet<LedgerId>;
@@ -60,6 +65,7 @@ export interface TransactionsTableProps {
  * @param props.accounts The accounts, by id.
  * @param props.institutions The institutions, by id.
  * @param props.categories The categories, by id.
+ * @param props.matchedNames What each paired row's counterpart is called.
  * @param props.selection What is ticked.
  * @param props.isEverythingSelected Whether everything the filters match is ticked.
  * @param props.isAnythingSelected Whether anything is ticked.
@@ -76,6 +82,7 @@ export const TransactionsTable = ({
 	accounts,
 	institutions,
 	categories,
+	matchedNames,
 	selection,
 	isEverythingSelected,
 	isAnythingSelected,
@@ -271,6 +278,23 @@ export const TransactionsTable = ({
 						{categoryChipOf(transaction)}
 					</EditableCell>
 				);
+			}
+		},
+		{
+			key: 'matched',
+			header: t('transactions.columns.matched'),
+			render: (transaction) => {
+				const name = matchedNames.get(transaction.id);
+
+				if(name === undefined) {
+					return (
+						<span className='transactions-screen-unmatched' aria-label={t('transactions.matched.noneLabel')}>
+							{t('transactions.matched.none')}
+						</span>
+					);
+				}
+
+				return <span className='transactions-screen-matched'>{t('transactions.matched.counterpart', { name })}</span>;
 			}
 		},
 		{

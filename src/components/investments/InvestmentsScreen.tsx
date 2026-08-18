@@ -1,5 +1,5 @@
 import 'src/components/investments/InvestmentsScreen.css';
-import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react';
 import { AppButton, AppLinkButton } from 'src/components/common/AppButton';
 import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { EmptyState } from 'src/components/common/EmptyState';
@@ -15,12 +15,15 @@ import { TradeForm, type TradeFormValues } from 'src/components/investments/Trad
 import { TradesTable } from 'src/components/investments/TradesTable';
 import { UpdatePricesPanel } from 'src/components/investments/UpdatePricesPanel';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
+import { useInvestmentsHandoff } from 'src/components/shell/RecordLinks';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
+import { useChecks } from 'src/contexts/ChecksContext';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter, usePreferences } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { indexInstitutions, isCashAccountType } from 'src/logic/accounts/Accounts';
+import { matchedTradeDates } from 'src/logic/checks/Matching';
 import { holdingAnnualisedReturn, portfolioAnnualisedReturn } from 'src/logic/investments/AnnualisedReturn';
 import {
 	deriveHoldings,
@@ -91,6 +94,9 @@ export const InvestmentsScreen = (): ReactElement => {
 	const { preferences } = usePreferences();
 	const { document, updateDocument } = useLedger();
 
+	// The five pairings, derived by the checks run, of which this screen reads the two that name a trade's bank transaction
+	const { matching: pairings } = useChecks();
+
 	const [ tab, setTab ] = useState<InvestmentsTab>('holdings');
 	const [ purchaseFilters, setPurchaseFilters ] = useState<TradeFilters>(NO_TRADE_FILTERS);
 	const [ saleFilters, setSaleFilters ] = useState<TradeFilters>(NO_TRADE_FILTERS);
@@ -106,6 +112,38 @@ export const InvestmentsScreen = (): ReactElement => {
 	const [ pricePass, setPricePass ] = useState<{ askedCount: number; review: PriceUpdateReview } | undefined>(undefined);
 
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
+
+	// A check entry arrives with the tab its record lives on and the filters that select it, and changes nothing else about
+	// the screen: the same tables, the same orderings, every control free to be changed or cleared
+	const handoff = useInvestmentsHandoff();
+
+	useEffect(() => {
+		if(!handoff) {
+			return;
+		}
+
+		setTab(handoff.tab);
+
+		if(handoff.tab === 'securities') {
+			setSelectedSecurityId(handoff.securityId);
+
+			return;
+		}
+
+		const handedFilters: TradeFilters = {
+			securityId: handoff.securityId,
+			accountId: handoff.accountId,
+			fromDate: handoff.fromDate,
+			toDate: handoff.toDate
+		};
+
+		if(handoff.tab === 'purchases') {
+			setPurchaseFilters(handedFilters);
+		}
+		else {
+			setSaleFilters(handedFilters);
+		}
+	}, [ handoff ]);
 
 	const trades = useMemo(() => {
 		return document?.trades ?? [];
@@ -152,6 +190,11 @@ export const InvestmentsScreen = (): ReactElement => {
 	const orderedTrades = useMemo(() => {
 		return sortTrades(trades);
 	}, [ trades ]);
+
+	// What the *Matched* column shows, which is derived on the same run that reports the trades nothing paired with
+	const matchedDates = useMemo((): ReadonlyMap<LedgerId, IsoDate> => {
+		return document && pairings ? matchedTradeDates(document, pairings) : new Map();
+	}, [ document, pairings ]);
 
 	const purchases = tradesOfKind(orderedTrades, 'purchase');
 	const sales = tradesOfKind(orderedTrades, 'sale');
@@ -511,6 +554,7 @@ export const InvestmentsScreen = (): ReactElement => {
 						accounts={accounts}
 						institutions={institutions}
 						realisedGains={walk.realisedGains}
+						matchedDates={matchedDates}
 						footer={tradesFooter(kind, matching)}
 						onEdit={editTrade}
 						onDelete={setTradeToDelete}/>}

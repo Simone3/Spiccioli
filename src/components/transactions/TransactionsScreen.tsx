@@ -10,11 +10,13 @@ import { TransactionFiltersBar } from 'src/components/transactions/TransactionFi
 import { TransactionForm, type TransactionFormValues } from 'src/components/transactions/TransactionForm';
 import { TransactionsPager } from 'src/components/transactions/TransactionsPager';
 import { TransactionsTable } from 'src/components/transactions/TransactionsTable';
+import { useChecks } from 'src/contexts/ChecksContext';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { indexInstitutions } from 'src/logic/accounts/Accounts';
 import { indexCategories } from 'src/logic/categories/Categories';
+import { describeMatchedTransactions } from 'src/logic/checks/Matching';
 import { categoriseTransaction } from 'src/logic/categories/Categorisation';
 import { createLedgerId, nextInsertionSeq } from 'src/logic/ledger/LedgerDocument';
 import {
@@ -60,6 +62,9 @@ export const TransactionsScreen = (): ReactElement => {
 	const { t } = translator;
 	const formatter = useFormatter();
 	const { document, updateDocument } = useLedger();
+
+	// The five pairings, derived by the checks run. Named apart from the filtered rows below, which are this screen's own match.
+	const { matching: pairings } = useChecks();
 	const handoff = useTransactionHandoff();
 
 	// However the screen is reached, it is the same screen: a finished import sets the filters where the user would have set them
@@ -106,6 +111,11 @@ export const TransactionsScreen = (): ReactElement => {
 	const categories = useMemo(() => {
 		return indexCategories(document?.categories ?? []);
 	}, [ document ]);
+
+	// What the *Matched* column names, which is derived on the same run that reports what it left over
+	const matchedNames = useMemo((): ReadonlyMap<LedgerId, string> => {
+		return document && pairings ? describeMatchedTransactions({ document, matching: pairings, translator }) : new Map();
+	}, [ document, pairings, translator ]);
 
 	const pageCount = transactionPageCount(matching.length);
 	const page = Math.min(requestedPage, pageCount);
@@ -299,6 +309,7 @@ export const TransactionsScreen = (): ReactElement => {
 								accounts={accounts}
 								institutions={institutions}
 								categories={categories}
+								matchedNames={matchedNames}
 								selection={selection}
 								isEverythingSelected={selected.length === matching.length}
 								isAnythingSelected={selected.length > 0}

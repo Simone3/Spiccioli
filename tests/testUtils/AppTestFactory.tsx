@@ -6,6 +6,7 @@ import { makeSeededDocument } from './LedgerTestFactory';
 import { SpiccioliApp } from 'src/components/SpiccioliApp';
 import { writeLedgerDocument } from 'src/logic/ledger/LedgerWriter';
 import type { LedgerDocument } from 'src/types/LedgerTypes';
+import { ChecksProvider } from 'src/contexts/ChecksContext';
 import { LedgerProvider } from 'src/contexts/LedgerContext';
 import { PreferencesProvider } from 'src/contexts/PreferencesContext';
 import { UnsavedDraftProvider } from 'src/contexts/UnsavedDraftContext';
@@ -133,7 +134,9 @@ const AppTestProviders = ({ children }: { children: ReactNode }): ReactElement =
 			<PreferencesProvider>
 				<UnsavedDraftProvider>
 					<LedgerProvider>
-						<MemoryRouter>{children}</MemoryRouter>
+						<ChecksProvider>
+							<MemoryRouter>{children}</MemoryRouter>
+						</ChecksProvider>
 					</LedgerProvider>
 				</UnsavedDraftProvider>
 			</PreferencesProvider>

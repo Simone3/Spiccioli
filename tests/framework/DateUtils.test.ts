@@ -112,4 +112,23 @@ describe('DateUtils', () => {
 		expect(DateUtils.fromStandardYearMonthDay(null)).toBeUndefined();
 		expect(DateUtils.fromStandardYearMonthDay('not a date')).toBeUndefined();
 	});
+
+	test('moves a day forwards and backwards, and lands at local midnight', () => {
+		expect(DateUtils.addDays(new Date(2026, 7, 5, 14, 30), 5)).toEqual(new Date(2026, 7, 10));
+		expect(DateUtils.addDays(new Date(2026, 7, 5), -5)).toEqual(new Date(2026, 6, 31));
+		expect(DateUtils.addDays(new Date(2026, 7, 5), 0)).toEqual(new Date(2026, 7, 5));
+	});
+
+	// Without the clamp the 31st of March a month back would land in March again, which would make a window a month too long
+	test('moves a day by months, clamping to the last day of the month it lands in', () => {
+		expect(DateUtils.addMonths(new Date(2026, 2, 31), -1)).toEqual(new Date(2026, 1, 28));
+		expect(DateUtils.addMonths(new Date(2026, 0, 15), -3)).toEqual(new Date(2025, 9, 15));
+		expect(DateUtils.addMonths(new Date(2026, 11, 15), 1)).toEqual(new Date(2027, 0, 15));
+	});
+
+	test('counts whole days from one day to another, in both directions', () => {
+		expect(DateUtils.dayDifference(new Date(2026, 7, 5), new Date(2026, 7, 10))).toBe(5);
+		expect(DateUtils.dayDifference(new Date(2026, 7, 10), new Date(2026, 7, 5))).toBe(-5);
+		expect(DateUtils.dayDifference(new Date(2026, 7, 5, 1), new Date(2026, 7, 5, 23))).toBe(0);
+	});
 });

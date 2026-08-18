@@ -1,3 +1,4 @@
+import type { SpiccioliTranslator } from 'src/i18n/Translations';
 import type { Cents, LedgerId, Payslip } from 'src/types/LedgerTypes';
 
 /**
@@ -11,6 +12,27 @@ import type { Cents, LedgerId, Payslip } from 'src/types/LedgerTypes';
  * **`netSalary` is the only derived field on a payslip**, and it is derived here rather than stored, like every other figure in
  * the application. It is exact: three amounts in cents added and subtracted, with no division anywhere near it.
  */
+
+// A month is written with both its digits wherever it is written on its own, the table's column included
+const MONTH_DIGITS = 2;
+
+/**
+ * Writes the period a payslip is for: its month, and the label behind it where it carries one.
+ *
+ * **This is how a payslip is named wherever it is named away from its own table** — in the *Matched* column of [§5.1] and in
+ * everything checks 4 and 5 report — the table itself being scoped to one year and needing no year in the cell.
+ * @param payslip The payslip.
+ * @param translator The wording the month and the label are joined with.
+ * @returns The month and the label, in one string.
+ */
+export const formatPayslipPeriod = (payslip: Payslip, translator: SpiccioliTranslator): string => {
+	const month = translator.t('payslips.monthOfYear', {
+		month: String(payslip.month).padStart(MONTH_DIGITS, '0'),
+		year: String(payslip.year)
+	});
+
+	return payslip.label === null ? month : translator.t('payslips.periodWithLabel', { month, label: payslip.label });
+};
 
 /**
  * The one figure a payslip does not store: what the month was actually worth, with the reimbursements taken back out of it and

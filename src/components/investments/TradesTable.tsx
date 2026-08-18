@@ -24,7 +24,7 @@ import type { Account, Cents, Institution, IsoDate, LedgerId, Security, TenThous
  * **Every column but the derived ones is edited where it sits.** `kind` is not among them: a purchase and a sale are two tabs
  * and a trade never moves between them, so there is nothing on the row that could change it.
  *
- * *Matched* is not a column yet: it is derived from the pairings, and it arrives with the checks.
+ * ***Matched* shows the date of the bank transaction the trade was paired with**, and an em dash is what checks 6 and 7 report.
  */
 
 // The smallest quantity and the smallest price a field admits, in the ten-thousandths both are stored in
@@ -45,6 +45,9 @@ export interface TradesTableProps {
 	// The realised gain per sale, and no entry at all where there is none to state
 	realisedGains: ReadonlyMap<LedgerId, WorkingAmount>;
 
+	// The day the bank transaction each trade paired with is dated, and no entry at all where nothing paired with it
+	matchedDates: ReadonlyMap<LedgerId, IsoDate>;
+
 	footer: ReactNode;
 
 	// Called with what a committed cell changed
@@ -62,6 +65,7 @@ export interface TradesTableProps {
  * @param props.accounts The accounts, by id.
  * @param props.institutions The institutions, by id.
  * @param props.realisedGains The realised gain per sale.
+ * @param props.matchedDates The day the transaction each trade paired with is dated.
  * @param props.footer What goes under the rule.
  * @param props.onEdit What a committed cell does.
  * @param props.onDelete What deleting a row does.
@@ -74,6 +78,7 @@ export const TradesTable = ({
 	accounts,
 	institutions,
 	realisedGains,
+	matchedDates,
 	footer,
 	onEdit,
 	onDelete
@@ -336,6 +341,23 @@ export const TradesTable = ({
 				}
 			} :
 			undefined,
+		{
+			key: 'matched',
+			header: t('trades.columns.matched'),
+			render: (trade) => {
+				const date = matchedDates.get(trade.id);
+
+				if(date === undefined) {
+					return (
+						<span className='investments-screen-quiet' aria-label={t('trades.matched.noneLabel')}>
+							{t('trades.matched.none')}
+						</span>
+					);
+				}
+
+				return t('trades.matched.date', { date: formatter.storedDate(date) });
+			}
+		},
 		{
 			key: 'notes',
 			header: t('trades.columns.notes'),

@@ -6,6 +6,7 @@ import ReactDOM from 'react-dom/client';
 import { HashRouter } from 'react-router';
 import { AppErrorBoundary } from 'src/components/common/AppErrorBoundary';
 import { SpiccioliApp } from 'src/components/SpiccioliApp';
+import { ChecksProvider } from 'src/contexts/ChecksContext';
 import { LedgerProvider } from 'src/contexts/LedgerContext';
 import { PreferencesProvider } from 'src/contexts/PreferencesContext';
 import { UnsavedDraftProvider } from 'src/contexts/UnsavedDraftContext';
@@ -21,9 +22,11 @@ root.render(
 				<PreferencesProvider>
 					<UnsavedDraftProvider>
 						<LedgerProvider>
-							<HashRouter>
-								<SpiccioliApp/>
-							</HashRouter>
+							<ChecksProvider>
+								<HashRouter>
+									<SpiccioliApp/>
+								</HashRouter>
+							</ChecksProvider>
 						</LedgerProvider>
 					</UnsavedDraftProvider>
 				</PreferencesProvider>

@@ -22,7 +22,8 @@ import { useTranslator } from 'src/i18n/TranslationContext';
 
 export interface SidebarProps {
 
-	// How many checks are failing. The checks themselves arrive with the phase that computes them, and until then nothing fails.
+	// How many of the fourteen checks are failing, never how many records they name between them. Nothing at all is shown when
+	// every check passes.
 	failingCheckCount: number;
 }
 

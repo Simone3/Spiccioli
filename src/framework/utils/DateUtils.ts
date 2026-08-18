@@ -120,11 +120,7 @@ export class DateUtils {
 	 * @returns 0 for today, negative for the past, positive for the future.
 	 */
 	static dayOffsetFromToday(date: Date): number {
-		const toUtcDayNumber = (value: Date): number => {
-			return Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()) / MILLIS_PER_DAY;
-		};
-
-		return toUtcDayNumber(date) - toUtcDayNumber(this.startOfToday());
+		return this.dayDifference(this.startOfToday(), date);
 	}
 
 	/**
@@ -186,6 +182,51 @@ export class DateUtils {
 		const date = new Date(Number(year), Number(month) - 1, Number(day));
 
 		return Number.isNaN(date.getTime()) ? undefined : date;
+	}
+
+	/**
+	 * Moves a day forwards or backwards by a number of days.
+	 * @param date Day to move.
+	 * @param days How many days to move by. Negative moves backwards.
+	 * @returns The day it lands on, at local midnight.
+	 */
+	static addDays(date: Date, days: number): Date {
+		const moved = this.startOfDay(date);
+		moved.setDate(moved.getDate() + days);
+
+		return moved;
+	}
+
+	/**
+	 * Moves a day forwards or backwards by a number of months, keeping the day of the month where the target month is long enough
+	 * and clamping to its last day where it is not. Without the clamp the 31st of March a month back would land in March again.
+	 * @param date Day to move.
+	 * @param months How many months to move by. Negative moves backwards.
+	 * @returns The day it lands on, at local midnight.
+	 */
+	static addMonths(date: Date, months: number): Date {
+		const start = this.startOfDay(date);
+		const moved = new Date(start.getFullYear(), start.getMonth() + months, 1);
+		const lastDayOfMonth = new Date(moved.getFullYear(), moved.getMonth() + 1, 0).getDate();
+
+		moved.setDate(Math.min(start.getDate(), lastDayOfMonth));
+
+		return moved;
+	}
+
+	/**
+	 * Counts whole days from one day to another.
+	 * The two days are compared as UTC day numbers, so a daylight saving change cannot make a day count as 0 or 2.
+	 * @param from The earlier day.
+	 * @param to The later day.
+	 * @returns How many days separate them: positive when the second is after the first, negative when before.
+	 */
+	static dayDifference(from: Date, to: Date): number {
+		const toUtcDayNumber = (value: Date): number => {
+			return Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()) / MILLIS_PER_DAY;
+		};
+
+		return toUtcDayNumber(to) - toUtcDayNumber(from);
 	}
 
 	/**

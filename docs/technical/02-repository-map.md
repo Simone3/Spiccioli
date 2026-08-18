@@ -64,6 +64,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/shell/ScreenLayout.tsx` `.css` | The shape every screen has, and the note a screen that is still a shell carries |
 | `components/shell/StorageNotices.tsx` `.css` | The three lines the file can put on whichever screen the user is on |
 | `components/shell/TransactionHandoff.ts` | How one screen hands its filters to Transactions, over the router's own location state ([§5.2](../functional/specs/05-transactions.md#52-ordering-and-paging)) |
+| `components/shell/RecordLinks.ts` | The same thing for Investments and Salaries, and the follow of a check entry to the record it names ([§9](../functional/specs/09-checks.md)) |
 | `components/launch/LaunchScreen.tsx` `.css` | The screen the application always opens with ([§12.1](../functional/specs/12-storage.md#121-the-launch-screen)) |
 | `components/launch/UpgradeDialog.tsx` | Its second panel: a file written by an older version |
 | `components/session/WriteFailurePanel.tsx` `.css` | The blocking message after five failed attempts, which belongs to no screen |
@@ -75,7 +76,9 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/categories/` | The Categories screen ([§6](../functional/specs/06-categories.md)): the three tabs, the categories × years matrix, the rule list with its drag reorder and its draft session, the rule form and the consequence summary — and `CategoryPicker`, **the one category picker in the application**, which a transaction, a filter and a rule all take |
 | `components/investments/` | The Investments screen ([§7](../functional/specs/07-investments.md)): the four tabs, the derived holdings with their inline price editor and their detail panel, the two trade tables with their filters and their forms, the securities list with its price history, the *Update prices* button with the statement of what leaves the machine and the review panel a pass ends in — and `SecurityPicker`, **the one security picker in the application**, plus the `SecurityFields` both forms that create one are built from |
 | `components/salaries/` | The Salaries screen ([§8](../functional/specs/08-salaries.md)): the two tabs, the contract selector that scopes the first of them, the contracts table and its form, the per-year table whose working-days cell **is** the ContractYear record, the twelve-column payslip table and its form, and the two charts |
-| `components/portfolio/` `checks/` | One folder per screen. Each holds its shell and its empty state until the phase that builds it |
+| `components/checks/ChecksScreen.tsx` `.css` | The Checks screen ([§9](../functional/specs/09-checks.md)): the fourteen in the order of the specification's table, each stating its reach, each failing one naming at most five records with the whole count and a link per record |
+| `components/portfolio/` | The one folder that still holds a shell and an empty state, until the phase that builds it |
+| `contexts/ChecksContext.tsx` | The one place the fourteen checks run and the five pairings are derived: undebounced on opening a file, debounced after every change, superseded by the next ([§9](../functional/specs/09-checks.md)) |
 | `contexts/LedgerContext.tsx` | The ledger in memory, the autosave, the save state, the storage lines |
 | `contexts/PreferencesContext.tsx` | The ten preferences, read once and written as they change, and the formatter they define |
 | `contexts/UnsavedDraftContext.tsx` | The guard every departure goes through, and the draft a screen registers with it ([§1.3](01-architecture.md#13-layers-inside-the-renderer)) |
@@ -87,6 +90,9 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `logic/categories/Categorisation.ts` | The rule engine: what a rule compares, which rule claims a description, the pass that keeps an `automatic` category the one the rules produce, what each rule accounts for, and the four figures applying a list would produce |
 | `logic/categories/RuleDraft.ts` | The draft the rule list is edited as, and what tells it apart from the list the file holds |
 | `logic/categories/CategoryReport.ts` | The categories × years matrix: the columns, the four groups, the three subtotals and Net |
+| `logic/checks/Matching.ts` | The five greedy pairings of [§11.6](../functional/specs/11-calculations.md#116-derived-matching) and the one bucketed walk all of them are made of, plus what the three *Matched* columns name |
+| `logic/checks/Checks.ts` | The fourteen checks of [§9](../functional/specs/09-checks.md), in that document's order: what each one examined, the records a failing one names, and the way back to each of them |
+| `logic/checks/CheckDates.ts` | The day arithmetic the windows and the ages are written in |
 | `logic/investments/Holdings.ts` | The weighted-average-cost walk in its one order, the realised gain a sale leaves, the holdings that survive it, and what each one would leave you with if it were sold today |
 | `logic/investments/AnnualisedReturn.ts` | The money-weighted return: the flows a position produces, the bisection that solves them, and every case that has no figure |
 | `logic/investments/Trades.ts` | Everything pure about the two trade tables: the one ordering, the three filters, the derived total and what the footers sum |

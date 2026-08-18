@@ -1,5 +1,5 @@
 import { compareNames } from 'src/logic/accounts/Accounts';
-import type { Category, LedgerId, Transaction } from 'src/types/LedgerTypes';
+import type { Category, CategoryRole, LedgerId, Transaction } from 'src/types/LedgerTypes';
 
 /**
  * Everything pure about the twenty-seven categories: how they are reached and the one order every list of them is in.
@@ -18,6 +18,23 @@ import type { Category, LedgerId, Transaction } from 'src/types/LedgerTypes';
 export const indexCategories = (categories: readonly Category[]): Map<LedgerId, Category> => {
 	return new Map(categories.map((category) => {
 		return [ category.id, category ];
+	}));
+};
+
+/**
+ * The categories carrying one role, as the set of their identities.
+ *
+ * **The checks key off roles and never off names** — a category is seeded with the role that says what it is for, and renaming
+ * one in the bundle changes nothing about what reads it.
+ * @param categories The categories.
+ * @param role The role being asked for.
+ * @returns The identities of the categories that carry it, which is usually one and is never assumed to be.
+ */
+export const categoryIdsWithRole = (categories: readonly Category[], role: CategoryRole): Set<LedgerId> => {
+	return new Set(categories.filter((category) => {
+		return category.role === role;
+	}).map((category) => {
+		return category.id;
 	}));
 };
 

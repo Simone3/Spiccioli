@@ -43,8 +43,9 @@ src/index.tsx                    mounts React, in StrictMode
           └── PreferencesProvider  the ten preferences, which are not in the ledger (§10 of the analysis)
               └── UnsavedDraftProvider  the guard every departure goes through, above the file because closing it is one
                   └── LedgerProvider   the open file: the document, the save state, the storage lines
-                      └── HashRouter   the one router, installed once, over a hash history
-                          └── SpiccioliApp the launch screen, or the shell around one of the screens
+                      └── ChecksProvider  the fourteen checks and the five pairings, run over whatever file is open (§9)
+                          └── HashRouter   the one router, installed once, over a hash history
+                              └── SpiccioliApp the launch screen, or the shell around one of the screens
 ```
 
 `AppErrorBoundary` wraps everything below the translator rather than one screen, so a failure inside a context provider is caught too. Its recovery is a reload: rendering the same tree again would usually throw the same error a second time, while a reload starts over from what is on disk.
@@ -54,6 +55,8 @@ The failure goes to the operational log over `window.spiccioliDiagnostics`, beca
 `LedgerProvider` is where the model lives. It reads the file the main process hands it, writes the text the main process puts on disk, debounces the autosave, and owns the three things [§12](../functional/specs/12-storage.md) puts on screen — the save state, the line while a failed write is being retried and the blocking message after the fifth attempt, and the line saying something else changed the file.
 
 `PreferencesProvider` carries a second thing besides the preferences: `useFormatter`, the reading of them that turns a stored figure or a day into what [§10](../functional/specs/10-settings.md) says it looks like. A screen never reads a separator or a date format itself, which is what makes changing a preference re-render every figure in the same pass.
+
+`ChecksProvider` sits **below** `LedgerProvider` and above the router, because it reads the open file and every screen reads it: the sidebar badge, the Checks screen, and the *Matched* columns of Transactions, Purchases and Sales. **The pairings and the checks are one computation with two readers** ([§11.6](../functional/specs/11-calculations.md#116-derived-matching)) — the checks report what the matching left over and the columns name what it paired — so a cell names its counterpart on the same run that reports it. **The run is debounced**, a change scheduling one rather than performing one and a scheduled run being superseded by the next; **the first run of a file is not**, there being no previous results to show while it waits.
 
 `UnsavedDraftProvider` sits **above** `LedgerProvider`, because two of the three departures it guards are the file's: **the rule list of [§6.2](../functional/specs/06-categories.md#62-rules) is the one thing on screen that is not in the file**, so leaving the screen, closing the file and quitting all ask first, and each offers discard and stay and nothing else. A screen holding a draft registers it, the sidebar routes its links through the guard because the router is declarative and has no blocker of its own, and a quit that is stayed is called off in the main process over `cancelClose` — the only answer to *prepare for close* that is not a close.
 
@@ -102,8 +105,7 @@ The configuration file holds two things, through `src/main/config/SpiccioliConfi
 
 ## 1.7 What is deliberately not here yet
 
-- **Three of the eight screens do not read their own records yet** — Portfolio, Salaries and Checks. They exist, the sidebar reaches them and each one shows the empty state of [§14](../functional/specs/14-empty-and-error-states.md); their tables, forms, charts and calculations arrive one screen per phase. Settings, Accounts, Transactions, Categories and Investments are finished.
-- **No failing-check badge.** The sidebar draws one and is handed a count, and the count is zero until the fourteen checks of [§9](../functional/specs/09-checks.md) are computed in Phase 10.
+- **One of the eight screens does not read its own records yet** — Portfolio. It exists, the sidebar reaches it and it shows the empty state of [§14](../functional/specs/14-empty-and-error-states.md); its cards, its chart and its calculations arrive with Phase 11. The other seven are finished.
 - **No single-instance lock.** Spiccioli is allowed to run twice. Two ledgers open side by side is ordinary use, and two sessions on *one* ledger is the case [§12](../functional/specs/12-storage.md) settles by detecting the external modification and keeping the displaced version — not by refusing to start.
 
 ---

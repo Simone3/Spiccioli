@@ -55,6 +55,9 @@ export interface Position {
 	// Whether the running quantity ever went below zero, which disqualifies the position outright
 	oversold: boolean;
 
+	// The sale that took it there, which is the record check 8 names. Undefined on every position that is sound.
+	oversoldTrade: Trade | undefined;
+
 	// Every trade of this position, in walk order, which is what the annualised return reads
 	trades: readonly Trade[];
 }
@@ -167,6 +170,7 @@ const emptyPosition = (securityId: LedgerId, accountId: LedgerId): WalkingPositi
 		costBasis: 0,
 		avgCost: undefined,
 		oversold: false,
+		oversoldTrade: undefined,
 		trades: []
 	};
 };
@@ -215,6 +219,7 @@ export const walkPositions = (trades: readonly Trade[]): PositionWalk => {
 
 		if(remaining < 0 || position.avgCost === undefined) {
 			position.oversold = true;
+			position.oversoldTrade = trade;
 
 			continue;
 		}

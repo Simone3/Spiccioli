@@ -13,6 +13,7 @@ import { APP_ROUTES } from 'src/components/shell/AppRoutes';
 import { Sidebar } from 'src/components/shell/Sidebar';
 import { StorageNotices } from 'src/components/shell/StorageNotices';
 import { TransactionsScreen } from 'src/components/transactions/TransactionsScreen';
+import { useChecks } from 'src/contexts/ChecksContext';
 import { useLedger } from 'src/contexts/LedgerContext';
 
 /**
@@ -26,15 +27,13 @@ import { useLedger } from 'src/contexts/LedgerContext';
  * history because a packaged run loads the built page over "file://".
  */
 
-// The checks arrive with the phase that computes them; until then nothing is failing and the badge has nothing to show
-const FAILING_CHECK_COUNT = 0;
-
 /**
  * The shell.
  * @returns The sidebar and the screen the user is on.
  */
 export const AppShell = (): ReactElement => {
 	const { filePath } = useLedger();
+	const { failingCount } = useChecks();
 	const navigate = useNavigate();
 
 	// Which file the shell last sent to Portfolio. The router hands back a new "navigate" on every move, so without this the
@@ -52,7 +51,7 @@ export const AppShell = (): ReactElement => {
 
 	return (
 		<div className='app-shell'>
-			<Sidebar failingCheckCount={FAILING_CHECK_COUNT}/>
+			<Sidebar failingCheckCount={failingCount}/>
 			<main className='app-shell-main'>
 				<StorageNotices/>
 				<Routes>

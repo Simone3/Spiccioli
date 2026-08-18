@@ -260,8 +260,17 @@ export const EN_TRANSLATIONS = {
 			description: 'Description',
 			amount: 'Amount',
 			category: 'Category',
+			matched: 'Matched',
 			receipt: 'Receipt',
 			notes: 'Notes'
+		},
+
+		// The Matched column, which is derived and read-only. It names the counterpart of every kind of pairing there is: the
+		// other account for a transfer, the security for a trade-matched row, the payslip for a salary or a pension credit.
+		matched: {
+			counterpart: '⇄ {name}',
+			none: '—',
+			noneLabel: 'Nothing is paired with this row'
 		},
 
 		// A cell is opened by the control that reads it, so each one says which row and which field it belongs to
@@ -721,7 +730,15 @@ export const EN_TRANSLATIONS = {
 			totalCost: 'Total cost',
 			netProceeds: 'Net proceeds',
 			realisedGain: 'Realised gain',
+			matched: 'Matched',
 			notes: 'Notes'
+		},
+
+		// Matched shows the date of the bank transaction the trade was paired with. A dash is what checks 6 and 7 report.
+		matched: {
+			date: '⇄ {date}',
+			none: '—',
+			noneLabel: 'No bank transaction is paired with this trade'
 		},
 		edit: {
 			date: 'Edit the date of the {security} trade of {date}',
@@ -1025,6 +1042,10 @@ export const EN_TRANSLATIONS = {
 		yearTable: 'Per year',
 		table: 'Payslips of {year}',
 		monthOfYear: '{month}/{year}',
+
+		// How a payslip is named away from its own table: in the Matched column, and in everything checks 4 and 5 report
+		periodWithLabel: '{month} · {label}',
+
 		yearColumns: {
 			year: 'Year',
 			payslipCount: 'Payslips',
@@ -1258,6 +1279,178 @@ export const EN_TRANSLATIONS = {
 			duplicateKey: 'In {location}, two records cannot be told apart: they share the key other records point at.',
 			danglingReference: 'In {location}, “{field}” points at a record the file does not hold.',
 			unsupportedSchemaVersion: 'The file was written by schema version {foundSchemaVersion}, and this version of Spiccioli reads schema version {supportedSchemaVersion}. A newer file cannot be opened by an older version.'
+		}
+	},
+
+	// The Checks screen: fourteen checks in the order of the specification's table, each stating what it examined and, where it
+	// failed, naming at most five of the records it found. Nothing here is a warning: a check passes or it fails.
+	checks: {
+		summary: '{total} checks · {passing} passing · {failing} failing',
+		allPassing: '{total} checks · all passing',
+		passed: 'Passed',
+		failed: 'Failed',
+		showingSome: {
+			one: 'showing {shown} of {count}',
+			other: 'showing {shown} of {count}'
+		},
+		showingAll: {
+			one: '{count} record',
+			other: '{count} records'
+		},
+
+		// What each of the fourteen is called, and the one line under it saying what it looks for
+		items: {
+			transfersBalance: {
+				name: 'Internal transfers balance out',
+				description: 'Every internal transfer should appear in two accounts, with opposite signs.'
+			},
+			transactionsCategorised: {
+				name: 'Every transaction has a category',
+				description: 'A transaction carrying no category at all.'
+			},
+			pricesRecent: {
+				name: 'Prices are recent',
+				description: 'Every security with an open holding has a price, no older than the staleness threshold.'
+			},
+			payslipsMatchSalaries: {
+				name: 'Payslips match salary transactions',
+				description: 'Net payment on each payslip against a Salary transaction in the same month or the next.'
+			},
+			pensionContributionsMatch: {
+				name: 'Payslip pension contributions match transactions',
+				description: 'Employee share, employer share and TFR, each against its own credit, same window.'
+			},
+			purchasesMatch: {
+				name: 'Purchase transactions match purchases',
+				description: 'Securities purchase transactions against the purchases on the Investments screen.'
+			},
+			salesMatch: {
+				name: 'Sale transactions match sales',
+				description: 'Securities sale transactions against the sales on the Investments screen.'
+			},
+			noNegativeHolding: {
+				name: 'No holding has gone negative',
+				description: 'The running quantity of a security in an account never drops below zero.'
+			},
+			noSaleBeforePurchase: {
+				name: 'No sale precedes its purchase',
+				description: 'A sale with nothing bought on or before its date in the same account.'
+			},
+			pensionFundRevalued: {
+				name: 'Pension fund revalued recently',
+				description: 'Every open pension fund account carries a recent value adjustment.'
+			},
+			closedAccountsEmpty: {
+				name: 'Closed accounts are empty',
+				description: 'An account with a closing date has a balance of zero and no holdings left in it.'
+			},
+			recordsWithinAccountLife: {
+				name: 'Records fall within their account’s life',
+				description: 'No transaction or trade is dated before its account opened or after it closed.'
+			},
+			receiptTrackedHaveState: {
+				name: 'Receipt-tracked transactions carry a state',
+				description: 'A category that expects a receipt should never read N/A.'
+			},
+			noOverduePendingReceipt: {
+				name: 'No receipt has been pending too long',
+				description: 'No transaction marked pending is older than the pending threshold.'
+			}
+		},
+
+		// What a check examined, stated whether it passed or failed, so that one that passed on nothing is distinguishable
+		reach: {
+			transferLegs: {
+				one: '{count} transfer leg',
+				other: '{count} transfer legs'
+			},
+			transactions: {
+				one: '{count} transaction',
+				other: '{count} transactions'
+			},
+			securitiesHeld: {
+				one: '{count} security held',
+				other: '{count} securities held'
+			},
+			payslips: {
+				one: '{count} payslip',
+				other: '{count} payslips'
+			},
+			contributions: {
+				one: '{count} contribution',
+				other: '{count} contributions'
+			},
+			purchases: {
+				one: '{count} purchase',
+				other: '{count} purchases'
+			},
+			sales: {
+				one: '{count} sale',
+				other: '{count} sales'
+			},
+			positions: {
+				one: '{count} position',
+				other: '{count} positions'
+			},
+			pensionFunds: {
+				one: '{count} pension fund',
+				other: '{count} pension funds'
+			},
+			closedAccounts: {
+				one: '{count} closed account',
+				other: '{count} closed accounts'
+			},
+			recordsAndTrades: '{transactions} transactions · {trades} trades',
+			trackedTransactions: {
+				one: '{count} tracked transaction',
+				other: '{count} tracked transactions'
+			},
+			pendingReceipts: {
+				one: '{count} pending receipt',
+				other: '{count} pending receipts'
+			}
+		},
+
+		// What the two lists of a check with two sides are called
+		sides: {
+			payslips: 'Unmatched payslips',
+			contributions: 'Unmatched contributions',
+			transactions: 'Unmatched transactions',
+			purchases: 'Unmatched purchases',
+			sales: 'Unmatched sales'
+		},
+
+		// Which of a payslip's three pension figures an entry is about
+		pensionFigures: {
+			employee: 'Employee share',
+			employer: 'Employer share',
+			severance: 'TFR'
+		},
+
+		// One record, written the way the screen it lives on writes it
+		entries: {
+			transaction: '{date} · {account} · {description} · {amount}',
+			trade: '{date} · {ticker} · {account} · {total}',
+			payslip: '{month} · {contract} · {amount}',
+			pensionFigure: '{month} · {contract} · {figure} · {amount}',
+			stalePrice: {
+				one: '{ticker} · {name} · {price} on {date} — {count} day ago',
+				other: '{ticker} · {name} · {price} on {date} — {count} days ago'
+			},
+			noPrice: '{ticker} · {name} — no price recorded',
+			oversold: '{ticker} · {account} · {date} — sold {quantity} more than was held',
+			neverRevalued: '{account} — never revalued',
+			lastRevalued: '{account} — last revalued {date}',
+			closedAccountBalance: '{account} · closed {date} — {balance} left in it',
+			closedAccountHolding: '{account} · closed {date} — {quantity} still held',
+			transactionRecord: '{date} · {description}',
+			tradeRecord: '{date} · {ticker}',
+			beforeOpening: '{record} · {account} — the account opened on {boundary}',
+			afterClosing: '{record} · {account} — the account closed on {boundary}',
+			overdueReceipt: {
+				one: '{date} · {account} · {description} · {amount} — pending {count} day',
+				other: '{date} · {account} · {description} · {amount} — pending {count} days'
+			}
 		}
 	},
 

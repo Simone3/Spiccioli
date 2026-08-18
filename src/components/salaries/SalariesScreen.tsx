@@ -1,5 +1,5 @@
 import 'src/components/salaries/SalariesScreen.css';
-import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react';
 import { AppButton } from 'src/components/common/AppButton';
 import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { EmptyState } from 'src/components/common/EmptyState';
@@ -11,6 +11,7 @@ import { ContractYearsTable } from 'src/components/salaries/ContractYearsTable';
 import { PayslipForm, type PayslipFormValues } from 'src/components/salaries/PayslipForm';
 import { formatPayslipMonth, PayslipsTable } from 'src/components/salaries/PayslipsTable';
 import { SalaryCharts } from 'src/components/salaries/SalaryCharts';
+import { useSalariesHandoff } from 'src/components/shell/RecordLinks';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter } from 'src/contexts/PreferencesContext';
@@ -67,6 +68,19 @@ export const SalariesScreen = (): ReactElement => {
 	const [ refusal, setRefusal ] = useState<string | undefined>(undefined);
 
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
+
+	// A check entry naming a payslip arrives with the contract and the year it is under, which is the pair this tab is scoped by
+	const handoff = useSalariesHandoff();
+
+	useEffect(() => {
+		if(!handoff) {
+			return;
+		}
+
+		setTab('payslips');
+		setChosenContractId(handoff.contractId);
+		setChosenYear(handoff.year);
+	}, [ handoff ]);
 
 	const contracts = useMemo(() => {
 		return sortContracts(document?.contracts ?? []);

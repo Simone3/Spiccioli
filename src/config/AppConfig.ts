@@ -76,6 +76,13 @@ export const TRANSACTIONS_CONFIG = {
 	rowsPerPage: 50
 } as const;
 
+// The fourteen checks: how often a change is allowed to start a run, and how many records one failing check names before it
+// states the whole count instead. Neither figure is fixed by the functional analysis; the five is what its examples show.
+export const CHECKS_CONFIG = {
+	debounceMs: 400,
+	maximumEntriesPerSide: 5
+} as const;
+
 // A render error is worded by the renderer, so the lengths the main process will write are fixed here rather than there: nothing the
 // renderer sends can grow a log line without limit
 export const DIAGNOSTICS_CONFIG = {
