@@ -67,7 +67,7 @@ Two overrides exist today and both say why where they are written. `DecimalField
 
 `react-datepicker` is the only dependency that ships CSS, and it ships a light calendar. `src/components/common/DateField.css` imports the library's stylesheet first and then overrides it — the surfaces, the borders, the text, the selected day and the focus outline — so that the calendar is the same dark theme as everything around it. **That override lives in the one file that imports the library**, which is what keeps replacing the date picker a change in one folder.
 
-The drag library of [§8.2](08-implementation-plan.md#82-decisions) D10 ships none: `RulesTable` styles its own handle and its own dragged row, and writes the row's transform by hand rather than importing the transitive `@dnd-kit/utilities` helper that would format it. What the library does contribute to the page is **a visually hidden live region of its own**, which is where the translated drag announcements are read out from.
+The drag library of [§8.1](08-decisions.md#81-the-fourteen-decisions) D10 ships none: `RulesTable` styles its own handle and its own dragged row, and writes the row's transform by hand rather than importing the transitive `@dnd-kit/utilities` helper that would format it. What the library does contribute to the page is **a visually hidden live region of its own**, which is where the translated drag announcements are read out from.
 
 ---
 

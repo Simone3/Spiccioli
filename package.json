@@ -9,6 +9,7 @@
 		"build-react": "vite build",
 		"build-electron": "node scripts/build-electron.js",
 		"build-icons": "electron scripts/build-icons.js",
+		"write-sample-ledger": "node scripts/write-sample-ledger.js",
 		"start": "node scripts/dev.js",
 		"start-packaged": "npm run build && electron-forge start",
 		"test": "vitest run",

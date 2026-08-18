@@ -16,7 +16,7 @@ New logic in `src/logic`, `src/main` and `src/framework` should come with unit t
 | --- | --- | --- |
 | `tests/framework/` | The framework's own tests | Framework modules only, so they travel with `src/framework` |
 | `tests/main/` | Electron main process modules | Anything, with Electron's own API stubbed |
-| `tests/logic/` | The pure logic of `src/logic` | Anything, and it needs nothing: none of it touches React, Electron or a filesystem |
+| `tests/logic/` | The pure logic of `src/logic` | Anything, and it needs nothing: none of it touches React or Electron. **`FileFormat.test.ts` is the one that reads from disk**, the two things it checks being files |
 | `tests/components/` | Rendered React components | Anything, with the preload bridge stubbed on `window` |
 | `tests/testUtils/` | Shared factories, re-exported through `index.ts` | Anything |
 
@@ -41,6 +41,7 @@ A test imports application code through the absolute `src/...` prefix and its ow
 - **`stubLedgerBridge` stands in for the preload.** Every channel it publishes is answered, and a test overrides only the ones it cares about — so a channel added to the bridge is a compile error here rather than an undefined function at run time. It also puts the price bridge up, through `stubPricesBridge`, so that **no test can reach the network by forgetting to**: the default pass asks for nothing and comes back with nothing, and a test that wants a pass overrides it *after* opening the ledger.
 - **Stub Electron at the seam.** The main process modules take the parts of Electron they use as options — `Pick<App, 'getPath' | 'isPackaged'>`, `Pick<IpcMain, 'handle'>` — so a test passes an object rather than mocking the `electron` module.
 - **Test the refusal, not only the happy path.** The cases worth writing down are usually the ones that say no: a packaged run ignoring the development server variable, a bridge that does not answer.
+- **`FileFormat.test.ts` is a test of the documentation.** [§9](09-file-format.md) exists so that a one-off migration script can write a file the application opens, which is worth nothing if the page is not exact. So `scripts/write-sample-ledger.js` writes one from §9's tables alone — importing nothing from `src` — and this test runs it, hands the bytes to the real reader, and puts §9's own worked example through the same reader. A field the page leaves out or a scale it states wrongly fails here.
 
 ## 7.5 Running them
 
@@ -53,4 +54,4 @@ Vitest is configured inside `vite.config.mts`, so the tests resolve `src/...` th
 
 ---
 
-[← §6 Styling](06-styling.md) · [§8 Implementation plan →](08-implementation-plan.md)
+[← §6 Styling](06-styling.md) · [§8 Decisions →](08-decisions.md)

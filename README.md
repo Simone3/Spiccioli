@@ -6,9 +6,9 @@ No account, no server, no synchronization service of its own. The file lives whe
 
 ## Status
 
-**In development.** There is nothing to install yet. A file can be created, opened and saved, and the eight screens below are reachable — but only Settings is finished, and the rest are being built one at a time. What Spiccioli will do is written down in full in the functional analysis below.
+**Feature complete, not yet released.** All eight screens below are built and everything on this page works. There is no installer to download yet: until the first release is cut, Spiccioli is run from source — Node 24 or later, then `npm install` and `npm start`, which the technical reference below sets out in full.
 
-## What it will do
+## What it does
 
 - **Portfolio** — everything owned, in one figure and broken down.
 - **Accounts** — the institutions and accounts the money sits in.

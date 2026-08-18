@@ -22,7 +22,7 @@ let esbuildContext;
 let electronProcess;
 
 // Rebuilds can arrive while a relaunch is still stopping the previous process, and two of them must never spawn Electron at the same time:
-// the second process would fail the single instance lock and quit immediately
+// nothing stops a second Spiccioli from running, so what would come up is two windows on one development loop
 let relaunchChain = Promise.resolve();
 
 let isShuttingDown = false;
@@ -64,7 +64,7 @@ const stopElectron = async () => {
 
 	await Promise.race([ exited, timeout ]);
 
-	// The single instance lock makes a process that will not go away a hard stop for the next launch, so it is killed outright
+	// A process that will not go away would leave its window up beside the one the relaunch is about to open, so it is killed outright
 	if(child.exitCode === null && child.signalCode === null) {
 		child.kill('SIGKILL');
 		await exited;

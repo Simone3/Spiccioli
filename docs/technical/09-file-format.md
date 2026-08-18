@@ -1,10 +1,12 @@
 # §9 — The ledger file format
 
-*[Index](README.md) · [← §8 Implementation plan](08-implementation-plan.md)*
+*[Index](README.md) · [← §8 Decisions](08-decisions.md)*
 
 The format of a `.spiccioli` file, documented well enough for a script to write one the application opens. That is what this page exists for: [§12](../functional/specs/12-storage.md) requires it, because ten years of history are loaded by a one-off migration script rather than by the application.
 
-**Read [§8.2](08-implementation-plan.md#82-decisions) first if you want to know *why* the format is this.** This page says what it is.
+**Read [§8.1](08-decisions.md#81-the-fourteen-decisions) first if you want to know *why* the format is this.** This page says what it is.
+
+**It is checked rather than trusted.** `scripts/write-sample-ledger.js` writes a `.spiccioli` file from these tables alone, importing nothing from `src`, and `tests/logic/FileFormat.test.ts` hands its bytes and the worked example of [§9.6](#96-a-worked-example) to the application's own reader — so a field this page leaves out, or a scale it states wrongly, fails the suite rather than the person who trusted it. See [§9.8](#98-writing-one-from-a-script).
 
 ---
 
@@ -377,6 +379,19 @@ Reading the figures back: the current account opened with **€ 2.500,00**, the 
 
 All of it is pure: bytes in, model out, and nothing about a filesystem in any of it. Where the bytes come from is [§1](01-architecture.md)'s.
 
+## 9.8 Writing one from a script
+
+```sh
+npm run write-sample-ledger            # writes dist/sample-ledger.spiccioli
+npm run write-sample-ledger -- /tmp/x.spiccioli
+```
+
+`scripts/write-sample-ledger.js` is the worked example of [§9.6](#96-a-worked-example) at full size: every one of the eleven entities populated, all twenty-seven categories, a pension fund with its exit tax, a transaction no rule claims, a sale with the tax the broker withheld. **It imports nothing from `src`** — it was written by reading the tables above, which is the position whoever writes the migration script is in — so what it proves is that those tables are enough.
+
+`tests/logic/FileFormat.test.ts` is what keeps it proving it: it runs the script, reads the file it wrote through `readLedgerDocument`, writes the result back out through `writeLedgerDocument` and reads it again, and checks that the automatic rows honour the invariant of [§9.3](#93-the-entities). It puts the worked example above through the same reader, and it holds the category list of [§9.3](#93-the-entities) to the ids the code actually seeds.
+
+**Start a migration script by copying it.** What it does not do is decide anything: it writes made-up figures, and the shape is the whole of what is worth taking.
+
 ---
 
-[← §8 Implementation plan](08-implementation-plan.md)
+[← §8 Decisions](08-decisions.md)

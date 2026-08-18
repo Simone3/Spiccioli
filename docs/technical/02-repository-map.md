@@ -61,7 +61,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/shell/AppRoutes.ts` | The nine paths and the eight sidebar entries, written down once |
 | `components/shell/AppShell.tsx` `.css` | The sidebar and the routed screen beside it, and the return to Portfolio when the open file changes |
 | `components/shell/Sidebar.tsx` `.css` | The eight screens, the failing-check badge and the save state ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)) |
-| `components/shell/ScreenLayout.tsx` `.css` | The shape every screen has, and the note a screen that is still a shell carries |
+| `components/shell/ScreenLayout.tsx` `.css` | The shape every screen has — a heading, what the screen says about what it is showing, the controls beside it — and nothing of any screen's own |
 | `components/shell/StorageNotices.tsx` `.css` | The three lines the file can put on whichever screen the user is on |
 | `components/shell/TransactionHandoff.ts` | How one screen hands its filters to Transactions, over the router's own location state ([§5.2](../functional/specs/05-transactions.md#52-ordering-and-paging)) |
 | `components/shell/RecordLinks.ts` | The same thing for Investments and Salaries, and the follow of a check entry to the record it names ([§9](../functional/specs/09-checks.md)) |
@@ -129,7 +129,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `vitest-env.d.ts` | Declares the Vitest globals the config enables |
 | `framework/` | The framework's own tests, which depend only on framework modules |
 | `main/` | Tests for the Electron main process modules |
-| `logic/` | Tests for the pure logic: the money arithmetic, the reader, the writer, the upgrade, the autosave, the preferences, the calculations of each screen |
+| `logic/` | Tests for the pure logic: the money arithmetic, the reader, the writer, the upgrade, the autosave, the preferences, the calculations of each screen — and `FileFormat.test.ts`, which checks [§9](09-file-format.md) itself against the reader |
 | `components/` | Tests that render React components |
 | `testUtils/` | Shared factories, re-exported through `testUtils/index.ts`: the ledger records, the translator, and the application with its bridge stubbed and its providers in place |
 
@@ -143,6 +143,7 @@ Covered in [§7](07-testing.md).
 | `build-electron.js` | The one-shot esbuild build |
 | `dev.js` | The development loop: Vite dev server, watched esbuild, and an Electron process relaunched on every rebuild |
 | `build-icons.js` | Rasterizes `assets/icon.svg` into the three icon formats the packagers want |
+| `write-sample-ledger.js` | Writes a `.spiccioli` file from [§9](09-file-format.md) alone, importing nothing from `src` — the worked example a migration script starts from, and what `tests/logic/FileFormat.test.ts` holds §9 to |
 
 ## 2.7 Everything else
 
