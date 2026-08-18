@@ -16,8 +16,9 @@ import type { LedgerDocument } from 'src/types/LedgerTypes';
 
 const translator = createSpiccioliTranslator('en');
 
-// A quantity, a unit price and a rate are all four decimal places, so a whole unit is ten thousand
+// A unit price and a rate are four decimal places, so a whole unit of either is ten thousand, and a quantity is six
 const UNITS = 10000;
+const QUANTITY_UNITS = 1000000;
 
 const TODAY = '2026-04-15';
 
@@ -95,7 +96,7 @@ describe('what a point is worth', () => {
 	test('carries a holding at its cost before the first price there was, and says the point was drawn from cost', () => {
 		const document = seriesDocument({
 			prices: [ makePrice({ securityId: 'swda', date: '2026-03-20', value: 1200 * UNITS }) ],
-			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 10 * UNITS, unitPrice: 1000 * UNITS, fees: 0 }) ]
+			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 0 }) ]
 		});
 
 		const points = seriesOf(document);
@@ -111,7 +112,7 @@ describe('what a point is worth', () => {
 
 	test('values a holding whose security has no price at all at nothing, at every point, without calling it a cost', () => {
 		const document = seriesDocument({
-			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 10 * UNITS, unitPrice: 1000 * UNITS, fees: 0 }) ]
+			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 0 }) ]
 		});
 
 		for(const point of seriesOf(document)) {
@@ -124,8 +125,8 @@ describe('what a point is worth', () => {
 		const document = seriesDocument({
 			prices: [ makePrice({ securityId: 'swda', date: '2026-01-20', value: 1000 * UNITS }) ],
 			trades: [
-				makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 10 * UNITS, unitPrice: 1000 * UNITS, fees: 0 }),
-				makeTrade({ id: 'sold', kind: 'sale', securityId: 'swda', accountId: 'dossier', date: '2026-04-02', quantity: 40 * UNITS, unitPrice: 1100 * UNITS, fees: 0, insertionSeq: 2 })
+				makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 0 }),
+				makeTrade({ id: 'sold', kind: 'sale', securityId: 'swda', accountId: 'dossier', date: '2026-04-02', quantity: 40 * QUANTITY_UNITS, unitPrice: 1100 * UNITS, fees: 0, insertionSeq: 2 })
 			]
 		});
 
@@ -189,8 +190,8 @@ describe('the final point', () => {
 				makeTransaction({ id: 'grew', accountId: 'pension', date: '2026-03-20', categoryId: 'value-adjustment', amount: 44444 })
 			],
 			trades: [
-				makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 3_3333, unitPrice: 900_1234, fees: 295 }),
-				makeTrade({ id: 'more', securityId: 'swda', accountId: 'dossier', date: '2026-02-25', quantity: 7_7777, unitPrice: 1050_5555, fees: 295, insertionSeq: 2 })
+				makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 3_333300, unitPrice: 900_1234, fees: 295 }),
+				makeTrade({ id: 'more', securityId: 'swda', accountId: 'dossier', date: '2026-02-25', quantity: 7_777700, unitPrice: 1050_5555, fees: 295, insertionSeq: 2 })
 			]
 		});
 

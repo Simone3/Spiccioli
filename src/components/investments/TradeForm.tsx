@@ -16,7 +16,7 @@ import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { findSecurityByIsinOrTicker, isIsinTaken } from 'src/logic/investments/Securities';
 import { tradeTotal } from 'src/logic/investments/Trades';
-import type { IsoDate, LedgerId, TenThousandths, TradeKind } from 'src/types/LedgerTypes';
+import type { IsoDate, LedgerId, Millionths, TenThousandths, TradeKind } from 'src/types/LedgerTypes';
 
 /**
  * The form a trade is recorded on, and the one place a security is created without going to the Securities tab first.
@@ -33,7 +33,7 @@ import type { IsoDate, LedgerId, TenThousandths, TradeKind } from 'src/types/Led
  * chosen last.
  */
 
-// The smallest quantity and the smallest price a field admits, in the ten-thousandths both are stored in
+// The smallest quantity and the smallest price a field admits, each in the minor units its own field is stored in
 const SMALLEST_QUANTITY = 1;
 
 const SMALLEST_PRICE = 1;
@@ -48,7 +48,7 @@ export interface TradeFormValues {
 	// The security to write alongside the trade, where the form expanded
 	newSecurity: SecurityFormValues | undefined;
 
-	quantity: TenThousandths;
+	quantity: Millionths;
 	unitPrice: TenThousandths;
 	fees: number;
 	taxes: number;
@@ -84,7 +84,7 @@ export const TradeForm = ({ kind, onSave, onCancel }: TradeFormProps): ReactElem
 	const [ newSecurity, setNewSecurity ] = useState<SecurityFormValues>(() => {
 		return emptySecurityValues(preferences.defaultTaxRate);
 	});
-	const [ quantity, setQuantity ] = useState<TenThousandths | undefined>(undefined);
+	const [ quantity, setQuantity ] = useState<Millionths | undefined>(undefined);
 	const [ unitPrice, setUnitPrice ] = useState<TenThousandths | undefined>(undefined);
 	const [ fees, setFees ] = useState<number | undefined>(0);
 	const [ taxes, setTaxes ] = useState<number | undefined>(0);

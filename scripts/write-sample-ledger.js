@@ -64,8 +64,8 @@ const CONTRACT = 'contract-acme';
 /**
  * Builds the sample document.
  *
- * Every figure is an integer at the scale §9.2 fixes: amounts in cents, quantities, unit prices and rates in ten-thousandths, and
- * "hoursPerDay" in hundredths. Every key of every record is present, and a value that is not there is null.
+ * Every figure is an integer at the scale §9.2 fixes: amounts in cents, quantities in millionths, unit prices and rates in
+ * ten-thousandths, and "hoursPerDay" in hundredths. Every key of every record is present, and a value that is not there is null.
  * @returns The document, ready to be serialized.
  */
 const buildSampleLedger = () => {
@@ -268,7 +268,7 @@ const buildSampleLedger = () => {
 				securityId: WORLD_ETF,
 				accountId: BROKERAGE,
 				date: '2026-08-05',
-				quantity: 125000,
+				quantity: 12500000,
 				unitPrice: 1043100,
 				fees: 295,
 				taxes: 0,
@@ -281,7 +281,7 @@ const buildSampleLedger = () => {
 				securityId: BOND_ETF,
 				accountId: BROKERAGE,
 				date: '2026-08-05',
-				quantity: 30000,
+				quantity: 3000000,
 				unitPrice: 1180000,
 				fees: 295,
 				taxes: 0,
@@ -294,7 +294,7 @@ const buildSampleLedger = () => {
 				securityId: WORLD_ETF,
 				accountId: BROKERAGE,
 				date: '2026-08-07',
-				quantity: 25000,
+				quantity: 2500000,
 				unitPrice: 1054300,
 				fees: 295,
 				taxes: 728,

@@ -2,7 +2,7 @@ import { DateUtils } from 'src/framework/utils/DateUtils';
 import { positionKey, type Holding, type PositionWalk } from 'src/logic/investments/Holdings';
 import { indexLatestPrices } from 'src/logic/investments/Securities';
 import { tradeGrossWorking, type WorkingAmount } from 'src/logic/investments/Trades';
-import { MONEY_SCALES, multiplyAtRateScale, roundHalfAwayFromZero, widenToWorkingScale } from 'src/logic/money/Money';
+import { MONEY_SCALES, multiplyQuantityByRateScale, roundHalfAwayFromZero, widenToWorkingScale } from 'src/logic/money/Money';
 import type { IsoDate, LedgerDocument, TenThousandths, Trade } from 'src/types/LedgerTypes';
 
 /**
@@ -224,7 +224,7 @@ export const portfolioAnnualisedReturn = (document: LedgerDocument, walk: Positi
 			continue;
 		}
 
-		const terminalValue = position.quantity > 0 ? multiplyAtRateScale(position.quantity, latest.value) : 0;
+		const terminalValue = position.quantity > 0 ? multiplyQuantityByRateScale(position.quantity, latest.value) : 0;
 
 		flows.push(...buildCashFlows(position.trades, terminalValue, today));
 	}

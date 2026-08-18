@@ -7,8 +7,8 @@ import { MONEY_SCALES } from 'src/logic/money/Money';
  * The shapes the one numeric field is used in.
  *
  * **Every monetary field in the application is the same field**: one control, at most two decimals, wherever an amount is
- * entered. A price and a quantity are the two exceptions and carry four; a percentage carries one and is entered as the
- * percentage while the fraction is what is stored; a count carries none.
+ * entered. A price is the one exception and carries four, a quantity carries six; a percentage carries one and is entered as
+ * the percentage while the fraction is what is stored; a count carries none.
  *
  * Whether a field accepts a sign, whether zero is allowed and what its floor and ceiling are vary by field and are the caller's
  * to state. The shape never does.
@@ -61,12 +61,12 @@ export const PriceField = (props: NumericFieldProps): ReactElement => {
 };
 
 /**
- * A quantity: four decimals and no currency.
+ * A quantity: six decimals and no currency, a broker selling fractional shares stating one to six.
  * @param props The field's props.
  * @returns The field.
  */
 export const QuantityField = (props: NumericFieldProps): ReactElement => {
-	return <DecimalField {...props} scale={MONEY_SCALES.rate}/>;
+	return <DecimalField {...props} scale={MONEY_SCALES.quantity}/>;
 };
 
 /**

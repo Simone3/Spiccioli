@@ -98,7 +98,7 @@ export const makeTrade = (overrides: Partial<Trade> = {}): Trade => {
 		securityId: 'security-1',
 		accountId: 'account-2',
 		date: '2026-08-08',
-		quantity: 125000,
+		quantity: 12500000,
 		unitPrice: 1054300,
 		fees: 295,
 		taxes: 0,

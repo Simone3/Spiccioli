@@ -18,8 +18,9 @@ import type { Account, LedgerDocument, Transaction } from 'src/types/LedgerTypes
 
 const translator = createSpiccioliTranslator('en');
 
-// A quantity, a unit price and a rate are all four decimal places, so a whole unit is ten thousand
+// A unit price and a rate are four decimal places, so a whole unit of either is ten thousand, and a quantity is six
 const UNITS = 10000;
+const QUANTITY_UNITS = 1000000;
 
 const cents = (working: number): number => {
 	return narrowFromWorkingScale(working, MONEY_SCALES.amount);
@@ -87,7 +88,7 @@ describe('the four lines and the headline', () => {
 		const document = portfolioDocument({
 			accounts: [ currentAccount({ openingBalance: 250000 }), pensionAccount(), brokerageAccount() ],
 			prices: [ makePrice({ securityId: 'swda', date: '2026-08-01', value: 1200 * UNITS }) ],
-			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-05', quantity: 10 * UNITS, unitPrice: 1000 * UNITS, fees: 500 }) ],
+			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-05', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 500 }) ],
 			transactions: [
 				makeTransaction({ id: 'shopping', accountId: 'current', amount: -12345 }),
 				contribution({ id: 'paid-in', amount: 500000 }),
@@ -124,7 +125,7 @@ describe('the four lines and the headline', () => {
 		const document = portfolioDocument({
 			accounts: [ brokerageAccount() ],
 			prices: [ makePrice({ securityId: 'swda', date: '2026-08-01', value: 1200 * UNITS }) ],
-			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-05', quantity: 10 * UNITS, unitPrice: 1000 * UNITS, fees: 500 }) ]
+			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-05', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 500 }) ]
 		});
 
 		const { figures, balances } = balancesOf(document);
@@ -142,8 +143,8 @@ describe('the four lines and the headline', () => {
 			accounts: [ brokerageAccount() ],
 			prices: [ makePrice({ securityId: 'swda', date: '2026-08-01', value: 1200 * UNITS }) ],
 			trades: [
-				makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-05', quantity: 10 * UNITS, unitPrice: 1000 * UNITS, fees: 0 }),
-				makeTrade({ id: 'sold', kind: 'sale', securityId: 'swda', accountId: 'dossier', date: '2026-02-05', quantity: 40 * UNITS, unitPrice: 1100 * UNITS, fees: 0, insertionSeq: 2 })
+				makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-05', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 0 }),
+				makeTrade({ id: 'sold', kind: 'sale', securityId: 'swda', accountId: 'dossier', date: '2026-02-05', quantity: 40 * QUANTITY_UNITS, unitPrice: 1100 * UNITS, fees: 0, insertionSeq: 2 })
 			]
 		});
 
@@ -242,8 +243,8 @@ describe('gains and costs', () => {
 		const document = portfolioDocument({
 			accounts: [ brokerageAccount() ],
 			trades: [
-				makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-05', quantity: 10 * UNITS, unitPrice: 1000 * UNITS, fees: 0 }),
-				makeTrade({ id: 'sold', kind: 'sale', securityId: 'swda', accountId: 'dossier', date: '2026-02-05', quantity: 40 * UNITS, unitPrice: 1100 * UNITS, fees: 0, insertionSeq: 2 })
+				makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-05', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 0 }),
+				makeTrade({ id: 'sold', kind: 'sale', securityId: 'swda', accountId: 'dossier', date: '2026-02-05', quantity: 40 * QUANTITY_UNITS, unitPrice: 1100 * UNITS, fees: 0, insertionSeq: 2 })
 			]
 		});
 
@@ -260,7 +261,7 @@ describe('the breakdown by type', () => {
 		const document = portfolioDocument({
 			accounts: [ currentAccount({ openingBalance: 300000 }), brokerageAccount() ],
 			prices: [ makePrice({ securityId: 'swda', date: '2026-08-01', value: 1000 * UNITS }) ],
-			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-05', quantity: 10 * UNITS, unitPrice: 1000 * UNITS, fees: 0 }) ]
+			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-05', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 0 }) ]
 		});
 
 		const breakdown = deriveTypeBreakdown({

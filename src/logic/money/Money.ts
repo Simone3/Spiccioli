@@ -1,13 +1,14 @@
 /**
  * The arithmetic every figure in the file goes through.
  *
- * Every stored number is an integer in minor units — cents for money, ten-thousandths for quantities, unit prices and rates,
- * hundredths for "hoursPerDay" — so a sum, a difference and a product of stored figures are all exact, and a file round-trips
- * without moving. The working scale everything widens into is eight decimal places: a quantity times a unit price is four
- * decimals by four and lands there exactly, and an amount widens into it with room to spare.
+ * Every stored number is an integer in minor units — cents for money, millionths for quantities, ten-thousandths for unit
+ * prices and rates, hundredths for "hoursPerDay" — so a sum and a difference of stored figures are exact, and a file round-trips
+ * without moving. The working scale everything widens into is eight decimal places, and every stored figure widens into it with
+ * room to spare.
  *
  * **A division is the only inexact step in the application**, and it rounds half away from zero, six orders of magnitude below
- * the cent anything is ever shown at. So do the deliberate roundings to the cent the calculations name. Neither ever uses the
+ * the cent anything is ever shown at. A quantity times a unit price is six decimals by four and therefore lands two places past
+ * the working scale: it comes back to it by that same division, and it is the one product that is not exact. So do the deliberate roundings to the cent the calculations name. Neither ever uses the
  * language's own "Math.round", which rounds -0,5 to -0 and 0,5 to 1 and is therefore not symmetric.
  *
  * Nothing here needs a dependency: a number holds an integer exactly to 2^53, which is orders of magnitude past what a personal
@@ -17,6 +18,7 @@
 // How many decimal places each kind of stored figure carries, and the scale everything is widened into before it is combined
 export const MONEY_SCALES = {
 	amount: 2,
+	quantity: 6,
 	rate: 4,
 	hundredths: 2,
 	working: 8
@@ -72,16 +74,6 @@ export const narrowFromWorkingScale = (value: number, scale: number): number => 
 };
 
 /**
- * Multiplies two four-decimal figures, which lands on the working scale exactly. A quantity times a unit price is this operation.
- * @param first Four-decimal figure, in ten-thousandths.
- * @param second Four-decimal figure, in ten-thousandths.
- * @returns Their product, at the working scale.
- */
-export const multiplyAtRateScale = (first: number, second: number): number => {
-	return first * second;
-};
-
-/**
  * Divides one working-scale figure by another, at the working scale.
  *
  * The whole part and the remainder are taken separately rather than scaling the numerator up first: a working-scale figure is
@@ -102,22 +94,60 @@ export const divideAtWorkingScale = (numerator: number, denominator: number): nu
 };
 
 /**
+ * Multiplies a working-scale figure by one in a stored scale, landing back on the working scale.
+ * The working operand is split into its whole part and its remainder before it is multiplied, so the largest intermediate figure
+ * is the size of the answer rather than a scale factor times it.
+ * @param value Figure at the working scale.
+ * @param factor Figure in minor units at the scale below.
+ * @param scale Decimal places that figure carries.
+ * @returns Their product, at the working scale, rounded half away from zero.
+ */
+const multiplyWorkingScaleByScaledFigure = (value: number, factor: number, scale: number): number => {
+	const divisor = getScaleFactor(scale);
+	const wholePart = Math.trunc(value / divisor);
+	const remainder = value - wholePart * divisor;
+
+	return roundHalfAwayFromZero(wholePart * factor + remainder * factor / divisor);
+};
+
+/**
  * Multiplies a working-scale figure by a four-decimal one and lands back on the working scale.
  *
- * It is what a quantity times a weighted average cost is, and what a taxable gain times a tax rate is: one side has already been
- * widened and the other is a stored `decimal(4)`, so the plain product would be four decimal places too far to the left. The
- * working operand is split into its whole part and its remainder before it is multiplied, exactly as the division below is, so
- * the largest intermediate figure is the size of the answer rather than ten thousand times it.
+ * It is what a taxable gain times a tax rate is, and what a widened quantity times a unit price is: one side has already been
+ * widened and the other is a stored `decimal(4)`, so the plain product would be four decimal places too far to the left.
  * @param value Figure at the working scale.
  * @param rate Four-decimal figure, in ten-thousandths.
  * @returns Their product, at the working scale, rounded half away from zero.
  */
 export const multiplyWorkingScaleByRateScale = (value: number, rate: number): number => {
-	const factor = getScaleFactor(MONEY_SCALES.rate);
-	const wholePart = Math.trunc(value / factor);
-	const remainder = value - wholePart * factor;
+	return multiplyWorkingScaleByScaledFigure(value, rate, MONEY_SCALES.rate);
+};
 
-	return roundHalfAwayFromZero(wholePart * rate + remainder * rate / factor);
+/**
+ * Multiplies a working-scale figure by a quantity and lands back on the working scale.
+ *
+ * It is what an average cost times a quantity is: the invested total behind a position, and the cost basis a sale takes out of
+ * it. The same splitting as above, six decimal places off instead of four.
+ * @param value Figure at the working scale.
+ * @param quantity Six-decimal figure, in millionths.
+ * @returns Their product, at the working scale, rounded half away from zero.
+ */
+export const multiplyWorkingScaleByQuantityScale = (value: number, quantity: number): number => {
+	return multiplyWorkingScaleByScaledFigure(value, quantity, MONEY_SCALES.quantity);
+};
+
+/**
+ * Multiplies a quantity by a four-decimal figure and lands on the working scale. A quantity times a unit price is this operation.
+ *
+ * Six decimals by four is ten, two past the working scale, so this is the one product in the application that rounds: the
+ * quantity is widened first and the multiplication above brings the four decimals of the other side back off. What is rounded
+ * away sits at 10^-10 of a euro, four orders of magnitude below the cent the answer is ever shown at.
+ * @param quantity Six-decimal figure, in millionths.
+ * @param rate Four-decimal figure, in ten-thousandths.
+ * @returns Their product, at the working scale, rounded half away from zero.
+ */
+export const multiplyQuantityByRateScale = (quantity: number, rate: number): number => {
+	return multiplyWorkingScaleByRateScale(widenToWorkingScale(quantity, MONEY_SCALES.quantity), rate);
 };
 
 /**

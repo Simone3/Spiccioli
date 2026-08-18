@@ -1,4 +1,4 @@
-import { MONEY_SCALES, multiplyAtRateScale, narrowFromWorkingScale, widenToWorkingScale } from 'src/logic/money/Money';
+import { MONEY_SCALES, multiplyQuantityByRateScale, narrowFromWorkingScale, widenToWorkingScale } from 'src/logic/money/Money';
 import type { Cents, IsoDate, LedgerId, Trade, TradeKind } from 'src/types/LedgerTypes';
 
 /**
@@ -9,7 +9,7 @@ import type { Cents, IsoDate, LedgerId, Trade, TradeKind } from 'src/types/Ledge
  * narrow the list instead.
  *
  * **A trade's total is derived and never entered**, and it is the figure the derived matching pairs against the bank transaction.
- * It is rounded to the cent, a quantity times a unit price being exact four decimal places further down than an amount is stated.
+ * It is rounded to the cent, a quantity times a unit price landing eight decimal places down before anything is shown.
  */
 
 // A figure at the working scale of eight decimal places, which is where a derived money figure is held before it is shown
@@ -115,12 +115,12 @@ export type TradeFigures = Pick<Trade, 'kind' | 'quantity' | 'unitPrice' | 'fees
 
 /**
  * What the trade moved at the market, before anything the broker took or added: quantity times unit price.
- * Four decimals by four lands on the working scale exactly, so this figure is not a rounding of anything.
+ * Six decimals by four is two past the working scale, so this is the one figure in a total that is rounded onto it.
  * @param trade The trade, or the figures a form holds.
  * @returns The gross figure, at the working scale.
  */
 export const tradeGrossWorking = (trade: TradeFigures): WorkingAmount => {
-	return multiplyAtRateScale(trade.quantity, trade.unitPrice);
+	return multiplyQuantityByRateScale(trade.quantity, trade.unitPrice);
 };
 
 /**

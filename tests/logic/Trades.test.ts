@@ -16,6 +16,7 @@ import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
 import type { Trade } from 'src/types/LedgerTypes';
 
 const UNITS = 10000;
+const QUANTITY_UNITS = 1000000;
 
 const cents = (working: number): number => {
 	return narrowFromWorkingScale(working, MONEY_SCALES.amount);
@@ -31,13 +32,13 @@ const sale = (overrides: Partial<Trade> = {}): Trade => {
 
 describe('the trade total', () => {
 	test('adds the fees on a purchase and takes the tax and the fees off a sale', () => {
-		expect(tradeTotal(purchase({ quantity: 10 * UNITS, unitPrice: 50 * UNITS, fees: 1900 }))).toBe(51900);
-		expect(tradeTotal(sale({ quantity: 10 * UNITS, unitPrice: 50 * UNITS, fees: 1900, taxes: 3200 }))).toBe(44900);
+		expect(tradeTotal(purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, fees: 1900 }))).toBe(51900);
+		expect(tradeTotal(sale({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, fees: 1900, taxes: 3200 }))).toBe(44900);
 	});
 
-	test('is rounded to the cent, a quantity times a price being four decimals further down', () => {
+	test('is rounded to the cent, a quantity times a price landing well below it', () => {
 		// 1,5 units at € 3,3333 is € 4,99995
-		expect(tradeTotal(purchase({ quantity: 15000, unitPrice: 33333, fees: 0 }))).toBe(500);
+		expect(tradeTotal(purchase({ quantity: 1500000, unitPrice: 33333, fees: 0 }))).toBe(500);
 	});
 });
 
@@ -127,12 +128,12 @@ describe('what a footer states', () => {
 
 	test('sums the realised gains that exist and says how many it left out', () => {
 		const good = [
-			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }),
-			sale({ id: 'two', date: '2021-01-10', quantity: 4 * UNITS, unitPrice: 90 * UNITS })
+			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }),
+			sale({ id: 'two', date: '2021-01-10', quantity: 4 * QUANTITY_UNITS, unitPrice: 90 * UNITS })
 		];
 		const broken = [
-			purchase({ id: 'three', securityId: 'vwce', date: '2020-01-10', quantity: UNITS, unitPrice: 50 * UNITS }),
-			sale({ id: 'four', securityId: 'vwce', date: '2021-01-10', quantity: 9 * UNITS, unitPrice: 90 * UNITS })
+			purchase({ id: 'three', securityId: 'vwce', date: '2020-01-10', quantity: QUANTITY_UNITS, unitPrice: 50 * UNITS }),
+			sale({ id: 'four', securityId: 'vwce', date: '2021-01-10', quantity: 9 * QUANTITY_UNITS, unitPrice: 90 * UNITS })
 		];
 		const walk = walkPositions([ ...good, ...broken ]);
 		const totals = sumRealisedGains(tradesOfKind([ ...good, ...broken ], 'sale'), walk.realisedGains);

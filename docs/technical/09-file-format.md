@@ -45,7 +45,8 @@ The format of a `.spiccioli` file, documented well enough for a script to write 
 | Kind | Fields | Stored as |
 | --- | --- | --- |
 | `amount` | every monetary field | **cents**, two decimal places. `€ 42,50` is `4250` |
-| `decimal(4)` | `quantity`, `unitPrice`, a Price's `value` | **ten-thousandths**, four decimal places. `12,5` units is `125000` |
+| `decimal(6)` | `quantity` | **millionths**, six decimal places. `12,5` units is `12500000` |
+| `decimal(4)` | `unitPrice`, a Price's `value` | **ten-thousandths**, four decimal places. `€ 104,31` is `1043100` |
 | `fraction` | `taxRate`, `exitTaxRate` | **ten-thousandths**. 26% is `2600`, 12,5% is `1250` |
 | `decimal(2)` | `hoursPerDay` | **hundredths**. 8 hours is `800` |
 | `int` | `workingDays`, `monthsPerYear`, `order`, `insertionSeq`, `year`, `month`, `schemaVersion` | as they are |
@@ -131,7 +132,7 @@ Every field of every entity, in the order the application writes them. `→` mar
 | `securityId` | string → `securities` | |
 | `accountId` | string → `accounts` | Always a `brokerage` account |
 | `date` | date | |
-| `quantity` | integer, ten-thousandths | Always positive; `kind` carries the direction |
+| `quantity` | integer, millionths | Always positive; `kind` carries the direction |
 | `unitPrice` | integer, ten-thousandths | |
 | `fees` | integer, cents | Actually charged |
 | `taxes` | integer, cents | Withheld on a sale; always `0` on a purchase |
@@ -317,7 +318,7 @@ Small enough to read and complete enough to open. Three of the twenty-seven cate
 			"securityId": "e2b1c0a4-3333-4a00-8000-000000000001",
 			"accountId": "e2b1c0a4-2222-4a00-8000-000000000002",
 			"date": "2026-08-05",
-			"quantity": 125000,
+			"quantity": 12500000,
 			"unitPrice": 1043100,
 			"fees": 295,
 			"taxes": 0,

@@ -3,8 +3,8 @@
  *
  * Two rules run through every type here and neither has an exception.
  *
- * **Every stored number is an integer**, at the scale its field fixes: amounts in cents, quantities, unit prices and rates in
- * ten-thousandths, `hoursPerDay` in hundredths, and the counts as they are. A fractional figure is not a number this application
+ * **Every stored number is an integer**, at the scale its field fixes: amounts in cents, quantities in millionths, unit prices
+ * and rates in ten-thousandths, `hoursPerDay` in hundredths, and the counts as they are. A fractional figure is not a number this application
  * ever wrote, and the reader refuses one. The arithmetic that goes with the scales is in "src/logic/money/Money.ts".
  *
  * **Every key is present in the file**, and a value that is not there is written as `null` rather than left out. That is what lets
@@ -20,8 +20,11 @@ export type IsoDate = string;
 // A monetary figure, in cents. Two decimal places.
 export type Cents = number;
 
-// A quantity, a unit price or a rate, in ten-thousandths. Four decimal places.
+// A unit price or a rate, in ten-thousandths. Four decimal places.
 export type TenThousandths = number;
+
+// A quantity, in millionths. Six decimal places, which is what a broker selling fractional shares states one to.
+export type Millionths = number;
 
 // A figure with two decimal places that is not money, which today is "hoursPerDay" alone
 export type Hundredths = number;
@@ -185,7 +188,7 @@ export interface Trade {
 	date: IsoDate;
 
 	// Always positive: "kind" carries the direction
-	quantity: TenThousandths;
+	quantity: Millionths;
 	unitPrice: TenThousandths;
 	fees: Cents;
 

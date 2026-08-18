@@ -104,7 +104,7 @@ A security belongs to no institution — it is the same instrument everywhere. T
 | securityId | ref | |
 | accountId | ref | **Always a `Brokerage` account.** The cash moved separately, through a transaction on a cash account at the same institution. |
 | date | date | **Never in the future** ([§13](13-validation.md)). |
-| quantity | decimal(4) | Always positive; `kind` carries direction. |
+| quantity | decimal(6) | Always positive; `kind` carries direction. **Six decimals, not four**: a broker that sells fractional shares states one to six, and a quantity truncated to four makes the trade total disagree with the bank ([§11.6](11-calculations.md#116-derived-matching)). |
 | unitPrice | decimal(4) | |
 | fees | amount | Actually charged, per trade. |
 | taxes | amount | Capital-gains tax actually withheld. Sales only; always 0 on a purchase. |

@@ -14,6 +14,7 @@ import type { LedgerDocument, Trade } from 'src/types/LedgerTypes';
 import type { PriceFetchOutcome } from 'src/types/PriceIpcTypes';
 
 const UNITS = 10000;
+const QUANTITY_UNITS = 1000000;
 
 const brokerage = makeAccount({ id: 'dossier', name: 'Dossier Titoli', institutionId: 'fineco', type: 'brokerage', openingBalance: 0 });
 
@@ -99,7 +100,7 @@ describe('the Investments screen', () => {
 
 	test('values a holding at its latest price and states the gain against what it cost', async() => {
 		await openInvestments(withRecords({
-			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ],
+			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ],
 			prices: [
 				makePrice({ securityId: 'swda', date: '2026-01-01', value: 60 * UNITS }),
 				makePrice({ securityId: 'swda', date: '2026-08-08', value: 90 * UNITS })
@@ -114,7 +115,7 @@ describe('the Investments screen', () => {
 
 	test('opens the detail panel with the whole liquidation breakdown', async() => {
 		await openInvestments(withRecords({
-			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ],
+			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ],
 			prices: [ makePrice({ securityId: 'swda', date: '2026-08-08', value: 100 * UNITS }) ]
 		}));
 		await userEvent.click(screen.getByRole('button', { name: 'Show the detail of SWDA' }));
@@ -131,7 +132,7 @@ describe('the Investments screen', () => {
 
 	test('records a price from the holdings row, replacing whatever that day held', async() => {
 		await openInvestments(withRecords({
-			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ]
+			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]
 		}));
 		await userEvent.click(screen.getByRole('button', { name: 'Edit the price of SWDA' }));
 		await userEvent.type(screen.getByRole('textbox', { name: 'Price' }), '77');
@@ -147,14 +148,14 @@ describe('the Investments screen', () => {
 		await openInvestments(withRecords({
 			securities: [ swda, makeSecurity({ id: 'vwce', isin: 'IE00BK5BQT80', ticker: 'VWCE', name: 'Vanguard FTSE All-World' }) ],
 			trades: [
-				purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }),
+				purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }),
 				makeTrade({
 					id: 'two',
 					kind: 'sale',
 					securityId: 'swda',
 					accountId: 'dossier',
 					date: '2021-01-10',
-					quantity: 4 * UNITS,
+					quantity: 4 * QUANTITY_UNITS,
 					unitPrice: 90 * UNITS,
 					fees: 0,
 					taxes: 0,
@@ -166,7 +167,7 @@ describe('the Investments screen', () => {
 					securityId: 'vwce',
 					accountId: 'dossier',
 					date: '2021-02-10',
-					quantity: 5 * UNITS,
+					quantity: 5 * QUANTITY_UNITS,
 					unitPrice: 90 * UNITS,
 					fees: 0,
 					taxes: 0,
@@ -186,14 +187,14 @@ describe('the Investments screen', () => {
 	test('says nothing can be said about a security oversold in any account', async() => {
 		await openInvestments(withRecords({
 			trades: [
-				purchase({ id: 'one', date: '2020-01-10', quantity: 5 * UNITS, unitPrice: 50 * UNITS }),
+				purchase({ id: 'one', date: '2020-01-10', quantity: 5 * QUANTITY_UNITS, unitPrice: 50 * UNITS }),
 				makeTrade({
 					id: 'two',
 					kind: 'sale',
 					securityId: 'swda',
 					accountId: 'dossier',
 					date: '2021-01-10',
-					quantity: 9 * UNITS,
+					quantity: 9 * QUANTITY_UNITS,
 					unitPrice: 90 * UNITS,
 					fees: 0,
 					taxes: 0,
@@ -210,7 +211,7 @@ describe('the Investments screen', () => {
 
 	test('refuses to delete a security a trade points at, above the list and not in a modal', async() => {
 		await openInvestments(withRecords({
-			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ]
+			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]
 		}));
 		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
 		await userEvent.click(screen.getByRole('button', { name: 'What can be done to SWDA' }));
@@ -247,7 +248,7 @@ describe('the Investments screen', () => {
 
 	test('puts a pass to the user before anything is written, and writes the whole of it on one confirmation', async() => {
 		await openInvestments(withRecords({
-			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ],
+			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ],
 			prices: [ makePrice({ securityId: 'swda', date: '2026-08-07', value: 90 * UNITS, source: 'manual' }) ]
 		}));
 		stubPricesBridge({ updatePrices: quotedWith([ { outcome: 'quoted', securityId: 'swda', value: 923100, date: '2026-08-07' } ]) });
@@ -279,7 +280,7 @@ describe('the Investments screen', () => {
 
 	test('cancels a pass and leaves every price the file had standing', async() => {
 		await openInvestments(withRecords({
-			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ],
+			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ],
 			prices: [ makePrice({ securityId: 'swda', date: '2026-08-07', value: 90 * UNITS }) ]
 		}));
 		stubPricesBridge({ updatePrices: quotedWith([ { outcome: 'quoted', securityId: 'swda', value: 923100, date: '2026-08-07' } ]) });
@@ -293,7 +294,7 @@ describe('the Investments screen', () => {
 
 	test('shows the panel even when there is nothing to write, naming each security and its reason', async() => {
 		await openInvestments(withRecords({
-			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ]
+			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]
 		}));
 		stubPricesBridge({
 			updatePrices: quotedWith([ { outcome: 'refused', securityId: 'swda', refusal: 'not-euro', currency: 'USD' } ])

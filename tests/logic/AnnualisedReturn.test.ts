@@ -10,6 +10,7 @@ import type { LedgerDocument, Trade } from 'src/types/LedgerTypes';
  */
 
 const UNITS = 10000;
+const QUANTITY_UNITS = 1000000;
 
 const euros = (amount: number): number => {
 	return widenToWorkingScale(amount * 100, MONEY_SCALES.amount);
@@ -83,14 +84,14 @@ describe('when it is undefined', () => {
 describe('the flows a position produces', () => {
 	test('take the fees out on both sides and add a sale’s tax back', () => {
 		const trades = [
-			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS, fees: 1900 }),
+			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, fees: 1900 }),
 			makeTrade({
 				id: 'two',
 				kind: 'sale',
 				securityId: 'swda',
 				accountId: 'dossier',
 				date: '2021-01-10',
-				quantity: 4 * UNITS,
+				quantity: 4 * QUANTITY_UNITS,
 				unitPrice: 90 * UNITS,
 				fees: 1900,
 				taxes: 3200
@@ -104,11 +105,11 @@ describe('the flows a position produces', () => {
 	});
 
 	test('carry no terminal flow for a position that is closed', () => {
-		expect(buildCashFlows([ purchase({ quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ], 0, '2026-08-08')).toHaveLength(1);
+		expect(buildCashFlows([ purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ], 0, '2026-08-08')).toHaveLength(1);
 	});
 
 	test('carry the value of what is still held, on today', () => {
-		const flows = buildCashFlows([ purchase({ quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ], euros(700), '2026-08-08');
+		const flows = buildCashFlows([ purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ], euros(700), '2026-08-08');
 
 		expect(flows[1]).toEqual({ date: '2026-08-08', amount: euros(700) });
 	});
@@ -117,14 +118,14 @@ describe('the flows a position produces', () => {
 describe('the portfolio-wide figure', () => {
 	test('covers every trade in the file, positions since sold in full included', () => {
 		const document = documentWith([
-			purchase({ id: 'one', date: '2020-01-01', quantity: 10 * UNITS, unitPrice: 100 * UNITS }),
+			purchase({ id: 'one', date: '2020-01-01', quantity: 10 * QUANTITY_UNITS, unitPrice: 100 * UNITS }),
 			makeTrade({
 				id: 'two',
 				kind: 'sale',
 				securityId: 'swda',
 				accountId: 'dossier',
 				date: '2020-12-31',
-				quantity: 10 * UNITS,
+				quantity: 10 * QUANTITY_UNITS,
 				unitPrice: 110 * UNITS,
 				fees: 0,
 				taxes: 0
@@ -136,8 +137,8 @@ describe('the portfolio-wide figure', () => {
 
 	test('leaves out a position whose security has no price at all, and says so', () => {
 		const document = documentWith([
-			purchase({ id: 'one', securityId: 'swda', date: '2020-01-01', quantity: 10 * UNITS, unitPrice: 100 * UNITS }),
-			purchase({ id: 'two', securityId: 'vwce', date: '2020-01-01', quantity: 10 * UNITS, unitPrice: 100 * UNITS })
+			purchase({ id: 'one', securityId: 'swda', date: '2020-01-01', quantity: 10 * QUANTITY_UNITS, unitPrice: 100 * UNITS }),
+			purchase({ id: 'two', securityId: 'vwce', date: '2020-01-01', quantity: 10 * QUANTITY_UNITS, unitPrice: 100 * UNITS })
 		], {
 			securities: [ makeSecurity({ id: 'swda', ticker: 'SWDA' }), makeSecurity({ id: 'vwce', isin: 'IE00BK5BQT80', ticker: 'VWCE' }) ],
 			prices: [ makePrice({ securityId: 'swda', date: '2020-12-31', value: 110 * UNITS }) ]
@@ -148,14 +149,14 @@ describe('the portfolio-wide figure', () => {
 
 	test('leaves out an oversold position whole rather than dropping its terminal flow', () => {
 		const document = documentWith([
-			purchase({ id: 'one', date: '2020-01-01', quantity: 5 * UNITS, unitPrice: 100 * UNITS }),
+			purchase({ id: 'one', date: '2020-01-01', quantity: 5 * QUANTITY_UNITS, unitPrice: 100 * UNITS }),
 			makeTrade({
 				id: 'two',
 				kind: 'sale',
 				securityId: 'swda',
 				accountId: 'dossier',
 				date: '2020-12-31',
-				quantity: 9 * UNITS,
+				quantity: 9 * QUANTITY_UNITS,
 				unitPrice: 110 * UNITS,
 				fees: 0,
 				taxes: 0

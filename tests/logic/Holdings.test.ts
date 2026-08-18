@@ -20,8 +20,9 @@ import type { LedgerDocument, Trade } from 'src/types/LedgerTypes';
 
 const translator = createSpiccioliTranslator('en');
 
-// A quantity, a unit price and a rate are all four decimal places, so a whole unit is ten thousand
+// A unit price and a rate are four decimal places, so a whole unit of either is ten thousand, and a quantity is six
 const UNITS = 10000;
+const QUANTITY_UNITS = 1000000;
 
 const cents = (working: number): number => {
 	return narrowFromWorkingScale(working, MONEY_SCALES.amount);
@@ -70,9 +71,9 @@ describe('the walk order', () => {
 
 	test('reaches the same result whatever order the trades arrive in', () => {
 		const trades = [
-			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS, insertionSeq: 1 }),
-			sale({ id: 'two', date: '2021-06-01', quantity: 4 * UNITS, unitPrice: 60 * UNITS, insertionSeq: 2 }),
-			purchase({ id: 'three', date: '2022-03-01', quantity: 6 * UNITS, unitPrice: 70 * UNITS, insertionSeq: 3 })
+			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, insertionSeq: 1 }),
+			sale({ id: 'two', date: '2021-06-01', quantity: 4 * QUANTITY_UNITS, unitPrice: 60 * UNITS, insertionSeq: 2 }),
+			purchase({ id: 'three', date: '2022-03-01', quantity: 6 * QUANTITY_UNITS, unitPrice: 70 * UNITS, insertionSeq: 3 })
 		];
 
 		const forwards = walkPositions(trades).positions.get(positionKey('swda', 'dossier'));
@@ -84,7 +85,7 @@ describe('the walk order', () => {
 
 describe('the weighted average cost', () => {
 	test('takes the purchase fees into the cost basis', () => {
-		const walk = walkPositions([ purchase({ quantity: 10 * UNITS, unitPrice: 50 * UNITS, fees: 1900 }) ]);
+		const walk = walkPositions([ purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, fees: 1900 }) ]);
 		const position = walk.positions.get(positionKey('swda', 'dossier'));
 
 		// € 500,00 of stock and € 19,00 of commission over ten units is € 51,90 each
@@ -94,20 +95,20 @@ describe('the weighted average cost', () => {
 
 	test('is unchanged by a sale, which takes its own units out of the basis', () => {
 		const walk = walkPositions([
-			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS, fees: 1900 }),
-			sale({ id: 'two', date: '2021-01-10', quantity: 4 * UNITS, unitPrice: 90 * UNITS })
+			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, fees: 1900 }),
+			sale({ id: 'two', date: '2021-01-10', quantity: 4 * QUANTITY_UNITS, unitPrice: 90 * UNITS })
 		]);
 		const position = walk.positions.get(positionKey('swda', 'dossier'));
 
 		expect(position?.avgCost).toBe(5190000000);
-		expect(position?.quantity).toBe(6 * UNITS);
+		expect(position?.quantity).toBe(6 * QUANTITY_UNITS);
 		expect(cents(position?.costBasis ?? 0)).toBe(31140);
 	});
 
 	test('clears itself on a sale that lands on exactly zero', () => {
 		const walk = walkPositions([
-			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }),
-			sale({ id: 'two', date: '2021-01-10', quantity: 10 * UNITS, unitPrice: 90 * UNITS })
+			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }),
+			sale({ id: 'two', date: '2021-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 90 * UNITS })
 		]);
 		const position = walk.positions.get(positionKey('swda', 'dossier'));
 
@@ -119,8 +120,8 @@ describe('the weighted average cost', () => {
 
 	test('counts the lots the quantity came from', () => {
 		const walk = walkPositions([
-			purchase({ id: 'one', date: '2020-01-10', quantity: 3 * UNITS, unitPrice: 50 * UNITS }),
-			purchase({ id: 'two', date: '2020-02-10', quantity: 7 * UNITS, unitPrice: 60 * UNITS })
+			purchase({ id: 'one', date: '2020-01-10', quantity: 3 * QUANTITY_UNITS, unitPrice: 50 * UNITS }),
+			purchase({ id: 'two', date: '2020-02-10', quantity: 7 * QUANTITY_UNITS, unitPrice: 60 * UNITS })
 		]);
 
 		expect(walk.positions.get(positionKey('swda', 'dossier'))?.lotCount).toBe(2);
@@ -128,8 +129,8 @@ describe('the weighted average cost', () => {
 
 	test('reads a same-day round trip as a round trip and not as a dip below zero', () => {
 		const walk = walkPositions([
-			sale({ id: 'sold', date: '2020-01-10', quantity: 5 * UNITS, unitPrice: 60 * UNITS, insertionSeq: 2 }),
-			purchase({ id: 'bought', date: '2020-01-10', quantity: 5 * UNITS, unitPrice: 50 * UNITS, insertionSeq: 1 })
+			sale({ id: 'sold', date: '2020-01-10', quantity: 5 * QUANTITY_UNITS, unitPrice: 60 * UNITS, insertionSeq: 2 }),
+			purchase({ id: 'bought', date: '2020-01-10', quantity: 5 * QUANTITY_UNITS, unitPrice: 50 * UNITS, insertionSeq: 1 })
 		]);
 
 		expect(walk.positions.get(positionKey('swda', 'dossier'))?.oversold).toBe(false);
@@ -138,10 +139,10 @@ describe('the weighted average cost', () => {
 
 describe('a position that goes below zero', () => {
 	const oversoldTrades = [
-		purchase({ id: 'one', date: '2020-01-10', quantity: 5 * UNITS, unitPrice: 50 * UNITS }),
-		sale({ id: 'two', date: '2021-01-10', quantity: 3 * UNITS, unitPrice: 60 * UNITS }),
-		sale({ id: 'three', date: '2022-01-10', quantity: 9 * UNITS, unitPrice: 70 * UNITS }),
-		purchase({ id: 'four', date: '2023-01-10', quantity: 20 * UNITS, unitPrice: 80 * UNITS })
+		purchase({ id: 'one', date: '2020-01-10', quantity: 5 * QUANTITY_UNITS, unitPrice: 50 * UNITS }),
+		sale({ id: 'two', date: '2021-01-10', quantity: 3 * QUANTITY_UNITS, unitPrice: 60 * UNITS }),
+		sale({ id: 'three', date: '2022-01-10', quantity: 9 * QUANTITY_UNITS, unitPrice: 70 * UNITS }),
+		purchase({ id: 'four', date: '2023-01-10', quantity: 20 * QUANTITY_UNITS, unitPrice: 80 * UNITS })
 	];
 
 	test('is marked oversold and stays so however the walk ends', () => {
@@ -161,18 +162,18 @@ describe('a position that goes below zero', () => {
 	});
 
 	test('says nothing about what the security holds, in that account or in any other', () => {
-		const elsewhere = purchase({ id: 'five', accountId: 'other', date: '2020-01-10', quantity: 4 * UNITS, unitPrice: 50 * UNITS });
+		const elsewhere = purchase({ id: 'five', accountId: 'other', date: '2020-01-10', quantity: 4 * QUANTITY_UNITS, unitPrice: 50 * UNITS });
 		const summary = summariseSecurityPositions(walkPositions([ ...oversoldTrades, elsewhere ]));
 
-		expect(summary.get('swda')).toEqual({ quantity: 4 * UNITS, oversold: true });
+		expect(summary.get('swda')).toEqual({ quantity: 4 * QUANTITY_UNITS, oversold: true });
 	});
 });
 
 describe('the realised gain on a sale', () => {
 	test('is the net proceeds less what those units cost', () => {
 		const walk = walkPositions([
-			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS, fees: 1900 }),
-			sale({ id: 'two', date: '2021-01-10', quantity: 4 * UNITS, unitPrice: 90 * UNITS, fees: 1900, taxes: 3200 })
+			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, fees: 1900 }),
+			sale({ id: 'two', date: '2021-01-10', quantity: 4 * QUANTITY_UNITS, unitPrice: 90 * UNITS, fees: 1900, taxes: 3200 })
 		]);
 
 		// € 360,00 less € 32,00 of tax and € 19,00 of commission, against four units at € 51,90
@@ -181,9 +182,9 @@ describe('the realised gain on a sale', () => {
 
 	test('is measured against the average a same-day purchase has already entered', () => {
 		const walk = walkPositions([
-			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS, insertionSeq: 1 }),
-			purchase({ id: 'two', date: '2021-06-01', quantity: 10 * UNITS, unitPrice: 100 * UNITS, insertionSeq: 2 }),
-			sale({ id: 'three', date: '2021-06-01', quantity: 10 * UNITS, unitPrice: 100 * UNITS, insertionSeq: 3 })
+			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, insertionSeq: 1 }),
+			purchase({ id: 'two', date: '2021-06-01', quantity: 10 * QUANTITY_UNITS, unitPrice: 100 * UNITS, insertionSeq: 2 }),
+			sale({ id: 'three', date: '2021-06-01', quantity: 10 * QUANTITY_UNITS, unitPrice: 100 * UNITS, insertionSeq: 3 })
 		]);
 
 		// The later purchase moved the average to € 75,00 before the sale was walked
@@ -194,7 +195,7 @@ describe('the realised gain on a sale', () => {
 describe('the hypothetical liquidation', () => {
 	const priced = (value: number): LedgerDocument => {
 		return documentWith(
-			[ purchase({ quantity: 10 * UNITS, unitPrice: 50 * UNITS, fees: 0 }) ],
+			[ purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, fees: 0 }) ],
 			{ prices: [ makePrice({ securityId: 'swda', date: '2026-08-08', value }) ] }
 		);
 	};
@@ -229,7 +230,7 @@ describe('the hypothetical liquidation', () => {
 	});
 
 	test('values a holding with no price at nothing, with no fee and minus its cost', () => {
-		const [ holding ] = holdingsOf(documentWith([ purchase({ quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ]));
+		const [ holding ] = holdingsOf(documentWith([ purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]));
 
 		expect(holding.price).toBeUndefined();
 		expect(holding.priceDate).toBeUndefined();
@@ -247,7 +248,7 @@ describe('the hypothetical liquidation', () => {
 	});
 
 	test('reads the latest price the security holds, whatever order the records are in', () => {
-		const document = documentWith([ purchase({ quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ], {
+		const document = documentWith([ purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ], {
 			prices: [
 				makePrice({ securityId: 'swda', date: '2026-01-01', value: 60 * UNITS }),
 				makePrice({ securityId: 'swda', date: '2026-08-08', value: 90 * UNITS }),
@@ -285,8 +286,8 @@ describe('the holdings table', () => {
 
 	test('leaves out a position that has been sold in full', () => {
 		const document = documentWith([
-			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }),
-			sale({ id: 'two', date: '2021-01-10', quantity: 10 * UNITS, unitPrice: 90 * UNITS })
+			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }),
+			sale({ id: 'two', date: '2021-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 90 * UNITS })
 		]);
 
 		expect(holdingsOf(document)).toEqual([]);
@@ -294,8 +295,8 @@ describe('the holdings table', () => {
 
 	test('totals the two money columns and the percentage they make', () => {
 		const document = documentWith([
-			purchase({ id: 'one', securityId: 'swda', quantity: 10 * UNITS, unitPrice: 50 * UNITS }),
-			purchase({ id: 'two', securityId: 'vwce', quantity: 10 * UNITS, unitPrice: 50 * UNITS })
+			purchase({ id: 'one', securityId: 'swda', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }),
+			purchase({ id: 'two', securityId: 'vwce', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS })
 		], {
 			securities: [ makeSecurity({ id: 'swda', ticker: 'SWDA' }), makeSecurity({ id: 'vwce', isin: 'IE00BK5BQT80', ticker: 'VWCE' }) ],
 			prices: [

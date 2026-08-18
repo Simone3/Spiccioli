@@ -25,8 +25,9 @@ import type { LedgerDocument } from 'src/types/LedgerTypes';
  * The containers measure the boxes they are put in, and jsdom lays nothing out, so `stubChartLayout` stands both in for the file.
  */
 
-// A quantity, a unit price and a rate are all four decimal places, so a whole unit is ten thousand
+// A unit price and a rate are four decimal places, so a whole unit of either is ten thousand, and a quantity is six
 const UNITS = 10000;
+const QUANTITY_UNITS = 1000000;
 
 beforeAll(stubChartLayout);
 
@@ -42,7 +43,7 @@ const portfolioDocument = (overrides: Partial<LedgerDocument> = {}): LedgerDocum
 		],
 		prices: [ makePrice({ securityId: 'swda', date: '2026-08-01', value: 1200 * UNITS }) ],
 		trades: [
-			makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 10 * UNITS, unitPrice: 1000 * UNITS, fees: 0 })
+			makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 0 })
 		],
 		transactions: [],
 		...overrides

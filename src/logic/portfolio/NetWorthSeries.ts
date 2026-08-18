@@ -4,7 +4,7 @@ import { lastDayOfMonth } from 'src/logic/checks/CheckDates';
 import { positionKey, valueHolding, walkPositions, type PositionWalk } from 'src/logic/investments/Holdings';
 import { indexPriceHistories, indexSecurities, priceOnOrBefore } from 'src/logic/investments/Securities';
 import type { WorkingAmount } from 'src/logic/investments/Trades';
-import { MONEY_SCALES, multiplyWorkingScaleByRateScale, widenToWorkingScale } from 'src/logic/money/Money';
+import { MONEY_SCALES, multiplyWorkingScaleByQuantityScale, widenToWorkingScale } from 'src/logic/money/Money';
 import { isPensionFund, netPensionFund } from 'src/logic/portfolio/NetWorth';
 import type { IsoDate, LedgerDocument, LedgerId } from 'src/types/LedgerTypes';
 
@@ -215,7 +215,7 @@ export const deriveNetWorthSeries = ({ document, walk, today }: NetWorthSeriesOp
 				continue;
 			}
 
-			const invested = multiplyWorkingScaleByRateScale(position.avgCost, position.quantity);
+			const invested = multiplyWorkingScaleByQuantityScale(position.avgCost, position.quantity);
 			const history = priceHistories.get(position.securityId);
 
 			// A security nobody has ever priced is worth nothing, here exactly as it is on the card above

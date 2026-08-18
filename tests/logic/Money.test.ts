@@ -2,7 +2,7 @@ import {
 	divideAtWorkingScale,
 	formatMinorUnitsAsPlainDecimal,
 	MONEY_SCALES,
-	multiplyAtRateScale,
+	multiplyQuantityByRateScale,
 	narrowFromWorkingScale,
 	parseDecimalToMinorUnits,
 	roundHalfAwayFromZero,
@@ -44,9 +44,14 @@ describe('the working scale', () => {
 		expect(widenToWorkingScale(12345, MONEY_SCALES.rate)).toBe(123450000);
 	});
 
-	test('takes a quantity times a unit price there without losing anything', () => {
-		// 12,5 units at 34,5678 each
-		expect(multiplyAtRateScale(125000, 345678)).toBe(43209750000);
+	test('takes a quantity times a unit price there', () => {
+		// 12,5 units at 34,5678 each, which needs nothing below the working scale
+		expect(multiplyQuantityByRateScale(12500000, 345678)).toBe(43209750000);
+	});
+
+	test('rounds the two places a quantity times a unit price falls past the working scale', () => {
+		// 0,311623 units at 104,3100 is 32,505395130 — the last digit is what the working scale cannot hold
+		expect(multiplyQuantityByRateScale(311623, 1043100)).toBe(3250539513);
 	});
 
 	test('narrows back to the cent, rounding half away from zero', () => {
@@ -65,14 +70,14 @@ describe('divideAtWorkingScale', () => {
 	test('divides a cost basis by a quantity', () => {
 		// 1.000,00 spent on 40 units is 25,00 each
 		const costBasis = widenToWorkingScale(100000, MONEY_SCALES.amount);
-		const quantity = widenToWorkingScale(400000, MONEY_SCALES.rate);
+		const quantity = widenToWorkingScale(40000000, MONEY_SCALES.quantity);
 
 		expect(narrowFromWorkingScale(divideAtWorkingScale(costBasis, quantity), MONEY_SCALES.amount)).toBe(2500);
 	});
 
 	test('keeps a repeating quotient at the working scale', () => {
 		const numerator = widenToWorkingScale(100, MONEY_SCALES.amount);
-		const denominator = widenToWorkingScale(30000, MONEY_SCALES.rate);
+		const denominator = widenToWorkingScale(3000000, MONEY_SCALES.quantity);
 
 		// 1,00 over 3 is 0,33333333 at eight decimal places
 		expect(divideAtWorkingScale(numerator, denominator)).toBe(33333333);

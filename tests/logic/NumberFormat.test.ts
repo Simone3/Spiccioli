@@ -65,8 +65,9 @@ describe('the four-decimal figures', () => {
 		expect(formatUnitPrice(1082150, ITALIAN)).toBe('€ 108,2150');
 	});
 
-	test('print a quantity with four decimals and no currency', () => {
-		expect(formatQuantity(125000, ITALIAN)).toBe('12,5000');
+	test('print a quantity with six decimals and no currency', () => {
+		expect(formatQuantity(12500000, ITALIAN)).toBe('12,500000');
+		expect(formatQuantity(311623, ITALIAN)).toBe('0,311623');
 	});
 });
 

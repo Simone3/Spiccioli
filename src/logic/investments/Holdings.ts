@@ -4,14 +4,15 @@ import { tradeTotalWorking, type WorkingAmount } from 'src/logic/investments/Tra
 import {
 	divideAtWorkingScale,
 	MONEY_SCALES,
-	multiplyAtRateScale,
+	multiplyQuantityByRateScale,
+	multiplyWorkingScaleByQuantityScale,
 	multiplyWorkingScaleByRateScale,
 	narrowFromWorkingScale,
 	roundWorkingScaleToCents,
 	widenToWorkingScale
 } from 'src/logic/money/Money';
 import type { SpiccioliTranslator } from 'src/i18n/Translations';
-import type { Cents, IsoDate, LedgerDocument, LedgerId, TenThousandths, Trade, TradeKind } from 'src/types/LedgerTypes';
+import type { Cents, IsoDate, LedgerDocument, LedgerId, Millionths, TenThousandths, Trade, TradeKind } from 'src/types/LedgerTypes';
 
 /**
  * The weighted-average-cost walk, the holdings it derives, and what each one would leave you with if it were sold today.
@@ -40,9 +41,9 @@ const WALK_KIND_ORDER: Record<TradeKind, number> = {
 export interface Position {
 	securityId: LedgerId;
 	accountId: LedgerId;
-	purchasedQuantity: TenThousandths;
-	soldQuantity: TenThousandths;
-	quantity: TenThousandths;
+	purchasedQuantity: Millionths;
+	soldQuantity: Millionths;
+	quantity: Millionths;
 
 	// How many purchase trades the quantity came from, which the detail panel states beside it
 	lotCount: number;
@@ -73,9 +74,9 @@ export interface PositionWalk {
 export interface Holding {
 	securityId: LedgerId;
 	accountId: LedgerId;
-	purchasedQuantity: TenThousandths;
-	soldQuantity: TenThousandths;
-	quantity: TenThousandths;
+	purchasedQuantity: Millionths;
+	soldQuantity: Millionths;
+	quantity: Millionths;
 	lotCount: number;
 
 	// Per unit, at the working scale: the one figure in the application that comes out of a division
@@ -103,7 +104,7 @@ export interface Holding {
 
 // What the Securities tab's *Held* column says: the quantity across every brokerage account, or that nothing can be said
 export interface SecurityPosition {
-	quantity: TenThousandths;
+	quantity: Millionths;
 	oversold: boolean;
 }
 
@@ -117,7 +118,7 @@ export interface HoldingsTotals {
 
 /** What valuing a position as if it had been sold takes: the quantity, what it cost, what it is worth and what selling costs. */
 export interface HoldingValuationOptions {
-	quantity: TenThousandths;
+	quantity: Millionths;
 
 	// Quantity times the average cost, at the working scale
 	invested: WorkingAmount;
@@ -247,7 +248,7 @@ export const walkPositions = (trades: readonly Trade[], asOf?: IsoDate): Positio
 			position.quantity += trade.quantity;
 			position.lotCount += 1;
 			position.costBasis += tradeTotalWorking(trade);
-			position.avgCost = divideAtWorkingScale(position.costBasis, widenToWorkingScale(position.quantity, MONEY_SCALES.rate));
+			position.avgCost = divideAtWorkingScale(position.costBasis, widenToWorkingScale(position.quantity, MONEY_SCALES.quantity));
 
 			continue;
 		}
@@ -262,7 +263,7 @@ export const walkPositions = (trades: readonly Trade[], asOf?: IsoDate): Positio
 		}
 
 		// Measured against the average in force at the time of the sale, which a sale never moves
-		const cost = multiplyWorkingScaleByRateScale(position.avgCost, trade.quantity);
+		const cost = multiplyWorkingScaleByQuantityScale(position.avgCost, trade.quantity);
 
 		realisedGains.set(trade.id, tradeTotalWorking(trade) - cost);
 		position.soldQuantity += trade.quantity;
@@ -308,7 +309,7 @@ export const walkPositions = (trades: readonly Trade[], asOf?: IsoDate): Positio
  * @returns The valuation, gross and net.
  */
 export const valueHolding = ({ quantity, invested, price, sellFee, taxRate }: HoldingValuationOptions): HoldingValuation => {
-	const marketValue = price === undefined ? 0 : multiplyAtRateScale(quantity, price);
+	const marketValue = price === undefined ? 0 : multiplyQuantityByRateScale(quantity, price);
 
 	// Nothing is being sold on a position nobody has ever valued, so no commission is estimated against it
 	const fee = price === undefined ? 0 : widenToWorkingScale(sellFee, MONEY_SCALES.amount);
@@ -363,7 +364,7 @@ export const deriveHoldings = ({ document, walk, translator }: HoldingsOptions):
 
 		const institution = account.institutionId === null ? undefined : institutions.get(account.institutionId);
 		const latest = latestPrices.get(position.securityId);
-		const invested = multiplyWorkingScaleByRateScale(position.avgCost, position.quantity);
+		const invested = multiplyWorkingScaleByQuantityScale(position.avgCost, position.quantity);
 		const valuation = valueHolding({
 			quantity: position.quantity,
 			invested,

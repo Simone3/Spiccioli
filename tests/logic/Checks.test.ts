@@ -208,7 +208,7 @@ describe('checks 8 and 9 — a position that went below zero', () => {
 		securities: [ makeSecurity() ],
 		trades: [
 			makeTrade({ id: 'buy', date: '2026-01-05' }),
-			makeTrade({ id: 'sell', kind: 'sale', date: '2026-02-05', quantity: 250000, insertionSeq: 2 })
+			makeTrade({ id: 'sell', kind: 'sale', date: '2026-02-05', quantity: 25000000, insertionSeq: 2 })
 		]
 	};
 

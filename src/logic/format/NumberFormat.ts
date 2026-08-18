@@ -102,13 +102,13 @@ export const formatUnitPrice = (tenThousandths: number, separators: SeparatorCha
 };
 
 /**
- * Prints a quantity, which carries four decimals and no currency.
- * @param tenThousandths The quantity, in ten-thousandths.
+ * Prints a quantity, which carries six decimals and no currency.
+ * @param millionths The quantity, in millionths.
  * @param separators The two characters the preferences hold.
  * @returns The quantity as text.
  */
-export const formatQuantity = (tenThousandths: number, separators: SeparatorCharacters): string => {
-	return `${signOf(tenThousandths, false)}${formatMagnitude(tenThousandths, MONEY_SCALES.rate, separators)}`;
+export const formatQuantity = (millionths: number, separators: SeparatorCharacters): string => {
+	return `${signOf(millionths, false)}${formatMagnitude(millionths, MONEY_SCALES.quantity, separators)}`;
 };
 
 /**

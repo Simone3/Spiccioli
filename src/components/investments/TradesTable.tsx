@@ -27,7 +27,7 @@ import type { Account, Cents, Institution, IsoDate, LedgerId, Security, TenThous
  * ***Matched* shows the date of the bank transaction the trade was paired with**, and an em dash is what checks 6 and 7 report.
  */
 
-// The smallest quantity and the smallest price a field admits, in the ten-thousandths both are stored in
+// The smallest quantity and the smallest price a field admits, each in the minor units its own field is stored in
 const SMALLEST_QUANTITY = 1;
 
 const SMALLEST_PRICE = 1;

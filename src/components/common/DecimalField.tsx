@@ -24,7 +24,7 @@ export interface DecimalFieldProps {
 	// Called only with a figure this field admits. A refused one leaves the caller holding what it had.
 	onChange: (value: number | undefined) => void;
 
-	// Decimal places the figure carries: two for an amount, four for a price or a quantity, one for a percentage, none for a count
+	// Decimal places the figure carries: two for an amount, four for a price, six for a quantity, one for a percentage, none for a count
 	scale?: number;
 	allowNegative?: boolean;
 
