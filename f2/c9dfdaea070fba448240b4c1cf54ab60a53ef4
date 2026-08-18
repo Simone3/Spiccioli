@@ -1,0 +1,74 @@
+CLAUDE.md
+  s_fc76f0e251d190::t_28377aa2e71968 9,49,79
+docs/technical/02-repository-map.md
+  s_fc76f0e251d190::t_f67b087c34d371 60,77-78,95-97
+docs/technical/06-styling.md
+  s_fc76f0e251d190::t_f5464ebedaca54 31,35-37
+package-lock.json
+  s_fc76f0e251d190::t_f074ec3739fdd3 20-21,2682-2707,3008-3013,3196-3258,3339,3365-3370,5602,5605-5725,5844-5849,6896-6907,8592-8601,8690-8698,11591-11613,11755-11784,11812-11826,11909-11914,13140-13145,13638-13646,13690-13711
+package.json
+  s_fc76f0e251d190::t_9869df9d5a46ba 48-49
+src/components/common/LineChart.css
+  s_fc76f0e251d190::t_0a63d7f9a63af7 1-104
+src/components/common/LineChart.tsx
+  s_fc76f0e251d190::t_4a0be4b9f1da90 1-194
+src/components/salaries/ContractForm.tsx
+  s_fc76f0e251d190::t_1af8b000863830 1-243
+src/components/salaries/ContractYearsTable.tsx
+  s_fc76f0e251d190::t_e54934800fc4b7 1-198
+src/components/salaries/ContractsTable.tsx
+  s_fc76f0e251d190::t_70444a8422abe3 1-180
+src/components/salaries/PayslipForm.tsx
+  s_fc76f0e251d190::t_48c99180d78178 1-263
+src/components/salaries/PayslipsTable.tsx
+  s_fc76f0e251d190::t_61d759af9bdae1 1-196
+src/components/salaries/SalariesScreen.css
+  s_fc76f0e251d190::t_3f642f8ffd2810 1-112
+src/components/salaries/SalariesScreen.tsx
+  s_fc76f0e251d190::t_9e623567786ce9 1-4,6-14,16,18-24,29-52,57-418,421-502
+src/components/salaries/SalaryCharts.tsx
+  s_fc76f0e251d190::t_1c0c2a9a1b9ab2 1-87
+src/i18n/lang/en.ts
+  s_fc76f0e251d190::t_0a18d044b695dc 102-103,936-1104
+src/index.css
+  s_fc76f0e251d190::t_276a44065df29d 37-47
+src/logic/salaries/Contracts.ts
+  s_fc76f0e251d190::t_938fbebfa6ff16 1-240
+src/logic/salaries/Payslips.ts
+  s_fc76f0e251d190::t_bc6281230ae223 1-83
+src/logic/salaries/SalaryFigures.ts
+  s_fc76f0e251d190::t_b6f3ea163eafff 1-184
+tests/components/DateField.test.tsx
+  s_fc76f0e251d190::t_8d1052c50bdbcb 33,37,43
+tests/components/LineChart.test.tsx
+  s_fc76f0e251d190::t_ece440d4f8b8a2 1-109
+tests/components/SalariesScreen.test.tsx
+  s_fc76f0e251d190::t_99bede499ba811 1-198
+tests/logic/Contracts.test.ts
+  s_fc76f0e251d190::t_4b5da80143df30 1-153
+tests/logic/SalaryFigures.test.ts
+  s_fc76f0e251d190::t_d49f12875f2e25 1-160
+docs/technical/08-implementation-plan.md
+  s_fc76f0e251d190::t_8b3bbe0070ea98 9,70,77,161-162,315-318,324-329
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "f2c9dfdaea070fba448240b4c1cf54ab60a53ef4",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_fc76f0e251d190": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "53d7d644-890d-4549-a79c-c07c96b6751d",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
