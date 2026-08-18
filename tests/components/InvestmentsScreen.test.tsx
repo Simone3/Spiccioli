@@ -7,9 +7,11 @@ import {
 	makeSeededDocument,
 	makeSecurity,
 	makeTrade,
-	renderOpenLedger
+	renderOpenLedger,
+	stubPricesBridge
 } from '../testUtils';
 import type { LedgerDocument, Trade } from 'src/types/LedgerTypes';
+import type { PriceFetchOutcome } from 'src/types/PriceIpcTypes';
 
 const UNITS = 10000;
 
@@ -28,6 +30,12 @@ const withRecords = (overrides: Partial<LedgerDocument> = {}): LedgerDocument =>
 		accounts: [ brokerage ],
 		securities: [ swda ],
 		...overrides
+	};
+};
+
+const quotedWith = (outcomes: PriceFetchOutcome[]) => {
+	return () => {
+		return Promise.resolve({ referenceDate: null, outcomes });
 	};
 };
 
@@ -235,5 +243,71 @@ describe('the Investments screen', () => {
 		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
 		expect(within(screen.getByRole('table', { name: 'Price history' })).queryByText('fetched')).not.toBeInTheDocument();
+	});
+
+	test('puts a pass to the user before anything is written, and writes the whole of it on one confirmation', async() => {
+		await openInvestments(withRecords({
+			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ],
+			prices: [ makePrice({ securityId: 'swda', date: '2026-08-07', value: 90 * UNITS, source: 'manual' }) ]
+		}));
+		stubPricesBridge({ updatePrices: quotedWith([ { outcome: 'quoted', securityId: 'swda', value: 923100, date: '2026-08-07' } ]) });
+
+		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
+
+		const panel = await screen.findByRole('dialog', { name: 'Prices fetched — nothing written yet' });
+
+		// The value, the day the quote is for, and what that day currently holds
+		expect(within(panel).getByText('€ 92,3100')).toBeInTheDocument();
+		expect(within(panel).getByText('07/08/2026')).toBeInTheDocument();
+		expect(within(panel).getByText('€ 90,0000')).toBeInTheDocument();
+		expect(within(panel).getByText('manual')).toBeInTheDocument();
+
+		// Nothing has been written: the holding is still reading the price it had
+		expect(within(screen.getByRole('table', { name: 'Holdings' })).getByText('€ 90,0000')).toBeInTheDocument();
+
+		await userEvent.click(within(panel).getByRole('button', { name: 'Write 1 price' }));
+
+		expect(screen.getByRole('status')).toHaveTextContent('1 price written.');
+		expect(within(screen.getByRole('table', { name: 'Holdings' })).getByText('€ 92,3100')).toBeInTheDocument();
+
+		// And the record that replaced a hand-typed value says it is the provider's
+		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Show the price history of SWDA' }));
+
+		expect(within(screen.getByRole('table', { name: 'Price history' })).getByText('fetched')).toBeInTheDocument();
+	});
+
+	test('cancels a pass and leaves every price the file had standing', async() => {
+		await openInvestments(withRecords({
+			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ],
+			prices: [ makePrice({ securityId: 'swda', date: '2026-08-07', value: 90 * UNITS }) ]
+		}));
+		stubPricesBridge({ updatePrices: quotedWith([ { outcome: 'quoted', securityId: 'swda', value: 923100, date: '2026-08-07' } ]) });
+
+		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
+		await userEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Cancel' }));
+
+		expect(screen.getByRole('status')).toHaveTextContent('Nothing was written.');
+		expect(within(screen.getByRole('table', { name: 'Holdings' })).getByText('€ 90,0000')).toBeInTheDocument();
+	});
+
+	test('shows the panel even when there is nothing to write, naming each security and its reason', async() => {
+		await openInvestments(withRecords({
+			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * UNITS, unitPrice: 50 * UNITS }) ]
+		}));
+		stubPricesBridge({
+			updatePrices: quotedWith([ { outcome: 'refused', securityId: 'swda', refusal: 'not-euro', currency: 'USD' } ])
+		});
+
+		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
+
+		const panel = await screen.findByRole('dialog', { name: 'Prices fetched — nothing written yet' });
+
+		expect(within(panel).getByText('could not be fetched — quoted in USD, not EUR')).toBeInTheDocument();
+		expect(within(panel).queryByRole('button', { name: /^Write/ })).not.toBeInTheDocument();
+		expect(within(panel).getByRole('button', { name: 'Close' })).toBeInTheDocument();
+
+		// The statement of what left the machine is repeated here, beside what the request brought back
+		expect(within(panel).getByText(/never the ISIN, never an amount, a quantity or an account/)).toBeInTheDocument();
 	});
 });

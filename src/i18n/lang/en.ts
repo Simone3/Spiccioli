@@ -868,6 +868,69 @@ export const EN_TRANSLATIONS = {
 		mustBePositive: 'A price is more than zero.'
 	},
 
+	// The one press that contacts the network, and the panel that puts what came back to the user before a single record is written
+	updatePrices: {
+		button: 'Update prices',
+		busy: 'Fetching prices…',
+		providerName: 'Yahoo Finance',
+
+		// Said beside the button, and again in the panel — the moment the user sees what a request brought back is the moment the
+		// question of what it took occurs to them
+		whatLeaves: 'The only thing in Spiccioli that contacts the network. It sends each security’s ticker and exchange to {provider}, and nothing else: never the ISIN, never an amount, a quantity or an account.',
+		title: 'Prices fetched — nothing written yet',
+		subtitle: '{securities} asked for',
+		subtitleWithReference: '{securities} asked for · provider reference date {date}',
+		securityCount: {
+			one: '1 security',
+			other: '{count} securities'
+		},
+		table: 'Prices fetched',
+		columns: {
+			security: 'Security',
+			quote: 'Quote',
+			quoteDate: 'Quote is for',
+			holds: 'That day currently holds'
+		},
+		newDay: 'nothing — a new day',
+		footer: '{written} · {replaced} · {quoted}',
+		writtenCount: {
+			one: '1 to write',
+			other: '{count} to write'
+		},
+		replacedNone: 'every day is new',
+		replaced: {
+			one: '1 replaces a value',
+			other: '{count} replace a value'
+		},
+		replacedWithManual: {
+			one: '{replaced}, 1 of them typed by hand',
+			other: '{replaced}, {count} of them typed by hand'
+		},
+		quotedOnOneDay: 'all quoted {date}',
+		quotedOverSeveralDays: 'quoted over several days',
+		problems: 'Nothing to write for these — they keep the prices they have',
+		reasons: {
+			noQuote: 'the provider has no quote for it',
+			futureDate: 'could not be fetched — the quote is dated in the future',
+			notPositive: 'could not be fetched — the quote is zero or less',
+			notEuro: 'could not be fetched — quoted in {currency}, not EUR',
+			noCurrency: 'could not be fetched — the provider stated no currency',
+			failed: 'could not be fetched — {message}'
+		},
+		passFailed: 'The price pass could not be started.',
+		nothingToWrite: 'Nothing came back that can be written. Every price the file holds still stands, and pressing the button again is the remedy — as is typing a price in by hand.',
+		confirm: {
+			one: 'Write 1 price',
+			other: 'Write {count} prices'
+		},
+		close: 'Close',
+		wrote: {
+			one: '1 price written.',
+			other: '{count} prices written.'
+		},
+		cancelled: 'Nothing was written.'
+	},
+
 	// What is said when something on screen has not been written and the user is leaving anyway. There is no *apply* here.
 	unsavedDraft: {
 		title: 'These changes have not been applied',

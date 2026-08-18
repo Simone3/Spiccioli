@@ -195,3 +195,76 @@
 	text-decoration: underline;
 	cursor: pointer;
 }
+
+/* The button that contacts the network, and the sentence that says what it sends. The sentence is beside the button and not
+   behind a hint, because it is the whole of what leaves the machine. */
+.investments-screen-update-prices {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: flex-end;
+	max-width: 420px;
+}
+
+.investments-screen-update-prices p {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--colors-text-secondary);
+	text-align: right;
+}
+
+/* The review panel: what a pass brought back, before a single record is written */
+.update-prices-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	padding: 24px;
+	background-color: var(--colors-modal-overlay);
+	overflow-y: auto;
+}
+
+.update-prices-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 860px;
+	padding: 22px;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 10px;
+	box-shadow: 0 24px 48px var(--colors-modal-shadow);
+}
+
+.update-prices-heading {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.update-prices-title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.update-prices-actions {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+}
+
+/* What a confirmed or a cancelled pass says it did. It states a fact rather than a problem, so it is not the refusal's colour. */
+.investments-screen-notice {
+	margin: 0 0 16px;
+	padding: 12px 14px;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 6px;
+}

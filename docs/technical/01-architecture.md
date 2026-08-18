@@ -17,19 +17,22 @@ The two processes are bundled separately and by different tools, because they ar
 
 ## 1.2 What crosses the bridge
 
-Three groups of channels, and they all follow one pattern: the names in `src/types/…IpcChannels.ts`, the shapes in `src/types/…IpcTypes.ts`, a handler in `src/main/ipc/`, and the preload publishing one function per thing the renderer may ask for.
+Four groups of channels, and they all follow one pattern: the names in `src/types/…IpcChannels.ts`, the shapes in `src/types/…IpcTypes.ts`, a handler in `src/main/ipc/`, and the preload publishing one function per thing the renderer may ask for.
 
 | Group | Files | Role |
 | --- | --- | --- |
 | App info | `src/types/AppInfoIpcChannels.ts` `AppInfoTypes.ts`, `src/main/ipc/AppInfoIpc.ts` | Which build the renderer is part of |
 | The ledger | `src/types/LedgerIpcChannels.ts` `LedgerIpcTypes.ts`, `src/main/ipc/LedgerIpc.ts` | Everything about the file: the two dialogs, reading, creating, saving, the copies, where the copies live, the recent list, the preferences, and the one answer to a shutdown that is not a close |
 | Diagnostics | `src/types/LedgerIpcChannels.ts`, `src/main/ipc/DiagnosticsIpc.ts` | The renderer's failures, written into the operational log by the process that owns it |
+| Prices | `src/types/PriceIpcChannels.ts` `PriceIpcTypes.ts`, `src/main/ipc/PricesIpc.ts` | **The one thing in the application that touches the network**: a listing per security out, a quote or a reason back, and the line saying what the confirmation wrote |
 
-`src/main/preload/Preload.ts` publishes them as `window.spiccioliAppInfo`, `window.spiccioliLedger` and `window.spiccioliDiagnostics`, and `src/vite-env.d.ts` tells TypeScript what `window` carries.
+`src/main/preload/Preload.ts` publishes them as `window.spiccioliAppInfo`, `window.spiccioliLedger`, `window.spiccioliPrices` and `window.spiccioliDiagnostics`, and `src/vite-env.d.ts` tells TypeScript what `window` carries.
 
 A channel is a request the renderer makes and the main process answers. For events pushed the other way, the framework's `subscribeToChannel` (`src/framework/preload/IpcBridge.ts`) is what the preload wraps a listener in, so the renderer gets the payload without an Electron event object it could not receive anyway. Four events are pushed today, all of them the ledger's: a write attempt that failed, an external modification, a File-menu command, and the request to finish saving before the session closes.
 
 **Nothing on any of these channels carries a parsed ledger.** The renderer holds the model and the main process owns the file, so what crosses is text and paths — plus, in the other direction, the schema version and record counts the renderer read out of a file, sent back only so that the main process can write them into the log.
+
+**The price channel is where the network lives, and it lives there for the same reason.** The renderer knows which securities exist and the main process is the side that may open a socket, so the renderer hands over one listing per security — a `ticker` and an `exchange`, plus an identity that never goes further than `src/main/prices` — and is handed back a quote or the reason there is none. **Nothing on it writes anything**: a confirmed pass writes Price records through the document the renderer already holds ([§7.6](../functional/specs/07-investments.md#76-prices)). The renderer could not make the request itself in any case — the Content-Security-Policy of [§1.5](#15-what-the-window-is-allowed-to-load) is `default-src 'self'`, so the page has nowhere to connect to.
 
 ## 1.3 Layers inside the renderer
 
@@ -99,7 +102,7 @@ The configuration file holds two things, through `src/main/config/SpiccioliConfi
 
 ## 1.7 What is deliberately not here yet
 
-- **Six of the eight screens do not read their own records yet.** They exist, the sidebar reaches them and each one shows the empty state of [§14](../functional/specs/14-empty-and-error-states.md); their tables, forms and calculations arrive one screen per phase. Settings and Accounts are the exceptions and are finished.
+- **Three of the eight screens do not read their own records yet** — Portfolio, Salaries and Checks. They exist, the sidebar reaches them and each one shows the empty state of [§14](../functional/specs/14-empty-and-error-states.md); their tables, forms, charts and calculations arrive one screen per phase. Settings, Accounts, Transactions, Categories and Investments are finished.
 - **No failing-check badge.** The sidebar draws one and is handed a count, and the count is zero until the fourteen checks of [§9](../functional/specs/09-checks.md) are computed in Phase 10.
 - **No single-instance lock.** Spiccioli is allowed to run twice. Two ledgers open side by side is ordinary use, and two sessions on *one* ledger is the case [§12](../functional/specs/12-storage.md) settles by detecting the external modification and keeping the displaced version — not by refusing to start.
 

@@ -32,7 +32,12 @@ Every non-generated file in the repository and what it is for. Generated folders
 | `ipc/AppInfoIpc.ts` | Answers what version and platform the running build is |
 | `ipc/LedgerIpc.ts` | Everything the renderer asks of the file: the two dialogs, reading, creating, saving, the copies, the recent list, the preferences |
 | `ipc/DiagnosticsIpc.ts` | The renderer's failures, written into the operational log with each text truncated |
+| `ipc/PricesIpc.ts` | The one press that reaches the network, and the line the renderer sends back saying what the confirmation wrote |
 | `menu/AppMenu.ts` | The File menu of four actions and the About item ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)), as a template a test can read |
+| `prices/PriceProvider.ts` | What everything above the adapter sees: a listing in, and a quote or a reason out |
+| `prices/YahooPriceProvider.ts` | **The one place that knows Yahoo** — the suffix table, the `v8/finance/chart` request, and the parse of the three fields a quote is made of |
+| `prices/PriceQuoteReview.ts` | The four refusals of [§7.6](../functional/specs/07-investments.md#76-prices), applied to a quote before the user ever sees it |
+| `prices/PricePass.ts` | One press, end to end: one paced request per security, each failing on its own, and the three log entries D14 fixes |
 | `preload/Preload.ts` | The context bridge: what the renderer is allowed to call |
 | `storage/LedgerSession.ts` | The one open ledger: which file, where its copies live, what its bytes hashed to, whether anything was written — and every storage entry in the log |
 | `storage/LedgerBackupNaming.ts` | Where a ledger's copies live, what one is called, and how to recognise one |
@@ -68,7 +73,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/transactions/` | The Transactions screen ([§5](../functional/specs/05-transactions.md)): the list with every cell edited in place, the seven filters, the pager, and the add form |
 | `components/import/` | Bulk import ([§5.7](../functional/specs/05-transactions.md#57-bulk-import)): the paste, the three format controls, the account, the outcome, and the preview table that marks every row |
 | `components/categories/` | The Categories screen ([§6](../functional/specs/06-categories.md)): the three tabs, the categories × years matrix, the rule list with its drag reorder and its draft session, the rule form and the consequence summary — and `CategoryPicker`, **the one category picker in the application**, which a transaction, a filter and a rule all take |
-| `components/investments/` | The Investments screen ([§7](../functional/specs/07-investments.md)): the four tabs, the derived holdings with their inline price editor and their detail panel, the two trade tables with their filters and their forms, the securities list with its price history — and `SecurityPicker`, **the one security picker in the application**, plus the `SecurityFields` both forms that create one are built from |
+| `components/investments/` | The Investments screen ([§7](../functional/specs/07-investments.md)): the four tabs, the derived holdings with their inline price editor and their detail panel, the two trade tables with their filters and their forms, the securities list with its price history, the *Update prices* button with the statement of what leaves the machine and the review panel a pass ends in — and `SecurityPicker`, **the one security picker in the application**, plus the `SecurityFields` both forms that create one are built from |
 | `components/portfolio/` `salaries/` `checks/` | One folder per screen. Each holds its shell and its empty state until the phase that builds it |
 | `contexts/LedgerContext.tsx` | The ledger in memory, the autosave, the save state, the storage lines |
 | `contexts/PreferencesContext.tsx` | The ten preferences, read once and written as they change, and the formatter they define |
@@ -85,6 +90,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `logic/investments/AnnualisedReturn.ts` | The money-weighted return: the flows a position produces, the bisection that solves them, and every case that has no figure |
 | `logic/investments/Trades.ts` | Everything pure about the two trade tables: the one ordering, the three filters, the derived total and what the footers sum |
 | `logic/investments/Securities.ts` | The ticker ordering, what points at a security, what makes an ISIN a duplicate, and the price history — which day a record lands on and when one has gone stale |
+| `logic/investments/PriceUpdate.ts` | Everything pure about a price pass: the listings that go out, what came back read against the file, and the records confirming it would write |
 | `logic/transactions/Transactions.ts` | Everything pure about the list: the one ordering, the seven filters, the footer total, the pages, and what a duplicate carries over |
 | `logic/transactions/TransactionImport.ts` | Everything pure about a paste: how a line becomes a row, what makes one unreadable, which rows the file already holds, and what the ticked ones are written as |
 | `logic/format/DateFormat.ts` `NumberFormat.ts` | Printing a day and printing a figure, the way the preferences say |
@@ -97,6 +103,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `types/AppInfoTypes.ts` `AppInfoIpcChannels.ts` | The shape and the channel names of the app-info request |
 | `types/LedgerTypes.ts` | The eleven stored entities and every closed set they take |
 | `types/LedgerIpcTypes.ts` `LedgerIpcChannels.ts` | What crosses the bridge for storage, and the channel names |
+| `types/PriceIpcTypes.ts` `PriceIpcChannels.ts` | What crosses the bridge for a price pass, and the channel names |
 | `types/PreferencesTypes.ts` | The ten preferences and the recent-file list |
 | `types/ElectronSquirrelStartup.d.ts` | Types for a dependency that ships none |
 
@@ -108,7 +115,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `vitest-env.d.ts` | Declares the Vitest globals the config enables |
 | `framework/` | The framework's own tests, which depend only on framework modules |
 | `main/` | Tests for the Electron main process modules |
-| `logic/` | Tests for the pure logic: the money arithmetic, the reader, the writer, the upgrade, the autosave, the preferences |
+| `logic/` | Tests for the pure logic: the money arithmetic, the reader, the writer, the upgrade, the autosave, the preferences, the calculations of each screen |
 | `components/` | Tests that render React components |
 | `testUtils/` | Shared factories, re-exported through `testUtils/index.ts`: the ledger records, the translator, and the application with its bridge stubbed and its providers in place |
 

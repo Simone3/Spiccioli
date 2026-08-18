@@ -2,8 +2,10 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { subscribeToChannel } from 'src/framework/preload/IpcBridge';
 import { SPICCIOLI_APP_INFO_IPC_CHANNELS } from 'src/types/AppInfoIpcChannels';
 import { SPICCIOLI_DIAGNOSTICS_IPC_CHANNELS, SPICCIOLI_LEDGER_IPC_CHANNELS, SPICCIOLI_LEDGER_IPC_EVENTS } from 'src/types/LedgerIpcChannels';
+import { SPICCIOLI_PRICES_IPC_CHANNELS } from 'src/types/PriceIpcChannels';
 import type { SpiccioliAppInfoApi } from 'src/types/AppInfoTypes';
 import type { SpiccioliDiagnosticsApi, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
+import type { SpiccioliPricesApi } from 'src/types/PriceIpcTypes';
 
 const spiccioliAppInfo: SpiccioliAppInfoApi = {
 	getAppInfo: () => {
@@ -76,6 +78,17 @@ const spiccioliLedger: SpiccioliLedgerApi = {
 	}
 };
 
+// The one thing in the application that reaches the network, and it reaches it from the other side of this bridge: the renderer
+// hands over a listing per security and is handed a quote or a reason back, and never a socket of its own
+const spiccioliPrices: SpiccioliPricesApi = {
+	updatePrices: (listings) => {
+		return ipcRenderer.invoke(SPICCIOLI_PRICES_IPC_CHANNELS.updatePrices, listings);
+	},
+	reportPricesWritten: (report) => {
+		return ipcRenderer.invoke(SPICCIOLI_PRICES_IPC_CHANNELS.reportPricesWritten, report);
+	}
+};
+
 const spiccioliDiagnostics: SpiccioliDiagnosticsApi = {
 	reportRenderError: (report) => {
 		return ipcRenderer.invoke(SPICCIOLI_DIAGNOSTICS_IPC_CHANNELS.reportRenderError, report);
@@ -84,4 +97,5 @@ const spiccioliDiagnostics: SpiccioliDiagnosticsApi = {
 
 contextBridge.exposeInMainWorld('spiccioliAppInfo', spiccioliAppInfo);
 contextBridge.exposeInMainWorld('spiccioliLedger', spiccioliLedger);
+contextBridge.exposeInMainWorld('spiccioliPrices', spiccioliPrices);
 contextBridge.exposeInMainWorld('spiccioliDiagnostics', spiccioliDiagnostics);

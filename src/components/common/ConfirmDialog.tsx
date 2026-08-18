@@ -7,8 +7,8 @@ import { useTranslator } from 'src/i18n/TranslationContext';
  * The confirmation every delete asks for.
  *
  * There is no undo in the application, which is the whole reason this exists: a record that goes is gone, so the gesture that
- * removes it says what it is about to remove. **It and the form panel are the only modals the application has** — an error is
- * never one, and is shown where the thing failed.
+ * removes it says what it is about to remove. **It, the form panel and the price-pass review panel are the only modals the
+ * application has** — an error is never one, and is shown where the thing failed.
  *
  * The keyboard opens on the cancelling button, Escape cancels, and nothing outside the dialog is reachable while it is up.
  */

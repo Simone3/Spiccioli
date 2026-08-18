@@ -14,7 +14,9 @@ import { logStartupConfiguration } from 'src/main/config/StartupConfigurationLog
 import { registerAppInfoIpcHandlers } from 'src/main/ipc/AppInfoIpc';
 import { registerDiagnosticsIpcHandlers } from 'src/main/ipc/DiagnosticsIpc';
 import { registerLedgerIpcHandlers } from 'src/main/ipc/LedgerIpc';
+import { registerPricesIpcHandlers } from 'src/main/ipc/PricesIpc';
 import { buildAppMenuTemplate } from 'src/main/menu/AppMenu';
+import { createYahooPriceProvider } from 'src/main/prices/YahooPriceProvider';
 import { createLedgerSession, type LedgerSession } from 'src/main/storage/LedgerSession';
 import { isDevelopmentRun, resolveWindowLoadTarget, type WindowLoadTarget } from 'src/main/window/WindowLoadTarget';
 import { SPICCIOLI_LEDGER_IPC_EVENTS } from 'src/types/LedgerIpcChannels';
@@ -281,6 +283,13 @@ const startApplication = (): void => {
 			platform: process.platform
 		});
 		registerDiagnosticsIpcHandlers({ ipcMain });
+
+		// The only thing in the application that touches the network, and it is here rather than in the renderer because the
+		// renderer is where the ledger is. It is reached by one press of a button and never on load, on a timer or in the background.
+		registerPricesIpcHandlers({
+			ipcMain,
+			provider: createYahooPriceProvider({ fetchResource: fetch })
+		});
 		registerLedgerIpcHandlers({
 			ipcMain,
 			dialog,

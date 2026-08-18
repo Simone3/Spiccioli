@@ -12,6 +12,7 @@ import { UnsavedDraftProvider } from 'src/contexts/UnsavedDraftContext';
 import { TranslationProvider } from 'src/i18n/TranslationContext';
 import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
 import type { SpiccioliDiagnosticsApi, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
+import type { SpiccioliPricesApi } from 'src/types/PriceIpcTypes';
 
 /**
  * The application as a test sees it: the preload bridge stubbed, and the providers the real root puts above every screen.
@@ -28,6 +29,27 @@ const unsubscribe = (): () => void => {
 };
 
 const SAVED_AT = new Date(2026, 7, 8, 14, 32).toISOString();
+
+/**
+ * The one bridge that reaches the network, stubbed. A test that says nothing about it gets a pass that asked for nothing.
+ * @param overrides What this test needs the pass to answer.
+ * @returns The bridge that was put on the window.
+ */
+export const stubPricesBridge = (overrides: Partial<SpiccioliPricesApi> = {}): SpiccioliPricesApi => {
+	const bridge: SpiccioliPricesApi = {
+		updatePrices: () => {
+			return Promise.resolve({ referenceDate: null, outcomes: [] });
+		},
+		reportPricesWritten: () => {
+			return Promise.resolve();
+		},
+		...overrides
+	};
+
+	Object.defineProperty(window, 'spiccioliPrices', { configurable: true, value: bridge });
+
+	return bridge;
+};
 
 /**
  * Everything the bridge publishes, stubbed. Only what a test cares about is overridden.
@@ -92,6 +114,7 @@ export const stubLedgerBridge = (overrides: Partial<SpiccioliLedgerApi> = {}): S
 	};
 
 	Object.defineProperty(window, 'spiccioliLedger', { configurable: true, value: bridge });
+	stubPricesBridge();
 	Object.defineProperty(window, 'spiccioliDiagnostics', {
 		configurable: true,
 		value: {

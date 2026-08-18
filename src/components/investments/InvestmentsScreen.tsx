@@ -13,6 +13,7 @@ import { toSecurity, type SecurityFormValues } from 'src/components/investments/
 import { TradeFiltersBar } from 'src/components/investments/TradeFilters';
 import { TradeForm, type TradeFormValues } from 'src/components/investments/TradeForm';
 import { TradesTable } from 'src/components/investments/TradesTable';
+import { UpdatePricesPanel } from 'src/components/investments/UpdatePricesPanel';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useLedger } from 'src/contexts/LedgerContext';
@@ -28,6 +29,12 @@ import {
 	totalHoldings,
 	walkPositions
 } from 'src/logic/investments/Holdings';
+import {
+	reviewPricePass,
+	toFetchedPrices,
+	toPriceListings,
+	type PriceUpdateReview
+} from 'src/logic/investments/PriceUpdate';
 import {
 	countSecurityUsage,
 	indexSecurities,
@@ -94,6 +101,9 @@ export const InvestmentsScreen = (): ReactElement => {
 	const [ securityToDelete, setSecurityToDelete ] = useState<Security | undefined>(undefined);
 	const [ tradeToDelete, setTradeToDelete ] = useState<Trade | undefined>(undefined);
 	const [ refusal, setRefusal ] = useState<string | undefined>(undefined);
+	const [ notice, setNotice ] = useState<string | undefined>(undefined);
+	const [ isFetchingPrices, setIsFetchingPrices ] = useState(false);
+	const [ pricePass, setPricePass ] = useState<{ askedCount: number; review: PriceUpdateReview } | undefined>(undefined);
 
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
 
@@ -176,6 +186,69 @@ export const InvestmentsScreen = (): ReactElement => {
 				})
 			};
 		});
+	};
+
+	/**
+	 * The one press that contacts the network.
+	 *
+	 * **One request per security in the file, held or fully sold**, and the file is not touched: what comes back opens the review
+	 * panel, and nothing at all is written until that panel is confirmed.
+	 */
+	const runPricePass = async(): Promise<void> => {
+		if(!document) {
+			return;
+		}
+
+		const listings = toPriceListings(document.securities);
+
+		setRefusal(undefined);
+		setNotice(undefined);
+		setIsFetchingPrices(true);
+
+		try {
+			const result = await window.spiccioliPrices.updatePrices(listings);
+
+			setPricePass({ askedCount: listings.length, review: reviewPricePass(result, securities, prices) });
+		}
+		catch {
+			// The pass itself reports a provider that could not be reached as a line in the panel, so reaching here is the bridge
+			// having failed rather than the network. It is stated where the button is and blocks nothing.
+			setRefusal(t('updatePrices.passFailed'));
+		}
+		finally {
+			setIsFetchingPrices(false);
+		}
+	};
+
+	// One confirmation covers the pass: every row is written, each as a fetched Price dated the day its quote is for, replacing
+	// whatever that day already held — a hand-typed value included
+	const confirmPricePass = (review: PriceUpdateReview): void => {
+		const records = toFetchedPrices(review.rows);
+
+		updateDocument((current) => {
+			return {
+				...current,
+				prices: records.reduce((written, record) => {
+					return writePrice(written, record);
+				}, current.prices)
+			};
+		});
+
+		void window.spiccioliPrices.reportPricesWritten({
+			writtenCount: records.length,
+			dates: [ ...new Set(records.map((record) => {
+				return record.date;
+			})) ]
+		});
+		setNotice(t('updatePrices.wrote', { count: records.length }));
+		setPricePass(undefined);
+	};
+
+	// Cancel and nothing at all is written — no record, no half-finished pass. The log still hears that the pass ended.
+	const cancelPricePass = (): void => {
+		void window.spiccioliPrices.reportPricesWritten({ writtenCount: 0, dates: [] });
+		setNotice(t('updatePrices.cancelled'));
+		setPricePass(undefined);
 	};
 
 	const saveSecurity = (values: SecurityFormValues): void => {
@@ -582,6 +655,23 @@ export const InvestmentsScreen = (): ReactElement => {
 	};
 
 	const actions = (): ReactNode => {
+		// The button sits on the Holdings tab, and it is a button and nothing else: no selection first and no setting behind it.
+		// The sentence under it is what leaves the machine, stated here and again in the panel.
+		if(tab === 'holdings' && orderedSecurities.length > 0) {
+			return (
+				<div className='investments-screen-update-prices'>
+					<AppButton
+						disabled={isFetchingPrices}
+						onClick={() => {
+							void runPricePass();
+						}}>
+						{isFetchingPrices ? t('updatePrices.busy') : t('updatePrices.button')}
+					</AppButton>
+					<p>{t('updatePrices.whatLeaves', { provider: t('updatePrices.providerName') })}</p>
+				</div>
+			);
+		}
+
 		if(tab === 'securities' && orderedSecurities.length > 0) {
 			return (
 				<AppButton
@@ -654,6 +744,7 @@ export const InvestmentsScreen = (): ReactElement => {
 				]}
 				onSelect={(key) => {
 					setRefusal(undefined);
+					setNotice(undefined);
 					setTab(key as InvestmentsTab);
 				}}/>
 
@@ -671,10 +762,24 @@ export const InvestmentsScreen = (): ReactElement => {
 				</div>
 			)}
 
+			{notice && (
+				<p className='investments-screen-notice' role='status'>{notice}</p>
+			)}
+
 			{tab === 'holdings' && renderHoldingsTab()}
 			{tab === 'purchases' && renderTradesTab('purchase')}
 			{tab === 'sales' && renderTradesTab('sale')}
 			{tab === 'securities' && renderSecuritiesTab()}
+
+			{pricePass && (
+				<UpdatePricesPanel
+					review={pricePass.review}
+					askedCount={pricePass.askedCount}
+					onConfirm={() => {
+						confirmPricePass(pricePass.review);
+					}}
+					onCancel={cancelPricePass}/>
+			)}
 
 			{securityDraft && (
 				<SecurityForm

@@ -10,7 +10,7 @@ import { useTranslator } from 'src/i18n/TranslationContext';
  * save is disable the saving button, which is what the validation specification asks of every form. The keyboard opens on the
  * first field, Escape cancels, and nothing outside the panel is reachable while it is up.
  *
- * It and the confirmation are the only modals the application has. **An error is never one.**
+ * It, the confirmation and the price-pass review panel are the only modals the application has. **An error is never one.**
  */
 
 export interface FormDialogProps {

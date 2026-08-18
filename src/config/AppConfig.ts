@@ -83,3 +83,12 @@ export const DIAGNOSTICS_CONFIG = {
 	maximumRenderErrorStackLength: 4000,
 	maximumRenderErrorComponentStackLength: 4000
 } as const;
+
+// The one thing in the application that touches the network: one request per security, spaced rather than fired at once, and
+// nothing the provider answers with allowed to grow a panel row or a log line without limit
+export const PRICES_CONFIG = {
+	requestSpacingMs: 400,
+	requestTimeoutMs: 10000,
+	maximumFailureMessageLength: 200,
+	maximumCurrencyCodeLength: 12
+} as const;
