@@ -30,16 +30,17 @@ const renderDateField = async(initial?: IsoDate, dateFormat: DateFormat = DEFAUL
 };
 
 describe('the date field', () => {
+	// The preferences reach the field over the bridge, so the day is awaited rather than read the moment the input exists
 	test('prints the day in the format the preferences hold', async() => {
 		await renderDateField('2026-08-08');
 
-		expect(screen.getByRole('textbox', { name: 'Date' })).toHaveValue('08/08/2026');
+		expect(await screen.findByDisplayValue('08/08/2026')).toBeInTheDocument();
 	});
 
 	test('follows the preference rather than a system locale', async() => {
 		await renderDateField('2026-08-08', 'YYYY-MM-DD');
 
-		expect(screen.getByRole('textbox', { name: 'Date' })).toHaveValue('2026-08-08');
+		expect(await screen.findByDisplayValue('2026-08-08')).toBeInTheDocument();
 	});
 
 	test('will not take a character that is neither a digit nor the format separator', async() => {

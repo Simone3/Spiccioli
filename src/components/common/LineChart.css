@@ -1,0 +1,104 @@
+
+.line-chart {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+/* The plot is given a height of its own because the library measures the box it is put in, and a box that sizes itself to the
+   chart inside it would measure zero */
+.line-chart-plot {
+	width: 100%;
+	height: 200px;
+}
+
+/* The key under the chart, which is ours rather than the library's so that a dashed line reads as dashed here too */
+.line-chart-key {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 12px;
+	color: var(--colors-text-secondary);
+}
+
+.line-chart-key li {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+
+.line-chart-key-mark {
+	display: block;
+	width: 14px;
+	height: 2px;
+	border-radius: 1px;
+}
+
+.line-chart-key-mark-1 {
+	background-color: var(--colors-chart-series-1);
+}
+
+.line-chart-key-mark-2 {
+	background-color: var(--colors-chart-series-2);
+}
+
+.line-chart-key-mark-3 {
+	background-color: var(--colors-chart-series-3);
+}
+
+.line-chart-key-mark-4 {
+	background-color: var(--colors-chart-series-4);
+}
+
+.line-chart-key-mark-5 {
+	background-color: var(--colors-chart-series-5);
+}
+
+/* A term rather than a measurement, marked the same way in the key as it is on the chart */
+.line-chart-key-mark-dashed {
+	background-image: linear-gradient(90deg, var(--colors-background-primary) 0 3px, transparent 3px 6px);
+	background-size: 6px 2px;
+}
+
+.line-chart-tooltip {
+	padding: 8px 10px;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 6px;
+	box-shadow: 0 8px 18px var(--colors-popup-shadow);
+	font-size: 12px;
+}
+
+.line-chart-tooltip-label {
+	margin: 0 0 6px;
+	font-weight: 700;
+}
+
+.line-chart-tooltip-figures {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin: 0;
+}
+
+.line-chart-tooltip-figure {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.line-chart-tooltip-figure dt {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+	color: var(--colors-text-secondary);
+}
+
+.line-chart-tooltip-figure dd {
+	margin: 0;
+	font-variant-numeric: tabular-nums;
+}

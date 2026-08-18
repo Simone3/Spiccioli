@@ -45,7 +45,8 @@
 		"react": "19.2.8",
 		"react-datepicker": "9.1.0",
 		"react-dom": "19.2.8",
-		"react-router": "8.3.0"
+		"react-router": "8.3.0",
+		"recharts": "3.10.1"
 	},
 	"devDependencies": {
 		"@electron-forge/cli": "7.11.2",

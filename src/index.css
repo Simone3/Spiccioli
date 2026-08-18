@@ -34,6 +34,17 @@ body {
 	--colors-provenance-border: rgba(169, 154, 214, 0.35);
 	--colors-provenance-background-muted: rgba(169, 154, 214, 0.12);
 
+	/* The chart series, fixed here so that two charts never draw the same series in two different colours. A line is told
+	   apart by its colour and by the legend beside it, and the first is the accent because the first series is the headline
+	   figure on every chart that has one */
+	--colors-chart-series-1: #E9A21B;
+	--colors-chart-series-2: #5B9EA6;
+	--colors-chart-series-3: #A8607A;
+	--colors-chart-series-4: #8FA05C;
+	--colors-chart-series-5: #3F6480;
+	--colors-chart-grid: rgba(255, 255, 255, 0.08);
+	--colors-chart-axis: #BFBFBF;
+
 	/* Fonts */
 	--font-family: Inter, system-ui, sans-serif;
 

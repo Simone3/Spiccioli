@@ -6,7 +6,7 @@ The route from the scaffolding that exists today to the application [`docs/funct
 
 It carries three things: the **decisions** ([§8.2](#82-decisions)) — every one of them now taken, stated as what a phase has to build to — the **shape the code is heading towards** ([§8.4](#84-the-shape-of-the-code)), and the **twelve phases** the work is cut into ([§8.5](#85-the-phases)). A section that cannot be written until a decision is taken says **to be completed** and names it; none does today.
 
-**Phases 1, 2, 3, 4, 5, 6 and 7 have landed.** Everything they built is described in the pages they changed — [§1](01-architecture.md), [§2](02-repository-map.md), [§4](04-framework.md), [§6](06-styling.md), [§7](07-testing.md) and the new [§9](09-file-format.md) — and this page keeps only the plan.
+**Phases 1 to 9 have landed.** Everything they built is described in the pages they changed — [§1](01-architecture.md), [§2](02-repository-map.md), [§4](04-framework.md), [§6](06-styling.md), [§7](07-testing.md) and the new [§9](09-file-format.md) — and this page keeps only the plan.
 
 **What each decision was taken *on* is in [`08-implementation-plan-why.md`](08-implementation-plan-why.md)**, the companion to this page: the grounds decision by decision, the measurements behind D1, and the provider survey behind D11. This page is read on the way into every phase and states only the outcomes; that one is read when a decision is questioned.
 
@@ -67,14 +67,14 @@ Each of these had to be settled before the phase that names it could start, and 
 
 ### The dependencies D7 – D10 add
 
-Four libraries, and they are the whole of what v1 adds to the five runtime dependencies `package.json` started with. **Each arrives in the phase that needs it and not before**, at an exact version; the first two are installed and the last two are not. The versions below are what was published when the decisions were taken; a phase installs the current one and pins it.
+Four libraries, and they are the whole of what v1 adds to the five runtime dependencies `package.json` started with. **Each arrives in the phase that needs it and not before**, at an exact version; all four are now installed. The versions below are what was published when the decisions were taken; a phase installs the current one and pins it.
 
 | Package | Version then | Arrives in | What comes with it |
 | --- | --- | --- | --- |
 | `react-router` | 7.18.2 | Phase 2 — **installed at 8.3.0** | `cookie-es`. Version 7 folded the DOM exports into the one package and version 8 keeps them there, so `react-router-dom` is a re-export and is not installed |
 | `react-datepicker` | 9.1.0 | Phase 2 — **installed** | `date-fns` and `@floating-ui/react`. `date-fns-tz` is an **optional** peer and stays uninstalled — nothing in this application has a time zone in it |
 | `@dnd-kit/core` + `@dnd-kit/sortable` | 0.5.0 for `@dnd-kit/react` | Phase 6 — **the fallback, installed at 6.3.1 and 10.0.0** | `@dnd-kit/accessibility` and `@dnd-kit/utilities`, both the same project's. `@dnd-kit/react` was still pre-1.0 when the phase started, which is exactly what the re-check below said to do about it |
-| `recharts` | 3.10.1 | Phase 9 | `@reduxjs/toolkit`, `react-redux`, `immer`, the d3 modules of `victory-vendor` and a handful of small utilities — much the largest tree of the four |
+| `recharts` | 3.10.1 | Phase 9 — **installed at 3.10.1** | `@reduxjs/toolkit`, `react-redux`, `immer`, the d3 modules of `victory-vendor` and a handful of small utilities — much the largest tree of the four |
 
 **Every one of them is wrapped where it meets a screen**, which is what keeps the choice reversible: the date picker behind our own control (D9), each chart behind a component of its own, the drag behind the rule list. **What the rest of the code imports is Spiccioli's component and never the library**, so replacing any of the four is a change in one folder.
 
@@ -158,8 +158,8 @@ Where the new folders go. `src/framework` keeps the rule of [§4](04-framework.m
 | 5 | [Bulk import](#phase-5--bulk-import) — **done** | [§5.7](../functional/specs/05-transactions.md#57-bulk-import) | 4 |
 | 6 | [Categories](#phase-6--categories) — **done** | [§6](../functional/specs/06-categories.md) | 4 |
 | 7 | [Investments](#phase-7--investments) — **done** | [§7.1](../functional/specs/07-investments.md#71-holdings) – [§7.5](../functional/specs/07-investments.md#75-recording-a-trade-and-where-securities-come-from), [§11.1](../functional/specs/11-calculations.md#111-weighted-average-cost) – [§11.3](../functional/specs/11-calculations.md#113-hypothetical-liquidation), [§11.8](../functional/specs/11-calculations.md#118-annualised-return) | 3 |
-| 8 | [Update prices](#phase-8--update-prices) | [§7.6](../functional/specs/07-investments.md#76-prices) | 7 |
-| 9 | [Salaries](#phase-9--salaries) | [§8](../functional/specs/08-salaries.md), [§11.7](../functional/specs/11-calculations.md#117-salary-figures) | 2 |
+| 8 | [Update prices](#phase-8--update-prices) — **done** | [§7.6](../functional/specs/07-investments.md#76-prices) | 7 |
+| 9 | [Salaries](#phase-9--salaries) — **done** | [§8](../functional/specs/08-salaries.md), [§11.7](../functional/specs/11-calculations.md#117-salary-figures) | 2 |
 | 10 | [Matching and checks](#phase-10--matching-and-checks) | [§9](../functional/specs/09-checks.md), [§11.6](../functional/specs/11-calculations.md#116-derived-matching) | 4, 7, 9 |
 | 11 | [Portfolio](#phase-11--portfolio) | [§3](../functional/specs/03-portfolio.md), [§11.4](../functional/specs/11-calculations.md#114-balances-and-net-worth), [§11.5](../functional/specs/11-calculations.md#115-net-worth-over-time) | 10 |
 | 12 | [Release readiness](#phase-12--release-readiness) | [§12](../functional/specs/12-storage.md) | 11 |
@@ -312,10 +312,20 @@ What it left behind, and where: four files in `src/main/prices/` — `PriceProvi
 
 ### Phase 9 — Salaries
 
+**Done.** The one screen whose two tabs are a numerator and a denominator, and the phase that brought `recharts` with it.
+
+What it left behind, and where: three files in `src/logic/salaries/` — `Contracts.ts`, `Payslips.ts` and `SalaryFigures.ts` — the six components of `src/components/salaries/`, and **one file in the kit**, `src/components/common/LineChart.tsx`, which is the only file in the application that imports the charting library. Nothing in `src/framework` grew and nothing in `src/main` was touched: this phase reads and writes the file the renderer already holds.
+
 - **Contracts tab**: creation and editing, the dates that cannot be narrowed past a payslip or a ContractYear, deletion refused while a payslip points at the contract.
 - **Payslips tab**: the contract selector scoping everything, the per-year table with `workingDays` created by typing and deleted by clearing, the twelve-column payslip table with `netSalary` inserted after `carPayment`, the add form whose year picker holds only the contract's own years.
 - `src/logic`: the figures of [§11.7](../functional/specs/11-calculations.md#117-salary-figures), including the years that read 0 and the hourly figures that read *undefined*.
 - The two charts, per D8, in `recharts`: *Average per month, per year* over `yearAvgGross` and `yearAvgNet`, and *Totals per year* carrying total gross, total net salary and the contract line, which is dashed because it is a term rather than a measurement ([§8.1](../functional/specs/08-salaries.md#81-payslips)).
+
+*Done when* a contract's years read the figures of [§11.7](../functional/specs/11-calculations.md#117-salary-figures) off its payslips and the two charts are drawn from the same rows. **They are**, in `tests/logic/Contracts.test.ts`, `tests/logic/SalaryFigures.test.ts`, `tests/components/SalariesScreen.test.tsx` and `tests/components/LineChart.test.tsx` — which stubs the one thing jsdom does not have, a `ResizeObserver`, and then asserts what the library actually drew.
+
+**Four things this phase settled that the specification does not fix.** **The narrowing refusal is split by the end that causes it** — `contractDateObstructions` returns what the start would leave behind it and what the end would leave after it, separately — because [§13](../functional/specs/13-validation.md) states a refusal beside the offending field and the offending field is one of two dates. **A ContractYear is bounded by the contract's dates and not by the rows of the per-year table**, so a running contract has no upper bound for one to be outside of however far ahead the year is, while a payslip is bounded by the month. **The four figures that come out of a division are divided once and rounded once, onto the cent they are shown at** rather than held at the working scale the way a holding's average cost is: an average and an hourly rate are the ends of their own calculations and nothing downstream combines them further. And **a year is interpolated into wording as text and never as a number** — it is an identifier rather than a quantity, and the translator's own number formatting would otherwise put a thousands separator through the middle of it.
+
+**The chart wrapper is the kit's and not the screen's**, because Phase 11 draws three more from the same file: a series is named by a tone rather than by a colour, the five series colours are variables in `src/index.css` ([§6](06-styling.md)), the legend and the tooltip are ours so that a dashed line reads as dashed in the key too, and **a `null` at a point is a stretch the line does not reach rather than a zero** — which is exactly the shape [§11.5](../functional/specs/11-calculations.md#115-net-worth-over-time)'s two series need.
 
 ### Phase 10 — Matching and checks
 

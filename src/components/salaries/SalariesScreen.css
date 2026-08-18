@@ -1,0 +1,112 @@
+
+/* The contract selector and the button that fills the tab, side by side beside the heading */
+.salaries-screen-actions {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+/* The two charts, side by side, each covering every year of the contract. They drop under each other where there is no room. */
+.salaries-screen-charts {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+@media (width <= 1100px) {
+	.salaries-screen-charts {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* One table or one chart, with what it is called above it. Three of them stack down the Payslips tab. */
+.salaries-screen-card {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-bottom: 16px;
+	padding: 16px;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 6px;
+}
+
+.salaries-screen-card-title {
+	margin: 0;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--colors-text-secondary);
+}
+
+/* What the specification says about a figure, under the figures it qualifies */
+.salaries-screen-note {
+	margin-top: 4px;
+	font-size: 12px;
+	color: var(--colors-text-secondary);
+}
+
+/* A zero is a figure and not an absence, and so are a note and a count beside the figures they qualify */
+.salaries-screen-quiet {
+	color: var(--colors-text-secondary);
+}
+
+/* A figure the form computes as it is typed, which is never a field */
+.salaries-screen-derived {
+	margin: 0;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	color: var(--colors-accent-primary);
+}
+
+.salaries-screen-row-selected td {
+	background-color: var(--colors-interactive-active-background);
+}
+
+/* The cell that scopes the screen to its row. It is a real button, so it draws the one focus ring. */
+.salaries-screen-link {
+	padding: 0;
+	background: none;
+	border: none;
+	border-radius: 3px;
+	font: inherit;
+	color: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.salaries-screen-link:hover {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+/* A refusal a screen states above its list. It is never a modal and it never blocks. */
+.salaries-screen-refusal {
+	display: flex;
+	gap: 16px;
+	align-items: baseline;
+	justify-content: space-between;
+	margin-bottom: 16px;
+	padding: 12px 14px;
+	background-color: var(--colors-danger-background-muted);
+	border: 1px solid var(--colors-danger-border);
+	border-radius: 6px;
+	color: var(--colors-danger-text);
+}
+
+.salaries-screen-refusal p {
+	margin: 0;
+}
+
+.salaries-screen-refusal-dismiss {
+	padding: 0;
+	background: none;
+	border: none;
+	border-radius: 3px;
+	font: inherit;
+	color: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+}

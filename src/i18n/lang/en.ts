@@ -99,6 +99,8 @@ export const EN_TRANSLATIONS = {
 		tradesFiltered: 'No trade matches these filters.',
 		securities: 'Add the first security, or let the purchase form create one while you record the trade.',
 		salaries: 'Add the employer, its months per year and its hours per day — everything on the other tab divides by them.',
+		payslips: 'Nothing has been recorded against this contract yet — add the first payslip and its year fills itself in.',
+		payslipsOfYear: 'Nothing was recorded for {year}. Add a payslip, or pick another year in the table above.',
 		goToAccounts: 'Go to Accounts',
 		goToImport: 'Import a bank export',
 		goToTransactions: 'Go to Transactions'
@@ -929,6 +931,175 @@ export const EN_TRANSLATIONS = {
 			other: '{count} prices written.'
 		},
 		cancelled: 'Nothing was written.'
+	},
+
+	// The two tabs of the Salaries screen. Contracts is the denominator every figure on Payslips divides by, which is why they sit together.
+	salaryTabs: {
+		payslips: 'Payslips',
+		contracts: 'Contracts · {count}'
+	},
+
+	// The Contracts tab. A contract is never retired, only ended: it stays in the selector and keeps its payslips and its years.
+	contracts: {
+		table: 'Contracts',
+		add: 'Add contract',
+		selector: 'Contract',
+		select: 'Show the payslips of {name}',
+		count: {
+			one: '1 contract',
+			other: '{count} contracts'
+		},
+		payslipCount: {
+			one: '1 payslip',
+			other: '{count} payslips'
+		},
+		yearCount: {
+			one: '1 year',
+			other: '{count} years'
+		},
+		range: '{from} – {to}',
+		summary: '{contracts} · {payslips} · {range}',
+		summaryWithoutPayslips: '{contracts} · {payslips}',
+		footer: '{contracts} · {ended} · {payslips}',
+		endedNone: 'none ended',
+		ended: {
+			one: '1 ended',
+			other: '{count} ended'
+		},
+
+		// The terms the payslips of the selected contract are read against, stated under the heading
+		terms: '{name} · {months} · {hours}',
+		monthsPerYear: {
+			one: '1 month per year',
+			other: '{count} months per year'
+		},
+		hoursPerDay: '{hours} hours per day',
+		columns: {
+			name: 'Employer',
+			monthsPerYear: 'Months / year',
+			hoursPerDay: 'Hours / day',
+			startDate: 'Start',
+			endDate: 'End',
+			payslips: 'Payslips',
+			notes: 'Notes'
+		},
+		rowMenu: 'Actions for {name}',
+		deleteTitle: 'Delete this contract?',
+		deleteMessage: '{name} will be removed, and the working days recorded against its years with it. This cannot be undone.',
+		deleteConfirm: 'Delete contract',
+		deleteBlocked: {
+			one: '{name} cannot be deleted while 1 payslip points at it. Delete it first.',
+			other: '{name} cannot be deleted while {count} payslips point at it. Delete them first.'
+		},
+		form: {
+			addTitle: 'Add contract',
+			editTitle: 'Edit contract',
+			name: 'Employer',
+			namePlaceholder: 'e.g. Acme S.p.A.',
+			nameTaken: 'There is already a contract with this employer.',
+			monthsPerYear: 'Months per year',
+			monthsPerYearHint: 'Thirteen where the year carries a tredicesima. The contract line on the totals chart is this times the monthly contract gross.',
+			hoursPerDay: 'Hours per day',
+			startDate: 'Start date',
+			endDate: 'End date',
+			endDateHint: 'Left empty while the contract is running. Ending a contract changes no figure: nothing in Spiccioli sums across contracts.',
+			endBeforeStart: 'The end date cannot be before the start date.',
+
+			// Narrowing is what is refused; widening is always fine, and is what an employer extending a contract looks like
+			narrowedPastPayslips: {
+				one: 'These dates would leave 1 payslip outside the contract: {months}. Delete it first, or leave the dates as they are.',
+				other: 'These dates would leave {count} payslips outside the contract: {months}. Delete them first, or leave the dates as they are.'
+			},
+			narrowedPastYears: {
+				one: 'These dates would leave the working days recorded for {years} outside the contract. Clear that year first, or leave the dates as they are.',
+				other: 'These dates would leave the working days recorded for {years} outside the contract. Clear those years first, or leave the dates as they are.'
+			},
+			workingDaysHint: 'Working days belong to a year of a contract, and are typed into the per-year table on the Payslips tab.',
+			notes: 'Notes'
+		}
+	},
+
+	// The Payslips tab: the per-year table above, the payslips of the selected year below, and the two charts over every year of the contract
+	payslips: {
+		add: 'Add payslip',
+		yearTable: 'Per year',
+		table: 'Payslips of {year}',
+		monthOfYear: '{month}/{year}',
+		yearColumns: {
+			year: 'Year',
+			payslipCount: 'Payslips',
+			yearContractGross: 'Annual contract gross',
+			totalGross: 'Total gross',
+			totalNetSalary: 'Total net salary',
+			workingDays: 'Working days',
+			grossPerHour: 'Gross / hour',
+			netPerHour: 'Net / hour'
+		},
+		columns: {
+			month: 'Month',
+			label: 'Label',
+			contractGross: 'Contract gross',
+			gross: 'Gross',
+			netPayment: 'Net payment',
+			refunds: 'Refunds',
+			carPayment: 'Car',
+			netSalary: 'Net salary',
+			employeeContribution: 'Employee',
+			employerContribution: 'Employer',
+			severanceContribution: 'TFR',
+			notes: 'Notes'
+		},
+
+		// The one delete that is not confirmed: the record is the cell, so clearing it puts the year back where it was
+		selectYear: 'Show the payslips of {year}',
+		editWorkingDays: 'Working days of {year}',
+		workingDaysHint: 'Working days are always the whole calendar year, never the part worked — so a partial first or last year understates both hourly figures.',
+		yearFooter: '{years} · {payslips} · {days}',
+		workingDaysMissing: {
+			one: '1 year without working days',
+			other: '{count} years without working days'
+		},
+		workingDaysComplete: 'every year has its working days',
+		footer: '{payslips} · gross {gross} · net payment {netPayment} · net salary {netSalary} · employee {employee} · employer {employer} · TFR {severance}',
+		rowMenu: 'Actions for the payslip of {month}',
+		deleteTitle: 'Delete this payslip?',
+		deleteMessage: 'The payslip of {month} for {net} will be removed. This cannot be undone.',
+		deleteConfirm: 'Delete payslip',
+
+		// The two charts, side by side, covering every year of the contract
+		charts: {
+			averages: 'Average per month, per year',
+			averageGross: 'average gross',
+			averageNet: 'average net',
+			totals: 'Totals per year',
+			totalGross: 'gross',
+			totalNet: 'net salary',
+			contractLine: 'contract × months'
+		},
+		form: {
+			addTitle: 'Add payslip',
+			editTitle: 'Edit payslip',
+			year: 'Year',
+			yearHint: 'The contract’s own years, opening on the one the table below is showing. Saving into another year moves the table to it.',
+			month: 'Month',
+			monthOutsideContract: 'The contract does not cover {month}.',
+			label: 'Label',
+			labelPlaceholder: 'e.g. 13th',
+			contractGross: 'Contract gross',
+			gross: 'Gross',
+			grossHint: 'The payslip’s own totale lordo line, typed as printed.',
+			netPayment: 'Net payment',
+			netPaymentHint: 'What reached the bank. It may be negative — a December whose tax recalculation exceeded the month’s net is a real payslip.',
+			refunds: 'Refunds',
+			carPayment: 'Car',
+			employeeContribution: 'Employee',
+			employerContribution: 'Employer',
+			severanceContribution: 'TFR',
+			pensionHint: 'The three credits that reach the pension fund separately. Zero is the ordinary value for a heading the payslip has nothing under.',
+			netSalary: 'Net salary',
+			netSalaryHint: 'Derived, never entered: net payment − refunds + car.',
+			notes: 'Notes'
+		}
 	},
 
 	// What is said when something on screen has not been written and the user is leaving anyway. There is no *apply* here.
