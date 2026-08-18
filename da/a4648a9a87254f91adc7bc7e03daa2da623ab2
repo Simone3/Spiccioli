@@ -1,0 +1,84 @@
+src/components/checks/ChecksScreen.css
+  s_9427e34d9a853a::t_a81879487f33ae 1-108
+src/components/investments/TradesTable.tsx
+  s_9427e34d9a853a::t_412763510bfb18 27,48-50,68,81,344-360
+src/components/shell/AppShell.tsx
+  s_9427e34d9a853a::t_bbbe697821fc05 16,36,54
+src/components/shell/RecordLinks.ts
+  s_9427e34d9a853a::t_63ba0cc1805124 1-116
+src/components/shell/Sidebar.tsx
+  s_9427e34d9a853a::t_6c4471ba597ef2 25-26
+src/components/transactions/TransactionsScreen.tsx
+  s_9427e34d9a853a::t_cc1d106689d129 13,19,65-67,115-119,312
+src/components/transactions/TransactionsTable.tsx
+  s_9427e34d9a853a::t_ab779fe6187877 23-25,37-39,68,85,283-299
+src/config/AppConfig.ts
+  s_9427e34d9a853a::t_44d2bc66bc96c9 79-85
+src/contexts/ChecksContext.tsx
+  s_9427e34d9a853a::t_89553e73544bbc 1-121
+src/framework/utils/DateUtils.ts
+  s_9427e34d9a853a::t_fcddde7ba3a089 123,187-231
+src/i18n/lang/en.ts
+  s_9427e34d9a853a::t_d11fc33b164e1d 263,268-275,733,736-742,1045-1048,1285-1456
+src/index.tsx
+  s_9427e34d9a853a::t_b808d1276b8d6c 9,25-29
+src/logic/categories/Categories.ts
+  s_9427e34d9a853a::t_94e53a0a5694b4 2,24-40
+src/logic/checks/CheckDates.ts
+  s_9427e34d9a853a::t_5a847d8e15ba6b 1-78
+src/logic/investments/Holdings.ts
+  s_9427e34d9a853a::t_03b7530105ff6c 58-60,173,222
+src/logic/salaries/Payslips.ts
+  s_9427e34d9a853a::t_8490c7e9129745 1,16-36
+CLAUDE.md
+  s_9427e34d9a853a::t_19c5641c8218ba 9
+docs/technical/01-architecture.md
+  s_9427e34d9a853a::t_33b40bb22aa36e 46-48,59-60,108
+docs/technical/02-repository-map.md
+  s_9427e34d9a853a::t_ee6a2665dbcde4 67,79-81,93-95
+docs/technical/04-framework.md
+  s_9427e34d9a853a::t_205f0e308a607a 45
+docs/technical/08-implementation-plan.md
+  s_9427e34d9a853a::t_bb5d5fbff665ac 9,332-338,341-346,379
+src/components/checks/ChecksScreen.tsx
+  s_9427e34d9a853a::t_427a1e5fbcf509 1,3-5,7,10,12-25,30-96,99-102
+src/components/investments/InvestmentsScreen.tsx
+  s_9427e34d9a853a::t_72cd9a7632dbb6 2,18,20,26,97-99,116-147,194-198,557
+src/components/salaries/SalariesScreen.tsx
+  s_9427e34d9a853a::t_3b6603de70b06b 2,14,72-84
+src/logic/checks/Checks.ts
+  s_9427e34d9a853a::t_65db49650c75ad 1-854
+src/logic/checks/Matching.ts
+  s_9427e34d9a853a::t_98fb97391b81fd 1-700
+tests/components/ChecksScreen.test.tsx
+  s_9427e34d9a853a::t_ec77621c05c475 1-114
+tests/framework/DateUtils.test.ts
+  s_9427e34d9a853a::t_1aa7598eb35c5c 115-133
+tests/logic/Checks.test.ts
+  s_9427e34d9a853a::t_666d36487162be 1-386
+tests/logic/Matching.test.ts
+  s_9427e34d9a853a::t_ce1eb803b22dfc 1-561
+tests/testUtils/AppTestFactory.tsx
+  s_9427e34d9a853a::t_8e44512390e10f 9,137-139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "daa4648a9a87254f91adc7bc7e03daa2da623ab2",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_9427e34d9a853a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cb27449e-34cb-45e3-9e00-74dbf43acfff",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
