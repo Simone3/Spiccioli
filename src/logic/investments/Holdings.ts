@@ -11,7 +11,7 @@ import {
 	widenToWorkingScale
 } from 'src/logic/money/Money';
 import type { SpiccioliTranslator } from 'src/i18n/Translations';
-import type { IsoDate, LedgerDocument, LedgerId, TenThousandths, Trade, TradeKind } from 'src/types/LedgerTypes';
+import type { Cents, IsoDate, LedgerDocument, LedgerId, TenThousandths, Trade, TradeKind } from 'src/types/LedgerTypes';
 
 /**
  * The weighted-average-cost walk, the holdings it derives, and what each one would leave you with if it were sold today.
@@ -115,6 +115,33 @@ export interface HoldingsTotals {
 	gainPct: TenThousandths | undefined;
 }
 
+/** What valuing a position as if it had been sold takes: the quantity, what it cost, what it is worth and what selling costs. */
+export interface HoldingValuationOptions {
+	quantity: TenThousandths;
+
+	// Quantity times the average cost, at the working scale
+	invested: WorkingAmount;
+
+	// The price the position is valued at, or undefined where there is none to value it at
+	price: TenThousandths | undefined;
+
+	// The institution's default sell fee, in cents. Charged once per holding, and not at all where there is no price.
+	sellFee: Cents;
+
+	taxRate: TenThousandths;
+}
+
+/** One position, valued at its price and again as if it had been sold at it. Every figure is at the working scale. */
+export interface HoldingValuation {
+	marketValue: WorkingAmount;
+	gain: WorkingAmount;
+	sellFee: WorkingAmount;
+	taxableGain: WorkingAmount;
+	tax: WorkingAmount;
+	netProceeds: WorkingAmount;
+	netGain: WorkingAmount;
+}
+
 export interface HoldingsOptions {
 	document: LedgerDocument;
 	walk: PositionWalk;
@@ -182,14 +209,24 @@ const emptyPosition = (securityId: LedgerId, accountId: LedgerId): WalkingPositi
  * its quantity out and takes that many units of the average out of the basis, leaving the average itself alone. A sale that lands
  * on exactly zero clears both. **A sale that goes below zero ends that position's walk**, and every realised gain it had already
  * produced is dropped with it: the position has no cost basis behind it, and neither has any sale in it.
+ *
+ * **A day the walk stops at is what the net worth line of [§11.5] reads**, the same walk taken over the trades recorded up to
+ * that day. **Whether a position is oversold is not a question about a day**, though: a position that broke later has broken,
+ * and the line asks the walk over the whole file which ones those are rather than asking this one.
  * @param trades Every trade in the file, in any order.
+ * @param asOf The day to stop at, or undefined to walk the whole file.
  * @returns Each position as the walk left it, and the realised gain of every sale that has one.
  */
-export const walkPositions = (trades: readonly Trade[]): PositionWalk => {
+export const walkPositions = (trades: readonly Trade[], asOf?: IsoDate): PositionWalk => {
 	const positions = new Map<string, WalkingPosition>();
 	const realisedGains = new Map<LedgerId, WorkingAmount>();
+	const walked = asOf === undefined ?
+		trades :
+		trades.filter((trade) => {
+			return trade.date <= asOf;
+		});
 
-	for(const trade of [ ...trades ].sort(compareTradesInWalkOrder)) {
+	for(const trade of [ ...walked ].sort(compareTradesInWalkOrder)) {
 		const key = positionKey(trade.securityId, trade.accountId);
 		let position = positions.get(key);
 
@@ -253,6 +290,44 @@ export const walkPositions = (trades: readonly Trade[]): PositionWalk => {
 };
 
 /**
+ * Values one position at a price and again as if it had been sold at it, which is the holding half of [§11.3].
+ *
+ * **The sell fee comes out before the tax**, a selling commission reducing the gain the tax is computed on, and **the tax is
+ * never negative** — a loss produces no rebate. **A position with no price is worth nothing, its gain is minus its cost, its tax
+ * is nothing and no fee is charged**, since nothing is being sold. **`netProceeds` can be negative and that is correct**: a
+ * position worth less than the fee to close it would cost money to close.
+ *
+ * It is written once here because two screens value a holding: Portfolio at today's price, and the net worth line at the most
+ * recent price of each of its dates.
+ * @param options What the position is valued from.
+ * @param options.quantity The quantity held.
+ * @param options.invested What that quantity cost, at the working scale.
+ * @param options.price The price to value it at, or undefined where there is none.
+ * @param options.sellFee The institution's default sell fee, in cents.
+ * @param options.taxRate The security's tax rate, in ten-thousandths.
+ * @returns The valuation, gross and net.
+ */
+export const valueHolding = ({ quantity, invested, price, sellFee, taxRate }: HoldingValuationOptions): HoldingValuation => {
+	const marketValue = price === undefined ? 0 : multiplyAtRateScale(quantity, price);
+
+	// Nothing is being sold on a position nobody has ever valued, so no commission is estimated against it
+	const fee = price === undefined ? 0 : widenToWorkingScale(sellFee, MONEY_SCALES.amount);
+	const taxableGain = marketValue - fee - invested;
+	const tax = taxableGain > 0 ? roundWorkingScaleToCents(multiplyWorkingScaleByRateScale(taxableGain, taxRate)) : 0;
+	const netProceeds = marketValue - fee - tax;
+
+	return {
+		marketValue,
+		gain: marketValue - invested,
+		sellFee: fee,
+		taxableGain,
+		tax,
+		netProceeds,
+		netGain: netProceeds - invested
+	};
+};
+
+/**
  * Derives the holdings: the positions that are still open, valued at the latest price and again as if they had been sold today.
  *
  * **The sell fee comes out before the tax**, a selling commission reducing the gain the tax is computed on, and the tax is never
@@ -289,15 +364,13 @@ export const deriveHoldings = ({ document, walk, translator }: HoldingsOptions):
 		const institution = account.institutionId === null ? undefined : institutions.get(account.institutionId);
 		const latest = latestPrices.get(position.securityId);
 		const invested = multiplyWorkingScaleByRateScale(position.avgCost, position.quantity);
-		const marketValue = latest ? multiplyAtRateScale(position.quantity, latest.value) : 0;
-		const gain = marketValue - invested;
-
-		// Nothing is being sold on a position nobody has ever valued, so no commission is estimated against it
-		const sellFee = latest ? widenToWorkingScale(institution?.defaultSellFee ?? 0, MONEY_SCALES.amount) : 0;
-		const taxableGain = marketValue - sellFee - invested;
-		const tax = taxableGain > 0 ? roundWorkingScaleToCents(multiplyWorkingScaleByRateScale(taxableGain, security.taxRate)) : 0;
-		const netProceeds = marketValue - sellFee - tax;
-		const netGain = netProceeds - invested;
+		const valuation = valueHolding({
+			quantity: position.quantity,
+			invested,
+			price: latest?.value,
+			sellFee: institution?.defaultSellFee ?? 0,
+			taxRate: security.taxRate
+		});
 
 		const percentageOf = (figure: WorkingAmount): TenThousandths | undefined => {
 			return invested === 0 ? undefined : narrowFromWorkingScale(divideAtWorkingScale(figure, invested), MONEY_SCALES.rate);
@@ -314,15 +387,15 @@ export const deriveHoldings = ({ document, walk, translator }: HoldingsOptions):
 			invested,
 			price: latest?.value,
 			priceDate: latest?.date,
-			marketValue,
-			gain,
-			gainPct: percentageOf(gain),
-			sellFee,
-			taxableGain,
-			tax,
-			netProceeds,
-			netGain,
-			netGainPct: percentageOf(netGain)
+			marketValue: valuation.marketValue,
+			gain: valuation.gain,
+			gainPct: percentageOf(valuation.gain),
+			sellFee: valuation.sellFee,
+			taxableGain: valuation.taxableGain,
+			tax: valuation.tax,
+			netProceeds: valuation.netProceeds,
+			netGain: valuation.netGain,
+			netGainPct: percentageOf(valuation.netGain)
 		});
 	}
 

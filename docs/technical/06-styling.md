@@ -28,13 +28,15 @@ The groups are:
 | --- | --- |
 | Main | Backgrounds, text, accent, borders, overlays and the two interactive backgrounds |
 | States | Danger in its several strengths, warning, disabled, the green a positive amount is printed in, and the violet that marks a category a rule assigned rather than one the user set |
-| Charts | Five series colors, a grid and an axis. A chart names a series by its number rather than by a color, so two charts never draw the same series two different ways |
+| Charts | Five series colors, eleven slice colors, a grid and an axis. A chart names a series by its number and a slice by its rank rather than either by a color, so two charts never draw the same thing two different ways |
 | Fonts | The one family: Inter, self-hosted through `@fontsource/inter`, with a system fallback |
 | Focus | The one ring, described below |
 
 The accent is amber, and it is also the first chart series: the first line of a chart is its headline figure.
 
-**The charts are SVG, which is what keeps them inside this rule** (D8). A `stroke` is written as `var(--colors-chart-series-1)` in the markup, exactly like every other color in the application, where a canvas library would have each one read out with `getComputedStyle` and passed in as a string. The one file that imports the library is `src/components/common/LineChart.tsx`, and it is also the only file that turns a series number into a variable name.
+**There are eleven slice colors because the breakdown by type has a ceiling of eleven** — the seven cash types and the four security types ([§3.1](../functional/specs/03-portfolio.md#31-behaviour)). **The first five are the series colors themselves**, by reference rather than by repeated value, so one chart never contradicts another; the six after them extend the same family rather than starting a second one.
+
+**The charts are SVG, which is what keeps them inside this rule** (D8). A `stroke` is written as `var(--colors-chart-series-1)` in the markup, exactly like every other color in the application, where a canvas library would have each one read out with `getComputedStyle` and passed in as a string. **Two files import the library and no others do** — `src/components/common/LineChart.tsx` and `src/components/common/PieChart.tsx` — and they are also the only two that turn a series number or a slice rank into a variable name.
 
 Inter is imported in `src/index.tsx` at weights 300 and 700 and bundled with the application: nothing is fetched from a font CDN at runtime, which the Content-Security-Policy would refuse anyway.
 

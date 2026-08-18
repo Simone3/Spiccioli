@@ -105,7 +105,6 @@ The configuration file holds two things, through `src/main/config/SpiccioliConfi
 
 ## 1.7 What is deliberately not here yet
 
-- **One of the eight screens does not read its own records yet** — Portfolio. It exists, the sidebar reaches it and it shows the empty state of [§14](../functional/specs/14-empty-and-error-states.md); its cards, its chart and its calculations arrive with Phase 11. The other seven are finished.
 - **No single-instance lock.** Spiccioli is allowed to run twice. Two ledgers open side by side is ordinary use, and two sessions on *one* ledger is the case [§12](../functional/specs/12-storage.md) settles by detecting the external modification and keeping the displaced version — not by refusing to start.
 
 ---

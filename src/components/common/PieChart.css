@@ -1,0 +1,33 @@
+
+/* The ring, with what it counts written inside it. It is given a size of its own because the library measures the box it is
+   put in, and a box that sizes itself to the chart inside it would measure zero */
+.pie-chart {
+	position: relative;
+	flex: none;
+	width: 168px;
+	height: 168px;
+}
+
+.pie-chart-centre {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+}
+
+.pie-chart-centre b {
+	font-size: 22px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.pie-chart-centre small {
+	font-size: 10px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--colors-text-secondary);
+}

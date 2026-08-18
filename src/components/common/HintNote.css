@@ -1,0 +1,61 @@
+
+.hint-note {
+	position: relative;
+	display: inline-flex;
+	vertical-align: baseline;
+}
+
+/* A real control, so it draws the one focus ring and the keyboard can bring the note up */
+.hint-note-mark {
+	padding: 0;
+	background: none;
+	border: none;
+	border-radius: 50%;
+	font: inherit;
+	font-size: 11px;
+	line-height: 1;
+	color: var(--colors-text-secondary);
+	cursor: help;
+}
+
+.hint-note-mark:hover {
+	color: var(--colors-text-primary);
+}
+
+/* The same words the control is called, drawn for whoever is looking rather than listening. It opens downwards, the one place
+   it is put inside something that scrolls being a table header */
+.hint-note-text {
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 50%;
+	z-index: 2;
+	display: none;
+	width: max-content;
+	max-width: 300px;
+	padding: 8px 10px;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 6px;
+	box-shadow: 0 8px 18px var(--colors-popup-shadow);
+	font-size: 12px;
+	font-weight: 400;
+	letter-spacing: normal;
+	line-height: 1.5;
+	color: var(--colors-text-secondary);
+	text-align: left;
+	text-transform: none;
+	white-space: normal;
+	transform: translateX(-50%);
+}
+
+/* Hung from the mark's right edge rather than centred on it, which is what keeps a note in a right-aligned column on screen */
+.hint-note-text-right {
+	left: auto;
+	right: 0;
+	transform: none;
+}
+
+.hint-note:hover .hint-note-text,
+.hint-note-mark:focus-visible + .hint-note-text {
+	display: block;
+}

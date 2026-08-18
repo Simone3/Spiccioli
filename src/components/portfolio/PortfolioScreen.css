@@ -1,0 +1,214 @@
+
+/* The banner every failing check puts above everything else on the screen. It states and it links; it never blocks. */
+.portfolio-screen-banner {
+	display: flex;
+	gap: 16px;
+	align-items: baseline;
+	justify-content: space-between;
+	padding: 12px 14px;
+	background-color: var(--colors-danger-background-muted);
+	border: 1px solid var(--colors-danger-border);
+	border-radius: 6px;
+	color: var(--colors-danger-text);
+}
+
+.portfolio-screen-banner p {
+	margin: 0;
+	font-weight: 700;
+}
+
+/* The headline card and the gains card, side by side. They drop under each other where there is no room. */
+.portfolio-screen-columns {
+	display: grid;
+	grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+	gap: 16px;
+}
+
+@media (width <= 1100px) {
+	.portfolio-screen-columns {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* One card, with what it is called above it. Four of them stack down the screen. */
+.portfolio-screen-card {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 16px;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 6px;
+}
+
+.portfolio-screen-card-title {
+	margin: 0;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--colors-text-secondary);
+}
+
+/* The headline. It is the one figure on the screen carrying no note of its own: the four lines beneath it carry them. */
+.portfolio-screen-hero {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.portfolio-screen-hero-label {
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--colors-text-secondary);
+}
+
+.portfolio-screen-hero-value {
+	font-size: 30px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.01em;
+}
+
+.portfolio-screen-rule {
+	width: 100%;
+	height: 0;
+	margin: 0;
+	border: none;
+	border-top: 1px solid var(--colors-border-subtle);
+}
+
+/* A list of figures: what each one is on the left, the amount on the right */
+.portfolio-screen-figures {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 0;
+}
+
+.portfolio-screen-figure {
+	display: flex;
+	gap: 16px;
+	align-items: baseline;
+	justify-content: space-between;
+	font-size: 13px;
+}
+
+.portfolio-screen-figure dt {
+	display: flex;
+	gap: 6px;
+	align-items: baseline;
+	color: var(--colors-text-secondary);
+}
+
+.portfolio-screen-figure dd {
+	margin: 0;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+/* The figure the gains card exists to produce, which is the sum of the five above it */
+.portfolio-screen-figure-total dt {
+	color: var(--colors-text-primary);
+	font-weight: 700;
+}
+
+.portfolio-screen-positive {
+	color: var(--colors-positive-text);
+}
+
+.portfolio-screen-negative {
+	color: var(--colors-danger-text);
+}
+
+/* The pie and the list beside it, which read in the same order */
+.portfolio-screen-breakdown {
+	display: flex;
+	gap: 24px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.portfolio-screen-slices {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto auto;
+	gap: 6px 12px;
+	flex: 1 1 320px;
+	align-items: center;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 13px;
+}
+
+.portfolio-screen-slices li {
+	display: grid;
+	grid-column: 1 / -1;
+	grid-template-columns: subgrid;
+	align-items: center;
+}
+
+/* The colour that keys a row to its slice. A row given no slice is given no mark, and keeps the space so the columns line up.  */
+.portfolio-screen-slice-mark {
+	width: 10px;
+	height: 10px;
+	border-radius: 2px;
+}
+
+.portfolio-screen-slice-label {
+	color: var(--colors-text-secondary);
+}
+
+.portfolio-screen-slice-amount,
+.portfolio-screen-slice-share {
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+	white-space: nowrap;
+}
+
+.portfolio-screen-slice-share {
+	color: var(--colors-text-secondary);
+}
+
+/* What the specification says about a figure, under the figures it qualifies */
+.portfolio-screen-note {
+	margin: 0;
+	max-width: 80ch;
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--colors-text-secondary);
+}
+
+/* A zero is a figure and not an absence, and neither is a column a row's type cannot carry */
+.portfolio-screen-quiet {
+	color: var(--colors-text-secondary);
+}
+
+/* A closed account is dimmed and sorted last: it keeps its balance, and it is stated more quietly */
+.portfolio-screen-row-closed td {
+	color: var(--colors-text-secondary);
+}
+
+.portfolio-screen-table-footer {
+	display: flex;
+	gap: 16px;
+	align-items: baseline;
+	justify-content: space-between;
+}
+
+.portfolio-screen-table-total {
+	font-size: 13px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	color: var(--colors-text-primary);
+}
+
+.portfolio-screen-link {
+	border-radius: 3px;
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}

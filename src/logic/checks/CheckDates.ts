@@ -2,7 +2,7 @@ import { DateUtils } from 'src/framework/utils/DateUtils';
 import type { IsoDate } from 'src/types/LedgerTypes';
 
 /**
- * The day arithmetic the matchers and the checks are written in.
+ * The day arithmetic the matchers, the checks and the net worth line are written in.
  *
  * **Every window in the matching of [§11.6] runs forwards only**, so each of these takes a day the file holds and produces the
  * other end of a window or the age of a record. They work on stored `YYYY-MM-DD` days rather than on `Date`, because that is
@@ -64,6 +64,17 @@ export const firstDayOfMonth = (year: number, month: number): IsoDate => {
 };
 
 /**
+ * The last day of a month, which is where every point of the net worth line but the final one falls.
+ * @param year The year.
+ * @param month The month, from 1.
+ * @returns The last day of that month.
+ */
+export const lastDayOfMonth = (year: number, month: number): IsoDate => {
+	// The zeroth day of the month after is the last day of this one, whatever its length
+	return DateUtils.toStandardYearMonthDay(new Date(year, month, 0));
+};
+
+/**
  * The last day of the month after a month, which is where a payslip's window closes: a month's pay is paid in its own month or
  * in the one after it.
  * @param year The year.
@@ -71,8 +82,5 @@ export const firstDayOfMonth = (year: number, month: number): IsoDate => {
  * @returns The last day of the following month.
  */
 export const lastDayOfNextMonth = (year: number, month: number): IsoDate => {
-	// The zeroth day of the month after next is the last day of the month after this one, whatever its length
-	const day = new Date(year, month + 1, 0);
-
-	return DateUtils.toStandardYearMonthDay(day);
+	return lastDayOfMonth(year, month + 1);
 };

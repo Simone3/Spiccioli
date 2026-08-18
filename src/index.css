@@ -45,6 +45,22 @@ body {
 	--colors-chart-grid: rgba(255, 255, 255, 0.08);
 	--colors-chart-axis: #BFBFBF;
 
+	/* The pie's slices. There are eleven because the breakdown by type has a ceiling of eleven — the seven cash types and
+	   the four security types — and a slice is named by its rank, largest first, exactly as a line is named by its number.
+	   The first five are the series colours themselves, so one chart never contradicts another; the six after them extend
+	   the same family rather than starting a second one */
+	--colors-chart-slice-1: var(--colors-chart-series-1);
+	--colors-chart-slice-2: var(--colors-chart-series-2);
+	--colors-chart-slice-3: var(--colors-chart-series-3);
+	--colors-chart-slice-4: var(--colors-chart-series-4);
+	--colors-chart-slice-5: var(--colors-chart-series-5);
+	--colors-chart-slice-6: #C87F4A;
+	--colors-chart-slice-7: #7E7BB5;
+	--colors-chart-slice-8: #4E9070;
+	--colors-chart-slice-9: #B96A5A;
+	--colors-chart-slice-10: #6D9BC0;
+	--colors-chart-slice-11: #9C8AA0;
+
 	/* Fonts */
 	--font-family: Inter, system-ui, sans-serif;
 

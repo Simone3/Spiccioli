@@ -78,8 +78,7 @@ export const EN_TRANSLATIONS = {
 		investments: 'Investments',
 		salaries: 'Salaries',
 		checks: 'Checks',
-		settings: 'Settings',
-		notBuiltYet: 'This screen is not built yet. Everything the file holds is safe and is read by the screens as each one is built.'
+		settings: 'Settings'
 	},
 
 	// What a screen with nothing on it says. Every one of them names the action that fills it, and none of them says "no data".
@@ -104,6 +103,92 @@ export const EN_TRANSLATIONS = {
 		goToAccounts: 'Go to Accounts',
 		goToImport: 'Import a bank export',
 		goToTransactions: 'Go to Transactions'
+	},
+
+	// The Portfolio screen, which is every other screen's output and states nothing of its own. Every note here is one plain
+	// string: it is what the control beside the figure is called as well as what the popup says, so it reads the same way to
+	// somebody hearing it as to somebody seeing it.
+	portfolio: {
+		failingChecks: {
+			one: '1 check is failing.',
+			other: '{count} checks are failing.'
+		},
+		reviewChecks: 'Review',
+		netWorth: 'Net worth',
+		netWorthChart: 'Net worth over time',
+
+		// The four lines beneath the headline, which add up to it
+		lines: {
+			cash: 'Cash',
+			securitiesAtCost: 'Securities at cost',
+			unrealisedNetGain: 'Unrealised net investment gain',
+			pensionNet: 'Pension funds, net'
+		},
+
+		// One note per line, and the four together are the estimation caveat split along the lines it actually applies to.
+		// Two of them say that nothing has been applied, which is what makes "read down and the estimation accumulates"
+		// something the screen shows rather than something the specification asserts.
+		notes: {
+			cash: 'Nothing is estimated here. Every cash account that is not a pension fund, at its opening balance plus every transaction on it: no haircut, no cost basis and no rate. Opening balances are in it, and an opening balance is not a transaction.',
+			securitiesAtCost: 'Nothing is estimated here. Every holding still open, at what was paid for it with the purchase fees included. Not what the positions are worth now, and not a sum of transactions: a holding is carried at its cost basis, which no single row holds.',
+			unrealisedNetGain: 'An estimate. What selling every holding today would add to the portfolio or take out of it, after the capital-gains tax and the sell fee. The tax is worked out one holding at a time, so a loss on one position does not reduce the tax on another, and the fee is charged once per holding — both push this figure down. The gross picture is on Investments.',
+			pensionNet: 'An estimate. Every pension fund at its balance less the exit tax, which falls on what was paid in rather than on what the fund earned, at a rate typed by hand. Netting a fund for tax does not make it liquid: this is still money that cannot be had before retirement.',
+			balance: 'The opening balance plus every transaction on the account. A pension fund is shown after its exit tax, and a brokerage account, which holds no money of its own, at the net value of its holdings after the capital-gains tax and the sell fee. Closed accounts are computed like any other, which is why this column totals to net worth.'
+		},
+
+		// What the portfolio has gained and lost by being kept in banks and funds instead of as cash. Nothing on this card is
+		// an estimate, which is the whole of what it has and the card above it has not.
+		gains: {
+			title: 'Gains and costs, all time',
+			roles: {
+				'bank-fees': 'Bank fees',
+				'wealth-tax': 'Wealth tax',
+				'interest-and-dividends': 'Interest, dividends & bonuses',
+				'value-adjustment': 'Value adjustments'
+			},
+			realisedGain: 'Realised gain on sales',
+			total: 'Total',
+			omitted: {
+				one: '1 sale has no average cost behind it and is left out of this figure and of the total.',
+				other: '{count} sales have no average cost behind them and are left out of this figure and of the total.'
+			},
+			omittedLink: 'Checks 8 and 9 name the trades'
+		},
+
+		// The pie and the list beside it, over the seven cash types and the four security types
+		types: {
+			title: 'Breakdown by type',
+			chart: 'Portfolio split by type',
+			sliceCount: {
+				one: 'type',
+				other: 'types'
+			},
+			noShare: '0,0%',
+			nothingPositive: 'No type is worth anything to divide up, so there is no shape to draw. Every amount is listed beside it.'
+		},
+
+		// The line, its key, and the note the key carries about the rates every point is taken at
+		chart: {
+			title: 'Net worth over time',
+			monthOfYear: '{month}/{year}',
+			fromPrices: 'holdings valued at the latest price known on that date',
+			fromCost: 'holdings valued at cost — before any price was recorded',
+			rates: 'Net of capital-gains tax, sell fees and pension exit tax at today’s rates',
+			needsHistory: 'There is no history to draw yet — the line fills in as transactions and trades arrive. The figures above are the opening balances.'
+		},
+
+		// The one place besides the Accounts table where every account is shown together, and the one that carries the balance
+		accounts: {
+			title: 'Breakdown by account',
+			table: 'Balances by account',
+			columns: {
+				institution: 'Institution',
+				account: 'Account',
+				type: 'Type',
+				balance: 'Balance'
+			},
+			footer: '{accounts} · {closed} closed · {institutions}'
+		}
 	},
 
 	// The Accounts screen. An account is written "Institution · Account" everywhere in the application; this screen, the

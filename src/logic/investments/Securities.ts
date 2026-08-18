@@ -150,6 +150,53 @@ export const indexLatestPrices = (prices: readonly Price[]): Map<LedgerId, Price
 };
 
 /**
+ * Groups every security's prices, oldest first, which is what a line drawn over the years reads.
+ * @param prices Every price in the file.
+ * @returns One history per security that has been priced, oldest first, and no entry at all for a security that has none.
+ */
+export const indexPriceHistories = (prices: readonly Price[]): Map<LedgerId, Price[]> => {
+	const histories = new Map<LedgerId, Price[]>();
+
+	for(const price of prices) {
+		const history = histories.get(price.securityId);
+
+		if(history) {
+			history.push(price);
+		}
+		else {
+			histories.set(price.securityId, [ price ]);
+		}
+	}
+
+	for(const history of histories.values()) {
+		history.sort((first, second) => {
+			return first.date < second.date ? -1 : 1;
+		});
+	}
+
+	return histories;
+};
+
+/**
+ * Finds the most recent price a security had on or before a day, which is what values a holding at a past date.
+ *
+ * **A security with a history but nothing dated that early has no price there**, and the caller falls back to cost; a security
+ * with no history at all is worth nothing, wherever it is asked about ([§11.5]).
+ * @param history One security's prices, oldest first.
+ * @param date The day being asked about.
+ * @returns The price in force on that day, or undefined where the history starts after it.
+ */
+export const priceOnOrBefore = (history: readonly Price[], date: IsoDate): Price | undefined => {
+	for(let index = history.length - 1; index >= 0; index -= 1) {
+		if(history[index].date <= date) {
+			return history[index];
+		}
+	}
+
+	return undefined;
+};
+
+/**
  * Finds what a security's given day holds, which is what the inline editor opens on and what a second price for that day replaces.
  * @param prices Every price in the file.
  * @param securityId The security.

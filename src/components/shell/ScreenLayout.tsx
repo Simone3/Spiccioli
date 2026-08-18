@@ -1,6 +1,5 @@
 import 'src/components/shell/ScreenLayout.css';
 import type { ReactElement, ReactNode } from 'react';
-import { useTranslator } from 'src/i18n/TranslationContext';
 
 /**
  * The shape every screen has: a heading, whatever the screen puts beside it, and the screen itself.
@@ -41,15 +40,4 @@ export const ScreenLayout = ({ title, subtitle, actions, children }: ScreenLayou
 			<div className='screen-layout-body'>{children}</div>
 		</div>
 	);
-};
-
-/**
- * What a screen says while it is still a shell: its data is in the file and the screen that reads it is built in a later phase.
- * It is not an empty state — a screen with nothing in it says what fills it instead — and it goes away as each screen is built.
- * @returns The note.
- */
-export const ScreenNotBuiltYet = (): ReactElement => {
-	const { t } = useTranslator();
-
-	return <p className='screen-layout-note'>{t('screens.notBuiltYet')}</p>;
 };
