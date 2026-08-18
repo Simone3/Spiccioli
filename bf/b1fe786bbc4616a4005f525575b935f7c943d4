@@ -1,0 +1,52 @@
+package.json
+  s_afb2e96f097b98::t_adcadb392566fe 12
+scripts/write-sample-ledger.js
+  s_afb2e96f097b98::t_bc372291785d8a 1-410
+tests/logic/FileFormat.test.ts
+  s_afb2e96f097b98::t_fd5047fd4f48ac 1-140
+CLAUDE.md
+  s_afb2e96f097b98::t_faf73d8fdc4e3e 9-11,18,51,53,55-56,58,62
+README.md
+  s_afb2e96f097b98::t_e3d0e81c167015 9,11
+docs/technical/02-repository-map.md
+  s_afb2e96f097b98::t_04b73eb9a657bf 64,132,146
+docs/technical/03-build-and-run.md
+  s_afb2e96f097b98::t_e0e4e41140c794 25
+docs/technical/04-framework.md
+  s_afb2e96f097b98::t_5ba297548b6c17 11,13,41,45-46,62
+docs/technical/06-styling.md
+  s_afb2e96f097b98::t_519bbbfa42de10 70
+docs/technical/07-testing.md
+  s_afb2e96f097b98::t_ec7dc341a6f1ac 19,44,57
+docs/technical/08-decisions-why.md
+  s_afb2e96f097b98::t_ea112b39c8f718 1,3,5,7,17,24,32,59,73,111
+docs/technical/08-decisions.md
+  s_afb2e96f097b98::t_682c221ebd4c93 1,3,5,7,9,13,15-32,54,56,58-63,69,71,85,99,105,115,117,119,121,123-124,129
+docs/technical/09-file-format.md
+  s_afb2e96f097b98::t_dad611f2bbb351 3,7-9,382-394,397
+docs/technical/README.md
+  s_afb2e96f097b98::t_cc23d3a98e34ca 22-23,26,41,47
+scripts/dev.js
+  s_afb2e96f097b98::t_41785f0a3a1bc4 25,67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "bfb1fe786bbc4616a4005f525575b935f7c943d4",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_afb2e96f097b98": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4ad7cf4b-ac84-43fc-926e-a2565c1b9e62",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
