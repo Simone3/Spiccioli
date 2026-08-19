@@ -34,15 +34,17 @@
 
 .form-dialog-title {
 	margin: 0;
-	font-size: 18px;
+	font-family: var(--font-family-display);
+	font-size: 19px;
 	font-weight: 700;
 }
 
 .form-dialog-subtitle {
-	font-size: 11px;
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	color: var(--colors-text-secondary);
+	color: var(--colors-text-faint);
 }
 
 .form-dialog-fields {

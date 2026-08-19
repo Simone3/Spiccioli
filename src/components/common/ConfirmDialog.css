@@ -27,7 +27,8 @@
 
 .confirm-dialog-title {
 	margin: 0;
-	font-size: 18px;
+	font-family: var(--font-family-display);
+	font-size: 19px;
 	font-weight: 700;
 }
 

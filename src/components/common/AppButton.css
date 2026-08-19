@@ -1,15 +1,16 @@
-
+/* A button is a raised surface with a hairline around it rather than an outline drawn on the page: it sits on a card the way
+   a card sits on the page, which is what keeps a row of them quiet next to the figures they act on. */
 .app-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: 6px;
-	padding: 7px 14px;
-	background-color: transparent;
+	padding: 6px 12px;
+	background-color: var(--colors-background-raised);
 	border: 1px solid var(--colors-border-strong);
 	border-radius: 6px;
 	font: inherit;
-	font-size: 13px;
+	font-size: 12.5px;
 	color: var(--colors-text-primary);
 	text-decoration: none;
 	white-space: nowrap;
@@ -17,39 +18,49 @@
 }
 
 .app-button:hover:not(:disabled) {
-	background-color: var(--colors-interactive-hover-background);
-}
-
-.app-button:active:not(:disabled) {
+	border-color: var(--colors-accent-muted);
 	background-color: var(--colors-interactive-active-background);
 }
 
+.app-button:active:not(:disabled) {
+	background-color: var(--colors-interactive-hover-background);
+}
+
 .app-button:disabled {
+	background-color: transparent;
 	color: var(--colors-disabled);
 	border-color: var(--colors-border-subtle);
 	cursor: default;
 }
 
+/* The one action a screen or a dialog exists for, and never more than one of them in a row of buttons */
 .app-button-primary {
 	background-color: var(--colors-accent-primary);
 	border-color: var(--colors-accent-primary);
-	color: var(--colors-background-primary);
+	color: var(--colors-text-on-accent);
 	font-weight: 700;
 }
 
 .app-button-primary:hover:not(:disabled) {
 	background-color: var(--colors-accent-primary);
-	filter: brightness(1.1);
+	border-color: var(--colors-accent-primary);
+	filter: brightness(1.08);
 }
 
 .app-button-primary:disabled {
-	background-color: var(--colors-border-strong);
-	border-color: var(--colors-border-strong);
+	background-color: var(--colors-background-raised);
+	border-color: var(--colors-border-subtle);
 }
 
 .app-button-ghost {
+	background-color: transparent;
 	border-color: transparent;
 	color: var(--colors-text-secondary);
+}
+
+.app-button-ghost:hover:not(:disabled) {
+	border-color: transparent;
+	color: var(--colors-text-primary);
 }
 
 .app-button-danger {

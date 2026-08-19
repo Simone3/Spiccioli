@@ -20,7 +20,8 @@
 	margin: 0;
 	padding: 0;
 	list-style: none;
-	font-size: 12px;
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
 	color: var(--colors-text-secondary);
 }
 
@@ -57,9 +58,10 @@
 	background-color: var(--colors-chart-series-5);
 }
 
-/* A term rather than a measurement, marked the same way in the key as it is on the chart */
+/* A term rather than a measurement, marked the same way in the key as it is on the chart. The gaps are painted in the card's
+   own surface, a chart always being drawn on one. */
 .line-chart-key-mark-dashed {
-	background-image: linear-gradient(90deg, var(--colors-background-primary) 0 3px, transparent 3px 6px);
+	background-image: linear-gradient(90deg, var(--colors-background-secondary) 0 3px, transparent 3px 6px);
 	background-size: 6px 2px;
 }
 
@@ -100,5 +102,6 @@
 
 .line-chart-tooltip-figure dd {
 	margin: 0;
+	font-family: var(--font-family-mono);
 	font-variant-numeric: tabular-nums;
 }

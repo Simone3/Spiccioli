@@ -1,5 +1,6 @@
 import 'src/components/launch/LaunchScreen.css';
 import { type ReactElement } from 'react';
+import { AppButton } from 'src/components/common/AppButton';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { usePreferences } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
@@ -28,7 +29,7 @@ export const UpgradeDialog = (): ReactElement => {
 	return (
 		<div className='launch-screen'>
 			<div className='launch-screen-panel'>
-				<h1 className='launch-screen-title'>{t('upgrade.title')}</h1>
+				<h1 className='launch-screen-title launch-screen-title-plain'>{t('upgrade.title')}</h1>
 				<p className='launch-screen-subtitle'>{getFileName(upgradePrompt.filePath)}</p>
 
 				<dl className='launch-screen-figures'>
@@ -60,18 +61,17 @@ export const UpgradeDialog = (): ReactElement => {
 				)}
 
 				<div className='launch-screen-actions'>
-					<button type='button' className='launch-screen-button' disabled={isBusy} onClick={cancelUpgrade}>
+					<AppButton variant='ghost' disabled={isBusy} onClick={cancelUpgrade}>
 						{t('upgrade.cancel')}
-					</button>
-					<button
-						type='button'
-						className='launch-screen-button launch-screen-button-primary'
+					</AppButton>
+					<AppButton
+						variant='primary'
 						disabled={isBusy}
 						onClick={() => {
 							void confirmUpgrade();
 						}}>
 						{upgradePrompt.backupFailureMessage ? t('upgrade.retry') : t('upgrade.confirm')}
-					</button>
+					</AppButton>
 				</div>
 			</div>
 		</div>

@@ -4,7 +4,7 @@
 	padding: 2px 9px;
 	border-radius: 20px;
 	border: 1px solid var(--colors-border-strong);
-	background-color: var(--colors-background-secondary);
+	background-color: var(--colors-background-raised);
 	font-size: 11px;
 	line-height: 1.45;
 	color: var(--colors-text-primary);

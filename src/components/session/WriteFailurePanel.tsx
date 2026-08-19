@@ -1,5 +1,6 @@
 import 'src/components/session/WriteFailurePanel.css';
 import { type ReactElement } from 'react';
+import { AppButton } from 'src/components/common/AppButton';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { getDirectory, getFileName } from 'src/logic/format/FilePathDisplay';
@@ -40,15 +41,14 @@ export const WriteFailurePanel = (): ReactElement => {
 				<p className='write-failure-reassurance'>{t('writeFailure.reassurance')}</p>
 
 				<div className='write-failure-actions'>
-					<button
-						type='button'
-						className='write-failure-button'
+					<AppButton
+						variant='primary'
 						disabled={isBusy}
 						onClick={() => {
 							void retrySave();
 						}}>
 						{t('writeFailure.retry')}
-					</button>
+					</AppButton>
 				</div>
 			</div>
 		</div>

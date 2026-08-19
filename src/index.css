@@ -1,49 +1,65 @@
-
-/* Theme variables. Spiccioli has one theme and it is dark, so these are the colors and not a light theme's counterparts. */
+/* Theme variables. Spiccioli has one theme and it is dark, so these are the colors and not a light theme's counterparts. The
+   family is warm rather than neutral: the surfaces are an ink that keeps a trace of brown, and the accent is a brass rather
+   than a signal amber, which is what stops a screen of figures from reading as a console. */
 body {
-	/* Main colors */
-	--colors-background-primary: #212529;
-	--colors-background-secondary: #2D3136;
-	--colors-text-primary: #FFFFFF;
-	--colors-text-secondary: #BFBFBF;
-	--colors-accent-primary: #E9A21B;
-	--colors-accent-secondary: #FFFFFF;
-	--colors-border-subtle: rgba(255, 255, 255, 0.08);
-	--colors-border-strong: rgba(255, 255, 255, 0.16);
-	--colors-modal-overlay: rgba(0, 0, 0, 0.65);
-	--colors-modal-shadow: rgba(0, 0, 0, 0.45);
-	--colors-popup-shadow: rgba(0, 0, 0, 0.35);
-	--colors-interactive-hover-background: rgba(255, 255, 255, 0.08);
-	--colors-interactive-active-background: rgba(255, 255, 255, 0.12);
+	/* The four surfaces, darkest to lightest. The page is what a screen is drawn on, a section is a card or a dialog or the
+	   sidebar sitting on it, and a raised surface is what a control wears on a section. A field is sunk below all three,
+	   because what the user types into is a hole in the page and not a thing on it. */
+	--colors-background-primary: #15140F;
+	--colors-background-secondary: #1C1B15;
+	--colors-background-raised: #23221A;
+	--colors-background-field: #131209;
+
+	/* Text in its three strengths: what is being read, what qualifies it, and the small uppercase labels that name a thing
+	   without competing with it */
+	--colors-text-primary: #E8E4D8;
+	--colors-text-secondary: #A69F8C;
+	--colors-text-faint: #8A8474;
+
+	/* The accent, and the dark it is written on where it is a background rather than a colour */
+	--colors-accent-primary: #D8A657;
+	--colors-accent-muted: #8C6E38;
+	--colors-text-on-accent: #1A1509;
+
+	/* The borders are solid rather than translucent white: a hairline over a warm surface has to be warm itself, and a white
+	   at 8% is the one thing that reads grey on every one of the four */
+	--colors-border-subtle: #26251E;
+	--colors-border-strong: #2E2C23;
+
+	--colors-modal-overlay: rgba(8, 7, 4, 0.68);
+	--colors-modal-shadow: rgba(0, 0, 0, 0.55);
+	--colors-popup-shadow: rgba(0, 0, 0, 0.45);
+	--colors-interactive-hover-background: rgba(232, 228, 216, 0.05);
+	--colors-interactive-active-background: rgba(232, 228, 216, 0.09);
 
 	/* States */
-	--colors-danger: #D92D3A;
-	--colors-danger-hover: #F0444F;
-	--colors-danger-text: #FF6B75;
-	--colors-danger-border: rgba(255, 107, 117, 0.35);
-	--colors-danger-background-muted: rgba(255, 107, 117, 0.12);
+	--colors-danger: #A83E36;
+	--colors-danger-hover: #C24C43;
+	--colors-danger-text: #E4675F;
+	--colors-danger-border: #4A2B27;
+	--colors-danger-background-muted: #2E1E1B;
 	--colors-text-on-danger: #FFFFFF;
-	--colors-warn: #FFA500;
-	--colors-disabled: #808080;
+	--colors-warn: #E0913A;
+	--colors-disabled: #6B665A;
 
 	/* An amount states its direction in its colour as well as in its sign: money in is green, money out is the danger red */
 	--colors-positive-text: #6FBE8C;
 
 	/* Where a category came from rather than whether it is right: violet marks the one a rule assigned */
 	--colors-provenance-text: #A99AD6;
-	--colors-provenance-border: rgba(169, 154, 214, 0.35);
-	--colors-provenance-background-muted: rgba(169, 154, 214, 0.12);
+	--colors-provenance-border: #3B3452;
+	--colors-provenance-background-muted: #221F2C;
 
 	/* The chart series, fixed here so that two charts never draw the same series in two different colours. A line is told
 	   apart by its colour and by the legend beside it, and the first is the accent because the first series is the headline
 	   figure on every chart that has one */
-	--colors-chart-series-1: #E9A21B;
+	--colors-chart-series-1: #D8A657;
 	--colors-chart-series-2: #5B9EA6;
 	--colors-chart-series-3: #A8607A;
 	--colors-chart-series-4: #8FA05C;
 	--colors-chart-series-5: #3F6480;
-	--colors-chart-grid: rgba(255, 255, 255, 0.08);
-	--colors-chart-axis: #BFBFBF;
+	--colors-chart-grid: #26251E;
+	--colors-chart-axis: #8A8474;
 
 	/* The pie's slices. There are eleven because the breakdown by type has a ceiling of eleven — the seven cash types and
 	   the four security types — and a slice is named by its rank, largest first, exactly as a line is named by its number.
@@ -61,8 +77,14 @@ body {
 	--colors-chart-slice-10: #6D9BC0;
 	--colors-chart-slice-11: #9C8AA0;
 
-	/* Fonts */
+	/* Three families, each with one job. The sans is what the application is read in, and it is bundled rather than the
+	   system's so that three platforms draw the same page. The display face is for what names a thing — a screen's title, a
+	   dialog's, and the few figures a screen exists to state — and it is a system stack, so it falls back rather than
+	   shipping a second font. The mono is for the small uppercase labels, for a figure in a column and for a path: anything
+	   that has to line up under itself. */
 	--font-family: Inter, system-ui, sans-serif;
+	--font-family-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif;
+	--font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 
 	/* Focus. The ring is separated from what it surrounds by a dark hairline, so that it is visible on every control,
 	   including the ones that are themselves filled with the accent color */
@@ -79,13 +101,17 @@ body {
 	box-shadow: var(--focus-ring);
 }
 
-/* HTML body */
+/* HTML body. The size and the leading are set here rather than left to the browser's sixteen, so that a control saying
+   `font: inherit` is the size of the text around it and not of a document nobody set. */
 body {
 	margin: 0;
 	background-color: var(--colors-background-primary);
 	color: var(--colors-text-primary);
 	overflow: hidden;
 	font-family: var(--font-family);
+	font-size: 14px;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
 }
 
 /* React root. It is a column, because the sidebar and the screen beside it sit under whatever the window puts above them. */

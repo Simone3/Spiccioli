@@ -14,7 +14,8 @@
 .sidebar-brand {
 	margin: 0;
 	padding: 0 18px;
-	font-size: 18px;
+	font-family: var(--font-family-display);
+	font-size: 19px;
 	font-weight: 700;
 	letter-spacing: -0.01em;
 }
@@ -59,7 +60,8 @@
 	border: 1px solid var(--colors-danger-border);
 	border-radius: 9px;
 	background-color: var(--colors-danger-background-muted);
-	font-size: 11px;
+	font-family: var(--font-family-mono);
+	font-size: 10px;
 	font-variant-numeric: tabular-nums;
 	color: var(--colors-danger-text);
 }
@@ -68,9 +70,10 @@
 .sidebar-save-state {
 	margin: auto 0 0;
 	padding: 0 18px;
-	font-size: 11px;
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
 	line-height: 1.5;
-	color: var(--colors-text-secondary);
+	color: var(--colors-text-faint);
 }
 
 .sidebar-save-state-warning {

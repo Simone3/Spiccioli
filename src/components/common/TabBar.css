@@ -25,5 +25,4 @@
 .tab-bar-tab-active {
 	border-bottom-color: var(--colors-accent-primary);
 	color: var(--colors-text-primary);
-	font-weight: 700;
 }

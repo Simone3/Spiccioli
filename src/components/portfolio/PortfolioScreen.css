@@ -43,11 +43,12 @@
 
 .portfolio-screen-card-title {
 	margin: 0;
-	font-size: 11px;
-	font-weight: 700;
-	letter-spacing: 0.12em;
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
+	font-weight: 400;
+	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: var(--colors-text-secondary);
+	color: var(--colors-text-faint);
 }
 
 /* The headline. It is the one figure on the screen carrying no note of its own: the four lines beneath it carry them. */
@@ -58,18 +59,21 @@
 }
 
 .portfolio-screen-hero-label {
-	font-size: 11px;
-	font-weight: 700;
-	letter-spacing: 0.12em;
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
+	font-weight: 400;
+	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: var(--colors-text-secondary);
+	color: var(--colors-text-faint);
 }
 
+/* The one figure the screen exists to state, and the only place the display face is given a number */
 .portfolio-screen-hero-value {
-	font-size: 30px;
-	font-weight: 700;
+	font-family: var(--font-family-display);
+	font-size: 38px;
+	line-height: 1.1;
 	font-variant-numeric: tabular-nums;
-	letter-spacing: -0.01em;
+	letter-spacing: -0.015em;
 }
 
 .portfolio-screen-rule {
@@ -105,7 +109,7 @@
 
 .portfolio-screen-figure dd {
 	margin: 0;
-	font-weight: 700;
+	font-family: var(--font-family-mono);
 	font-variant-numeric: tabular-nums;
 	white-space: nowrap;
 }
@@ -114,6 +118,10 @@
 .portfolio-screen-figure-total dt {
 	color: var(--colors-text-primary);
 	font-weight: 700;
+}
+
+.portfolio-screen-figure-total dd {
+	font-size: 14.5px;
 }
 
 .portfolio-screen-positive {
@@ -198,6 +206,8 @@
 
 .portfolio-screen-slice-amount,
 .portfolio-screen-slice-share {
+	font-family: var(--font-family-mono);
+	font-size: 12.5px;
 	font-variant-numeric: tabular-nums;
 	text-align: right;
 	white-space: nowrap;
@@ -234,6 +244,7 @@
 }
 
 .portfolio-screen-table-total {
+	font-family: var(--font-family-mono);
 	font-size: 13px;
 	font-weight: 700;
 	font-variant-numeric: tabular-nums;

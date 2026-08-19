@@ -28,10 +28,11 @@
 
 .categories-screen-report-group th {
 	padding-top: 18px;
-	font-size: 11px;
-	letter-spacing: 0.12em;
+	font-family: var(--font-family-mono);
+	font-size: 10px;
+	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: var(--colors-text-secondary);
+	color: var(--colors-accent-primary);
 }
 
 .categories-screen-report-subtotal td,
@@ -110,7 +111,9 @@
 }
 
 .categories-screen-rule-number {
-	color: var(--colors-text-secondary);
+	font-family: var(--font-family-mono);
+	font-size: 11.5px;
+	color: var(--colors-text-faint);
 }
 
 .categories-screen-rule-dragging td {
@@ -154,7 +157,7 @@
 
 .categories-screen-apply-figure dd {
 	margin: 0;
-	font-weight: 700;
+	font-family: var(--font-family-mono);
 	font-variant-numeric: tabular-nums;
 }
 

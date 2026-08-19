@@ -27,15 +27,17 @@
 
 .write-failure-title {
 	margin: 0;
-	font-size: 20px;
+	font-family: var(--font-family-display);
+	font-size: 21px;
 	font-weight: 700;
 	color: var(--colors-danger-text);
 }
 
 .write-failure-subtitle {
 	margin: -10px 0 0;
-	font-size: 13px;
-	color: var(--colors-text-secondary);
+	font-family: var(--font-family-mono);
+	font-size: 11.5px;
+	color: var(--colors-text-faint);
 }
 
 .write-failure-figures {
@@ -52,7 +54,7 @@
 
 .write-failure-figures dd {
 	margin: 2px 0 0;
-	font-size: 14px;
+	font-size: 13px;
 	overflow-wrap: anywhere;
 }
 
@@ -66,21 +68,4 @@
 .write-failure-actions {
 	display: flex;
 	justify-content: flex-end;
-}
-
-.write-failure-button {
-	padding: 8px 16px;
-	background-color: var(--colors-accent-primary);
-	border: 1px solid var(--colors-accent-primary);
-	border-radius: 6px;
-	font: inherit;
-	font-weight: 700;
-	color: var(--colors-background-primary);
-	cursor: pointer;
-}
-
-.write-failure-button:disabled {
-	background-color: var(--colors-disabled);
-	border-color: var(--colors-disabled);
-	cursor: default;
 }

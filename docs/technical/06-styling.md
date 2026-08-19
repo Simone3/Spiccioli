@@ -26,19 +26,32 @@ The groups are:
 
 | Group | What it covers |
 | --- | --- |
-| Main | Backgrounds, text, accent, borders, overlays and the two interactive backgrounds |
+| Surfaces | The four backgrounds — page, section, raised, field — and the two interactive backgrounds, the overlay and the two shadows |
+| Text and lines | The three strengths of text, the accent with the ink written on it, and the two borders |
 | States | Danger in its several strengths, warning, disabled, the green a positive amount is printed in, and the violet that marks a category a rule assigned rather than one the user set |
 | Charts | Five series colors, eleven slice colors, a grid and an axis. A chart names a series by its number and a slice by its rank rather than either by a color, so two charts never draw the same thing two different ways |
-| Fonts | The one family: Inter, self-hosted through `@fontsource/inter`, with a system fallback |
+| Fonts | The three families, described below |
 | Focus | The one ring, described below |
 
-The accent is amber, and it is also the first chart series: the first line of a chart is its headline figure.
+**The family is warm rather than neutral**, and it is the one the mockups of `docs/functional/mockups` are drawn in: the surfaces are an ink that keeps a trace of brown, the hairlines are solid warm lines rather than a translucent white — a white at 8% is the one thing that reads grey on every surface — and the accent is a brass rather than a signal amber, which is what stops a screen of figures from reading as a console. The accent is also the first chart series: the first line of a chart is its headline figure.
+
+**There are four surfaces and they are a scale, darkest to lightest.** The page is what a screen is drawn on, a section — a card, a dialog, the sidebar — sits on the page, and a raised surface is what a control wears on a section. Below all three is the field: what the user types into is a hole in the page and not a thing on it. A component picks the one its own depth calls for rather than a shade it likes.
+
+**Text has three strengths and they are roles, not sizes**: what is being read, what qualifies it, and the small uppercase labels that name a thing without competing with it. The faint one is the dimmest of the three and is still a legible one — the mockups go a step further down for the same labels, which a page of prose can afford and a screen of figures cannot.
+
+Where the accent is a background rather than a color — the primary button, the selected day of the calendar — what is written on it is `--colors-text-on-accent`, never the page's own background color.
 
 **There are eleven slice colors because the breakdown by type has a ceiling of eleven** — the seven cash types and the four security types ([§3.1](../functional/specs/03-portfolio.md#31-behaviour)). **The first five are the series colors themselves**, by reference rather than by repeated value, so one chart never contradicts another; the six after them extend the same family rather than starting a second one.
 
 **The charts are SVG, which is what keeps them inside this rule** (D8). A `stroke` is written as `var(--colors-chart-series-1)` in the markup, exactly like every other color in the application, where a canvas library would have each one read out with `getComputedStyle` and passed in as a string. **Two files import the library and no others do** — `src/components/common/LineChart.tsx` and `src/components/common/PieChart.tsx` — and they are also the only two that turn a series number or a slice rank into a variable name.
 
-Inter is imported in `src/index.tsx` at weights 300 and 700 and bundled with the application: nothing is fetched from a font CDN at runtime, which the Content-Security-Policy would refuse anyway.
+**There are three families and each has one job.**
+
+- **`--font-family` is what the application is read in**: Inter, imported in `src/index.tsx` at weights 300 and 700 and bundled with the application through `@fontsource/inter`. Nothing is fetched from a font CDN at runtime, which the Content-Security-Policy would refuse anyway. It is bundled rather than taken from the system so that the three platforms draw the same page.
+- **`--font-family-display` is for what names a thing**: a screen's title, a dialog's, the application's own name, and the few figures a screen exists to state — the headline on Portfolio, the count inside the ring. It is a system stack of old-style serifs, so it falls back rather than shipping a second font: Iowan Old Style on macOS, Palatino Linotype or Georgia on Windows, and whatever the desktop's `serif` resolves to elsewhere. **It is never used for a paragraph**, and a screen has at most a title and one figure in it.
+- **`--font-family-mono` is for anything that has to line up under itself**: the small uppercase labels above a card, a table's headings and its figures, a file path, a date field, a schema version. A column of amounts set in it is a column, the digits being one width.
+
+`body` sets the size and the leading rather than leaving them to the browser's sixteen, so that a control saying `font: inherit` is the size of the text around it.
 
 ## 6.3 The focus ring
 

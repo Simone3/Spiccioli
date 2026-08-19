@@ -20,7 +20,8 @@
 }
 
 .pie-chart-centre b {
-	font-size: 22px;
+	font-family: var(--font-family-display);
+	font-size: 20px;
 	font-weight: 700;
 	font-variant-numeric: tabular-nums;
 }
@@ -29,12 +30,13 @@
    than running out over it */
 .pie-chart-centre small {
 	max-width: 88px;
-	font-size: 10px;
-	letter-spacing: 0.12em;
+	font-family: var(--font-family-mono);
+	font-size: 9.5px;
+	letter-spacing: 0.1em;
 	line-height: 1.4;
 	text-align: center;
 	text-transform: uppercase;
-	color: var(--colors-text-secondary);
+	color: var(--colors-text-faint);
 }
 
 /* A slice fades as it is dimmed and as it comes back, rather than switching between the two. It is written against the shape

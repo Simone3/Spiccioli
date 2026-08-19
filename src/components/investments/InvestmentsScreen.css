@@ -32,8 +32,9 @@
 .investments-screen-detail-subtitle {
 	display: block;
 	margin-top: 4px;
-	font-size: 12px;
-	color: var(--colors-text-secondary);
+	font-family: var(--font-family-mono);
+	font-size: 11px;
+	color: var(--colors-text-faint);
 }
 
 .investments-screen-detail-actions {
@@ -45,11 +46,12 @@
 
 .investments-screen-subhead {
 	margin: 18px 0 10px;
-	font-size: 11px;
-	font-weight: 700;
-	letter-spacing: 0.12em;
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
+	font-weight: 400;
+	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: var(--colors-text-secondary);
+	color: var(--colors-text-faint);
 }
 
 /* The figures of a detail panel: what each one is on the left, what it reads on the right */
@@ -73,7 +75,7 @@
 
 .investments-screen-figure dd {
 	margin: 0;
-	font-weight: 700;
+	font-family: var(--font-family-mono);
 	font-variant-numeric: tabular-nums;
 }
 
@@ -87,7 +89,7 @@
 /* A figure the form computes as it is typed, which is never a field */
 .investments-screen-derived {
 	margin: 0;
-	font-weight: 700;
+	font-family: var(--font-family-mono);
 	font-variant-numeric: tabular-nums;
 	color: var(--colors-accent-primary);
 }
@@ -250,7 +252,8 @@
 
 .update-prices-title {
 	margin: 0;
-	font-size: 18px;
+	font-family: var(--font-family-display);
+	font-size: 19px;
 	font-weight: 700;
 }
 

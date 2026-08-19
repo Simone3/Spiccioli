@@ -14,10 +14,11 @@
 }
 
 .filter-bar-label {
-	font-size: 11px;
-	letter-spacing: 0.1em;
+	font-family: var(--font-family-mono);
+	font-size: 10px;
+	letter-spacing: 0.12em;
 	text-transform: uppercase;
-	color: var(--colors-text-secondary);
+	color: var(--colors-text-faint);
 }
 
 .filter-bar-clear {

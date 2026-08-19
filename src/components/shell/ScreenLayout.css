@@ -22,16 +22,18 @@
 
 .screen-layout-title {
 	margin: 0;
-	font-size: 22px;
+	font-family: var(--font-family-display);
+	font-size: 23px;
 	font-weight: 700;
 	letter-spacing: -0.01em;
 }
 
 .screen-layout-subtitle {
+	font-family: var(--font-family-mono);
 	font-size: 11px;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	color: var(--colors-text-secondary);
+	color: var(--colors-text-faint);
 }
 
 .screen-layout-actions {

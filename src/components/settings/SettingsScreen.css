@@ -32,11 +32,12 @@
 
 .settings-screen-card-title {
 	margin: 0;
-	font-size: 11px;
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
 	font-weight: 400;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: var(--colors-text-secondary);
+	color: var(--colors-text-faint);
 }
 
 .settings-screen-fields {
@@ -78,7 +79,8 @@
 
 .settings-screen-path dd {
 	margin: 0;
-	font-size: 12px;
+	font-family: var(--font-family-mono);
+	font-size: 11.5px;
 	line-height: 1.5;
 	word-break: break-all;
 }

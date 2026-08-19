@@ -1,5 +1,6 @@
 import 'src/components/launch/LaunchScreen.css';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
+import { AppButton } from 'src/components/common/AppButton';
 import { UpgradeDialog } from 'src/components/launch/UpgradeDialog';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter } from 'src/contexts/PreferencesContext';
@@ -118,24 +119,21 @@ export const LaunchScreen = (): ReactElement => {
 					</ul>}
 
 				<div className='launch-screen-actions'>
-					<button
-						type='button'
-						className='launch-screen-button'
+					<AppButton
+						variant='ghost'
 						disabled={isBusy}
 						onClick={() => {
 							void openWithDialog();
 						}}>
 						{t('launch.open')}
-					</button>
-					<button
-						type='button'
-						className='launch-screen-button launch-screen-button-primary'
+					</AppButton>
+					<AppButton
 						disabled={isBusy}
 						onClick={() => {
 							void createWithDialog();
 						}}>
 						{t('launch.newFile')}
-					</button>
+					</AppButton>
 				</div>
 			</div>
 		</div>

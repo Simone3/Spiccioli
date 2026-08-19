@@ -8,7 +8,7 @@
 
 .text-field-input {
 	padding: 6px 10px;
-	background-color: var(--colors-background-primary);
+	background-color: var(--colors-background-field);
 	border: 1px solid var(--colors-border-strong);
 	border-radius: 6px;
 	font: inherit;
