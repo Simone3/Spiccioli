@@ -17,20 +17,23 @@ The two processes are bundled separately and by different tools, because they ar
 
 ## 1.2 What crosses the bridge
 
-Four groups of channels, and they all follow one pattern: the names in `src/types/…IpcChannels.ts`, the shapes in `src/types/…IpcTypes.ts`, a handler in `src/main/ipc/`, and the preload publishing one function per thing the renderer may ask for.
+Five groups of channels, and they all follow one pattern: the names in `src/types/…IpcChannels.ts`, the shapes in `src/types/…IpcTypes.ts`, a handler in `src/main/ipc/`, and the preload publishing one function per thing the renderer may ask for.
 
 | Group | Files | Role |
 | --- | --- | --- |
 | App info | `src/types/AppInfoIpcChannels.ts` `AppInfoTypes.ts`, `src/main/ipc/AppInfoIpc.ts` | Which build the renderer is part of |
+| The menu bar | `src/types/AppMenuIpcChannels.ts` `AppMenuTypes.ts`, `src/main/ipc/AppMenuIpc.ts` | **Only where the window has no menu bar of its own**: what the renderer draws in its place, when it changed, and the closed set of commands a drawn entry asks for |
 | The ledger | `src/types/LedgerIpcChannels.ts` `LedgerIpcTypes.ts`, `src/main/ipc/LedgerIpc.ts` | Everything about the file: the two dialogs, reading, creating, saving, the copies, where the copies live, the recent list, the preferences, and the one answer to a shutdown that is not a close |
 | Diagnostics | `src/types/LedgerIpcChannels.ts`, `src/main/ipc/DiagnosticsIpc.ts` | The renderer's failures, written into the operational log by the process that owns it |
 | Prices | `src/types/PriceIpcChannels.ts` `PriceIpcTypes.ts`, `src/main/ipc/PricesIpc.ts` | **The one thing in the application that touches the network**: a listing and a span per security out, the days it carries or a reason back, how far the pass has got while it runs, and the line saying what the confirmation wrote |
 
-`src/main/preload/Preload.ts` publishes them as `window.spiccioliAppInfo`, `window.spiccioliLedger`, `window.spiccioliPrices` and `window.spiccioliDiagnostics`, and `src/vite-env.d.ts` tells TypeScript what `window` carries.
+`src/main/preload/Preload.ts` publishes them as `window.spiccioliAppInfo`, `window.spiccioliAppMenu`, `window.spiccioliLedger`, `window.spiccioliPrices` and `window.spiccioliDiagnostics`, and `src/vite-env.d.ts` tells TypeScript what `window` carries.
 
-A channel is a request the renderer makes and the main process answers. For events pushed the other way, the framework's `subscribeToChannel` (`src/framework/preload/IpcBridge.ts`) is what the preload wraps a listener in, so the renderer gets the payload without an Electron event object it could not receive anyway. Four events are pushed today, all of them the ledger's: a write attempt that failed, an external modification, a File-menu command, and the request to finish saving before the session closes.
+A channel is a request the renderer makes and the main process answers. For events pushed the other way, the framework's `subscribeToChannel` (`src/framework/preload/IpcBridge.ts`) is what the preload wraps a listener in, so the renderer gets the payload without an Electron event object it could not receive anyway. Five events are pushed today. Four are the ledger's: a write attempt that failed, an external modification, a File-menu command, and the request to finish saving before the session closes. The fifth is the drawn menu bar's, sent whenever the menu is rebuilt — which is every time the recent list changes Open Recent underneath it.
 
 **Nothing on any of these channels carries a parsed ledger.** The renderer holds the model and the main process owns the file, so what crosses is text and paths — plus, in the other direction, the schema version and record counts the renderer read out of a file, sent back only so that the main process can write them into the log.
+
+**The menu channel carries a description one way and a command name the other, and nothing else.** The main process owns the menu, so the renderer is handed what to draw rather than deciding it, and what it may send back is a closed set: an unknown command name is ignored rather than guessed at, and the one command that carries a value — the file *Open Recent* was asked for — is refused unless the recent list actually holds it. The File entries of the drawn menu reach the very callbacks the native menu items click, so a file is never opened or closed by two different routes.
 
 **The price channel is where the network lives, and it lives there for the same reason.** The renderer knows which securities exist and the main process is the side that may open a socket, so the renderer hands over one listing per security — a `ticker`, an `exchange` and the first day wanted, plus an identity that never goes further than `src/main/prices` — and is handed back the days the provider carries or the reason there are none. **It is also the one channel that pushes**: a pass asked for years of days at a time is slow enough that the screen has to say how far it has got, so `PricesIpc` sends a count back to the window that asked and to no other. **Nothing on it writes anything**: a confirmed pass writes Price records through the document the renderer already holds ([§7.6](../functional/specs/07-investments.md#76-prices)). The renderer could not make the request itself in any case — the Content-Security-Policy of [§1.5](#15-what-the-window-is-allowed-to-load) is `default-src 'self'`, so the page has nowhere to connect to.
 
@@ -47,6 +50,8 @@ src/index.tsx                    mounts React, in StrictMode
                           └── HashRouter   the one router, installed once, over a hash history
                               └── SpiccioliApp the launch screen, or the shell around one of the screens
 ```
+
+`SpiccioliApp` puts `TitleBar` above both of its states, and on most platforms it draws nothing at all: the main process answers with no menu, and the window keeps the title bar and the menu bar the operating system gave it. Where it does draw — Windows, outside a development run — the row is the menu bar and the window title both, so the launch screen needs it as much as an open file does. The file's name is read from `LedgerProvider` rather than from the window, because `setTitle` in the main process is invisible to the page.
 
 `AppErrorBoundary` wraps everything below the translator rather than one screen, so a failure inside a context provider is caught too. Its recovery is a reload: rendering the same tree again would usually throw the same error a second time, while a reload starts over from what is on disk.
 
@@ -71,8 +76,10 @@ The failure goes to the operational log over `window.spiccioliDiagnostics`, beca
 3. **Resolves the window load target** — the built `build/index.html` or the development server — so every window of the run loads the same page.
 4. **Resolves the runtime paths**, **initializes the logger** into them, opens the configuration store, and writes the one entry that describes the run (`src/main/config/StartupConfigurationLog.ts`).
 5. **Creates the ledger session** and **registers the IPC handlers.**
-6. **Installs the application menu** — the File menu of four actions and the About item of [§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open), rebuilt whenever the recent list changes because Open Recent is part of it.
-7. **Creates the window**, installs the navigation guard on it, and shows it maximized once it is ready to be shown.
+6. **Installs the application menu** — the File menu of four actions and the About item of [§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open), with the Edit, View and Window menus each platform expects beside them, rebuilt whenever the recent list changes because Open Recent is part of it. **A development run gets three entries more** — reload, force reload and the developer tools — which an installed Spiccioli does not offer. The same call rebuilds the description the renderer draws from, where it draws one, and tells the window it changed.
+7. **Creates the window**, installs the navigation guard on it, and shows it maximized once it is ready to be shown. Where the renderer draws the menu bar the window is created without a title bar of its own, with the two colors Electron overlays the window buttons in, and the native menu bar — installed, because its items are what answer the keyboard — is hidden.
+
+**Which platform draws the menu bar is decided once, before the window exists.** Windows draws its own in its own grey, above a window that is dark, and nothing in Electron can restyle it, so the renderer draws one instead in the colors of the application; macOS puts the menu where it belongs to the desktop rather than the window, and Linux is left alone because hiding the menu bar there means taking the window buttons over too. A development run keeps the native bar everywhere, which is where its reload and developer-tools entries stay reachable.
 
 **A quit is not immediate while a file is open.** All four File actions and the window closing are the same event — a close of the session, which takes its backup — and the renderer is the side that has to finish saving first. The main process asks it to and waits, with a bound: a renderer that cannot answer must not be able to stop the application from exiting, and what is lost by quitting anyway is a copy of a file that is already safely on disk.
 

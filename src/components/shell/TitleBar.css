@@ -1,0 +1,35 @@
+
+/* The row stands where the operating system's title bar was, so it is what the window is dragged by, and it reserves the width of the
+   window buttons Electron still overlays on its right. Those two are the same measurement: "titlebar-area-width" is what the overlay
+   left over, and everything outside it belongs to the buttons. */
+#title-bar {
+	position: relative;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	height: env(titlebar-area-height, 32px);
+	padding-right: calc(100vw - env(titlebar-area-width, 100vw));
+	background-color: var(--colors-background-primary);
+	border-bottom: 1px solid var(--colors-border-subtle);
+	user-select: none;
+	-webkit-app-region: drag;
+}
+
+/* Centered on the window rather than on what the menu left over, which is where a title bar puts a title. It is drawn under the
+   submenu titles and takes no clicks, so a window narrow enough for the two to meet is still dragged and still opens its menu. */
+.title-bar-title {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: env(titlebar-area-width, 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0.8em;
+	color: var(--colors-text-secondary);
+	white-space: nowrap;
+	overflow: hidden;
+	pointer-events: none;
+}

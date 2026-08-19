@@ -55,6 +55,8 @@ Both configs resolve the `src/...` import prefix — Vite through an alias, esbu
 
 Editing a React source hot-reloads it in place. Editing `src/main` or `src/config` rebuilds and relaunches the window.
 
+**A development run has three menu entries an installed one does not**: *Reload*, *Force Reload* and *Toggle Developer Tools*, at the end of the View menu. Reloading throws away whatever has not been written and the tools are an invitation to break things, so a packaged Spiccioli offers none of them. The same flag keeps the native menu bar on Windows, where an installed run hides it and draws its own — a development run is therefore not where the drawn bar is exercised; `npm run start-packaged` is.
+
 **The port is not fixed**, because the server picks it, which is why it is passed through the environment rather than written down anywhere.
 
 `npm run start-packaged` is the other half of the picture: it builds both bundles once and starts the application the way a packaged one starts, loading `build/index.html` from disk. Use it to check anything that behaves differently when the renderer is not served.

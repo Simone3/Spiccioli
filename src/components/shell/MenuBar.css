@@ -1,0 +1,125 @@
+
+.menu-bar {
+	display: flex;
+	align-items: stretch;
+	height: 100%;
+}
+
+.menu-bar-menu {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+/* The titles sit in the title bar, which is dragged by the pointer everywhere the user is not aiming at a control */
+.menu-bar-trigger,
+.menu-bar-dropdown {
+	-webkit-app-region: no-drag;
+}
+
+.menu-bar-trigger {
+	font: inherit;
+	font-size: 0.85em;
+	color: var(--colors-text-secondary);
+	background: none;
+	border: none;
+	border-radius: 5px;
+	padding: 4px 8px;
+	margin: 0 1px;
+	cursor: default;
+	white-space: nowrap;
+}
+
+.menu-bar-trigger:hover {
+	background-color: var(--colors-interactive-hover-background);
+	color: var(--colors-text-primary);
+}
+
+.menu-bar-trigger-open,
+.menu-bar-trigger-open:hover {
+	background-color: var(--colors-interactive-active-background);
+	color: var(--colors-text-primary);
+}
+
+/* The submenu hangs below the title bar, over the page: nothing above it is allowed to clip it, and nothing under it may draw over it */
+.menu-bar-dropdown {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	z-index: 300;
+	min-width: 200px;
+	display: flex;
+	flex-direction: column;
+	padding: 4px;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 5px;
+	box-shadow: 0 6px 16px var(--colors-popup-shadow);
+}
+
+/* Open Recent, which is the one submenu of a submenu the menu has. It hangs off the right of the row it belongs to, level with it. */
+.menu-bar-nested {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+}
+
+.menu-bar-nested-dropdown {
+	top: -4px;
+	left: 100%;
+}
+
+.menu-bar-entry {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 20px;
+	font: inherit;
+	font-size: 0.85em;
+	text-align: left;
+	color: var(--colors-text-primary);
+	background: none;
+	border: none;
+	border-radius: 5px;
+	padding: 6px 8px;
+	cursor: default;
+	white-space: nowrap;
+}
+
+/* An entry never takes the focus, so that the field the user was typing in keeps it and the Edit entries have something to act on.
+   This is therefore the only indication it has, and it is what both the pointer and the keyboard put on it. */
+.menu-bar-entry-highlighted {
+	background-color: var(--colors-accent-primary);
+	color: var(--colors-text-on-accent);
+}
+
+.menu-bar-entry-accelerator {
+	color: var(--colors-text-secondary);
+}
+
+/* The shortcut and the arrow of the highlighted row are read against the accent color, which the secondary text color is too dim for */
+.menu-bar-entry-highlighted .menu-bar-entry-accelerator {
+	color: var(--colors-text-on-accent);
+}
+
+.menu-bar-entry-arrow {
+	color: var(--colors-text-secondary);
+}
+
+.menu-bar-entry-highlighted .menu-bar-entry-arrow {
+	color: var(--colors-text-on-accent);
+}
+
+/* A row that says something and does nothing: an empty Open Recent, and a recent file that has moved */
+.menu-bar-label {
+	font-size: 0.85em;
+	color: var(--colors-disabled);
+	padding: 6px 8px;
+	white-space: nowrap;
+}
+
+.menu-bar-separator {
+	height: 1px;
+	margin: 4px 6px;
+	background-color: var(--colors-border-strong);
+}

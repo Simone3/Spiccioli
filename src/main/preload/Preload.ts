@@ -1,15 +1,31 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { subscribeToChannel } from 'src/framework/preload/IpcBridge';
 import { SPICCIOLI_APP_INFO_IPC_CHANNELS } from 'src/types/AppInfoIpcChannels';
+import { SPICCIOLI_APP_MENU_IPC_CHANNELS, SPICCIOLI_APP_MENU_IPC_EVENTS } from 'src/types/AppMenuIpcChannels';
 import { SPICCIOLI_DIAGNOSTICS_IPC_CHANNELS, SPICCIOLI_LEDGER_IPC_CHANNELS, SPICCIOLI_LEDGER_IPC_EVENTS } from 'src/types/LedgerIpcChannels';
 import { SPICCIOLI_PRICES_IPC_CHANNELS } from 'src/types/PriceIpcChannels';
 import type { SpiccioliAppInfoApi } from 'src/types/AppInfoTypes';
+import type { SpiccioliAppMenuApi } from 'src/types/AppMenuTypes';
 import type { SpiccioliDiagnosticsApi, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
 import type { PricePassProgress, SpiccioliPricesApi } from 'src/types/PriceIpcTypes';
 
 const spiccioliAppInfo: SpiccioliAppInfoApi = {
 	getAppInfo: () => {
 		return ipcRenderer.invoke(SPICCIOLI_APP_INFO_IPC_CHANNELS.getAppInfo);
+	}
+};
+
+// The menu bar the renderer draws where the native one is hidden. What crosses is a description on the way out and one of a closed
+// set of command names on the way back, so nothing in the window can ask for anything the menu does not already offer.
+const spiccioliAppMenu: SpiccioliAppMenuApi = {
+	getMenuBar: () => {
+		return ipcRenderer.invoke(SPICCIOLI_APP_MENU_IPC_CHANNELS.getMenuBar);
+	},
+	runMenuCommand: (request) => {
+		return ipcRenderer.invoke(SPICCIOLI_APP_MENU_IPC_CHANNELS.runMenuCommand, request);
+	},
+	onMenuBarChanged: (listener) => {
+		return subscribeToChannel(ipcRenderer, SPICCIOLI_APP_MENU_IPC_EVENTS.menuBarChanged, listener);
 	}
 };
 
@@ -110,6 +126,7 @@ const spiccioliDiagnostics: SpiccioliDiagnosticsApi = {
 };
 
 contextBridge.exposeInMainWorld('spiccioliAppInfo', spiccioliAppInfo);
+contextBridge.exposeInMainWorld('spiccioliAppMenu', spiccioliAppMenu);
 contextBridge.exposeInMainWorld('spiccioliLedger', spiccioliLedger);
 contextBridge.exposeInMainWorld('spiccioliPrices', spiccioliPrices);
 contextBridge.exposeInMainWorld('spiccioliDiagnostics', spiccioliDiagnostics);

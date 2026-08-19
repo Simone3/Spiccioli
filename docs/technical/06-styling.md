@@ -22,6 +22,8 @@ Vite collects those imports into one stylesheet at build time. Class names are n
 
 Every color is written as a variable and used through `var(--…)`. A color written inline in a component is a bug: it is what makes a later change to the palette a search-and-replace across the tree.
 
+**Two colors of the palette are also written in `src/config/AppConfig.ts`, and they are the one exception to that.** Where the window draws its own title bar ([§1.4](01-architecture.md#14-what-the-main-process-does-at-startup)) the minimize, maximize and close buttons on it are still the operating system's, so Electron is told what to paint them in rather than CSS: `TITLE_BAR_CONFIG` carries the values of `--colors-background-primary` and `--colors-text-primary`, and has to be changed with them.
+
 The groups are:
 
 | Group | What it covers |

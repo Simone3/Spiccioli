@@ -28,7 +28,13 @@ export const EN_TRANSLATIONS = {
 	menu: {
 		file: 'File',
 		edit: 'Edit',
+		view: 'View',
+		window: 'Window',
 		help: 'Help',
+
+		// Names the whole drawn menu bar for anything reading the window out, which sees a row of buttons and nothing saying what they are
+		bar: 'Application menu',
+
 		newFile: 'New…',
 		openFile: 'Open…',
 		openRecent: 'Open Recent',
@@ -36,7 +42,21 @@ export const EN_TRANSLATIONS = {
 		missingRecentFile: '{name} — not found',
 		quit: 'Quit',
 		about: 'About {name}',
-		aboutVersion: 'Version {version}'
+		aboutVersion: 'Version {version}',
+
+		// The entries the native menu takes from an Electron role, worded here for the menu bar Spiccioli draws itself
+		undo: 'Undo',
+		redo: 'Redo',
+		cut: 'Cut',
+		copy: 'Copy',
+		paste: 'Paste',
+		selectAll: 'Select All',
+		resetZoom: 'Actual Size',
+		zoomIn: 'Zoom In',
+		zoomOut: 'Zoom Out',
+		toggleFullScreen: 'Toggle Full Screen',
+		minimize: 'Minimize',
+		close: 'Close'
 	},
 
 	// The launch screen, which the application always opens with and which never reopens the last file on its own

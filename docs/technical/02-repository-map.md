@@ -30,10 +30,12 @@ Every non-generated file in the repository and what it is for. Generated folders
 | `config/SpiccioliConfigStore.ts` | The preferences and the recent-file list, through the framework's configuration store |
 | `config/StartupConfigurationLog.ts` | The one entry that describes the run the rest of the log belongs to |
 | `ipc/AppInfoIpc.ts` | Answers what version and platform the running build is |
+| `ipc/AppMenuIpc.ts` | What the menu bar Spiccioli draws itself says, and the closed set of commands that come back from it |
 | `ipc/LedgerIpc.ts` | Everything the renderer asks of the file: the two dialogs, reading, creating, saving, the copies, the recent list, the preferences |
 | `ipc/DiagnosticsIpc.ts` | The renderer's failures, written into the operational log with each text truncated |
 | `ipc/PricesIpc.ts` | The one press that reaches the network, and the line the renderer sends back saying what the confirmation wrote |
-| `menu/AppMenu.ts` | The File menu of four actions and the About item ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)), as a template a test can read |
+| `menu/AppMenu.ts` | The File menu of four actions and the About item ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)), the Edit, View and Window menus the platform expects beside them, the three entries a development run adds — and the same menu again as the description the renderer draws on Windows |
+| `menu/MenuCommands.ts` | What a drawn entry does, since it has no Electron role behind it: the closed set, and the refusal of a recent file the menu does not offer |
 | `prices/PriceProvider.ts` | What everything above the adapter sees: a listing and a span in, and the days it carries or a reason out |
 | `prices/YahooPriceProvider.ts` | **The one place that knows Yahoo** — the suffix table, the `v8/finance/chart` request in both its shapes, and the parse of the live quote and of the daily bars |
 | `prices/PriceQuoteReview.ts` | The four refusals of [§7.6](../functional/specs/07-investments.md#76-prices), applied before the user ever sees a figure — the currency to a whole response, the date and the value to each day of it |
@@ -63,6 +65,8 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/shell/Sidebar.tsx` `.css` | The eight screens, the failing-check badge and the save state ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)) |
 | `components/shell/ScreenLayout.tsx` `.css` | The shape every screen has — a heading, what the screen says about what it is showing, the controls beside it — and nothing of any screen's own |
 | `components/shell/StorageNotices.tsx` `.css` | The three lines the file can put on whichever screen the user is on |
+| `components/shell/TitleBar.tsx` `.css` | The row drawn where the window has no title bar of its own: the menu bar, and the open file's name |
+| `components/shell/MenuBar.tsx` `.css` | That menu bar itself — the pointer, the keyboard, and the one submenu of a submenu the menu has |
 | `components/shell/TransactionHandoff.ts` | How one screen hands its filters to Transactions, over the router's own location state ([§5.2](../functional/specs/05-transactions.md#52-ordering-and-paging)) |
 | `components/shell/RecordLinks.ts` | The same thing for Investments and Salaries, and the follow of a check entry to the record it names ([§9](../functional/specs/09-checks.md)) |
 | `components/launch/LaunchScreen.tsx` `.css` | The screen the application always opens with ([§12.1](../functional/specs/12-storage.md#121-the-launch-screen)) |
@@ -110,11 +114,13 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `logic/format/DateFormat.ts` `NumberFormat.ts` | Printing a day and printing a figure, the way the preferences say — including the compact amount a chart's value axis writes, which is the one place a figure is not printed in full |
 | `logic/format/Formatter.ts` | Both of those, bound once to the preferences in force |
 | `logic/format/FilePathDisplay.ts` | Reading a path apart for display |
+| `logic/menu/DrawnMenu.ts` | The only module that touches the menu bridge: what to draw, when it changed, and what a click asks for |
 | `logic/ledger/` | The document: its version, its seed, its reader, its writer, its refusals and its upgrade ([§9](09-file-format.md)) |
 | `logic/money/Money.ts` | The scales, the one division rule and the roundings |
 | `logic/preferences/Preferences.ts` | The defaults, the reading of whatever the configuration file holds, and the rule that the two separators must differ — which Settings and the import's own controls both apply |
 | `logic/storage/AutosaveScheduler.ts` | The debounce, and the rule that two writes never overlap |
 | `types/AppInfoTypes.ts` `AppInfoIpcChannels.ts` | The shape and the channel names of the app-info request |
+| `types/AppMenuTypes.ts` `AppMenuIpcChannels.ts` | The drawn menu's description, its closed set of commands, and the channel names |
 | `types/LedgerTypes.ts` | The eleven stored entities and every closed set they take |
 | `types/LedgerIpcTypes.ts` `LedgerIpcChannels.ts` | What crosses the bridge for storage, and the channel names |
 | `types/PriceIpcTypes.ts` `PriceIpcChannels.ts` | What crosses the bridge for a price pass, and the channel names |

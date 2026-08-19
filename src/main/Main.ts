@@ -1,8 +1,8 @@
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { app, BrowserWindow, dialog, ipcMain, Menu } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu, type BrowserWindowConstructorOptions } from 'electron';
 import squirrelStartup from 'electron-squirrel-startup';
-import { LOGGING_CONFIG, SHUTDOWN_CONFIG, STORAGE_CONFIG, WINDOW_CONFIG } from 'src/config/AppConfig';
+import { LOGGING_CONFIG, SHUTDOWN_CONFIG, STORAGE_CONFIG, TITLE_BAR_CONFIG, WINDOW_CONFIG } from 'src/config/AppConfig';
 import { appLogger, initializeAppLogger } from 'src/framework/main/logging/AppLogger';
 import { installProcessCrashHandlers } from 'src/framework/main/logging/ProcessCrashHandlers';
 import { installWindowNavigationGuard } from 'src/framework/main/window/WindowNavigationGuard';
@@ -12,17 +12,28 @@ import { createSpiccioliConfigStore, type SpiccioliConfigStore } from 'src/main/
 import { resolveSpiccioliRuntimePaths } from 'src/main/config/SpiccioliRuntimePaths';
 import { logStartupConfiguration } from 'src/main/config/StartupConfigurationLog';
 import { registerAppInfoIpcHandlers } from 'src/main/ipc/AppInfoIpc';
+import { registerAppMenuIpcHandlers } from 'src/main/ipc/AppMenuIpc';
 import { registerDiagnosticsIpcHandlers } from 'src/main/ipc/DiagnosticsIpc';
 import { registerLedgerIpcHandlers } from 'src/main/ipc/LedgerIpc';
 import { registerPricesIpcHandlers } from 'src/main/ipc/PricesIpc';
-import { buildAppMenuTemplate } from 'src/main/menu/AppMenu';
+import { buildAppMenuTemplate, buildDrawnMenuBar, drawsOwnMenuBar } from 'src/main/menu/AppMenu';
 import { createYahooPriceProvider } from 'src/main/prices/YahooPriceProvider';
 import { createLedgerSession, type LedgerSession } from 'src/main/storage/LedgerSession';
 import { isDevelopmentRun, resolveWindowLoadTarget, type WindowLoadTarget } from 'src/main/window/WindowLoadTarget';
+import { SPICCIOLI_APP_MENU_IPC_EVENTS } from 'src/types/AppMenuIpcChannels';
+import type { SpiccioliMenu } from 'src/types/AppMenuTypes';
 import { SPICCIOLI_LEDGER_IPC_EVENTS } from 'src/types/LedgerIpcChannels';
 import type { LedgerCloseDoor, LedgerMenuCommand } from 'src/types/LedgerIpcTypes';
 
 let mainWindow: BrowserWindow | undefined;
+
+// Whether the renderer draws the menu bar rather than the operating system. It is decided once at startup, because it is also what
+// hides the title bar the drawn one takes the place of, and the window has to know that before it is created.
+let drawsMenuBar = false;
+
+// What that drawn bar says, rebuilt with the native menu rather than asked for again: Open Recent changes every time a file is
+// opened, and the window is told rather than left to notice
+let drawnMenuBar: SpiccioliMenu[] = [];
 
 // Only the first failure opens a dialog. A process that started failing usually keeps failing, and a stack of error boxes would
 // bury the window instead of reporting anything the first one did not already say.
@@ -81,27 +92,44 @@ const sendToRenderer = (channel: string, payload: unknown): void => {
 	mainWindow?.webContents.send(channel, payload);
 };
 
-// Rebuilt rather than patched, because Open Recent changes every time a file is opened and Electron has no way to replace one submenu
-const installApplicationMenu = (translator: SpiccioliTranslator, configStore: SpiccioliConfigStore): void => {
+// The only place a version number appears, opened by the About item of whichever menu the platform draws
+const showAboutBox = (translator: SpiccioliTranslator): void => {
+	void dialog.showMessageBox({
+		type: 'info',
+		title: translator.t('menu.about', { name: translator.t('app.name') }),
+		message: translator.t('app.name'),
+		detail: translator.t('menu.aboutVersion', { version: app.getVersion() })
+	});
+};
+
+// A File action ends the current session, so none of them acts here: it is sent to the renderer, which is the side that has to
+// finish saving before the file can stop being the open one
+const sendMenuCommandToRenderer = (command: LedgerMenuCommand): void => {
+	sendToRenderer(SPICCIOLI_LEDGER_IPC_EVENTS.menuCommand, command);
+};
+
+// Rebuilt rather than patched, because Open Recent changes every time a file is opened and Electron has no way to replace one
+// submenu. The drawn bar is rebuilt on the same call and for the same reason, and the window is told it changed.
+const installApplicationMenu = (translator: SpiccioliTranslator, configStore: SpiccioliConfigStore, isDevelopment: boolean): void => {
+	const recentFiles = configStore.readRecentFiles();
+
 	Menu.setApplicationMenu(Menu.buildFromTemplate(buildAppMenuTemplate({
 		translator,
 		isMac: process.platform === 'darwin',
-		recentFiles: configStore.readRecentFiles(),
-		onCommand: (command: LedgerMenuCommand) => {
-			sendToRenderer(SPICCIOLI_LEDGER_IPC_EVENTS.menuCommand, command);
-		},
+		recentFiles,
+		isDevelopmentRun: isDevelopment,
+		onCommand: sendMenuCommandToRenderer,
 		onAbout: () => {
-			void dialog.showMessageBox({
-				type: 'info',
-				title: translator.t('menu.about', { name: translator.t('app.name') }),
-				message: translator.t('app.name'),
-				detail: translator.t('menu.aboutVersion', { version: app.getVersion() })
-			});
+			showAboutBox(translator);
 		},
 		onQuit: () => {
 			app.quit();
 		}
 	})));
+
+	// Nothing at all where the platform keeps its native menu bar, which is what tells the renderer to draw none
+	drawnMenuBar = drawsMenuBar ? buildDrawnMenuBar({ translator, recentFiles }) : [];
+	sendToRenderer(SPICCIOLI_APP_MENU_IPC_EVENTS.menuBarChanged, drawnMenuBar);
 };
 
 /**
@@ -150,6 +178,20 @@ const cancelShutdown = (): void => {
 	isShuttingDown = false;
 };
 
+// The window options that put the menu bar inside the page instead of above it. Hiding the operating system's title bar is what
+// makes room for it: what stays is the overlay Electron keeps drawing the minimize, maximize and close buttons in, told which two
+// colors to draw them in so that they belong to the same window as everything below.
+const buildDrawnTitleBarWindowOptions = (): Pick<BrowserWindowConstructorOptions, 'titleBarStyle' | 'titleBarOverlay'> => {
+	return {
+		titleBarStyle: 'hidden',
+		titleBarOverlay: {
+			color: TITLE_BAR_CONFIG.backgroundColor,
+			symbolColor: TITLE_BAR_CONFIG.symbolColor,
+			height: TITLE_BAR_CONFIG.heightPixels
+		}
+	};
+};
+
 // What the window loads, resolved once at startup so that every window of this run loads the same page
 const createWindow = (loadTarget: WindowLoadTarget, translator: SpiccioliTranslator): void => {
 	const win = new BrowserWindow({
@@ -157,12 +199,20 @@ const createWindow = (loadTarget: WindowLoadTarget, translator: SpiccioliTransla
 		height: WINDOW_CONFIG.heightPixels,
 		show: false,
 		title: translator.t('app.name'),
+		...drawsMenuBar ? buildDrawnTitleBarWindowOptions() : {},
 		webPreferences: {
 			contextIsolation: true,
 			nodeIntegration: false,
 			preload: path.join(__dirname, WINDOW_CONFIG.preloadScriptFileName)
 		}
 	});
+
+	// The native menu stays installed, because its items are what answer the keyboard shortcuts, but a window that draws the menu
+	// itself must not have it above the page as well. Electron draws that bar inside the window once the title bar is hidden, so it
+	// is turned off here rather than left to look like a second menu nobody styled.
+	if(drawsMenuBar) {
+		win.setMenuBarVisibility(false);
+	}
 
 	// Maximizes to the screen work area on startup without engaging macOS native fullscreen (a distinct window state the user opts into separately)
 	win.once('ready-to-show', () => {
@@ -219,11 +269,16 @@ const startApplication = (): void => {
 		const translator = createSpiccioliTranslator(language);
 		fatalErrorTranslator = translator;
 
-		// Resolved before the window, because every window of this run loads the same page
+		// Resolved before the window, because every window of this run loads the same page, and because the menu is decided from it
 		const loadTarget = resolveWindowLoadTarget({
 			appRootDirectory: app.getAppPath(),
 			isPackaged: app.isPackaged
 		});
+		const isDevelopment = isDevelopmentRun(loadTarget);
+
+		// On Windows the native menu is installed but hidden, and the renderer draws one of its own in the colors of the application.
+		// The window has to know before it is created, because that is what hides the title bar the drawn one takes the place of.
+		drawsMenuBar = drawsOwnMenuBar({ platform: process.platform, isDevelopmentRun: isDevelopment });
 
 		const runtimePaths = resolveSpiccioliRuntimePaths(app);
 
@@ -246,8 +301,9 @@ const startApplication = (): void => {
 			nodeVersion: process.versions.node,
 			requestedLocale,
 			resolvedLanguage: language,
-			rendererSource: isDevelopmentRun(loadTarget) ? 'development-server' : 'build',
+			rendererSource: isDevelopment ? 'development-server' : 'build',
 			rendererLocation: loadTarget.value,
+			drawsMenuBar,
 			rootDirectory: runtimePaths.rootDirectory,
 			configFilePath: runtimePaths.configFilePath,
 			logFilePath: path.join(runtimePaths.logDirectory, LOGGING_CONFIG.fileName),
@@ -267,7 +323,7 @@ const startApplication = (): void => {
 			},
 			rememberRecentFile: (filePath) => {
 				configStore.rememberRecentFile(filePath);
-				installApplicationMenu(translator, configStore);
+				installApplicationMenu(translator, configStore, isDevelopment);
 			},
 			onWriteAttemptFailed: (event) => {
 				sendToRenderer(SPICCIOLI_LEDGER_IPC_EVENTS.writeAttemptFailed, event);
@@ -281,6 +337,33 @@ const startApplication = (): void => {
 			ipcMain,
 			app,
 			platform: process.platform
+		});
+
+		// The renderer is told what to draw, and nothing at all where the platform keeps its native menu bar, so a Spiccioli that has
+		// one never draws a second. What comes back is one of a closed set of commands, and the File ones reach the very callbacks the
+		// native items click.
+		registerAppMenuIpcHandlers({
+			ipcMain,
+			getMenuBar: () => {
+				return drawnMenuBar;
+			},
+			commandTarget: {
+				getWindow: () => {
+					return mainWindow;
+				},
+				onLedgerCommand: sendMenuCommandToRenderer,
+				onAbout: () => {
+					showAboutBox(translator);
+				},
+				onQuit: () => {
+					app.quit();
+				},
+				offersRecentFile: (filePath) => {
+					return configStore.readRecentFiles().some((recentFile) => {
+						return recentFile.filePath === filePath && !recentFile.missing;
+					});
+				}
+			}
 		});
 		registerDiagnosticsIpcHandlers({ ipcMain });
 
@@ -301,12 +384,12 @@ const startApplication = (): void => {
 			},
 			onOpenFileChanged: (filePath) => {
 				setWindowTitleForFile(translator, filePath);
-				installApplicationMenu(translator, configStore);
+				installApplicationMenu(translator, configStore, isDevelopment);
 			},
 			onCloseCancelled: cancelShutdown
 		});
 
-		installApplicationMenu(translator, configStore);
+		installApplicationMenu(translator, configStore, isDevelopment);
 		createWindow(loadTarget, translator);
 
 		// Closing the window is a close of the session on every platform, and on some of them it is not a quit. Either way the

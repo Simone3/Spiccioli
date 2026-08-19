@@ -12,6 +12,7 @@ import { PreferencesProvider } from 'src/contexts/PreferencesContext';
 import { UnsavedDraftProvider } from 'src/contexts/UnsavedDraftContext';
 import { TranslationProvider } from 'src/i18n/TranslationContext';
 import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
+import type { SpiccioliAppMenuApi } from 'src/types/AppMenuTypes';
 import type { SpiccioliDiagnosticsApi, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
 import type { SpiccioliPricesApi } from 'src/types/PriceIpcTypes';
 
@@ -55,6 +56,29 @@ export const stubPricesBridge = (overrides: Partial<SpiccioliPricesApi> = {}): S
 	};
 
 	Object.defineProperty(window, 'spiccioliPrices', { configurable: true, value: bridge });
+
+	return bridge;
+};
+
+/**
+ * The menu bar the renderer draws, stubbed. A test that says nothing about it gets what every platform with a native menu bar
+ * gets: no menu at all, and therefore no drawn title bar.
+ * @param overrides What this test needs the bridge to answer.
+ * @returns The bridge that was put on the window.
+ */
+export const stubAppMenuBridge = (overrides: Partial<SpiccioliAppMenuApi> = {}): SpiccioliAppMenuApi => {
+	const bridge: SpiccioliAppMenuApi = {
+		getMenuBar: () => {
+			return Promise.resolve([]);
+		},
+		runMenuCommand: () => {
+			return Promise.resolve();
+		},
+		onMenuBarChanged: unsubscribe,
+		...overrides
+	};
+
+	Object.defineProperty(window, 'spiccioliAppMenu', { configurable: true, value: bridge });
 
 	return bridge;
 };

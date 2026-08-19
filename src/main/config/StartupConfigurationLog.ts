@@ -27,6 +27,10 @@ export interface StartupConfigurationLogOptions {
 	rendererSource: 'development-server' | 'build';
 	rendererLocation: string;
 
+	// Whether the window hides its native menu bar and the renderer draws one, which is what a report of a menu that is not there
+	// has to be read against
+	drawsMenuBar: boolean;
+
 	rootDirectory: string;
 	configFilePath: string;
 	logFilePath: string;
