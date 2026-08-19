@@ -61,7 +61,7 @@ Three decisions are packed into it.
 
 This is also why anything clickable is a real `<button>` or `<a>` and never a clickable `<div>`: the keyboard has to reach it and activate it, and the ring has to have something to draw around.
 
-Two overrides exist today and both say why where they are written. `DecimalField` draws the ring on the box around its input with `:focus-within`, because the box with its currency symbol and its unit is what the user sees as the field, and the bare input inside it drops the ring so there is only ever one. `DateField` puts the ring back on the calendar's days, which the library it is built on draws an outline of its own on.
+Three overrides exist today and each says why where it is written. `DecimalField` draws the ring on the box around its input with `:focus-within`, because the box with its currency symbol and its unit is what the user sees as the field, and the bare input inside it drops the ring so there is only ever one. `DateField` puts the ring back on the calendar's days, which the library it is built on draws an outline of its own on. `PieChart` takes the browser's own box off a focused sector — the charting library makes each one click-focusable — because the ring belongs to controls and nothing in the ring is one: it is a picture, reached by no keyboard and pressed for nothing.
 
 ## 6.4 A library's stylesheet
 

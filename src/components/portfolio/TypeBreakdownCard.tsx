@@ -1,9 +1,10 @@
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { PieChart, pieSliceColour, type PieChartSlice } from 'src/components/common/PieChart';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
 import type { BreakdownRow, TypeBreakdown } from 'src/logic/portfolio/TypeBreakdown';
+import type { TenThousandths } from 'src/types/LedgerTypes';
 
 /**
  * What shape the portfolio is in: one slice per type present, and the amounts and shares beside it.
@@ -15,6 +16,11 @@ import type { BreakdownRow, TypeBreakdown } from 'src/logic/portfolio/TypeBreakd
  * **Shares are computed against the total of the positive types** and not against net worth; the two differ by exactly the
  * negative amounts, which are on screen a line away. **If no type is positive at all the pie is replaced by a line saying so**,
  * and the list still shows every amount.
+ *
+ * **Pointing at a slice names it, and pointing at a row finds its slice**: the middle of the ring reads that type's share
+ * instead of the count, and the row it belongs to lights up. Eleven slices carry eleven colours, and a thin one is quicker to
+ * point at than to match by eye. **It states what is already on the screen and never hides any of it** — every amount and every
+ * share is in the list whether anything is being pointed at or not, so nothing here is behind a pointer.
  */
 
 export interface TypeBreakdownCardProps {
@@ -31,6 +37,9 @@ export const TypeBreakdownCard = ({ breakdown }: TypeBreakdownCardProps): ReactE
 	const { t } = useTranslator();
 	const formatter = useFormatter();
 
+	// Which row the pointer is on, whether it got there over the slice or over the row
+	const [ pointedKey, setPointedKey ] = useState<string | undefined>(undefined);
+
 	const labelOf = (row: BreakdownRow): string => {
 		return row.side === 'security' ? t(`securityTypes.${row.type}`) : t(`accounts.types.${row.type}`);
 	};
@@ -41,6 +50,11 @@ export const TypeBreakdownCard = ({ breakdown }: TypeBreakdownCardProps): ReactE
 		return { key: row.key, label: labelOf(row), value: row.amount };
 	});
 
+	// A row with no slice is never pointed at: there is nothing in the ring to have found it
+	const pointed = breakdown.rows.find((row): row is BreakdownRow & { share: TenThousandths } => {
+		return row.key === pointedKey && row.share !== undefined;
+	});
+
 	return (
 		<section className='portfolio-screen-card'>
 			<h2 className='portfolio-screen-card-title'>{t('portfolio.types.title')}</h2>
@@ -49,14 +63,27 @@ export const TypeBreakdownCard = ({ breakdown }: TypeBreakdownCardProps): ReactE
 					<p className='portfolio-screen-note'>{t('portfolio.types.nothingPositive')}</p> :
 					<PieChart
 						slices={slices}
-						centreFigure={formatter.integer(breakdown.sliceCount)}
-						centreLabel={t('portfolio.types.sliceCount', { count: breakdown.sliceCount })}
-						label={t('portfolio.types.chart')}/>}
+						centreFigure={pointed === undefined ?
+							formatter.integer(breakdown.sliceCount) :
+							formatter.percentage(pointed.share)}
+						centreLabel={pointed === undefined ?
+							t('portfolio.types.sliceCount', { count: breakdown.sliceCount }) :
+							labelOf(pointed)}
+						label={t('portfolio.types.chart')}
+						onPointAt={setPointedKey}/>}
 
 				<ul className='portfolio-screen-slices' aria-label={t('portfolio.types.title')}>
 					{breakdown.rows.map((row, rank) => {
 						return (
-							<li key={row.key}>
+							<li
+								key={row.key}
+								className={row.key === pointed?.key ? 'portfolio-screen-slice-pointed' : undefined}
+								onMouseEnter={() => {
+									setPointedKey(row.key);
+								}}
+								onMouseLeave={() => {
+									setPointedKey(undefined);
+								}}>
 								{/* Only a slice is keyed by a colour, so a row that is given none is given no mark either. Every
 									positive row sorts before every other one, so a row's place in the list is its slice's place
 									in the ring. */}

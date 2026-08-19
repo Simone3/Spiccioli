@@ -125,15 +125,15 @@ export const EN_TRANSLATIONS = {
 			pensionNet: 'Pension funds, net'
 		},
 
-		// One note per line, and the four together are the estimation caveat split along the lines it actually applies to.
-		// Two of them say that nothing has been applied, which is what makes "read down and the estimation accumulates"
-		// something the screen shows rather than something the specification asserts.
+		// One note per line, and the four together are the estimation caveat split along the lines it actually applies to. Two
+		// of them say what the figure is and nothing more, which is where the estimation has not reached yet; the two that
+		// carry it open by saying so.
 		notes: {
-			cash: 'Nothing is estimated here. Every cash account that is not a pension fund, at its opening balance plus every transaction on it: no haircut, no cost basis and no rate. Opening balances are in it, and an opening balance is not a transaction.',
-			securitiesAtCost: 'Nothing is estimated here. Every holding still open, at what was paid for it with the purchase fees included. Not what the positions are worth now, and not a sum of transactions: a holding is carried at its cost basis, which no single row holds.',
-			unrealisedNetGain: 'An estimate. What selling every holding today would add to the portfolio or take out of it, after the capital-gains tax and the sell fee. The tax is worked out one holding at a time, so a loss on one position does not reduce the tax on another, and the fee is charged once per holding — both push this figure down. The gross picture is on Investments.',
+			cash: 'Every cash account that is not a pension fund, at its opening balance plus every transaction on it.',
+			securitiesAtCost: 'Every holding still open, valued at what was paid for it with the purchase fees included.',
+			unrealisedNetGain: 'An estimate. What selling every holding today would add to the portfolio or take out of it, after the capital-gains tax and the sell fee. The tax is worked out one holding at a time, so a loss on one does not reduce the tax on another, and the fee is charged once per holding — both push this figure down. The gross picture is on Investments.',
 			pensionNet: 'An estimate. Every pension fund at its balance less the exit tax, which falls on what was paid in rather than on what the fund earned, at a rate typed by hand. Netting a fund for tax does not make it liquid: this is still money that cannot be had before retirement.',
-			balance: 'The opening balance plus every transaction on the account. A pension fund is shown after its exit tax, and a brokerage account, which holds no money of its own, at the net value of its holdings after the capital-gains tax and the sell fee. Closed accounts are computed like any other, which is why this column totals to net worth.'
+			balance: 'Opening balance plus every transaction on standard accounts. A pension fund is shown after its exit tax. A brokerage account reads as the net value of its holdings, after the capital-gains tax and the sell fee.'
 		},
 
 		// What the portfolio has gained and lost by being kept in banks and funds instead of as cash. Nothing on this card is
@@ -167,12 +167,12 @@ export const EN_TRANSLATIONS = {
 			nothingPositive: 'No type is worth anything to divide up, so there is no shape to draw. Every amount is listed beside it.'
 		},
 
-		// The line, its key, and the note the key carries about the rates every point is taken at
+		// The line, the two states the tooltip names it in, and the note under it about the rates every point is taken at
 		chart: {
 			title: 'Net worth over time',
 			monthOfYear: '{month}/{year}',
-			fromPrices: 'holdings valued at the latest price known on that date',
-			fromCost: 'holdings valued at cost — before any price was recorded',
+			fromPrices: 'Holdings, if any, at their latest known price',
+			fromCost: 'At least one holding at cost — no price yet',
 			rates: 'Net of capital-gains tax, sell fees and pension exit tax at today’s rates',
 			needsHistory: 'There is no history to draw yet — the line fills in as transactions and trades arrive. The figures above are the opening balances.'
 		},

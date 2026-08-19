@@ -10,8 +10,13 @@ import { CartesianGrid, Line, LineChart as RechartsLineChart, ResponsiveContaine
  * hands over points, series and the one function that writes a figure; it never sees the library and never states a colour.
  *
  * **A series may be `null` at a point**, which is a stretch the line does not reach rather than a zero — the two are different
- * facts and the chart draws them differently. The legend is ours rather than the library's, so a dashed line reads as dashed in
+ * facts and the chart draws them differently. The key is ours rather than the library's, so a dashed line reads as dashed in
  * the key as well as on the chart.
+ *
+ * **A chart whose series are one line in two states says so on hover instead of in a key.** The tooltip names every series that
+ * reaches the point under the pointer, which is the same words the key would carry and only where they mean something; a key
+ * under such a chart names two lines where the reader sees one. A chart whose series are genuinely different measurements keeps
+ * its key, and that is the default.
  */
 
 // Which of the five fixed series colours a line is drawn in
@@ -47,6 +52,9 @@ export interface LineChartProps {
 
 	// How a figure is written, which is the caller's because the chart does not know what its figures are
 	formatValue: (value: number) => string;
+
+	// Whether the series are named under the chart. False where they are one line in two states, which the tooltip says better.
+	showSeriesKey?: boolean;
 }
 
 // What recharts hands a tooltip of ours. Every field is optional because the library injects them into an element it clones.
@@ -128,12 +136,13 @@ const ChartTooltip = ({ active, label, payload, series, formatValue }: ChartTool
  * The one chart.
  * @param props The chart's props.
  * @param props.points The points, in the order the horizontal axis reads them.
- * @param props.series The lines, in the order the legend names them.
+ * @param props.series The lines, in the order they are named.
  * @param props.label What the chart is called.
  * @param props.formatValue How a figure is written.
- * @returns The chart and the key under it.
+ * @param props.showSeriesKey Whether the series are named under the chart.
+ * @returns The chart, and the key under it where the series are named there.
  */
-export const LineChart = ({ points, series, label, formatValue }: LineChartProps): ReactElement => {
+export const LineChart = ({ points, series, label, formatValue, showSeriesKey = true }: LineChartProps): ReactElement => {
 	// The library reads a flat row, so the values are spread onto the label the axis reads
 	const rows = points.map((point) => {
 		return { label: point.label, ...point.values };
@@ -179,16 +188,18 @@ export const LineChart = ({ points, series, label, formatValue }: LineChartProps
 					</RechartsLineChart>
 				</ResponsiveContainer>
 			</div>
-			<ul className='line-chart-key'>
-				{series.map((line) => {
-					return (
-						<li key={line.key}>
-							<span className={line.dashed ? `${toneClassName(line.tone)} line-chart-key-mark-dashed` : toneClassName(line.tone)}/>
-							{line.label}
-						</li>
-					);
-				})}
-			</ul>
+			{showSeriesKey && (
+				<ul className='line-chart-key'>
+					{series.map((line) => {
+						return (
+							<li key={line.key}>
+								<span className={line.dashed ? `${toneClassName(line.tone)} line-chart-key-mark-dashed` : toneClassName(line.tone)}/>
+								{line.label}
+							</li>
+						);
+					})}
+				</ul>
+			)}
 		</div>
 	);
 };

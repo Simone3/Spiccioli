@@ -22,12 +22,11 @@
 	color: var(--colors-text-primary);
 }
 
-/* The same words the control is called, drawn for whoever is looking rather than listening. It opens downwards, the one place
-   it is put inside something that scrolls being a table header */
+/* The same words the control is called, drawn for whoever is looking rather than listening. It opens downwards, everything it
+   is put inside scrolling and therefore clipping it */
 .hint-note-text {
 	position: absolute;
 	top: calc(100% + 8px);
-	left: 50%;
 	z-index: 2;
 	display: none;
 	width: max-content;
@@ -45,14 +44,22 @@
 	text-align: left;
 	text-transform: none;
 	white-space: normal;
+}
+
+/* Centred on the mark, which is where a note with room on both sides of it goes */
+.hint-note-text-centre {
+	left: 50%;
 	transform: translateX(-50%);
 }
 
-/* Hung from the mark's right edge rather than centred on it, which is what keeps a note in a right-aligned column on screen */
+/* Hung from the mark's left edge, which is what keeps a note beside the first words of a line clear of the sidebar */
+.hint-note-text-left {
+	left: 0;
+}
+
+/* Hung from the mark's right edge, which is what keeps a note in a right-aligned column on screen */
 .hint-note-text-right {
-	left: auto;
 	right: 0;
-	transform: none;
 }
 
 .hint-note:hover .hint-note-text,

@@ -11,12 +11,13 @@ import type { ReactElement } from 'react';
  * The note is one string and carries no markup, so that it reads the same way to somebody hearing it as to somebody seeing it.
  *
  * **The note always opens downwards**, because the one place it is put inside something that scrolls is a table header, and a
- * table scrolls sideways. Where the mark is near the right edge of what encloses it — the last column of a table — the note is
- * hung from its right edge instead of centred on it, which is what keeps it inside.
+ * table scrolls sideways. **The screen it is drawn on scrolls too and therefore clips it**, so a note near either edge of what
+ * encloses it is hung from that edge instead of centred on the mark — a centred note beside the first words of a line would be
+ * cut off at the sidebar, and one in the last column of a table at the far side.
  */
 
-// Which edge of the mark the note is hung from. A note near the right edge of what encloses it is hung from that edge.
-export type HintNoteAlignment = 'centre' | 'right';
+// Which edge of the mark the note is hung from. A note near an edge of what encloses it is hung from that edge.
+export type HintNoteAlignment = 'left' | 'centre' | 'right';
 
 export interface HintNoteProps {
 
@@ -37,9 +38,7 @@ export const HintNote = ({ children, align = 'centre' }: HintNoteProps): ReactEl
 	return (
 		<span className='hint-note'>
 			<button type='button' className='hint-note-mark' aria-label={children}>ⓘ</button>
-			<span className={align === 'right' ? 'hint-note-text hint-note-text-right' : 'hint-note-text'} aria-hidden='true'>
-				{children}
-			</span>
+			<span className={`hint-note-text hint-note-text-${align}`} aria-hidden='true'>{children}</span>
 		</span>
 	);
 };

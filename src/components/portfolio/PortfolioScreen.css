@@ -132,12 +132,16 @@
 	flex-wrap: wrap;
 }
 
+/* Eleven types down one column leave the card half empty and the pie stranded beside a stripe, so the rows run in two, reading
+   across and then down. Each row is a subgrid of four of the eight tracks, which is what lines the amounts of both columns up
+   with each other; the wide gap between the two groups is the list's own, and each row overrides it back to a narrow one
+   inside itself. */
 .portfolio-screen-slices {
 	display: grid;
-	grid-template-columns: auto minmax(0, 1fr) auto auto;
-	gap: 6px 12px;
+	grid-template-columns: repeat(2, auto minmax(0, 1fr) auto auto);
+	gap: 6px 32px;
 	flex: 1 1 320px;
-	align-items: center;
+	align-content: center;
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -146,9 +150,25 @@
 
 .portfolio-screen-slices li {
 	display: grid;
-	grid-column: 1 / -1;
+	grid-column: span 4;
 	grid-template-columns: subgrid;
+	column-gap: 12px;
 	align-items: center;
+}
+
+/* The row the pointer has found, whether it got there over the row or over the slice. The tint is spread by a shadow rather
+   than by padding, a subgrid's tracks being the list's own and a padded row's no longer lining up with them. */
+.portfolio-screen-slice-pointed {
+	border-radius: 3px;
+	background-color: var(--colors-interactive-hover-background);
+	box-shadow: 0 0 0 4px var(--colors-interactive-hover-background);
+}
+
+/* One column where there is no room for two, which is the same width the two cards above the list stop sharing a row at */
+@media (width <= 1100px) {
+	.portfolio-screen-slices {
+		grid-template-columns: auto minmax(0, 1fr) auto auto;
+	}
 }
 
 /* The colour that keys a row to its slice. A row given no slice is given no mark, and keeps the space so the columns line up.  */

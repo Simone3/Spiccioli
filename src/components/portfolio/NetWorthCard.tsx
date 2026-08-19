@@ -60,7 +60,7 @@ export const NetWorthCard = ({ figures }: NetWorthCardProps): ReactElement => {
 						<div key={line.key} className='portfolio-screen-figure'>
 							<dt>
 								{t(`portfolio.lines.${line.key}`)}
-								<HintNote>{t(`portfolio.notes.${line.key}`)}</HintNote>
+								<HintNote align='left'>{t(`portfolio.notes.${line.key}`)}</HintNote>
 							</dt>
 							<dd className={line.signed ? tone : undefined}>{formatter.amount(amount, line.signed)}</dd>
 						</div>

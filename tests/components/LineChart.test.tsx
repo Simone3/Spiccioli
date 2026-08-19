@@ -23,7 +23,7 @@ const POINTS: readonly LineChartPoint[] = [
 
 beforeAll(stubChartLayout);
 
-const renderChart = async(): Promise<void> => {
+const renderChart = async(showSeriesKey?: boolean): Promise<void> => {
 	stubLedgerBridge();
 	renderWithProviders(
 		<LineChart
@@ -32,7 +32,8 @@ const renderChart = async(): Promise<void> => {
 			label='Totals per year'
 			formatValue={(value) => {
 				return `€ ${value / 100}`;
-			}}/>
+			}}
+			showSeriesKey={showSeriesKey}/>
 	);
 	await screen.findByRole('img', { name: 'Totals per year' });
 };
@@ -72,5 +73,13 @@ describe('the one chart', () => {
 
 		expect(screen.getByText('gross')).toBeInTheDocument();
 		expect(screen.getByText('contract × months')).toBeInTheDocument();
+	});
+
+	// A chart whose series are one line in two states names them on hover instead, where they mean something
+	test('draws no key at all where the caller says the series are not named under it', async() => {
+		await renderChart(false);
+
+		expect(screen.queryByText('gross')).not.toBeInTheDocument();
+		expect(screen.queryByText('contract × months')).not.toBeInTheDocument();
 	});
 });

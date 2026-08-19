@@ -79,11 +79,11 @@ describe('the Portfolio screen', () => {
 		expect(within(table).getByText('€ 14.806,51')).toBeInTheDocument();
 	});
 
-	test('carries a note on each of the four lines, and the two that estimate nothing say so', async() => {
+	test('carries a note on each of the four lines, and the two that estimate say so first', async() => {
 		await renderOpenLedger(portfolioDocument());
 
 		await screen.findAllByText('€ 14.806,51');
-		expect(screen.getByRole('button', { name: /^Nothing is estimated here\. Every cash account/ })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /^Every cash account that is not a pension fund/ })).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /^An estimate\. What selling every holding today/ })).toBeInTheDocument();
 	});
 
@@ -104,13 +104,35 @@ describe('the Portfolio screen', () => {
 		expect(within(slices).queryByText('Brokerage')).not.toBeInTheDocument();
 	});
 
+	test('reads the type under the pointer in the middle of the ring, and lights up its row', async() => {
+		await renderOpenLedger(portfolioDocument());
+
+		await screen.findAllByText('€ 14.806,51');
+
+		const slices = screen.getByRole('list', { name: 'Breakdown by type' });
+		const row = within(slices).getByText('Stock ETF').closest('li') as HTMLElement;
+
+		// The share is in the list and nowhere else until a row is pointed at, and then the ring reads it too
+		expect(screen.getAllByText('77,4%')).toHaveLength(1);
+
+		await userEvent.hover(row);
+		expect(screen.getAllByText('77,4%')).toHaveLength(2);
+		expect(row).toHaveClass('portfolio-screen-slice-pointed');
+
+		await userEvent.unhover(row);
+		expect(screen.getAllByText('77,4%')).toHaveLength(1);
+		expect(row).not.toHaveClass('portfolio-screen-slice-pointed');
+	});
+
 	test('draws the net worth line and names what every point was taken net of', async() => {
 		await renderOpenLedger(portfolioDocument());
 
 		await screen.findAllByText('€ 14.806,51');
 		expect(screen.getByRole('img', { name: 'Net worth over time' })).toBeInTheDocument();
-		expect(screen.getByText('holdings valued at the latest price known on that date')).toBeInTheDocument();
 		expect(screen.getByText('Net of capital-gains tax, sell fees and pension exit tax at today’s rates')).toBeInTheDocument();
+
+		// The two states the line is drawn in are named by pointing at a month and never in a key under the chart
+		expect(screen.queryByText('Holdings, if any, at their latest known price')).not.toBeInTheDocument();
 	});
 
 	test('says the line needs history on a file whose accounts have had nothing recorded on them', async() => {

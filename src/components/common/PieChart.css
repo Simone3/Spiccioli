@@ -25,9 +25,22 @@
 	font-variant-numeric: tabular-nums;
 }
 
+/* What the figure counts, or what it is of: a slice's name is longer than a count's word, so it wraps inside the ring rather
+   than running out over it */
 .pie-chart-centre small {
+	max-width: 88px;
 	font-size: 10px;
 	letter-spacing: 0.12em;
+	line-height: 1.4;
+	text-align: center;
 	text-transform: uppercase;
 	color: var(--colors-text-secondary);
+}
+
+/* A sector is click-focusable because the library makes it so, and a focused one is boxed by the browser around its bounding
+   rectangle rather than around its shape. This overrides the one focus ring of "src/index.css" rather than drawing its own:
+   the ring belongs to controls, and nothing in the ring is one — it is a picture, reached by no keyboard and pressed for
+   nothing. What pointing at a slice does say is said by the caller, in words. */
+.pie-chart :focus {
+	outline: none;
 }

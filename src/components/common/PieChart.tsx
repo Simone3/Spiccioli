@@ -11,6 +11,11 @@ import { Pie, PieChart as RechartsPieChart, ResponsiveContainer } from 'recharts
  *
  * **Only slices are passed in.** A row worth nothing or less is not a slice of anything and is the caller's to draw beside the
  * chart, which is where its amount belongs; a caller with no slice at all draws its own line instead of an empty ring.
+ *
+ * **Pointing at a slice says which one it is, and the chart does not decide what that means.** It reports the slice under the
+ * pointer and nothing else: what the middle of the ring then reads, and what the list beside it then does, are the caller's,
+ * which is what keeps the ring a picture of the figures rather than a control over them. A caller that wants none of it passes
+ * no handler and gets a ring that only ever reads its own count.
  */
 
 // How many colours the palette holds, which is the ceiling the breakdown by type has anyway
@@ -40,6 +45,9 @@ export interface PieChartProps {
 
 	// What the chart is called, for whoever is not looking at the heading above it
 	label: string;
+
+	// Told the key of the slice under the pointer, and "undefined" when the pointer has left the ring
+	onPointAt?: (key: string | undefined) => void;
 }
 
 const RING_INNER_RADIUS = '62%';
@@ -63,15 +71,22 @@ export const pieSliceColour = (rank: number): string => {
  * @param props.centreFigure What is written in the middle.
  * @param props.centreLabel What that figure counts.
  * @param props.label What the chart is called.
+ * @param props.onPointAt Told which slice the pointer is over, where the caller keys anything to it.
  * @returns The ring and what is written inside it.
  */
-export const PieChart = ({ slices, centreFigure, centreLabel, label }: PieChartProps): ReactElement => {
+export const PieChart = ({ slices, centreFigure, centreLabel, label, onPointAt }: PieChartProps): ReactElement => {
 	const data: PieChartDatum[] = slices.map((slice, rank) => {
 		return { ...slice, fill: pieSliceColour(rank) };
 	});
 
 	return (
-		<div className='pie-chart' role='img' aria-label={label}>
+		<div
+			className='pie-chart'
+			role='img'
+			aria-label={label}
+			onMouseLeave={() => {
+				onPointAt?.(undefined);
+			}}>
 			<ResponsiveContainer width='100%' height='100%'>
 				<RechartsPieChart>
 					<Pie
@@ -84,7 +99,10 @@ export const PieChart = ({ slices, centreFigure, centreLabel, label }: PieChartP
 						strokeWidth={1}
 						startAngle={90}
 						endAngle={-270}
-						isAnimationActive={false}/>
+						isAnimationActive={false}
+						onMouseEnter={(_: unknown, rank: number) => {
+							onPointAt?.(data[rank]?.key);
+						}}/>
 				</RechartsPieChart>
 			</ResponsiveContainer>
 			<div className='pie-chart-centre' aria-hidden='true'>

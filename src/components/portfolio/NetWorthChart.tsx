@@ -6,18 +6,21 @@ import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
 import type { NetWorthPoint } from 'src/logic/portfolio/NetWorthSeries';
 
 /**
- * Net worth over time, and the legend that carries the two things the line does not say for itself.
+ * Net worth over time, and the one note that carries what the line does not say for itself.
  *
  * **It is two series over one array rather than a per-point dash**: *from prices* and *from cost*, each `null` where the other
- * holds. That is what the specification's legend requires — a stretch drawn from cost has to be nameable — and the cost series
- * carries the first point after the stretch it ends, so the two lines meet rather than leaving a gap.
+ * holds. That is what makes a cost-based stretch nameable — the tooltip names whichever series reaches the point under the
+ * pointer — and the cost series carries the first point after the stretch it ends, so the two lines meet rather than leaving a
+ * gap.
  *
- * **The cost series is named only when there is one.** A file every month of which had a price for every holding draws one solid
- * line, and a key naming a line that is not on the chart would be noise. **Today's point is never drawn from cost**, a price
- * never being dated ahead, so the price series is never the missing one.
+ * **The series are not named in a key under the chart**, because they are one line in two states rather than two measurements:
+ * a key would name two lines where the reader sees one, and it would name them everywhere rather than over the months they
+ * apply to. **The cost series still exists only when there is one**, a file every month of which had a price for every holding
+ * drawing one solid line. **Today's point is never drawn from cost**, a price never being dated ahead, so the price series is
+ * never the missing one.
  *
- * **The legend also states that the rates and the fee taken out at every point are today's**, those being the only ones the file
- * records. The final point needs no note at all: it is the figure printed at the top of the screen.
+ * **The note under the chart states that the rates and the fee taken out at every point are today's**, those being the only
+ * ones the file records. The final point needs no note at all: it is the figure printed at the top of the screen.
  *
  * **A file with accounts but nothing recorded on them says it needs history instead of drawing a flat line** ([§14]). The pie
  * beside it is not in that state and never says it: opening balances divide by type perfectly well, and [§3.1] says what a
@@ -42,7 +45,7 @@ const FROM_COST = 'fromCost';
  * @param props The chart's props.
  * @param props.points The points the line is drawn through.
  * @param props.hasHistory Whether anything has been recorded for the line to have a shape.
- * @returns The chart and its key, or what it is waiting for.
+ * @returns The chart and its note, or what it is waiting for.
  */
 export const NetWorthChart = ({ points, hasHistory }: NetWorthChartProps): ReactElement => {
 	const { t } = useTranslator();
@@ -83,7 +86,8 @@ export const NetWorthChart = ({ points, hasHistory }: NetWorthChartProps): React
 						points={chartPoints}
 						series={series}
 						label={t('portfolio.netWorthChart')}
-						formatValue={formatter.amount}/>
+						formatValue={formatter.amount}
+						showSeriesKey={false}/>
 					<p className='portfolio-screen-note'>{t('portfolio.chart.rates')}</p>
 				</> :
 				<p className='portfolio-screen-note'>{t('portfolio.chart.needsHistory')}</p>}
