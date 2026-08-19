@@ -1,0 +1,66 @@
+docs/functional/specs/05-transactions.md
+  s_66feac5cd12638::t_4de5e62c881a86 22-23,25-28,54,135,139
+docs/functional/specs/06-categories.md
+  s_66feac5cd12638::t_73721c42975414 29
+docs/functional/specs/07-investments.md
+  s_66feac5cd12638::t_dd498af1c68a9a 35
+docs/functional/specs/09-checks.md
+  s_66feac5cd12638::t_da786194a28874 33
+docs/functional/specs/11-calculations.md
+  s_66feac5cd12638::t_b3b2cda45fb971 5,158
+docs/functional/why/05-transactions.md
+  s_66feac5cd12638::t_295ddd752dd477 11,15
+docs/technical/06-styling.md
+  s_66feac5cd12638::t_3ac6329ab363da 25-26,87-88
+src/components/categories/CategoryReportTable.tsx
+  s_66feac5cd12638::t_0498248515616c 88,93,110,116,135,140
+src/components/categories/RulesTable.tsx
+  s_66feac5cd12638::t_b8f0da180dfb1f 118,124,239,242
+src/components/common/DataTable.css
+  s_66feac5cd12638::t_26658372478091 61-62
+src/components/common/DataTable.tsx
+  s_66feac5cd12638::t_8f3df1625ff60e 7-10,19,41
+src/components/common/DateField.css
+  s_66feac5cd12638::t_775b2afbc49517 5-8,45
+src/components/common/FilterBar.css
+  s_66feac5cd12638::t_05009468806516 16-24
+src/components/common/SelectField.css
+  s_66feac5cd12638::t_93b1440d08693b 10-12,21-27
+src/components/transactions/TransactionsPager.tsx
+  s_66feac5cd12638::t_39241092659318 1,9-12,15-17,36-55,61-70,77-99,104,110-118
+src/components/transactions/TransactionsScreen.css
+  s_66feac5cd12638::t_545d1a19994d55 47,54-56,61-76
+src/components/transactions/TransactionsScreen.tsx
+  s_66feac5cd12638::t_a8bd8370ef742a 25,29,40-42,89,96-97,134,200
+src/i18n/lang/en.ts
+  s_66feac5cd12638::t_4871cef33f349d 407-408,411-421,541-542
+src/index.css
+  s_66feac5cd12638::t_e5c490cf147b44 108-113
+src/logic/transactions/Transactions.ts
+  s_66feac5cd12638::t_d1e6bc3ce3a6eb 10-14,61-64,96,98,114-123,211,219
+tests/components/TransactionsScreen.test.tsx
+  s_66feac5cd12638::t_8adf1e2dd3cc53 4,52,57-58,137,153-220
+tests/logic/Transactions.test.ts
+  s_66feac5cd12638::t_5c1a4c35e00c0c 9,51-66,178-179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "ffbde45dab2bd1421ecd64aba81f3352b6637462",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_66feac5cd12638": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9a9b819f-5d13-47f4-b4d4-0be22634b3b4",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
