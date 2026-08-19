@@ -74,6 +74,60 @@ export const narrowFromWorkingScale = (value: number, scale: number): number => 
 };
 
 /**
+ * Narrows a set of working-scale parts to a stored scale so that they still add up to their own narrowed total.
+ *
+ * **A decomposition rounds twice and the two roundings do not agree.** Where a total is displayed above the parts it divides
+ * into — net worth and its four lines being the case this exists for — the total is exact at the working scale and so are the
+ * parts, but each figure is narrowed on its own: four parts each half a cent short of the cent they print produce a column that
+ * reads two cents under the total nobody computed differently. **The parts are what is adjusted and never the total**, the total
+ * being the figure a screen exists to state and the one another screen is checked against.
+ *
+ * The part that gives up the most in its own rounding is the part that takes the cent back, which is the largest-remainder rule:
+ * every part lands within one minor unit of its own value, and the part furthest from the one it printed is corrected first. A
+ * residual is at most half the number of parts and so is always spent by the end of one pass.
+ * @param parts Figures at the working scale.
+ * @param scale Decimal places to land on.
+ * @returns The parts in that scale's minor units, adding to the narrowed sum of the parts.
+ */
+export const narrowPartsFromWorkingScale = (parts: readonly number[], scale: number): number[] => {
+	const factor = getScaleFactor(MONEY_SCALES.working - scale);
+	const sum = parts.reduce((running, part) => {
+		return running + part;
+	}, 0);
+
+	const narrowed = parts.map((part) => {
+		return narrowFromWorkingScale(part, scale);
+	});
+
+	let residual = narrowFromWorkingScale(sum, scale) - narrowed.reduce((running, part) => {
+		return running + part;
+	}, 0);
+
+	if(residual === 0) {
+		return narrowed;
+	}
+
+	// One minor unit, given to or taken from the parts that were rounded furthest in the opposite direction
+	const step = residual > 0 ? 1 : -1;
+	const byRoundingError = narrowed.map((part, index) => {
+		return { index, error: parts[index] / factor - part };
+	}).sort((left, right) => {
+		return step * (right.error - left.error);
+	});
+
+	for(const { index } of byRoundingError) {
+		if(residual === 0) {
+			break;
+		}
+
+		narrowed[index] += step;
+		residual -= step;
+	}
+
+	return narrowed;
+};
+
+/**
  * Divides one working-scale figure by another, at the working scale.
  *
  * The whole part and the remainder are taken separately rather than scaling the numerator up first: a working-scale figure is

@@ -79,6 +79,36 @@ describe('the Portfolio screen', () => {
 		expect(within(table).getByText('€ 14.806,51')).toBeInTheDocument();
 	});
 
+	test('prints four lines that add to the headline where the cent they round to is not the one they each round to', async() => {
+		// Three units at 10,00 with a fee of a cent, one of them sold: what is left cost 20,006667 and is priced at 24,684, so
+		// the cost line rounds up, the gain line rounds down, and the two of them printed on their own read a cent over the total
+		await renderOpenLedger(portfolioDocument({
+			institutions: [ makeInstitution({ id: 'fineco', name: 'Fineco', defaultSellFee: 0 }) ],
+			securities: [ makeSecurity({ id: 'swda', ticker: 'SWDA', type: 'stock-etf', taxRate: 0 }) ],
+			accounts: [
+				makeAccount({ id: 'current', name: 'Conto Corrente', institutionId: 'fineco', openingBalance: 300000, openingDate: '2026-01-10' }),
+				makeAccount({ id: 'dossier', name: 'Dossier Titoli', institutionId: 'fineco', type: 'brokerage', openingBalance: 0, openingDate: '2026-01-10' })
+			],
+			prices: [ makePrice({ securityId: 'swda', date: '2026-08-01', value: 12.342 * UNITS }) ],
+			trades: [
+				makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 3 * QUANTITY_UNITS, unitPrice: 10 * UNITS, fees: 1 }),
+				makeTrade({ id: 'sold', kind: 'sale', securityId: 'swda', accountId: 'dossier', date: '2026-02-20', quantity: QUANTITY_UNITS, unitPrice: 11 * UNITS, fees: 0, insertionSeq: 2 })
+			],
+			transactions: []
+		}));
+
+		// The headline is the figure the working scale produces, and the table under it still totals to the same one
+		expect(await screen.findAllByText('€ 3.024,68')).toHaveLength(2);
+
+		// The cent goes to the cost line, which is the one that gave up the most of it in its own rounding
+		const card = screen.getByText('Net worth').closest('section') as HTMLElement;
+
+		expect(within(card).getByText('€ 3.000,00')).toBeInTheDocument();
+		expect(within(card).getByText('€ 20,00')).toBeInTheDocument();
+		expect(within(card).getByText('+ € 4,68')).toBeInTheDocument();
+		expect(within(card).getByText('€ 0,00')).toBeInTheDocument();
+	});
+
 	test('carries a note on each of the four lines, and the two that estimate say so first', async() => {
 		await renderOpenLedger(portfolioDocument());
 

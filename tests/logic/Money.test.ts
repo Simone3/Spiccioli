@@ -4,6 +4,7 @@ import {
 	MONEY_SCALES,
 	multiplyQuantityByRateScale,
 	narrowFromWorkingScale,
+	narrowPartsFromWorkingScale,
 	parseDecimalToMinorUnits,
 	roundHalfAwayFromZero,
 	widenToWorkingScale
@@ -62,6 +63,62 @@ describe('the working scale', () => {
 	test('round-trips a stored amount that is never divided', () => {
 		[ 0, 1, -1, 999999999, -250050 ].forEach((amount) => {
 			expect(narrowFromWorkingScale(widenToWorkingScale(amount, MONEY_SCALES.amount), MONEY_SCALES.amount)).toBe(amount);
+		});
+	});
+});
+
+describe('narrowPartsFromWorkingScale', () => {
+	const cent = 1000000;
+
+	test('leaves parts that already add to their total alone', () => {
+		const parts = [ 300000 * cent, 2000 * cent, -450 * cent ];
+
+		expect(narrowPartsFromWorkingScale(parts, MONEY_SCALES.amount)).toEqual([ 300000, 2000, -450 ]);
+	});
+
+	test('gives the cent back to the part that gave up the most of it', () => {
+		// The four lines of a net worth of 3.024,68: the cost line is 20,006667 and the gain line is 4,677333, and each of them
+		// rounded on its own prints a column that reads a cent over the headline
+		const parts = [ 300000 * cent, 2000.666666 * cent, 467.733334 * cent, 0 ];
+		const narrowed = narrowPartsFromWorkingScale(parts, MONEY_SCALES.amount);
+
+		expect(narrowed).toEqual([ 300000, 2000, 468, 0 ]);
+		expect(narrowed.reduce((running, part) => {
+			return running + part;
+		}, 0)).toBe(302468);
+	});
+
+	test('takes the cent from the part that was rounded furthest the other way', () => {
+		const parts = [ 100.3 * cent, 100.3 * cent, 100.2 * cent ];
+		const narrowed = narrowPartsFromWorkingScale(parts, MONEY_SCALES.amount);
+
+		expect(narrowed).toEqual([ 101, 100, 100 ]);
+	});
+
+	test('makes the parts add to the total on every sign', () => {
+		const cases = [
+			[ -100.5 * cent, -200.5 * cent, 0.5 * cent ],
+			[ 0.5 * cent, -0.5 * cent, 0.5 * cent, -0.5 * cent ],
+			[ 1.4 * cent, 1.4 * cent, 1.4 * cent, 1.4 * cent, 1.4 * cent ],
+			[ -1.6 * cent, -1.6 * cent, -1.6 * cent ]
+		];
+
+		cases.forEach((parts) => {
+			const total = narrowFromWorkingScale(parts.reduce((running, part) => {
+				return running + part;
+			}, 0), MONEY_SCALES.amount);
+
+			expect(narrowPartsFromWorkingScale(parts, MONEY_SCALES.amount).reduce((running, part) => {
+				return running + part;
+			}, 0)).toBe(total);
+		});
+	});
+
+	test('never moves a part by more than one minor unit', () => {
+		const parts = [ 12.4 * cent, 12.4 * cent, 12.4 * cent, 12.4 * cent ];
+
+		narrowPartsFromWorkingScale(parts, MONEY_SCALES.amount).forEach((part, index) => {
+			expect(Math.abs(part - narrowFromWorkingScale(parts[index], MONEY_SCALES.amount))).toBeLessThanOrEqual(1);
 		});
 	});
 });
