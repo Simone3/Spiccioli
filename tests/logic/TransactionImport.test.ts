@@ -175,6 +175,17 @@ describe('reading the amount column', () => {
 		expect(readAmountOf('-54,80 USD')).toBeUndefined();
 	});
 
+	test('takes the sign on either side of a leading marker, but not on both', () => {
+		expect(readAmountOf('-€ 54,80')).toBe(-5480);
+		expect(readAmountOf('-€54,80')).toBe(-5480);
+		expect(readAmountOf('- €54,80')).toBe(-5480);
+		expect(readAmountOf('- € 54,80')).toBe(-5480);
+		expect(readAmountOf('-EUR 54,80')).toBe(-5480);
+		expect(readAmountOf('+€ 54,80')).toBe(5480);
+		expect(readAmountOf('-€ -54,80')).toBeUndefined();
+		expect(readAmountOf('-€ +54,80')).toBeUndefined();
+	});
+
 	test('reads a zero amount, which is legal on both paths', () => {
 		expect(readAmountOf('0,00')).toBe(0);
 	});

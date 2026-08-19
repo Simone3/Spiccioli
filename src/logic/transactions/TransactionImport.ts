@@ -187,6 +187,19 @@ const readDate = (text: string, dateFormat: DateFormat): IsoDate | undefined => 
 	return `${yearText}-${padded(monthText)}-${padded(dayText)}`;
 };
 
+/**
+ * Takes a leading sign off, if one is there, saying whether it found one so that a second is never read as another.
+ * @param text What is left of the column at this point.
+ * @returns What the sign said, whether there was one, and the column without it.
+ */
+const stripLeadingSign = (text: string): { isNegative: boolean; signed: boolean; rest: string } => {
+	if(text.startsWith('-') || text.startsWith('+')) {
+		return { isNegative: text.startsWith('-'), signed: true, rest: text.slice(1).trim() };
+	}
+
+	return { isNegative: false, signed: false, rest: text };
+};
+
 const stripCurrencyMarker = (text: string): string => {
 	for(const marker of CURRENCY_MARKERS) {
 		if(text.startsWith(marker)) {
@@ -242,16 +255,22 @@ const removeGrouping = (text: string, thousandsSeparator: ThousandsSeparator): s
  *
  * **The decimal character may appear at most once**, whichever character it is: a field is never asked to work out which of two
  * identical characters was meant as which. Zero, one and two decimals are all read and a third is refused, exactly as the amount
- * field refuses one. The sign is a leading "-" for money out and a leading "+" or nothing at all for money in.
+ * field refuses one. The sign is a leading "-" for money out and a leading "+" or nothing at all for money in, and **it may sit
+ * on either side of a leading currency marker** — but only on one of the two, a field signed on both being unreadable.
  * @param text The column, trimmed.
  * @param format What the controls say the characters mean.
  * @returns The amount in cents, or undefined when the column is not one these separators admit.
  */
 const readAmount = (text: string, format: ImportFormat): Cents | undefined => {
-	const withoutMarker = stripCurrencyMarker(text);
-	const isNegative = withoutMarker.startsWith('-');
-	const unsigned = isNegative || withoutMarker.startsWith('+') ? withoutMarker.slice(1) : withoutMarker;
-	const parts = unsigned.split(SEPARATOR_CHARACTERS[format.decimalSeparator]);
+	const outside = stripLeadingSign(text);
+	const inside = stripLeadingSign(stripCurrencyMarker(outside.rest));
+
+	// One sign, on one side of the marker or the other. A field signed on both sides is not one anybody's export wrote.
+	if(outside.signed && inside.signed) {
+		return undefined;
+	}
+
+	const parts = inside.rest.split(SEPARATOR_CHARACTERS[format.decimalSeparator]);
 
 	if(parts.length > 2) {
 		return undefined;
@@ -274,7 +293,7 @@ const readAmount = (text: string, format: ImportFormat): Cents | undefined => {
 		return undefined;
 	}
 
-	return isNegative ? -cents : cents;
+	return outside.isNegative || inside.isNegative ? -cents : cents;
 };
 
 const readRow = (fields: ImportRowFields, columns: number, format: ImportFormat, today: IsoDate): ImportRow => {
