@@ -1,5 +1,6 @@
-import { useState, type ReactElement } from 'react';
+import { useState, type CSSProperties, type ReactElement } from 'react';
 import { PieChart, pieSliceColour, type PieChartSlice } from 'src/components/common/PieChart';
+import { PORTFOLIO_CONFIG } from 'src/config/AppConfig';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
@@ -9,9 +10,13 @@ import type { TenThousandths } from 'src/types/LedgerTypes';
 /**
  * What shape the portfolio is in: one slice per type present, and the amounts and shares beside it.
  *
- * **The list reads down in the order the slices are drawn clockwise**, both ordered by share and largest first. **A type worth
- * nothing or less keeps its place in the list, shows its amount, reads 0,0% and is given no slice at all** — an overdrawn current
- * account does it, and so does a holding worth less than the fee it would cost to sell.
+ * **The list reads down in the order the slices are drawn clockwise**, both ordered by share and largest first. It runs in
+ * columns and each of them reads downwards, the way the ranking it is in does — which is why the card works out how many
+ * columns there are and how many rows fill one, those following from the number of types, and hands the two figures to the
+ * stylesheet: CSS can flow rows down a column but it cannot count the rows. **A portfolio of few types keeps the one column it
+ * had**, a column of two beside a column of one being no easier to read than three in a row. **A type worth nothing or less
+ * keeps its place in the list, shows its amount, reads 0,0% and is given no slice at all** — an overdrawn current account does
+ * it, and so does a holding worth less than the fee it would cost to sell.
  *
  * **Shares are computed against the total of the positive types** and not against net worth; the two differ by exactly the
  * negative amounts, which are on screen a line away. **If no type is positive at all the pie is replaced by a line saying so**,
@@ -55,6 +60,16 @@ export const TypeBreakdownCard = ({ breakdown }: TypeBreakdownCardProps): ReactE
 		return row.key === pointedKey && row.share !== undefined;
 	});
 
+	// Where the columns break, which is the one thing about the list's shape the stylesheet cannot work out for itself
+	const columns = breakdown.rows.length >= PORTFOLIO_CONFIG.typeListColumns * PORTFOLIO_CONFIG.minimumRowsPerTypeListColumn ?
+		PORTFOLIO_CONFIG.typeListColumns :
+		1;
+
+	const listLayout = {
+		'--portfolio-slice-columns': columns,
+		'--portfolio-slice-rows': Math.ceil(breakdown.rows.length / columns)
+	} as CSSProperties;
+
 	return (
 		<section className='portfolio-screen-card'>
 			<h2 className='portfolio-screen-card-title'>{t('portfolio.types.title')}</h2>
@@ -72,7 +87,7 @@ export const TypeBreakdownCard = ({ breakdown }: TypeBreakdownCardProps): ReactE
 						label={t('portfolio.types.chart')}
 						onPointAt={setPointedKey}/>}
 
-				<ul className='portfolio-screen-slices' aria-label={t('portfolio.types.title')}>
+				<ul className='portfolio-screen-slices' style={listLayout} aria-label={t('portfolio.types.title')}>
 					{breakdown.rows.map((row, rank) => {
 						return (
 							<li

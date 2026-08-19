@@ -76,6 +76,14 @@ export const TRANSACTIONS_CONFIG = {
 	rowsPerPage: 50
 } as const;
 
+// The list of types beside the pie on Portfolio, which runs in columns read downwards. Neither figure is fixed by the
+// functional analysis: the two is what the mockup draws, and the three is what keeps a portfolio of few types from being split
+// into a column of two and a column of one.
+export const PORTFOLIO_CONFIG = {
+	typeListColumns: 2,
+	minimumRowsPerTypeListColumn: 3
+} as const;
+
 // The fourteen checks: how often a change is allowed to start a run, and how many records one failing check names before it
 // states the whole count instead. Neither figure is fixed by the functional analysis; the five is what its examples show.
 export const CHECKS_CONFIG = {

@@ -132,13 +132,17 @@
 	flex-wrap: wrap;
 }
 
-/* Eleven types down one column leave the card half empty and the pie stranded beside a stripe, so the rows run in two, reading
-   across and then down. Each row is a subgrid of four of the eight tracks, which is what lines the amounts of both columns up
-   with each other; the wide gap between the two groups is the list's own, and each row overrides it back to a narrow one
-   inside itself. */
+/* Eleven types down one column leave the card half empty and the pie stranded beside a stripe, so the rows run in columns and
+   each column reads downwards, the way the ranking they are in does. How many columns there are and how many rows fill one
+   are the card's, because they follow from the number of types and CSS cannot count them; the flow is what turns those two
+   figures into columns read down rather than rows read across. Each row is a subgrid of four of a column's tracks, which is
+   what lines the amounts of every column up with each other; the wide gap between two columns is the list's own, and each row
+   overrides it back to a narrow one inside itself. */
 .portfolio-screen-slices {
 	display: grid;
-	grid-template-columns: repeat(2, auto minmax(0, 1fr) auto auto);
+	grid-auto-flow: column;
+	grid-template-columns: repeat(var(--portfolio-slice-columns), auto minmax(0, 1fr) auto auto);
+	grid-template-rows: repeat(var(--portfolio-slice-rows), auto);
 	gap: 6px 32px;
 	flex: 1 1 320px;
 	align-content: center;
@@ -164,10 +168,13 @@
 	box-shadow: 0 0 0 4px var(--colors-interactive-hover-background);
 }
 
-/* One column where there is no room for two, which is the same width the two cards above the list stop sharing a row at */
+/* One column where there is no room for more, which is the same width the two cards above the list stop sharing a row at. The
+   rows are the flow's again here: there is only one column to fill, so nothing has to be told where to break. */
 @media (width <= 1100px) {
 	.portfolio-screen-slices {
+		grid-auto-flow: row;
 		grid-template-columns: auto minmax(0, 1fr) auto auto;
+		grid-template-rows: none;
 	}
 }
 
