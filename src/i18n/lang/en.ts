@@ -270,12 +270,12 @@ export const EN_TRANSLATIONS = {
 
 		// A deletion refused because something points at the record says what does, where the record is, and never in a modal
 		deleteBlockedByTransactions: {
-			one: '{name} cannot be deleted: 1 transaction points at it. Closing it is what retiring an account looks like.',
-			other: '{name} cannot be deleted: {count} transactions point at it. Closing it is what retiring an account looks like.'
+			one: '{name} cannot be deleted: 1 transaction points at it. Set a closing date if you just want to retire it.',
+			other: '{name} cannot be deleted: {count} transactions point at it. Set a closing date if you just want to retire it.'
 		},
 		deleteBlockedByTrades: {
-			one: '{name} cannot be deleted: 1 trade points at it. Closing it is what retiring an account looks like.',
-			other: '{name} cannot be deleted: {count} trades point at it. Closing it is what retiring an account looks like.'
+			one: '{name} cannot be deleted: 1 trade points at it. Set a closing date if you just want to retire it.',
+			other: '{name} cannot be deleted: {count} trades point at it. Set a closing date if you just want to retire it.'
 		},
 		form: {
 			addTitle: 'Add account',
