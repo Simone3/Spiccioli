@@ -19,11 +19,11 @@
 .storage-notice-warning {
 	border-color: var(--colors-danger-border);
 	background-color: var(--colors-danger-background-muted);
+	color: var(--colors-danger-text);
 }
 
 .storage-notice p {
 	margin: 0;
-	max-width: 90ch;
 	font-size: 13px;
 	line-height: 1.6;
 }

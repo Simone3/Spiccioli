@@ -37,7 +37,7 @@ export const StorageNotices = (): ReactElement => {
 			)}
 
 			{externalModification && (
-				<div className='storage-notice' role='status'>
+				<div className='storage-notice storage-notice-warning' role='status'>
 					<p>
 						{externalModification.backup.written ?
 							t('session.externalModification', {
