@@ -1,0 +1,34 @@
+docs/technical/08-decisions-why.md
+  s_ec7ec0381a7f68::t_21b2488e750fb4 63-65
+docs/technical/08-decisions.md
+  s_ec7ec0381a7f68::t_6d3e9fee042605 45-47
+src/components/portfolio/NetWorthCard.tsx
+  s_ec7ec0381a7f68::t_b60b3d329132d6 5,16-20,47-51,57,61-62
+src/logic/money/Money.ts
+  s_ec7ec0381a7f68::t_6ec8fafe26ca63 76-129
+tests/components/PortfolioScreen.test.tsx
+  s_ec7ec0381a7f68::t_c7f7a31c499724 82-111
+tests/logic/Money.test.ts
+  s_ec7ec0381a7f68::t_98021c91aafb53 7,70-125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "671ff19fbf8fce03358331e9b44da3c64a761bf8",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_ec7ec0381a7f68": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef96f57a-438e-4803-9ac8-f82147925379",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
