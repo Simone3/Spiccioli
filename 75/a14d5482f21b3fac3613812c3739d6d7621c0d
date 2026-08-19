@@ -1,0 +1,26 @@
+src/components/shell/StorageNotices.css
+  s_d97260f0657491::t_294351701adf8c 22
+src/components/shell/StorageNotices.tsx
+  s_d97260f0657491::t_11ae4aee2e9c6d 40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "75a14d5482f21b3fac3613812c3739d6d7621c0d",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d97260f0657491": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "374d7d1e-4cf9-4b5b-9991-1cf3800f0198",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
