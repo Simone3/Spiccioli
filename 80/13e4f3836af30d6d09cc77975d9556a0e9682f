@@ -1,0 +1,24 @@
+src/components/portfolio/PortfolioScreen.css
+  s_9651f586d1e284::t_1b2780235f70d7 146,155-158,165,168-169,173-175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "8013e4f3836af30d6d09cc77975d9556a0e9682f",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_9651f586d1e284": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "85794b27-ff8f-48e2-ba28-ad77b69f551d",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
