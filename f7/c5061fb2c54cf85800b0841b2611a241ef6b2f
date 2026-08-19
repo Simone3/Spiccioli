@@ -1,0 +1,32 @@
+docs/functional/specs/03-portfolio.md
+  s_9651f586d1e284::t_28add9766efdb4 38
+src/components/common/PieChart.tsx
+  s_9651f586d1e284::t_e1cf61b8a44957 19-23,37-38,41,58-60,67-69,88,91,93-97
+tests/components/PieChart.test.tsx
+  s_9651f586d1e284::t_03727ef3bc20e9 42-74
+src/components/common/PieChart.css
+  s_9651f586d1e284::t_73c7d0d4326c75 40-45
+src/components/portfolio/TypeBreakdownCard.tsx
+  s_9651f586d1e284::t_6b58220c2f2947 26-30,90-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "f7c5061fb2c54cf85800b0841b2611a241ef6b2f",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_9651f586d1e284": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "85794b27-ff8f-48e2-ba28-ad77b69f551d",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
