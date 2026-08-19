@@ -6,7 +6,7 @@ import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { isAccountClosed } from 'src/logic/accounts/Accounts';
 import type { WorkingAmount } from 'src/logic/investments/Trades';
-import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
+import { MONEY_SCALES, narrowFromWorkingScale, narrowPartsFromWorkingScale } from 'src/logic/money/Money';
 import type { Account, Institution, LedgerId } from 'src/types/LedgerTypes';
 
 /**
@@ -22,6 +22,10 @@ import type { Account, Institution, LedgerId } from 'src/types/LedgerTypes';
  * **The Balance column is the one column on the screen whose figure means three different things depending on the row it is in**,
  * which is what its note says — and closed accounts are computed like any other, which is the reason the column totals to the
  * headline.
+ *
+ * **The column totals to it as printed and not only at the working scale.** A brokerage row is the one kind that carries a
+ * fraction of a cent, its holdings' net proceeds being products, so the balances are narrowed against the total rather than each
+ * on its own — which leaves every exact row alone, those having given up nothing in their own rounding.
  */
 
 export interface AccountBalancesTableProps {
@@ -54,6 +58,13 @@ export interface AccountBalancesTableProps {
 export const AccountBalancesTable = ({ accounts, institutions, balances, summary, total }: AccountBalancesTableProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
+
+	// The rows are narrowed together, so the column adds up to the footer under it rather than to a cent either side of it
+	const rowAmounts = new Map<LedgerId, number>(narrowPartsFromWorkingScale(accounts.map((account) => {
+		return balances.get(account.id) ?? 0;
+	}), MONEY_SCALES.amount).map((amount, index) => {
+		return [ accounts[index].id, amount ];
+	}));
 
 	const columns: readonly DataTableColumn<Account>[] = [
 		{
@@ -90,7 +101,7 @@ export const AccountBalancesTable = ({ accounts, institutions, balances, summary
 			),
 			numeric: true,
 			render: (account) => {
-				return formatter.amount(narrowFromWorkingScale(balances.get(account.id) ?? 0, MONEY_SCALES.amount));
+				return formatter.amount(rowAmounts.get(account.id) ?? 0);
 			}
 		}
 	];

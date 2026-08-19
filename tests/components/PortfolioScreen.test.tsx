@@ -107,6 +107,56 @@ describe('the Portfolio screen', () => {
 		expect(within(card).getByText('€ 20,00')).toBeInTheDocument();
 		expect(within(card).getByText('+ € 4,68')).toBeInTheDocument();
 		expect(within(card).getByText('€ 0,00')).toBeInTheDocument();
+
+		// The two lists of parts on the same screen are fitted to the same total, and the cent falls on the row that carries the
+		// fraction — the brokerage account in the table, the security type in the breakdown, and never a row that is exact
+		const table = screen.getByRole('table', { name: 'Balances by account' });
+
+		expect(within(table).getByText('€ 24,68')).toBeInTheDocument();
+
+		expect(within(screen.getByRole('list', { name: 'Breakdown by type' })).getByText('€ 24,68')).toBeInTheDocument();
+	});
+
+	test('prints a table and a breakdown that add to the headline where their own rows do not each round to it', async() => {
+		// Two brokerage accounts holding a unit of a type each, priced at 12,3430: every row is three tenths of a cent short of
+		// the cent it prints, and the two lists read a cent under the headline when each figure is rounded on its own
+		await renderOpenLedger(portfolioDocument({
+			institutions: [ makeInstitution({ id: 'fineco', name: 'Fineco', defaultSellFee: 0 }) ],
+			securities: [
+				makeSecurity({ id: 'swda', ticker: 'SWDA', type: 'stock-etf', taxRate: 0 }),
+				makeSecurity({ id: 'aggh', ticker: 'AGGH', type: 'bond-etf', taxRate: 0 })
+			],
+			accounts: [
+				makeAccount({ id: 'current', name: 'Conto Corrente', institutionId: 'fineco', openingBalance: 300000, openingDate: '2026-01-10' }),
+				makeAccount({ id: 'first', name: 'Primo Dossier', institutionId: 'fineco', type: 'brokerage', openingBalance: 0, openingDate: '2026-01-10' }),
+				makeAccount({ id: 'second', name: 'Secondo Dossier', institutionId: 'fineco', type: 'brokerage', openingBalance: 0, openingDate: '2026-01-10' })
+			],
+			prices: [
+				makePrice({ securityId: 'swda', date: '2026-08-01', value: 12.343 * UNITS }),
+				makePrice({ securityId: 'aggh', date: '2026-08-01', value: 12.343 * UNITS })
+			],
+			trades: [
+				makeTrade({ id: 'first-bought', securityId: 'swda', accountId: 'first', date: '2026-01-20', quantity: QUANTITY_UNITS, unitPrice: 10 * UNITS, fees: 0 }),
+				makeTrade({ id: 'second-bought', securityId: 'aggh', accountId: 'second', date: '2026-01-20', quantity: QUANTITY_UNITS, unitPrice: 10 * UNITS, fees: 0, insertionSeq: 2 })
+			],
+			transactions: []
+		}));
+
+		expect(await screen.findAllByText('€ 3.024,69')).toHaveLength(2);
+
+		// The cent falls on one of the two rows that carry the fraction, and never on the cash row, which gave up nothing
+		const table = screen.getByRole('table', { name: 'Balances by account' });
+
+		expect(within(table).getByText('€ 3.000,00')).toBeInTheDocument();
+		expect(within(table).getByText('€ 12,35')).toBeInTheDocument();
+		expect(within(table).getByText('€ 12,34')).toBeInTheDocument();
+
+		// The breakdown by type is the same total divided a different way, and it is fitted to it the same way
+		const slices = screen.getByRole('list', { name: 'Breakdown by type' });
+
+		expect(within(slices).getByText('€ 3.000,00')).toBeInTheDocument();
+		expect(within(slices).getByText('€ 12,35')).toBeInTheDocument();
+		expect(within(slices).getByText('€ 12,34')).toBeInTheDocument();
 	});
 
 	test('carries a note on each of the four lines, and the two that estimate say so first', async() => {

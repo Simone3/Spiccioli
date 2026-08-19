@@ -3,7 +3,7 @@ import { PieChart, pieSliceColour, type PieChartSlice } from 'src/components/com
 import { PORTFOLIO_CONFIG } from 'src/config/AppConfig';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
-import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
+import { MONEY_SCALES, narrowPartsFromWorkingScale } from 'src/logic/money/Money';
 import type { BreakdownRow, TypeBreakdown } from 'src/logic/portfolio/TypeBreakdown';
 import type { TenThousandths } from 'src/types/LedgerTypes';
 
@@ -21,6 +21,10 @@ import type { TenThousandths } from 'src/types/LedgerTypes';
  * **Shares are computed against the total of the positive types** and not against net worth; the two differ by exactly the
  * negative amounts, which are on screen a line away. **If no type is positive at all the pie is replaced by a line saying so**,
  * and the list still shows every amount.
+ *
+ * **The amounts add to the headline as printed and not only at the working scale.** A security row is the kind that carries a
+ * fraction of a cent, a holding's net proceeds being a product, so the amounts are narrowed against their own total rather than
+ * each on its own — which leaves every exact row alone, those having given up nothing in their own rounding.
  *
  * **Pointing at a slice names it, and pointing at a row finds its slice**: the middle of the ring reads that type's share
  * instead of the count, the row it belongs to lights up, and every slice but its own dims behind it. Eleven slices carry eleven
@@ -46,6 +50,11 @@ export const TypeBreakdownCard = ({ breakdown }: TypeBreakdownCardProps): ReactE
 
 	// Which row the pointer is on, whether it got there over the slice or over the row
 	const [ pointedKey, setPointedKey ] = useState<string | undefined>(undefined);
+
+	// The rows are narrowed together, so the list adds up to the headline the same way the breakdown by account does
+	const rowAmounts = narrowPartsFromWorkingScale(breakdown.rows.map((row) => {
+		return row.amount;
+	}), MONEY_SCALES.amount);
 
 	const labelOf = (row: BreakdownRow): string => {
 		return row.side === 'security' ? t(`securityTypes.${row.type}`) : t(`accounts.types.${row.type}`);
@@ -110,7 +119,7 @@ export const TypeBreakdownCard = ({ breakdown }: TypeBreakdownCardProps): ReactE
 									style={row.share === undefined ? undefined : { backgroundColor: pieSliceColour(rank) }}/>
 								<span className='portfolio-screen-slice-label'>{labelOf(row)}</span>
 								<span className='portfolio-screen-slice-amount'>
-									{formatter.amount(narrowFromWorkingScale(row.amount, MONEY_SCALES.amount))}
+									{formatter.amount(rowAmounts[rank])}
 								</span>
 								<span className='portfolio-screen-slice-share'>
 									{row.share === undefined ? t('portfolio.types.noShare') : formatter.percentage(row.share)}
