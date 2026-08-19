@@ -1,0 +1,72 @@
+src/config/AppConfig.ts
+  s_45fce1cea5321e::t_acf51c74072e0b 18-42
+src/i18n/lang/en.ts
+  s_45fce1cea5321e::t_b8fce9559abf96 31-32,34-37,45-59
+src/main/Main.ts
+  s_45fce1cea5321e::t_a79b88634b7c9d 3,5,15,19,23-24,30-37,95-115,119-121,123,129-132,181-194,202,210-216,272,277-281,304,306,326,341-367,387,392
+src/main/config/StartupConfigurationLog.ts
+  s_45fce1cea5321e::t_20be57b0689c02 30-33
+src/main/ipc/AppMenuIpc.ts
+  s_45fce1cea5321e::t_e7bc45dc14fc27 1-43
+src/main/menu/MenuCommands.ts
+  s_45fce1cea5321e::t_666eb271137c28 1-134
+src/main/preload/Preload.ts
+  s_45fce1cea5321e::t_ffb74d5b3f70c1 4,8,18-31,129
+src/types/AppMenuIpcChannels.ts
+  s_45fce1cea5321e::t_10f6638e435c3b 1-12
+src/vite-env.d.ts
+  s_45fce1cea5321e::t_4b9da783092e8c 4,11
+docs/technical/01-architecture.md
+  s_45fce1cea5321e::t_1b0687d19d175a 20,25,30,32,36-37,54-55,79-82
+docs/technical/02-repository-map.md
+  s_45fce1cea5321e::t_aba51710face53 33,37-38,68-69,117,123
+docs/technical/03-build-and-run.md
+  s_45fce1cea5321e::t_d8ad653ca4e512 58-59
+docs/technical/06-styling.md
+  s_45fce1cea5321e::t_56deac32c840a2 25-26
+src/components/SpiccioliApp.tsx
+  s_45fce1cea5321e::t_83ff1c9cf22ea3 4,17-20,28
+src/components/shell/MenuBar.css
+  s_45fce1cea5321e::t_672bd7b78de2de 1-125
+src/components/shell/MenuBar.tsx
+  s_45fce1cea5321e::t_3868bda24625c3 1-365
+src/components/shell/TitleBar.css
+  s_45fce1cea5321e::t_12a4cc060094f5 1-35
+src/components/shell/TitleBar.tsx
+  s_45fce1cea5321e::t_0c8d6cbec59afe 1-71
+src/logic/menu/DrawnMenu.ts
+  s_45fce1cea5321e::t_978e4387096038 1-70
+src/main/menu/AppMenu.ts
+  s_45fce1cea5321e::t_906a851b36a19f 4,17-32,35-37,42-45,78-94,101,111,174-177,179-180,182,186-321
+src/types/AppMenuTypes.ts
+  s_45fce1cea5321e::t_f41fe4f2c805e4 1-93
+tests/components/TitleBar.test.tsx
+  s_45fce1cea5321e::t_75dbef784f83f6 1-138
+tests/main/AppMenu.test.ts
+  s_45fce1cea5321e::t_c5c4647819abea 1-205
+tests/main/AppMenuIpc.test.ts
+  s_45fce1cea5321e::t_b7aa3c15621e3f 1-214
+tests/testUtils/AppTestFactory.tsx
+  s_45fce1cea5321e::t_62118854c60fa8 15,63-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "a177d2c175794dc855140c8e7402addaa9487678",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_45fce1cea5321e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1c4dce2-50a1-49d0-b511-5090cecca97d",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
