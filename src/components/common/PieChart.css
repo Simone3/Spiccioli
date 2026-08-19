@@ -37,6 +37,12 @@
 	color: var(--colors-text-secondary);
 }
 
+/* A slice fades as it is dimmed and as it comes back, rather than switching between the two. It is written against the shape
+   itself and not against the library's class name, there being nothing else drawn inside the ring. */
+.pie-chart path {
+	transition: fill-opacity 120ms ease;
+}
+
 /* A sector is click-focusable because the library makes it so, and a focused one is boxed by the browser around its bounding
    rectangle rather than around its shape. This overrides the one focus ring of "src/index.css" rather than drawing its own:
    the ring belongs to controls, and nothing in the ring is one — it is a picture, reached by no keyboard and pressed for

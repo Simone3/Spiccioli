@@ -23,9 +23,11 @@ import type { TenThousandths } from 'src/types/LedgerTypes';
  * and the list still shows every amount.
  *
  * **Pointing at a slice names it, and pointing at a row finds its slice**: the middle of the ring reads that type's share
- * instead of the count, and the row it belongs to lights up. Eleven slices carry eleven colours, and a thin one is quicker to
- * point at than to match by eye. **It states what is already on the screen and never hides any of it** — every amount and every
- * share is in the list whether anything is being pointed at or not, so nothing here is behind a pointer.
+ * instead of the count, the row it belongs to lights up, and every slice but its own dims behind it. Eleven slices carry eleven
+ * colours, and a thin one is quicker to point at than to match by eye — **which is why the dimming matters most from the list
+ * end**, a row naming a type the reader then has to find in the ring. **It states what is already on the screen and never hides
+ * any of it** — every amount and every share is in the list whether anything is being pointed at or not, so nothing here is
+ * behind a pointer.
  */
 
 export interface TypeBreakdownCardProps {
@@ -85,7 +87,8 @@ export const TypeBreakdownCard = ({ breakdown }: TypeBreakdownCardProps): ReactE
 							t('portfolio.types.sliceCount', { count: breakdown.sliceCount }) :
 							labelOf(pointed)}
 						label={t('portfolio.types.chart')}
-						onPointAt={setPointedKey}/>}
+						onPointAt={setPointedKey}
+						pointedKey={pointed?.key}/>}
 
 				<ul className='portfolio-screen-slices' style={listLayout} aria-label={t('portfolio.types.title')}>
 					{breakdown.rows.map((row, rank) => {

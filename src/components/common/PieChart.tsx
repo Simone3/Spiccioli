@@ -16,6 +16,11 @@ import { Pie, PieChart as RechartsPieChart, ResponsiveContainer } from 'recharts
  * pointer and nothing else: what the middle of the ring then reads, and what the list beside it then does, are the caller's,
  * which is what keeps the ring a picture of the figures rather than a control over them. A caller that wants none of it passes
  * no handler and gets a ring that only ever reads its own count.
+ *
+ * **Which slice the ring draws full is the caller's too, and is not what the pointer last touched.** The caller hands one back,
+ * and every other slice is dimmed rather than the one being brightened: the palette is fixed, so there is no brighter version
+ * of a colour to reach for, and dimming the rest is what leaves the marked one reading exactly as it does at rest. That is also
+ * what lets a list beside the ring point at a slice the pointer never went near.
  */
 
 // How many colours the palette holds, which is the ceiling the breakdown by type has anyway
@@ -29,9 +34,11 @@ export interface PieChartSlice {
 	value: number;
 }
 
-// One slice as the library reads it: the colour is carried on the datum, which is what colours the sector it becomes
+// One slice as the library reads it: the colour and the strength are carried on the datum, which is what draws the sector it
+// becomes. The stroke is not dimmed with the fill, so the hairline between two dimmed slices stays where it is.
 interface PieChartDatum extends PieChartSlice {
 	fill: string;
+	fillOpacity: number;
 }
 
 export interface PieChartProps {
@@ -48,11 +55,17 @@ export interface PieChartProps {
 
 	// Told the key of the slice under the pointer, and "undefined" when the pointer has left the ring
 	onPointAt?: (key: string | undefined) => void;
+
+	// Which slice is drawn full while the rest are dimmed. Undefined draws every slice alike, which is the ring at rest.
+	pointedKey?: string;
 }
 
 const RING_INNER_RADIUS = '62%';
 
 const RING_OUTER_RADIUS = '100%';
+
+// What a slice is dimmed to while another one is marked: faint enough to recede, strong enough to still read as its own colour
+const DIMMED_SLICE_OPACITY = 0.3;
 
 /**
  * The colour a slice of a given rank is drawn in. The palette wraps, which it can only do on a chart of more than eleven
@@ -72,11 +85,16 @@ export const pieSliceColour = (rank: number): string => {
  * @param props.centreLabel What that figure counts.
  * @param props.label What the chart is called.
  * @param props.onPointAt Told which slice the pointer is over, where the caller keys anything to it.
+ * @param props.pointedKey Which slice is drawn full, the rest being dimmed behind it.
  * @returns The ring and what is written inside it.
  */
-export const PieChart = ({ slices, centreFigure, centreLabel, label, onPointAt }: PieChartProps): ReactElement => {
+export const PieChart = ({ slices, centreFigure, centreLabel, label, onPointAt, pointedKey }: PieChartProps): ReactElement => {
 	const data: PieChartDatum[] = slices.map((slice, rank) => {
-		return { ...slice, fill: pieSliceColour(rank) };
+		return {
+			...slice,
+			fill: pieSliceColour(rank),
+			fillOpacity: pointedKey === undefined || pointedKey === slice.key ? 1 : DIMMED_SLICE_OPACITY
+		};
 	});
 
 	return (

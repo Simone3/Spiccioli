@@ -39,6 +39,39 @@ describe('the pie', () => {
 		expect(within(chart).getByText('types')).toBeInTheDocument();
 	});
 
+	test('draws every slice alike until one is marked, and then dims the rest behind it', () => {
+		stubLedgerBridge();
+		const { rerender } = renderWithProviders(
+			<PieChart slices={SLICES} centreFigure='3' centreLabel='types' label='Portfolio split by type'/>
+		);
+
+		const opacities = (): (string | null)[] => {
+			return Array.from(screen.getByRole('img', { name: 'Portfolio split by type' })
+				.querySelectorAll('path.recharts-sector'))
+				.map((sector) => {
+					return sector.getAttribute('fill-opacity');
+				});
+		};
+
+		expect(new Set(opacities()).size).toBe(1);
+
+		rerender(
+			<PieChart
+				slices={SLICES}
+				centreFigure='13,7%'
+				centreLabel='Term deposit'
+				label='Portfolio split by type'
+				pointedKey='term-deposit'/>
+		);
+
+		// The marked slice is the one left as it was drawn at rest, the rest of the ring having gone back rather than it forward
+		const [ first, marked, last ] = opacities();
+
+		expect(marked).toBe('1');
+		expect(Number(first)).toBeLessThan(1);
+		expect(last).toBe(first);
+	});
+
 	test('wraps the palette rather than running out of it', () => {
 		expect(pieSliceColour(10)).toBe('var(--colors-chart-slice-11)');
 		expect(pieSliceColour(11)).toBe('var(--colors-chart-slice-1)');
