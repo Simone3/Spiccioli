@@ -143,7 +143,7 @@
 	grid-auto-flow: column;
 	grid-template-columns: repeat(var(--portfolio-slice-columns), auto minmax(0, 1fr) auto auto);
 	grid-template-rows: repeat(var(--portfolio-slice-rows), auto);
-	gap: 6px 32px;
+	column-gap: 32px;
 	flex: 1 1 320px;
 	align-content: center;
 	margin: 0;
@@ -152,20 +152,27 @@
 	font-size: 13px;
 }
 
+/* The rows are spaced by their own padding and not by a gap between them, so that a column is one unbroken strip of rows: a
+   gap is a place the pointer is on no row at all, and crossing one on the way from a row to the next one would let the ring go
+   back to full and forward again. The padding is vertical only — a subgrid's columns are the list's, and inline padding would
+   inset them out of line with every other row's. */
 .portfolio-screen-slices li {
 	display: grid;
 	grid-column: span 4;
 	grid-template-columns: subgrid;
 	column-gap: 12px;
 	align-items: center;
+	padding-block: 3px;
 }
 
-/* The row the pointer has found, whether it got there over the row or over the slice. The tint is spread by a shadow rather
-   than by padding, a subgrid's tracks being the list's own and a padded row's no longer lining up with them. */
+/* The row the pointer has found, whether it got there over the row or over the slice. The tint reaches past the row on either
+   side by a shadow rather than by inline padding, which would take the row's columns out of line with the others'. */
 .portfolio-screen-slice-pointed {
 	border-radius: 3px;
 	background-color: var(--colors-interactive-hover-background);
-	box-shadow: 0 0 0 4px var(--colors-interactive-hover-background);
+	box-shadow:
+		-6px 0 0 var(--colors-interactive-hover-background),
+		6px 0 0 var(--colors-interactive-hover-background);
 }
 
 /* One column where there is no room for more, which is the same width the two cards above the list stop sharing a row at. The
