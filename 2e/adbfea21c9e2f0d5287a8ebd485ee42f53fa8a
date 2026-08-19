@@ -1,0 +1,16 @@
+src/i18n/lang/en.ts
+  h_08e8a5184a38af 273-274,277-278
+TODO.md
+  h_08e8a5184a38af 9,11-13,15,23,25,27,29,31-32,34-36,38-39,41-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "2eadbfea21c9e2f0d5287a8ebd485ee42f53fa8a",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
