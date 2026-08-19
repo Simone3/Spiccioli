@@ -85,12 +85,12 @@ export const CategoryReportTable = ({ report, today, onOpen }: CategoryReportTab
 				<th scope='row'>{label}</th>
 				{totals.cells.map((cell, column) => {
 					return (
-						<td key={report.years[column]} className={`data-table-right data-table-numeric ${amountClassName(cell)}`}>
+						<td key={report.years[column]} className={`data-table-numeric ${amountClassName(cell)}`}>
 							{formatter.amount(cell, true)}
 						</td>
 					);
 				})}
-				<td className={`data-table-right data-table-numeric ${amountClassName(totals.total)}`}>
+				<td className={`data-table-numeric ${amountClassName(totals.total)}`}>
 					{formatter.amount(totals.total, true)}
 				</td>
 			</tr>
@@ -107,13 +107,13 @@ export const CategoryReportTable = ({ report, today, onOpen }: CategoryReportTab
 							const months = partialYearMonths(year, today);
 
 							return (
-								<th key={year} scope='col' className='data-table-right data-table-numeric'>
+								<th key={year} scope='col' className='data-table-numeric'>
 									{String(year)}
 									{months !== undefined && <span className='categories-screen-partial'>{t('report.partialYear', { count: months })}</span>}
 								</th>
 							);
 						})}
-						<th scope='col' className='data-table-right data-table-numeric'>{t('report.columns.total')}</th>
+						<th scope='col' className='data-table-numeric'>{t('report.columns.total')}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -132,12 +132,12 @@ export const CategoryReportTable = ({ report, today, onOpen }: CategoryReportTab
 											<th scope='row'>{row.category.name}</th>
 											{row.cells.map((cell, column) => {
 												return (
-													<td key={report.years[column]} className='data-table-right data-table-numeric'>
+													<td key={report.years[column]} className='data-table-numeric'>
 														{renderFigure(row, cell, report.years[column])}
 													</td>
 												);
 											})}
-											<td className='data-table-right data-table-numeric'>{renderFigure(row, row.total, undefined)}</td>
+											<td className='data-table-numeric'>{renderFigure(row, row.total, undefined)}</td>
 										</tr>
 									);
 								})}

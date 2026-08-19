@@ -404,12 +404,21 @@ export const EN_TRANSLATIONS = {
 		},
 		bulkDeleteConfirm: 'Delete transactions',
 
-		// The one paginated table in the application, and it opens on its last page so the most recent rows are in view
+		// The one paginated table in the application. It opens on its first page, which is where the most recent rows are, and the
+		// four steps and the box are the whole of how it is walked: the words are what the buttons say, the labels what they are called.
 		pager: {
 			label: 'Pages',
-			position: 'Page {page} of {pages} · {rows} per page',
-			previous: 'Previous page',
-			next: 'Next page'
+			page: 'Page',
+			of: 'of {pages}',
+			goTo: 'Go to page',
+			first: 'First',
+			firstLabel: 'First page',
+			previous: 'Previous',
+			previousLabel: 'Previous page',
+			next: 'Next',
+			nextLabel: 'Next page',
+			last: 'Last',
+			lastLabel: 'Last page'
 		},
 		filters: {
 			account: 'Account',
@@ -529,8 +538,8 @@ export const EN_TRANSLATIONS = {
 
 	// The three receipt states, written the same way wherever they are shown. The stored "na" is never one of them.
 	receiptStates: {
-		pending: 'pending',
-		checked: 'checked',
+		pending: 'Pending',
+		checked: 'Checked',
 		na: 'N/A'
 	},
 

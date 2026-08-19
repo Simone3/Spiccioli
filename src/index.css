@@ -105,6 +105,12 @@ body {
    `font: inherit` is the size of the text around it and not of a document nobody set. */
 body {
 	margin: 0;
+
+	/* The controls the browser draws itself — a checkbox's box, a picker's dropped list, a scrollbar — take their colors from
+	   here and from nowhere in the palette above. Spiccioli has one theme and it is dark, so this says so once: without it an
+	   unticked checkbox is a white square on an ink page, whatever the accent color says about the ticked one. */
+	color-scheme: dark;
+
 	background-color: var(--colors-background-primary);
 	color: var(--colors-text-primary);
 	overflow: hidden;

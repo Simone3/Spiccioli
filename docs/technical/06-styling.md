@@ -22,6 +22,8 @@ Vite collects those imports into one stylesheet at build time. Class names are n
 
 Every color is written as a variable and used through `var(--…)`. A color written inline in a component is a bug: it is what makes a later change to the palette a search-and-replace across the tree.
 
+**`body` also declares `color-scheme: dark`, and that is what the palette cannot reach.** A checkbox's box, the list a picker drops, a scrollbar and a spinner are drawn by the browser rather than by CSS, and they read that property and nothing above it: without it an unticked checkbox is a white square on an ink page whatever `accent-color` says about the ticked one. One theme means one declaration, with no second value to keep in step.
+
 **Two colors of the palette are also written in `src/config/AppConfig.ts`, and they are the one exception to that.** Where the window draws its own title bar ([§1.4](01-architecture.md#14-what-the-main-process-does-at-startup)) the minimize, maximize and close buttons on it are still the operating system's, so Electron is told what to paint them in rather than CSS: `TITLE_BAR_CONFIG` carries the values of `--colors-background-primary` and `--colors-text-primary`, and has to be changed with them.
 
 The groups are:
@@ -81,6 +83,8 @@ Three overrides exist today and each says why where it is written. `DecimalField
 ## 6.4 A library's stylesheet
 
 `react-datepicker` is the only dependency that ships CSS, and it ships a light calendar. `src/components/common/DateField.css` imports the library's stylesheet first and then overrides it — the surfaces, the borders, the text, the selected day and the focus outline — so that the calendar is the same dark theme as everything around it. **That override lives in the one file that imports the library**, which is what keeps replacing the date picker a change in one folder.
+
+**It also puts an element of its own beside the input while the calendar is open** — the focus trap the popper sits inside — so `.date-field` spaces its refusal with a margin instead of a `gap`. A gap would give that empty element room, and the field would grow the moment the calendar opened: on a filter bar whose controls are aligned along one edge, that moves every control beside it.
 
 The drag library of [§8.1](08-decisions.md#81-the-fourteen-decisions) D10 ships none: `RulesTable` styles its own handle and its own dragged row, and writes the row's transform by hand rather than importing the transitive `@dnd-kit/utilities` helper that would format it. What the library does contribute to the page is **a visually hidden live region of its own**, which is where the translated drag announcements are read out from.
 

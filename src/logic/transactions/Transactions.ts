@@ -7,9 +7,11 @@ import type { CategorySource, Cents, IsoDate, LedgerId, ReceiptState, Rule, Tran
  * Everything pure about the transactions list: the one order it is in, the seven filters, the page it lands on and what a
  * duplicate carries over.
  *
- * **The order is fixed and is not configurable**: `date ASC, insertionSeq ASC, id ASC`. Columns are not sortable, so this is the
- * only order the screen has, and `insertionSeq` is what keeps two rows of one day in the order they arrived in — which is the
- * order a bank export had.
+ * **The three sort keys are fixed and are not configurable**: `date`, then `insertionSeq`, then `id`. Columns are not sortable,
+ * so this is the only order the screen has, and `insertionSeq` is what keeps two rows of one day in the order they arrived in —
+ * which is the order a bank export had. **Ascending is the order everything else reads them in** — the checks, the matchers and
+ * the walks they rest on; **the Transactions screen shows them descending**, most recent first, so its first page is the one
+ * worth opening on.
  *
  * **Every filter takes one value or none**, and they combine with AND. That is what lets one screen hand its filters to another
  * and know they fit.
@@ -56,7 +58,10 @@ export interface TransactionDuplicationOptions {
 	rules: readonly Rule[];
 }
 
-// What the screen opens with: the whole history, on its last page
+// The page the screen opens on and the one a filter change lands on: the first, which is where the most recent rows are
+export const FIRST_TRANSACTION_PAGE = 1;
+
+// What the screen opens with: the whole history, nothing filtered
 export const NO_TRANSACTION_FILTERS: TransactionFilters = {
 	accountId: undefined,
 	fromDate: undefined,
@@ -88,9 +93,9 @@ export const isAnyTransactionFilterSet = (filters: TransactionFilters): boolean 
 };
 
 /**
- * Orders the transactions the one way this screen shows them.
+ * Orders the transactions the one way everything that walks them reads them: oldest first.
  * @param transactions The transactions.
- * @returns The transactions, ordered by date, then insertion sequence, then id.
+ * @returns The transactions, ordered by date, then insertion sequence, then id, all ascending.
  */
 export const sortTransactions = (transactions: readonly Transaction[]): Transaction[] => {
 	return [ ...transactions ].sort((first, second) => {
@@ -104,6 +109,16 @@ export const sortTransactions = (transactions: readonly Transaction[]): Transact
 
 		return first.id < second.id ? -1 : 1;
 	});
+};
+
+/**
+ * Orders the transactions the one way the Transactions screen shows them: the same three keys, reversed, so the most recent row
+ * is the first row of the first page.
+ * @param transactions The transactions.
+ * @returns The transactions, newest first.
+ */
+export const sortTransactionsNewestFirst = (transactions: readonly Transaction[]): Transaction[] => {
+	return sortTransactions(transactions).reverse();
 };
 
 const matchesCategory = (transaction: Transaction, category: TransactionCategoryFilter): boolean => {
@@ -178,16 +193,6 @@ export const transactionPageCount = (count: number): number => {
 };
 
 /**
- * The page the screen lands on: the last one, so that the most recent rows are in view. It is where the screen opens and where
- * a filter change lands, a page number carried over from another filter pointing at a different part of a different list.
- * @param count How many rows the filters match.
- * @returns The last page.
- */
-export const lastTransactionPage = (count: number): number => {
-	return transactionPageCount(count);
-};
-
-/**
  * Takes one page out of the ordered, filtered list.
  * @param transactions The transactions the filters match, ordered.
  * @param page The page, counting from one.
@@ -203,7 +208,7 @@ export const transactionPage = (transactions: readonly Transaction[], page: numb
  * Which page a row sits on, which is how the screen follows a row it has just created.
  * @param transactions The transactions the filters match, ordered.
  * @param id The row to find.
- * @returns The page holding it, or the last page when the filters do not match it.
+ * @returns The page holding it, or the first page when the filters do not match it.
  */
 export const pageHoldingTransaction = (transactions: readonly Transaction[], id: LedgerId): number => {
 	const position = transactions.findIndex((transaction) => {
@@ -211,7 +216,7 @@ export const pageHoldingTransaction = (transactions: readonly Transaction[], id:
 	});
 
 	if(position < 0) {
-		return lastTransactionPage(transactions.length);
+		return FIRST_TRANSACTION_PAGE;
 	}
 
 	return Math.floor(position / TRANSACTIONS_CONFIG.rowsPerPage) + 1;

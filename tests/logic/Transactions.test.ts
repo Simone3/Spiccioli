@@ -3,10 +3,10 @@ import {
 	duplicateTransaction,
 	filterTransactions,
 	isAnyTransactionFilterSet,
-	lastTransactionPage,
 	NO_TRANSACTION_FILTERS,
 	pageHoldingTransaction,
 	sortTransactions,
+	sortTransactionsNewestFirst,
 	sumTransactionAmounts,
 	transactionPage,
 	transactionPageCount,
@@ -47,6 +47,22 @@ describe('the transactions ordering', () => {
 		];
 
 		expect(identities(sortTransactions(pasted))).toEqual([ 'first', 'second' ]);
+	});
+
+	test('is the same three keys reversed where the screen shows them, so the most recent row is the first row', () => {
+		const later = makeTransaction({ id: 'c', date: '2026-08-09', insertionSeq: 1 });
+		const first = makeTransaction({ id: 'b', date: '2026-08-08', insertionSeq: 2 });
+		const second = makeTransaction({ id: 'a', date: '2026-08-08', insertionSeq: 3 });
+
+		expect(identities(sortTransactionsNewestFirst([ second, later, first ]))).toEqual([ 'c', 'a', 'b' ]);
+	});
+
+	test('leaves the transactions it was given alone', () => {
+		const transactions = [ makeTransaction({ id: 'a', insertionSeq: 1 }), makeTransaction({ id: 'b', insertionSeq: 2 }) ];
+
+		sortTransactionsNewestFirst(transactions);
+
+		expect(identities(transactions)).toEqual([ 'a', 'b' ]);
 	});
 });
 
@@ -143,10 +159,6 @@ describe('paging', () => {
 		expect(transactionPageCount(51)).toBe(2);
 	});
 
-	test('opens on the last page, so the most recent rows are in view', () => {
-		expect(lastTransactionPage(120)).toBe(3);
-	});
-
 	test('takes the rows of the page asked for', () => {
 		const all = manyTransactions(120);
 		const third = transactionPage(all, 3);
@@ -163,8 +175,8 @@ describe('paging', () => {
 		expect(pageHoldingTransaction(all, 'transaction-119')).toBe(3);
 	});
 
-	test('falls back to the last page for a row the filters do not match', () => {
-		expect(pageHoldingTransaction(manyTransactions(120), 'nothing')).toBe(3);
+	test('falls back to the first page for a row the filters do not match', () => {
+		expect(pageHoldingTransaction(manyTransactions(120), 'nothing')).toBe(1);
 	});
 });
 

@@ -32,7 +32,7 @@ Four tabs: Holdings, Purchases, Sales, Securities. Holdings is entirely derived 
 - **Total cost** is `qty × price + fees`, derived, never entered. It is the figure [§11.6](11-calculations.md#116-derived-matching) pairs against the bank transaction.
 - **Matched** shows the date of the bank transaction the application paired the trade with ([§11.6](11-calculations.md#116-derived-matching)). A dash is what check 6 reports.
 - Recording a trade **does not** create a transaction.
-- Ordering: `date ASC, insertionSeq ASC, id ASC` — the same three keys and the same direction as Transactions ([§5.2](05-transactions.md#52-ordering-and-paging)). No paging; filters narrow the list instead.
+- Ordering: `date ASC, insertionSeq ASC, id ASC` — the same three keys as Transactions ([§5.2](05-transactions.md#52-ordering-and-paging)), ascending, which is the direction everything but that screen's own list reads them in. No paging; filters narrow the list instead.
 - Filters: security, account — **brokerage accounts only** ([§2](02-domain-model.md)), one at a time or *All*, like every account filter in the application ([§5.3](05-transactions.md#53-filters)) — and period, which is the *from* and *to* pair of [§5.3](05-transactions.md#53-filters), inclusive at both ends.
 - **The footer sums the filtered rows**: quantity is not totalled, and fees and total cost are, with the count beside them. It is the counterpart of the Sales footer ([§7.3](#73-sales)) minus the columns Purchases does not have.
 

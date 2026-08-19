@@ -58,12 +58,8 @@
 	cursor: default;
 }
 
-.data-table-right {
-	text-align: right;
-}
-
-/* A figure is set in the mono, so that a column of them is a column: the digits are one width and the decimal separators
-   stack under each other */
+/* A figure is set in the mono, so that a column of them is a column: the digits are one width. Every column starts at the same
+   edge, figures included — a table read left to right is read that way in all of its columns. */
 .data-table-numeric {
 	font-family: var(--font-family-mono);
 	font-variant-numeric: tabular-nums;

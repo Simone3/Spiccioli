@@ -7,6 +7,9 @@
 }
 
 .select-field-control {
+	width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
 	padding: 6px 10px;
 	background-color: var(--colors-background-field);
 	border: 1px solid var(--colors-border-strong);
@@ -15,6 +18,13 @@
 	font-size: 13px;
 	color: var(--colors-text-primary);
 	cursor: pointer;
+
+	/* A picker left to itself is as wide as its longest option, which is what makes one control three times the width of the
+	   one beside it. It takes the width it is given and the value in view is clipped, the whole label still being read in the
+	   list the picker drops. */
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 .select-field-control:disabled {

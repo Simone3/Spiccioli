@@ -13,6 +13,15 @@
 	min-width: 0;
 }
 
+/* One width for every filter that holds a single control, so that the bar reads as a row of filters rather than as a row of
+   labels of different lengths. It is the width a text field takes when nothing stretches it, and a picker over long labels —
+   the accounts, the twenty-seven categories — is clipped to it rather than sized to its longest option. The two filters that
+   are a pair of controls set their own widths: an end of a period is not the width of a search box. */
+.filter-bar-filter > .text-field,
+.filter-bar-filter > .select-field {
+	width: 176px;
+}
+
 .filter-bar-label {
 	font-family: var(--font-family-mono);
 	font-size: 10px;

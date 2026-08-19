@@ -115,13 +115,13 @@ const SortableRuleRow = ({
 					⣿
 				</button>
 			</td>
-			<td className='data-table-right data-table-numeric categories-screen-rule-number'>{formatter.integer(position)}</td>
+			<td className='data-table-numeric categories-screen-rule-number'>{formatter.integer(position)}</td>
 			<td>
 				{rule.substring}
 				{marker && <span className='categories-screen-marker'><Chip tone='accent'>{t(`rules.marker.${marker}`)}</Chip></span>}
 			</td>
 			<td>{categoryName && <Chip tone='provenance'>{categoryName}</Chip>}</td>
-			<td className={`data-table-right data-table-numeric${isDraftPending ? ' categories-screen-stale' : ''}`}>
+			<td className={`data-table-numeric${isDraftPending ? ' categories-screen-stale' : ''}`}>
 				{applications === undefined ? t('table.notApplicable') : formatter.integer(applications)}
 			</td>
 			<td>
@@ -236,10 +236,10 @@ export const RulesTable = ({
 					<thead>
 						<tr>
 							<th scope='col'><span className='categories-screen-handle-header'>{t('rules.columns.order')}</span></th>
-							<th scope='col' className='data-table-right data-table-numeric'>{t('rules.columns.position')}</th>
+							<th scope='col' className='data-table-numeric'>{t('rules.columns.position')}</th>
 							<th scope='col'>{t('rules.columns.substring')}</th>
 							<th scope='col'>{t('rules.columns.category')}</th>
-							<th scope='col' className='data-table-right data-table-numeric'>{t('rules.columns.appliesTo')}</th>
+							<th scope='col' className='data-table-numeric'>{t('rules.columns.appliesTo')}</th>
 							<th scope='col'/>
 						</tr>
 					</thead>

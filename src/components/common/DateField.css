@@ -2,10 +2,13 @@
 /* The library's own stylesheet is imported before this one and is overridden here to the theme: it ships a light calendar with
    a focus style of its own, and Spiccioli has one dark theme and one focus ring. */
 
+/* The refusal is spaced by a margin of its own rather than by a gap here, because the library puts a second element beside the
+   input while the calendar is open — the focus trap the popper sits in — and a gap would give that empty element room. The
+   field would grow by it the moment the calendar opened, which on a filter bar of controls aligned along one edge moves every
+   control beside it. */
 .date-field {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
 	min-width: 0;
 }
 
@@ -39,7 +42,7 @@
 }
 
 .date-field-refusal {
-	margin: 0;
+	margin: 4px 0 0;
 	font-size: 12px;
 	line-height: 1.4;
 	color: var(--colors-danger-text);

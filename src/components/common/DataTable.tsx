@@ -4,9 +4,10 @@ import type { ReactElement, ReactNode } from 'react';
 /**
  * The one table, and the footer every table that totals something carries.
  *
- * A column says how it is read rather than how it is drawn: a numeric column aligns right and uses tabular figures, so a column
- * of amounts lines up on its decimal place. **A zero is not an empty state** and renders like any other figure; a screen with
- * nothing to put in the table shows the empty state instead of the table's own headers.
+ * A column says how it is read rather than how it is drawn: a numeric column is set in the mono in tabular figures, so a column
+ * of amounts is a column of one digit width. **Every column starts at the same edge**, a figure included. **A zero is not an
+ * empty state** and renders like any other figure; a screen with nothing to put in the table shows the empty state instead of
+ * the table's own headers.
  */
 
 export interface DataTableColumn<TRow> {
@@ -15,7 +16,7 @@ export interface DataTableColumn<TRow> {
 	// What the column is called. A control rather than a word where the column holds one, which today is the selection checkbox.
 	header: ReactNode;
 
-	// Right-aligned, in tabular figures: every amount, quantity, price and count
+	// Set in the mono in tabular figures: every amount, quantity, price and count
 	numeric?: boolean;
 
 	render: (row: TRow) => ReactNode;
@@ -37,7 +38,7 @@ export interface DataTableProps<TRow> {
 }
 
 const cellClassName = (column: DataTableColumn<unknown>): string | undefined => {
-	return column.numeric ? 'data-table-right data-table-numeric' : undefined;
+	return column.numeric ? 'data-table-numeric' : undefined;
 };
 
 /**

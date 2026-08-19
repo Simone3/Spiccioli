@@ -22,11 +22,11 @@ import { createLedgerId, nextInsertionSeq } from 'src/logic/ledger/LedgerDocumen
 import {
 	duplicateTransaction,
 	filterTransactions,
+	FIRST_TRANSACTION_PAGE,
 	isAnyTransactionFilterSet,
-	lastTransactionPage,
 	NO_TRANSACTION_FILTERS,
 	pageHoldingTransaction,
-	sortTransactions,
+	sortTransactionsNewestFirst,
 	sumTransactionAmounts,
 	transactionPage,
 	transactionPageCount,
@@ -37,9 +37,9 @@ import type { Account, LedgerId, Transaction } from 'src/types/LedgerTypes';
 /**
  * Transactions: the whole history in one order, seven filters over it, and every cell edited where it sits.
  *
- * **The order is fixed and the screen opens on its last page**, so the most recent rows are in view and the pager is how the
- * history is walked back. **Changing a filter lands on the last page of what it now matches** — a page number carried over from
- * another filter would point at a different part of a different list.
+ * **The order is fixed and the list is shown newest first**, so the screen opens on its first page with the most recent rows in
+ * view and the pager is how the history is walked back. **Changing a filter lands on the first page of what it now matches** —
+ * a page number carried over from another filter would point at a different part of a different list.
  *
  * **The categorisation invariant is restored on every write from here**: a row created, duplicated, switched back to *Automatic*
  * or given a new description carries whatever the rule list produces, and a category set by hand is never touched by any of it.
@@ -86,17 +86,15 @@ export const TransactionsScreen = (): ReactElement => {
 	}, [ document ]);
 
 	const ordered = useMemo(() => {
-		return sortTransactions(transactions);
+		return sortTransactionsNewestFirst(transactions);
 	}, [ transactions ]);
 
 	const matching = useMemo(() => {
 		return filterTransactions(ordered, filters);
 	}, [ filters, ordered ]);
 
-	// The last page of what the filters match, which is where the screen opens however it was reached
-	const [ requestedPage, setRequestedPage ] = useState(() => {
-		return lastTransactionPage(matching.length);
-	});
+	// The first page of what the filters match, which is where the screen opens however it was reached
+	const [ requestedPage, setRequestedPage ] = useState(FIRST_TRANSACTION_PAGE);
 
 	const accounts = useMemo((): ReadonlyMap<LedgerId, Account> => {
 		return new Map((document?.accounts ?? []).map((account) => {
@@ -133,7 +131,7 @@ export const TransactionsScreen = (): ReactElement => {
 	// Changing a filter recomputes the position rather than keeping it, and every filter change clears the selection
 	const changeFilters = (next: TransactionFilters): void => {
 		setFilters(next);
-		setRequestedPage(lastTransactionPage(filterTransactions(ordered, next).length));
+		setRequestedPage(FIRST_TRANSACTION_PAGE);
 		clearSelection();
 	};
 
@@ -199,7 +197,7 @@ export const TransactionsScreen = (): ReactElement => {
 		updateDocument((current) => {
 			return { ...current, transactions: [ ...current.transactions, created ] };
 		});
-		setRequestedPage(pageHoldingTransaction(filterTransactions(sortTransactions([ ...transactions, created ]), filters), created.id));
+		setRequestedPage(pageHoldingTransaction(filterTransactions(sortTransactionsNewestFirst([ ...transactions, created ]), filters), created.id));
 		clearSelection();
 	};
 
