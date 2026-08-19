@@ -1290,6 +1290,13 @@ export const EN_TRANSLATIONS = {
 		optional: 'optional'
 	},
 
+	// What a chart says for itself, wherever it is drawn
+	chart: {
+		// The value axis writes an amount at the coarsest scale it is short at, so that a tick is one line and never wraps
+		axisThousands: 'k',
+		axisMillions: 'M'
+	},
+
 	table: {
 		// A column a record's type cannot carry: a field that cannot be filled rather than one nobody got round to
 		notApplicable: '—',

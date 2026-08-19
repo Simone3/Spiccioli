@@ -1,6 +1,15 @@
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { formatDate, formatDateAndTime, formatTimeOfDay } from 'src/logic/format/DateFormat';
-import { formatAmount, formatInteger, formatPercentage, formatQuantity, formatUnitPrice, type SeparatorCharacters } from 'src/logic/format/NumberFormat';
+import {
+	formatAmount,
+	formatCompactAmount,
+	formatInteger,
+	formatPercentage,
+	formatQuantity,
+	formatUnitPrice,
+	type CompactUnitLabels,
+	type SeparatorCharacters
+} from 'src/logic/format/NumberFormat';
 import { SEPARATOR_CHARACTERS, type Preferences } from 'src/types/PreferencesTypes';
 import type { IsoDate } from 'src/types/LedgerTypes';
 
@@ -18,6 +27,10 @@ export interface Formatter {
 	separators: SeparatorCharacters;
 
 	amount: (cents: number, explicitSign?: boolean) => string;
+
+	// The same amount at the coarsest scale it is short at, which is what a chart's value axis writes. The words a thousand
+	// and a million are written with come from the caller: the formatter is bound to the preferences and not to a language.
+	compactAmount: (cents: number, units: CompactUnitLabels) => string;
 	unitPrice: (tenThousandths: number) => string;
 	quantity: (tenThousandths: number) => string;
 	percentage: (fraction: number) => string;
@@ -48,6 +61,9 @@ export const createFormatter = (preferences: Preferences): Formatter => {
 		separators,
 		amount: (cents, explicitSign) => {
 			return formatAmount(cents, separators, explicitSign);
+		},
+		compactAmount: (cents, units) => {
+			return formatCompactAmount(cents, separators, units);
 		},
 		unitPrice: (tenThousandths) => {
 			return formatUnitPrice(tenThousandths, separators);

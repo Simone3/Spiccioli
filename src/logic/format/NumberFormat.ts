@@ -10,6 +10,10 @@ import { MONEY_SCALES, roundHalfAwayFromZero } from 'src/logic/money/Money';
  * **Every monetary figure carries exactly two decimals**, quantities and unit prices four, percentages one — so a round thousand
  * reads "€ 21.900,00" and a column of figures always aligns on the same decimal place. **Every amount is EUR and is printed with
  * "€" before it**; there is no currency field and nothing to choose.
+ *
+ * **The only figures written short are a chart's axis labels** ([§11]), which is the one thing `formatCompactAmount` is for.
+ * Every other figure in the application is printed in full, this exception included: the axis writes the tick, the tooltip
+ * beside it writes the amount.
  */
 
 // The one currency, fixed rather than chosen, with the space the mockups put after it
@@ -22,11 +26,29 @@ const POSITIVE_SIGN = '+ ';
 
 const GROUP_SIZE = 3;
 
+// The three scales a compact amount is written at, in cents: one euro, one thousand euros, one million euros
+const CENTS_PER_UNIT = 100;
+
+const CENTS_PER_THOUSAND = 100_000;
+
+const CENTS_PER_MILLION = 100_000_000;
+
+// How many decimals a compact amount keeps where the scale it is written at would otherwise lose the figure
+const COMPACT_SCALE = 1;
+
+const COMPACT_TENTHS = 10;
+
 // How many decimals a percentage carries, which is also the scale the fraction is narrowed to before it is printed
 export const PERCENTAGE_SCALE = 1;
 
 // A fraction is stored in ten-thousandths and shown as a percentage, so the × 100 and the narrowing to one decimal are one step
 const FRACTION_TO_PERCENTAGE_TENTHS = 10;
+
+// What a compact amount writes a thousand and a million with. They are words and so are the caller's, this file holding none.
+export interface CompactUnitLabels {
+	thousands: string;
+	millions: string;
+}
 
 export interface SeparatorCharacters {
 	decimal: string;
@@ -81,6 +103,24 @@ const signOf = (value: number, explicitSign: boolean): string => {
 };
 
 /**
+ * Prints an amount at one coarser scale, keeping the one decimal that scale would otherwise lose.
+ * @param cents The amount, in cents.
+ * @param centsPerUnit How many cents the scale's unit is worth.
+ * @param suffix What that unit is written with, empty for the euro itself.
+ * @param separators The two characters the preferences hold.
+ * @returns The amount at that scale, with its unit after it.
+ */
+const compactAtScale = (cents: number, centsPerUnit: number, suffix: string, separators: SeparatorCharacters): string => {
+	const tenths = roundHalfAwayFromZero(Math.abs(cents) * COMPACT_TENTHS / centsPerUnit);
+
+	const magnitude = tenths % COMPACT_TENTHS === 0 ?
+		formatMagnitude(tenths / COMPACT_TENTHS, 0, separators) :
+		formatMagnitude(tenths, COMPACT_SCALE, separators);
+
+	return `${signOf(cents, false)}${CURRENCY_PREFIX}${magnitude}${suffix}`;
+};
+
+/**
  * Prints an amount in cents, with the currency symbol every monetary figure carries.
  * @param cents The amount, in cents.
  * @param separators The two characters the preferences hold.
@@ -89,6 +129,33 @@ const signOf = (value: number, explicitSign: boolean): string => {
  */
 export const formatAmount = (cents: number, separators: SeparatorCharacters, explicitSign = false): string => {
 	return `${signOf(cents, explicitSign)}${CURRENCY_PREFIX}${formatMagnitude(cents, MONEY_SCALES.amount, separators)}`;
+};
+
+/**
+ * Prints an amount at the coarsest scale that leaves it short: whole euros below a thousand, thousands below a million, and
+ * millions above it. **It is what a chart's value axis writes** — a tick is one short line and never a wrapped one, and the
+ * axis then takes a fraction of the width the full figures would need. Everything else prints the amount in full.
+ *
+ * **One decimal is kept where the coarser scale would otherwise lose the figure**, so a tick at € 2.500,00 reads "€ 2,5k"
+ * rather than "€ 2k" or "€ 3k", and a round one drops the decimal it does not need. The division is the one inexact step and
+ * rounds half away from zero, like every other in the application.
+ * @param cents The amount, in cents.
+ * @param separators The two characters the preferences hold.
+ * @param units What a thousand and a million are written with, which is the caller's because this file holds no wording.
+ * @returns The amount as text, at the scale it is short at.
+ */
+export const formatCompactAmount = (cents: number, separators: SeparatorCharacters, units: CompactUnitLabels): string => {
+	const magnitude = Math.abs(cents);
+
+	if(magnitude >= CENTS_PER_MILLION) {
+		return compactAtScale(cents, CENTS_PER_MILLION, units.millions, separators);
+	}
+
+	if(magnitude >= CENTS_PER_THOUSAND) {
+		return compactAtScale(cents, CENTS_PER_THOUSAND, units.thousands, separators);
+	}
+
+	return compactAtScale(cents, CENTS_PER_UNIT, '', separators);
 };
 
 /**

@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { useAmountAxisFormatter } from 'src/components/common/ChartAxisFormat';
 import { LineChart, type LineChartPoint, type LineChartSeries } from 'src/components/common/LineChart';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
@@ -50,6 +51,7 @@ const FROM_COST = 'fromCost';
 export const NetWorthChart = ({ points, hasHistory }: NetWorthChartProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
+	const axisValue = useAmountAxisFormatter();
 
 	const anyFromCost = points.some((point) => {
 		return point.fromCost;
@@ -87,6 +89,7 @@ export const NetWorthChart = ({ points, hasHistory }: NetWorthChartProps): React
 						series={series}
 						label={t('portfolio.netWorthChart')}
 						formatValue={formatter.amount}
+						formatAxisValue={axisValue}
 						showSeriesKey={false}/>
 					<p className='portfolio-screen-note'>{t('portfolio.chart.rates')}</p>
 				</> :

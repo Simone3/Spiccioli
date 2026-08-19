@@ -1,6 +1,7 @@
 import { createFormatter } from 'src/logic/format/Formatter';
 import {
 	formatAmount,
+	formatCompactAmount,
 	formatInteger,
 	formatMagnitude,
 	formatPercentage,
@@ -17,6 +18,41 @@ const ITALIAN: SeparatorCharacters = { decimal: ',', thousands: '.' };
 const ENGLISH: SeparatorCharacters = { decimal: '.', thousands: ',' };
 
 const NO_THOUSANDS: SeparatorCharacters = { decimal: ',', thousands: '' };
+
+const UNITS = { thousands: 'k', millions: 'M' };
+
+describe('formatCompactAmount', () => {
+	test('writes an amount at the coarsest scale it is short at', () => {
+		expect(formatCompactAmount(24000000, ITALIAN, UNITS)).toBe('€ 240k');
+		expect(formatCompactAmount(240000000, ITALIAN, UNITS)).toBe('€ 2,4M');
+		expect(formatCompactAmount(90000, ITALIAN, UNITS)).toBe('€ 900');
+	});
+
+	test('keeps the one decimal the scale would otherwise lose, and drops the one it does not need', () => {
+		expect(formatCompactAmount(250000, ITALIAN, UNITS)).toBe('€ 2,5k');
+		expect(formatCompactAmount(200000, ITALIAN, UNITS)).toBe('€ 2k');
+	});
+
+	// The one division is the one inexact step, and it rounds half away from zero like every other in the application
+	test('rounds a figure the scale cannot hold', () => {
+		expect(formatCompactAmount(123400, ITALIAN, UNITS)).toBe('€ 1,2k');
+		expect(formatCompactAmount(-125000, ITALIAN, UNITS)).toBe('− € 1,3k');
+	});
+
+	// The scale is chosen from the figure itself and not from what rounding it would make of it, which is why a hair under a
+	// thousand is written in full rather than as the thousand it rounds to. It is still one short line, which is the point.
+	test('turns over to the next scale at the unit itself and not before it', () => {
+		expect(formatCompactAmount(99999, ITALIAN, UNITS)).toBe('€ 1.000');
+		expect(formatCompactAmount(100000, ITALIAN, UNITS)).toBe('€ 1k');
+		expect(formatCompactAmount(99999999, ITALIAN, UNITS)).toBe('€ 1.000k');
+		expect(formatCompactAmount(100000000, ITALIAN, UNITS)).toBe('€ 1M');
+	});
+
+	test('writes the separators the preferences hold, like every other figure', () => {
+		expect(formatCompactAmount(250000, ENGLISH, UNITS)).toBe('€ 2.5k');
+		expect(formatCompactAmount(120000000000, ENGLISH, UNITS)).toBe('€ 1,200M');
+	});
+});
 
 describe('formatMagnitude', () => {
 	test('groups the whole part by threes', () => {

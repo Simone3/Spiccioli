@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { useAmountAxisFormatter } from 'src/components/common/ChartAxisFormat';
 import { LineChart, type LineChartPoint, type LineChartSeries } from 'src/components/common/LineChart';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
@@ -31,6 +32,7 @@ export interface SalaryChartsProps {
 export const SalaryCharts = ({ years }: SalaryChartsProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
+	const axisValue = useAmountAxisFormatter();
 
 	const averageSeries: readonly LineChartSeries[] = [
 		{ key: 'gross', label: t('payslips.charts.averageGross'), tone: 1 },
@@ -71,7 +73,8 @@ export const SalaryCharts = ({ years }: SalaryChartsProps): ReactElement => {
 					points={averagePoints}
 					series={averageSeries}
 					label={t('payslips.charts.averages')}
-					formatValue={formatter.amount}/>
+					formatValue={formatter.amount}
+					formatAxisValue={axisValue}/>
 			</section>
 
 			<section className='salaries-screen-card'>
@@ -80,7 +83,8 @@ export const SalaryCharts = ({ years }: SalaryChartsProps): ReactElement => {
 					points={totalPoints}
 					series={totalSeries}
 					label={t('payslips.charts.totals')}
-					formatValue={formatter.amount}/>
+					formatValue={formatter.amount}
+					formatAxisValue={axisValue}/>
 			</section>
 		</div>
 	);

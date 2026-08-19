@@ -53,6 +53,10 @@ export interface LineChartProps {
 	// How a figure is written, which is the caller's because the chart does not know what its figures are
 	formatValue: (value: number) => string;
 
+	// How the value axis writes one, where a shorter form belongs on a tick than in the tooltip. It falls back to the figure
+	// written in full, which is right for a chart whose figures are short to begin with.
+	formatAxisValue?: (value: number) => string;
+
 	// Whether the series are named under the chart. False where they are one line in two states, which the tooltip says better.
 	showSeriesKey?: boolean;
 }
@@ -73,10 +77,17 @@ interface ChartTooltipProps {
 
 const DASHED_STROKE = '5 4';
 
-// Room for the widest figure an axis holds, which is an amount with its currency and its thousands separators
-const VALUE_AXIS_WIDTH = 92;
+// Room for the widest figure an axis holds. A caller that writes its ticks short is what makes this narrow: the axis is given
+// a fixed width and a label too wide for it is broken across lines rather than allowed to overflow, which is what pushes the
+// topmost tick off the top of the chart and the bottom one down into the labels of the other axis.
+const VALUE_AXIS_WIDTH = 68;
 
-const CHART_MARGIN = { top: 8, right: 8, bottom: 0, left: 0 };
+// The top leaves the topmost tick the half of itself that sits above the line it names
+const CHART_MARGIN = { top: 12, right: 8, bottom: 0, left: 0 };
+
+// How far the labels of the horizontal axis sit below it, which is what keeps the first of them clear of the lowest tick of
+// the other axis: the two meet at the corner, one ending where the other begins
+const LABEL_AXIS_TICK_MARGIN = 8;
 
 const toneVariable = (tone: ChartSeriesTone): string => {
 	return `var(--colors-chart-series-${tone})`;
@@ -139,10 +150,18 @@ const ChartTooltip = ({ active, label, payload, series, formatValue }: ChartTool
  * @param props.series The lines, in the order they are named.
  * @param props.label What the chart is called.
  * @param props.formatValue How a figure is written.
+ * @param props.formatAxisValue How the value axis writes one, the figure in full by default.
  * @param props.showSeriesKey Whether the series are named under the chart.
  * @returns The chart, and the key under it where the series are named there.
  */
-export const LineChart = ({ points, series, label, formatValue, showSeriesKey = true }: LineChartProps): ReactElement => {
+export const LineChart = ({
+	points,
+	series,
+	label,
+	formatValue,
+	formatAxisValue = formatValue,
+	showSeriesKey = true
+}: LineChartProps): ReactElement => {
 	// The library reads a flat row, so the values are spread onto the label the axis reads
 	const rows = points.map((point) => {
 		return { label: point.label, ...point.values };
@@ -158,6 +177,7 @@ export const LineChart = ({ points, series, label, formatValue, showSeriesKey = 
 							dataKey='label'
 							stroke='var(--colors-chart-axis)'
 							tickLine={false}
+							tickMargin={LABEL_AXIS_TICK_MARGIN}
 							fontSize={11}/>
 						<YAxis
 							stroke='var(--colors-chart-axis)'
@@ -165,7 +185,7 @@ export const LineChart = ({ points, series, label, formatValue, showSeriesKey = 
 							width={VALUE_AXIS_WIDTH}
 							fontSize={11}
 							tickFormatter={(value: number) => {
-								return formatValue(value);
+								return formatAxisValue(value);
 							}}/>
 						<Tooltip
 							cursor={{ stroke: 'var(--colors-border-strong)' }}
