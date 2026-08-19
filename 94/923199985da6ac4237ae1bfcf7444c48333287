@@ -1,0 +1,52 @@
+docs/functional/specs/03-portfolio.md
+  s_a19600c5a07e8b::t_367cb1bded03c3 44-47
+docs/functional/specs/07-investments.md
+  s_a19600c5a07e8b::t_d85c41293349ed 18,23-24,84,101
+docs/functional/specs/09-checks.md
+  s_a19600c5a07e8b::t_78bc6764ee252b 15
+docs/functional/specs/11-calculations.md
+  s_a19600c5a07e8b::t_499f27622c6468 53-55,64,90,100-103,135-137,139-141,218,232-233,244
+docs/functional/specs/14-empty-and-error-states.md
+  s_a19600c5a07e8b::t_da0bd4f599e1a7 28
+src/components/investments/HoldingsTable.tsx
+  s_a19600c5a07e8b::t_71c031e99db786 26-29
+src/components/portfolio/NetWorthChart.tsx
+  s_a19600c5a07e8b::t_e38b59990c6573 20-25
+src/i18n/lang/en.ts
+  s_a19600c5a07e8b::t_aeb6825cc5f4ec 175
+src/logic/investments/AnnualisedReturn.ts
+  s_a19600c5a07e8b::t_995d9b66ede1a8 180-185,198-199,211-212
+src/logic/investments/Holdings.ts
+  s_a19600c5a07e8b::t_b0ab4c28ae9a2f 86,126,297-304,311,317-318,341-343,431
+src/logic/investments/Securities.ts
+  s_a19600c5a07e8b::t_5413a72b296b08 183-184
+src/logic/portfolio/NetWorthSeries.ts
+  s_a19600c5a07e8b::t_c2cf0b359825ca 24-32,45,225,227,237
+tests/logic/AnnualisedReturn.test.ts
+  s_a19600c5a07e8b::t_3706d073453cb5 2-4,16-17,172-212
+tests/logic/Holdings.test.ts
+  s_a19600c5a07e8b::t_43cc035b6555b7 232,237-238,240,242-251
+tests/logic/NetWorthSeries.test.ts
+  s_a19600c5a07e8b::t_7c45feacba1b5a 108,113,118,120-121,125-134,216-238
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "94923199985da6ac4237ae1bfcf7444c48333287",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a19600c5a07e8b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1b3f0d2e-5280-45f8-998a-192d02129cee",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
