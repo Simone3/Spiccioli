@@ -1,0 +1,82 @@
+CLAUDE.md
+  s_3b72b16ff3a2c4::t_c39953c60635ca 81
+docs/technical/06-styling.md
+  s_3b72b16ff3a2c4::t_0a2aeba7a068ee 29-30,33,36-42,48-54
+src/components/categories/CategoriesScreen.css
+  s_3b72b16ff3a2c4::t_4cfd9255d7bb4c 31-33,35,114-116,160
+src/components/checks/ChecksScreen.css
+  s_3b72b16ff3a2c4::t_4450a6f1d497ec 23-25,61-63,65,103,105
+src/components/common/AppButton.css
+  s_3b72b16ff3a2c4::t_5637b996f12cce 1-2,8-9,13,21-22,26,30,36,40,46-47,51-52,56,61-65
+src/components/common/AppErrorBoundary.css
+  s_3b72b16ff3a2c4::t_9433700ec686db 26-27,41,43-44,47-48
+src/components/common/Chip.css
+  s_3b72b16ff3a2c4::t_9e84f51333c8ff 7
+src/components/common/ConfirmDialog.css
+  s_3b72b16ff3a2c4::t_6c5d1f00d201f9 30-31
+src/components/common/DataTable.css
+  s_3b72b16ff3a2c4::t_ca2352b70f9e61 17-18,22,43-44,65-66,68
+src/components/common/DateField.css
+  s_3b72b16ff3a2c4::t_ea6b376678a48e 21,25-26,87
+src/components/common/DecimalField.css
+  s_3b72b16ff3a2c4::t_266d57b3b87c52 14,47-48
+src/components/common/FilterBar.css
+  s_3b72b16ff3a2c4::t_ef616566d25605 17-19,21
+src/components/common/FormDialog.css
+  s_3b72b16ff3a2c4::t_20629d488779c8 37-38,43-44,47
+src/components/common/LineChart.css
+  s_3b72b16ff3a2c4::t_e57fe577ca2e53 23-24,61-62,64,105
+src/components/common/PieChart.css
+  s_3b72b16ff3a2c4::t_3b4edbae7a07e6 23-24,33-35,39
+src/components/common/SelectField.css
+  s_3b72b16ff3a2c4::t_57093387adf3e9 11
+src/components/common/TextField.css
+  s_3b72b16ff3a2c4::t_85e45e5b0322bb 11
+src/components/import/BulkImportScreen.css
+  s_3b72b16ff3a2c4::t_d444bb94c21ead 23-24,28,38,42,91
+src/components/investments/InvestmentsScreen.css
+  s_3b72b16ff3a2c4::t_1cf10d20a7667d 35-37,49-52,54,78,92,255-256
+src/components/launch/LaunchScreen.css
+  s_3b72b16ff3a2c4::t_8f1b8d769dabac 28,31,35-42,45-47,99-100,111-113,148,173-175,180
+src/components/launch/LaunchScreen.tsx
+  s_3b72b16ff3a2c4::t_56e7fb887b81aa 3,122-123,129-130,136
+src/components/launch/UpgradeDialog.tsx
+  s_3b72b16ff3a2c4::t_43bdc7472c7287 3,32,64,66-68,74
+src/components/portfolio/PortfolioScreen.css
+  s_3b72b16ff3a2c4::t_d1bf67e3b773c6 46-49,51,62-65,67,70,72-74,76,112,123-126,209-210,247
+src/components/salaries/SalariesScreen.css
+  s_3b72b16ff3a2c4::t_30c90c1fda185a 37-40,42,60
+src/components/session/WriteFailurePanel.css
+  s_3b72b16ff3a2c4::t_c44f716ff671d3 30-31,38-40,57
+src/components/session/WriteFailurePanel.tsx
+  s_3b72b16ff3a2c4::t_16eab267b29ef7 3,44-45,51
+src/components/settings/SettingsScreen.css
+  s_3b72b16ff3a2c4::t_57454b06cb4148 35-36,40,82-83
+src/components/shell/ScreenLayout.css
+  s_3b72b16ff3a2c4::t_5c6ae4358a01bf 25-26,32,36
+src/components/shell/Sidebar.css
+  s_3b72b16ff3a2c4::t_335b7ca282c786 17-18,63-64,73-74,76
+src/index.css
+  s_3b72b16ff3a2c4::t_ae6c2db27e5df8 1-3,5-33,36-40,42-43,50-51,56,61-62,80-84,86-87,104-105,112-114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e705320f08434b1788b7584690919a0403535013",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3b72b16ff3a2c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "700e529b-3138-4b97-865f-c6ea3cab8d96",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
