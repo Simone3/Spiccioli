@@ -1,0 +1,40 @@
+src/components/common/ChartAxisFormat.ts
+  s_9651f586d1e284::t_b21dd694fa6012 1-25
+src/components/portfolio/NetWorthChart.tsx
+  s_9651f586d1e284::t_fc8fc7cba4cfbc 2,54,92
+src/components/salaries/SalaryCharts.tsx
+  s_9651f586d1e284::t_588656bbf5d05f 2,35,76-77,86-87
+src/i18n/lang/en.ts
+  s_9651f586d1e284::t_5554b3d9245911 1293-1299
+src/logic/format/Formatter.ts
+  s_9651f586d1e284::t_3e7916d0803f0b 3-12,30-33,65-67
+docs/technical/02-repository-map.md
+  s_9651f586d1e284::t_e39035955968c0 60,110
+src/components/common/LineChart.tsx
+  s_9651f586d1e284::t_13c388073582f2 56-59,80-86,88-90,153,157-164,180,188
+src/logic/format/NumberFormat.ts
+  s_9651f586d1e284::t_f90cb460f2dfff 13-16,29-40,47-52,105-122,134-160
+tests/logic/NumberFormat.test.ts
+  s_9651f586d1e284::t_da41826e0644f3 4,22-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4b8bf20feb9d82489d457be0a02b16b71ce587a1",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_9651f586d1e284": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "85794b27-ff8f-48e2-ba28-ad77b69f551d",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
