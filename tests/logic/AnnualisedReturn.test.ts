@@ -1,6 +1,7 @@
 import { makeAccount, makeInstitution, makePrice, makeSeededDocument, makeSecurity, makeTrade } from '../testUtils';
-import { annualisedReturn, buildCashFlows, portfolioAnnualisedReturn, type CashFlow } from 'src/logic/investments/AnnualisedReturn';
-import { walkPositions } from 'src/logic/investments/Holdings';
+import { createSpiccioliTranslator } from 'src/i18n/Translations';
+import { annualisedReturn, buildCashFlows, holdingAnnualisedReturn, portfolioAnnualisedReturn, type CashFlow } from 'src/logic/investments/AnnualisedReturn';
+import { deriveHoldings, walkPositions } from 'src/logic/investments/Holdings';
 import { MONEY_SCALES, widenToWorkingScale } from 'src/logic/money/Money';
 import type { LedgerDocument, Trade } from 'src/types/LedgerTypes';
 
@@ -11,6 +12,8 @@ import type { LedgerDocument, Trade } from 'src/types/LedgerTypes';
 
 const UNITS = 10000;
 const QUANTITY_UNITS = 1000000;
+
+const translator = createSpiccioliTranslator('en');
 
 const euros = (amount: number): number => {
 	return widenToWorkingScale(amount * 100, MONEY_SCALES.amount);
@@ -164,5 +167,46 @@ describe('the portfolio-wide figure', () => {
 		], { prices: [ makePrice({ securityId: 'swda', date: '2020-12-31', value: 110 * UNITS }) ] });
 
 		expect(portfolioAnnualisedReturn(document, walkPositions(document.trades), '2020-12-31')).toEqual({ rate: undefined, omitted: 1 });
+	});
+});
+
+describe('the rate of one holding', () => {
+	const rateOf = (document: LedgerDocument, today: string): number | undefined => {
+		const walk = walkPositions(document.trades);
+		const [ holding ] = deriveHoldings({ document, walk, translator });
+
+		return holdingAnnualisedReturn(holding, walk, today);
+	};
+
+	test('is the rate the position reconciles to against what it is worth today', () => {
+		const document = documentWith([
+			purchase({ date: '2020-01-01', quantity: 10 * QUANTITY_UNITS, unitPrice: 100 * UNITS })
+		], { prices: [ makePrice({ securityId: 'swda', date: '2020-12-31', value: 110 * UNITS }) ] });
+
+		expect(rateOf(document, '2020-12-31')).toBe(1000);
+	});
+
+	test('is undefined where the security has no price at all, rather than the rate its cost would reconcile to', () => {
+		const document = documentWith([
+			purchase({ date: '2020-01-01', quantity: 10 * QUANTITY_UNITS, unitPrice: 100 * UNITS })
+		]);
+
+		// The holding is carried at its cost everywhere else, and a terminal flow at cost would solve to a rate of about
+		// nothing — a position that earned exactly nothing, which is a performance claim nobody measured. Check 3 says why.
+		expect(rateOf(document, '2020-12-31')).toBeUndefined();
+	});
+
+	test('is undefined on an unpriced holding even though its cost would reconcile perfectly well', () => {
+		const document = documentWith([
+			purchase({ date: '2020-01-01', quantity: 10 * QUANTITY_UNITS, unitPrice: 100 * UNITS })
+		]);
+
+		const walk = walkPositions(document.trades);
+		const [ holding ] = deriveHoldings({ document, walk, translator });
+
+		// What is being refused is a solvable figure and not an unsolvable one, which is the whole of why this is a rule
+		expect(holding.marketValue).toBe(holding.invested);
+		expect(annualisedReturn(buildCashFlows(walk.positions.get('swda|dossier')?.trades ?? [], holding.marketValue, '2020-12-31'))).toBe(0);
+		expect(holdingAnnualisedReturn(holding, walk, '2020-12-31')).toBeUndefined();
 	});
 });

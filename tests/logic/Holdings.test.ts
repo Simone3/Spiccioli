@@ -229,16 +229,26 @@ describe('the hypothetical liquidation', () => {
 		expect(holding.netGainPct).toBe(7119);
 	});
 
-	test('values a holding with no price at nothing, with no fee and minus its cost', () => {
+	test('carries a holding with no price at what it cost, with no fee, no tax and no gain either way', () => {
 		const [ holding ] = holdingsOf(documentWith([ purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]));
 
 		expect(holding.price).toBeUndefined();
 		expect(holding.priceDate).toBeUndefined();
-		expect(holding.marketValue).toBe(0);
+		expect(cents(holding.marketValue)).toBe(50000);
+		expect(cents(holding.netProceeds)).toBe(50000);
 		expect(holding.sellFee).toBe(0);
+		expect(holding.taxableGain).toBe(0);
 		expect(holding.tax).toBe(0);
-		expect(cents(holding.gain)).toBe(-50000);
-		expect(cents(holding.netGain)).toBe(-50000);
+		expect(holding.gain).toBe(0);
+		expect(holding.netGain).toBe(0);
+	});
+
+	test('keeps the price undefined on a holding carried at cost, which is what marks the row and the check', () => {
+		const [ holding ] = holdingsOf(documentWith([ purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]));
+
+		// The cost is a fallback and not a measurement, so nothing may read it as a price the file holds
+		expect(holding.price).toBeUndefined();
+		expect(holding.priceDate).toBeUndefined();
 	});
 
 	test('lets the net proceeds go negative on a position worth less than the fee to sell it', () => {

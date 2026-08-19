@@ -172,7 +172,7 @@ export const EN_TRANSLATIONS = {
 			title: 'Net worth over time',
 			monthOfYear: '{month}/{year}',
 			fromPrices: 'Holdings, if any, at their latest known price',
-			fromCost: 'At least one holding at cost — no price yet',
+			fromCost: 'At least one holding at cost — no price to value it at',
 			rates: 'Net of capital-gains tax, sell fees and pension exit tax at today’s rates',
 			needsHistory: 'There is no history to draw yet — the line fills in as transactions and trades arrive. The figures above are the opening balances.'
 		},

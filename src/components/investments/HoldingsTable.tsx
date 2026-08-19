@@ -23,8 +23,10 @@ import type { Account, Institution, IsoDate, LedgerId, Security, TenThousandths 
  *
  * **A date older than the staleness threshold is marked in the cell itself**: the date is the thing that has gone wrong, so the
  * date is what is marked, and the row says *how* stale rather than only *that* it is. **A security with no price at all is marked
- * more loudly** — its price cell reads *none*, its *Last priced* an em dash, its value nothing and its gain minus everything the
- * position cost. The em dash is not marked: there is no date to age, and the price cell has already said so.
+ * differently rather than more loudly** — its price cell reads *none*, its *Last priced* an em dash, and its two money columns
+ * read what the position cost and a gain of nothing, the row being carried at cost ([§11.3]). The em dash is not marked: there is
+ * no date to age, and the price cell has already said so. **The money columns therefore look like a position that has gone
+ * nowhere**, and what says otherwise is the price cell, check 3 and the banner behind it — a row cannot shout and a banner can.
  *
  * The table is **gross** throughout: market price, no tax, no fees. The net counterpart is the Portfolio headline.
  */

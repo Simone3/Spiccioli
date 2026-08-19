@@ -180,8 +180,8 @@ export const indexPriceHistories = (prices: readonly Price[]): Map<LedgerId, Pri
 /**
  * Finds the most recent price a security had on or before a day, which is what values a holding at a past date.
  *
- * **A security with a history but nothing dated that early has no price there**, and the caller falls back to cost; a security
- * with no history at all is worth nothing, wherever it is asked about ([§11.5]).
+ * **A security with a history but nothing dated that early has no price there**, and the caller falls back to cost — which is
+ * the same thing it does for a security with no history at all, that having no price anywhere either ([§11.5]).
  * @param history One security's prices, oldest first.
  * @param date The day being asked about.
  * @returns The price in force on that day, or undefined where the history starts after it.

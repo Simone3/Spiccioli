@@ -105,20 +105,31 @@ describe('what a point is worth', () => {
 		expect(points[0].fromCost).toBe(true);
 		expect(points[0].value / 1000000).toBe(1100000);
 
-		// The line goes solid at the first month in which every holding had a price, and today's point is never dashed
+		// The line goes solid at the first month in which every holding had a price
 		expect(points[2].fromCost).toBe(false);
 		expect(points[3].fromCost).toBe(false);
 	});
 
-	test('values a holding whose security has no price at all at nothing, at every point, without calling it a cost', () => {
+	test('carries a holding whose security has no price at all at its cost, at every point from the purchase on', () => {
 		const document = seriesDocument({
 			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 0 }) ]
 		});
 
+		// 1.000,00 of cash plus 10.000,00 of cost, with no sell fee and no tax taken off it, and the point says it is a cost
 		for(const point of seriesOf(document)) {
-			expect(point.value / 1000000).toBe(100000);
-			expect(point.fromCost).toBe(false);
+			expect(point.value / 1000000).toBe(1100000);
+			expect(point.fromCost).toBe(true);
 		}
+	});
+
+	test('draws today\'s point from cost where a security has no price at all, which is the one case the last point is dashed', () => {
+		const document = seriesDocument({
+			trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 0 }) ]
+		});
+
+		const points = seriesOf(document);
+
+		expect(points[points.length - 1].fromCost).toBe(true);
 	});
 
 	test('leaves a position that has ever gone oversold out of every point, the early ones included', () => {
@@ -201,5 +212,28 @@ describe('the final point', () => {
 
 		expect(points[points.length - 1].date).toBe(TODAY);
 		expect(points[points.length - 1].value).toBe(figures.netWorth);
+	});
+
+	test('is still the headline figure where a security has no price at all, both sides carrying it at cost', () => {
+		const document = seriesDocument({
+			securities: [
+				makeSecurity({ id: 'swda', ticker: 'SWDA', type: 'stock-etf', taxRate: 2600 }),
+				makeSecurity({ id: 'vwce', isin: 'IE00BK5BQT80', ticker: 'VWCE', type: 'stock-etf', taxRate: 2600 })
+			],
+			prices: [ makePrice({ securityId: 'swda', date: '2026-02-20', value: 1234_5678 }) ],
+			trades: [
+				makeTrade({ id: 'priced', securityId: 'swda', accountId: 'dossier', date: '2026-01-20', quantity: 3_333300, unitPrice: 900_1234, fees: 295 }),
+				makeTrade({ id: 'unpriced', securityId: 'vwce', accountId: 'dossier', date: '2026-01-20', quantity: 7_777700, unitPrice: 1050_5555, fees: 295, insertionSeq: 2 })
+			]
+		});
+
+		const walk = walkPositions(document.trades);
+		const { figures } = derivePortfolioBalances({ document, holdings: deriveHoldings({ document, walk, translator }) });
+		const points = seriesOf(document);
+		const last = points[points.length - 1];
+
+		// The two agree not because nothing falls back to cost at today, but because both sides fall back to the same thing
+		expect(last.value).toBe(figures.netWorth);
+		expect(last.fromCost).toBe(true);
 	});
 });

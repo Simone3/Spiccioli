@@ -17,8 +17,12 @@ import type { NetWorthPoint } from 'src/logic/portfolio/NetWorthSeries';
  * **The series are not named in a key under the chart**, because they are one line in two states rather than two measurements:
  * a key would name two lines where the reader sees one, and it would name them everywhere rather than over the months they
  * apply to. **The cost series still exists only when there is one**, a file every month of which had a price for every holding
- * drawing one solid line. **Today's point is never drawn from cost**, a price never being dated ahead, so the price series is
- * never the missing one.
+ * drawing one solid line.
+ *
+ * **A security that has no price at all draws its whole life from cost, today's point included**, that fallback never ending
+ * where the one before a first price does ([§11.5]). The final point is dashed exactly when the headline above it contains such
+ * a holding, and it still equals that headline to the cent — both carry the position at what it cost. A file whose every open
+ * holding has a price is the case where the price series runs to the end alone.
  *
  * **The note under the chart states that the rates and the fee taken out at every point are today's**, those being the only
  * ones the file records. The final point needs no note at all: it is the figure printed at the top of the screen.

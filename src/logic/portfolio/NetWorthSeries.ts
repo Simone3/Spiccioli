@@ -21,10 +21,15 @@ import type { IsoDate, LedgerDocument, LedgerId } from 'src/types/LedgerTypes';
  * and an institution's `defaultSellFee` — because they are the only ones the file records. A past point is therefore what that
  * portfolio would have been worth in hand *on today's terms*, not what it would have fetched at the time.
  *
- * **The fallback to cost covers the years before a price was recorded, and nothing else.** A holding whose security has at least
- * one price but none dated early enough contributes its cost, with no sell fee and no tax, and the point says so; a holding whose
- * security has **no price at all** contributes zero, exactly as it does everywhere else. That distinction is what leaves the last
- * point equal to the headline and means today's point is never drawn from cost.
+ * **Two holdings fall back to cost, and they fall back to the same figure.** One whose security has at least one price but none
+ * dated early enough, and one whose security has **no price at all**, each contribute their cost, with no sell fee and no tax, and
+ * the point says so either way. The second never stops applying, so a file holding one unpriced security draws its whole life from
+ * cost — **today's point included, which is the one case the final point is drawn from cost**. The last point still equals the
+ * headline to the cent, because the headline carries that holding at cost too, and **that is why the two agree**: not because
+ * nothing falls back to cost at today, but because both sides fall back to the same thing.
+ *
+ * **There is one cost state and not two.** Which of the two cases a point is in is check 3's to say and not the line's: both are
+ * answered by recording a price, and a second state would need a precedence rule for the month that is in both at once.
  *
  * **A position that has ever gone oversold contributes nothing at any point**, the early ones included: no holding is derived for
  * it at all, so the line is wrong by whatever it was worth in the years before the trade that broke it, and checks 8 and 9 are
@@ -37,7 +42,7 @@ export interface NetWorthPoint {
 	// Net worth at that date, at the working scale
 	value: WorkingAmount;
 
-	// Whether any holding open at this point had to be valued at its cost, which is what draws the point dashed
+	// Whether any holding open at this point had to be carried at its cost, which is what draws the point dashed
 	fromCost: boolean;
 }
 
@@ -217,20 +222,11 @@ export const deriveNetWorthSeries = ({ document, walk, today }: NetWorthSeriesOp
 
 			const invested = multiplyWorkingScaleByQuantityScale(position.avgCost, position.quantity);
 			const history = priceHistories.get(position.securityId);
+			const price = history ? priceOnOrBefore(history, date) : undefined;
 
-			// A security nobody has ever priced is worth nothing, here exactly as it is on the card above
-			if(!history) {
-				continue;
-			}
-
-			const price = priceOnOrBefore(history, date);
-
-			// Before the first price there was, the holding is carried at what it cost — no sell fee and no tax
+			// No price to value it at — whether none yet or none ever — is one state, and the valuation carries it at cost
 			if(!price) {
-				value += invested;
 				fromCost = true;
-
-				continue;
 			}
 
 			const institution = account.institutionId === null ? undefined : institutions.get(account.institutionId);
@@ -238,7 +234,7 @@ export const deriveNetWorthSeries = ({ document, walk, today }: NetWorthSeriesOp
 			value += valueHolding({
 				quantity: position.quantity,
 				invested,
-				price: price.value,
+				price: price?.value,
 				sellFee: institution?.defaultSellFee ?? 0,
 				taxRate: security.taxRate
 			}).netProceeds;

@@ -177,6 +177,12 @@ export const annualisedReturn = (flows: readonly CashFlow[]): TenThousandths | u
 
 /**
  * The annualised return of one holding, which is every trade in that position plus what it is worth today.
+ *
+ * **A holding whose security has no price at all reads *undefined* rather than a rate**, and this is the one place the cost
+ * fallback of [§11.3] is refused. The holding is carried at its cost everywhere else, and a terminal flow at cost solves
+ * perfectly well — to a rate of about zero, a position that earned nothing, which is a performance claim nobody measured and is
+ * indistinguishable on screen from a real one. An amount standing on cost is a fallback the reader can see; a rate standing on it
+ * is a fabrication. Check 3 says why instead.
  * @param holding The holding.
  * @param walk The positions as the walk left them.
  * @param today Today, as the file writes a day.
@@ -189,7 +195,8 @@ export const holdingAnnualisedReturn = (
 ): TenThousandths | undefined => {
 	const position = walk.positions.get(positionKey(holding.securityId, holding.accountId));
 
-	if(!position) {
+	// A rate is the one figure that may not rest on the cost an unpriced holding is carried at
+	if(!position || holding.price === undefined) {
 		return undefined;
 	}
 
@@ -201,7 +208,8 @@ export const holdingAnnualisedReturn = (
  * the ones a lifetime performance figure must not drop — against the value of everything still open.
  *
  * **Two kinds of (security, account) are left out entirely, and the figure says how many**: an oversold one, which derives no
- * holding and so has no terminal value, and one whose security has no Price record at all, which has none either. **Left out means
+ * holding and so has no terminal value at all, and one whose security has no Price record at all, which has no *measured* one —
+ * the cost it is carried at everywhere else being a fallback, and a rate the one figure that may not rest on it. **Left out means
  * every flow in that position and not merely its terminal one** — dropping the terminal flow alone would leave the purchases
  * behind and report a position that returned nothing, which is a rate arrived at by omission rather than by arithmetic. A holding
  * whose price is merely stale is not left out.

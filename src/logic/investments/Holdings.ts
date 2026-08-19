@@ -83,7 +83,7 @@ export interface Holding {
 	avgCost: WorkingAmount;
 	invested: WorkingAmount;
 
-	// Undefined where the security has no Price record at all, which is what values the holding at nothing
+	// Undefined where the security has no Price record at all, which is what carries the holding at its cost instead
 	price: TenThousandths | undefined;
 	priceDate: IsoDate | undefined;
 
@@ -123,7 +123,7 @@ export interface HoldingValuationOptions {
 	// Quantity times the average cost, at the working scale
 	invested: WorkingAmount;
 
-	// The price the position is valued at, or undefined where there is none to value it at
+	// The price the position is valued at, or undefined where there is none and it falls back to its cost
 	price: TenThousandths | undefined;
 
 	// The institution's default sell fee, in cents. Charged once per holding, and not at all where there is no price.
@@ -294,22 +294,28 @@ export const walkPositions = (trades: readonly Trade[], asOf?: IsoDate): Positio
  * Values one position at a price and again as if it had been sold at it, which is the holding half of [§11.3].
  *
  * **The sell fee comes out before the tax**, a selling commission reducing the gain the tax is computed on, and **the tax is
- * never negative** — a loss produces no rebate. **A position with no price is worth nothing, its gain is minus its cost, its tax
- * is nothing and no fee is charged**, since nothing is being sold. **`netProceeds` can be negative and that is correct**: a
- * position worth less than the fee to close it would cost money to close.
+ * never negative** — a loss produces no rebate. **`netProceeds` can be negative and that is correct**: a position worth less than
+ * the fee to close it would cost money to close.
+ *
+ * **A position with no price to value it at is carried at what it cost**, which falls out of the same arithmetic rather than
+ * being a branch around it: no fee is charged, since nothing is being sold, so the taxable gain is exactly zero, the tax with it,
+ * and the net proceeds come out at the cost the position went in at. Its gain and its net gain are both nothing. **Cost is a
+ * fallback and not a valuation** — it is the one figure here that can err upward, every screen showing it says so, and the
+ * annualised return refuses it outright ([§11.3], [§11.8]).
  *
  * It is written once here because two screens value a holding: Portfolio at today's price, and the net worth line at the most
  * recent price of each of its dates.
  * @param options What the position is valued from.
  * @param options.quantity The quantity held.
  * @param options.invested What that quantity cost, at the working scale.
- * @param options.price The price to value it at, or undefined where there is none.
+ * @param options.price The price to value it at, or undefined where it falls back to its cost.
  * @param options.sellFee The institution's default sell fee, in cents.
  * @param options.taxRate The security's tax rate, in ten-thousandths.
  * @returns The valuation, gross and net.
  */
 export const valueHolding = ({ quantity, invested, price, sellFee, taxRate }: HoldingValuationOptions): HoldingValuation => {
-	const marketValue = price === undefined ? 0 : multiplyQuantityByRateScale(quantity, price);
+	// A position nobody has ever priced is carried at what it cost, which is the closest thing the file can say about it
+	const marketValue = price === undefined ? invested : multiplyQuantityByRateScale(quantity, price);
 
 	// Nothing is being sold on a position nobody has ever valued, so no commission is estimated against it
 	const fee = price === undefined ? 0 : widenToWorkingScale(sellFee, MONEY_SCALES.amount);
@@ -332,8 +338,9 @@ export const valueHolding = ({ quantity, invested, price, sellFee, taxRate }: Ho
  * Derives the holdings: the positions that are still open, valued at the latest price and again as if they had been sold today.
  *
  * **The sell fee comes out before the tax**, a selling commission reducing the gain the tax is computed on, and the tax is never
- * negative — a loss produces no rebate. **A holding whose security has no price at all is worth nothing, its gain is minus its
- * cost, its tax is nothing and no fee is charged**, since nothing is being sold.
+ * negative — a loss produces no rebate. **A holding whose security has no price at all is carried at what it cost**, its gain and
+ * its tax are nothing and no fee is charged, since nothing is being sold; its `price` stays undefined, which is what the row reads
+ * *none* from and what keeps it out of the annualised return.
  * @param options What the holdings are derived from.
  * @param options.document The ledger.
  * @param options.walk The positions as the walk left them.
@@ -421,7 +428,7 @@ export const deriveHoldings = ({ document, walk, translator }: HoldingsOptions):
  * Totals the two money columns of the Holdings footer and states the percentage they make.
  *
  * The denominator is what the positions cost — Σ value less Σ gain — so the figure is the gross return on the money still in the
- * market. A holding with no price contributes nothing to the value and minus its cost to the gain, exactly as its row does, so
+ * market. A holding with no price contributes its cost to the value and nothing to the gain, exactly as its row does, so
  * **neither total states an omission**: every figure exists.
  * @param holdings The holdings.
  * @returns The two totals and the percentage they make.
