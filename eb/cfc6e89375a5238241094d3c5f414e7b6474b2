@@ -1,0 +1,56 @@
+docs/functional/specs/03-portfolio.md
+  s_9651f586d1e284::t_6a3f2c4e8e2270 23-27,37-38,42,44-45,48
+docs/functional/specs/11-calculations.md
+  s_9651f586d1e284::t_13f38897cef133 134
+docs/technical/06-styling.md
+  s_9651f586d1e284::t_c0c405060d450e 64
+docs/technical/08-decisions-why.md
+  s_9651f586d1e284::t_bc8edb5acbd55d 22
+docs/technical/08-decisions.md
+  s_9651f586d1e284::t_a658538bdf5065 24
+src/components/common/HintNote.css
+  s_9651f586d1e284::t_15be88655e408d 25-26,47-51,55-60
+src/components/common/HintNote.tsx
+  s_9651f586d1e284::t_9a3e8a8c1bd6b2 14-16,19-20,41
+src/components/common/LineChart.tsx
+  s_9651f586d1e284::t_6c90438c2b310d 13,15-19,55-57,139,142-143,145,191-202
+src/components/common/PieChart.css
+  s_9651f586d1e284::t_191e16de93018e 28-29,31,34-35,39-46
+src/components/common/PieChart.tsx
+  s_9651f586d1e284::t_a7372920a4f40f 14-18,48-50,74,77,83-89,102-105
+src/components/portfolio/NetWorthCard.tsx
+  s_9651f586d1e284::t_e3c6f54e404f73 63
+src/components/portfolio/NetWorthChart.tsx
+  s_9651f586d1e284::t_ec3e2cc3231da4 9,12-14,16-20,22-23,48,89-90
+src/components/portfolio/PortfolioScreen.css
+  s_9651f586d1e284::t_2a54ced9548063 135-138,141-142,144,153,155,159-173
+src/components/portfolio/TypeBreakdownCard.tsx
+  s_9651f586d1e284::t_575c255a824d53 1,7,19-23,40-42,53-57,66-73,78-86
+src/i18n/lang/en.ts
+  s_9651f586d1e284::t_054d824782f6ec 128-130,132-134,136,170,174-175
+tests/components/LineChart.test.tsx
+  s_9651f586d1e284::t_9abc273b136806 26,35-36,77-84
+tests/components/PortfolioScreen.test.tsx
+  s_9651f586d1e284::t_7ddd845b13f0e4 82,86,107-126,133-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "ebcfc6e89375a5238241094d3c5f414e7b6474b2",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_9651f586d1e284": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "85794b27-ff8f-48e2-ba28-ad77b69f551d",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
