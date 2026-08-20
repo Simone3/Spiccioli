@@ -14,8 +14,7 @@ import { toSecurity, type SecurityFormValues } from 'src/components/investments/
 import { TradeFiltersBar } from 'src/components/investments/TradeFilters';
 import { TradeForm, type TradeFormValues } from 'src/components/investments/TradeForm';
 import { TradesTable } from 'src/components/investments/TradesTable';
-import { UpdatePricesPanel } from 'src/components/investments/UpdatePricesPanel';
-import { UpdatePricesSpanDialog } from 'src/components/investments/UpdatePricesSpanDialog';
+import { UpdatePricesDialog } from 'src/components/investments/UpdatePricesDialog';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
 import { useInvestmentsHandoff } from 'src/components/shell/RecordLinks';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
@@ -34,13 +33,6 @@ import {
 	totalHoldings,
 	walkPositions
 } from 'src/logic/investments/Holdings';
-import {
-	reviewPricePass,
-	toFetchedPrices,
-	toPriceListings,
-	type PricePassSpan,
-	type PriceUpdateReview
-} from 'src/logic/investments/PriceUpdate';
 import {
 	countSecurityUsage,
 	indexSecurities,
@@ -66,7 +58,6 @@ import {
 import { createLedgerId, nextInsertionSeq } from 'src/logic/ledger/LedgerDocument';
 import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
 import type { Account, IsoDate, LedgerId, Price, Security, Trade, TradeKind } from 'src/types/LedgerTypes';
-import type { PricePassProgress } from 'src/types/PriceIpcTypes';
 
 /**
  * Investments: four tabs, of which Holdings is entirely derived from the middle two and Securities is what all three point at.
@@ -121,14 +112,7 @@ export const InvestmentsScreen = (): ReactElement => {
 	const [ tradeToDelete, setTradeToDelete ] = useState<Trade | undefined>(undefined);
 	const [ refusal, setRefusal ] = useState<string | undefined>(undefined);
 	const [ notice, setNotice ] = useState<string | undefined>(undefined);
-	const [ isFetchingPrices, setIsFetchingPrices ] = useState(false);
-	const [ isChoosingSpan, setIsChoosingSpan ] = useState(false);
-
-	// How far the running pass has got, as the main process reports it. Undefined until the first listing has been answered.
-	const [ passProgress, setPassProgress ] = useState<PricePassProgress | undefined>(undefined);
-	const [ pricePass, setPricePass ] = useState<
-		{ askedCount: number; span: PricePassSpan; review: PriceUpdateReview } | undefined
-	>(undefined);
+	const [ isUpdatingPrices, setIsUpdatingPrices ] = useState(false);
 
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
 
@@ -254,59 +238,19 @@ export const InvestmentsScreen = (): ReactElement => {
 	};
 
 	/**
-	 * The one press that contacts the network.
+	 * Writes what the modal's review was confirmed with, which is the only thing a pass ever writes.
 	 *
-	 * **One request per security in the file, held or fully sold**, and the file is not touched: what comes back opens the review
-	 * panel, and nothing at all is written until that panel is confirmed.
-	 *
-	 * **The span is the user's answer to the one question the button puts**, and it reaches the listings already worked out per
-	 * security: the day after each one's most recent price, or the day of its first purchase where it holds none.
-	 *
-	 * **The pass says how far it has got while it runs.** The listener is removed however the pass ends, the failed and the
-	 * cancelled included, so a press leaves nothing of itself behind.
-	 * @param span Which of the two passes to run.
+	 * **Nothing reaches the file before this**: the pass gathers, the review is ticked, and the records arrive here already
+	 * narrowed to the days that are new or that land on a different value.
+	 * @param records What confirming writes.
 	 */
-	const runPricePass = async(span: PricePassSpan): Promise<void> => {
-		if(!document) {
-			return;
-		}
-
-		const listings = toPriceListings(document.securities, span, prices, document.trades, today);
-
-		setRefusal(undefined);
-		setNotice(undefined);
-		setPassProgress(undefined);
-		setIsFetchingPrices(true);
-
-		const stopListening = window.spiccioliPrices.onPassProgress(setPassProgress);
-
-		try {
-			const result = await window.spiccioliPrices.updatePrices(listings);
-
-			setPricePass({ askedCount: listings.length, span, review: reviewPricePass(result, securities, prices) });
-		}
-		catch {
-			// The pass itself reports a provider that could not be reached as a line in the panel, so reaching here is the bridge
-			// having failed rather than the network. It is stated where the button is and blocks nothing.
-			setRefusal(t('updatePrices.passFailed'));
-		}
-		finally {
-			stopListening();
-			setPassProgress(undefined);
-			setIsFetchingPrices(false);
-		}
-	};
-
-	// One confirmation covers the pass: every row is written, each as a fetched Price dated the day its quote is for, replacing
-	// whatever that day already held — a hand-typed value included
-	const confirmPricePass = (review: PriceUpdateReview): void => {
-		const records = toFetchedPrices(review.rows);
+	const writeFetchedPrices = (records: readonly Price[]): void => {
 		const dates = records.map((record) => {
 			return record.date;
 		}).sort();
 
-		// Laid over the history in one pass rather than one record at a time: a confirmed span is thousands of them, and writing
-		// each through the whole history would re-read the file once per day of it
+		// Laid over the history in one pass rather than one record at a time: a confirmed history is thousands of them, and
+		// writing each through the whole history would re-read the file once per day of it
 		updateDocument((current) => {
 			return { ...current, prices: writePrices(current.prices, records) };
 		});
@@ -317,14 +261,13 @@ export const InvestmentsScreen = (): ReactElement => {
 			lastDate: dates[dates.length - 1] ?? null
 		});
 		setNotice(t('updatePrices.wrote', { count: records.length }));
-		setPricePass(undefined);
+		setIsUpdatingPrices(false);
 	};
 
-	// Cancel and nothing at all is written — no record, no half-finished pass. The log still hears that the pass ended.
-	const cancelPricePass = (): void => {
+	// Closing without confirming writes nothing at all — no record, no half-finished pass. The log still hears that the pass ended.
+	const closePriceModal = (): void => {
 		void window.spiccioliPrices.reportPricesWritten({ writtenCount: 0, firstDate: null, lastDate: null });
-		setNotice(t('updatePrices.cancelled'));
-		setPricePass(undefined);
+		setIsUpdatingPrices(false);
 	};
 
 	const saveSecurity = (values: SecurityFormValues): void => {
@@ -749,39 +692,26 @@ export const InvestmentsScreen = (): ReactElement => {
 	};
 
 	const actions = (): ReactNode => {
-		// The button sits on the Securities tab, beside the list of what it asks about: a price belongs to a security, and every
-		// other way one is written is on this tab too. It puts one question — how far back — and is otherwise a button and nothing
-		// else: no selection first, no row to tick and no setting behind it. The sentence under it is what leaves the machine,
-		// stated here, again in the question and again in the panel.
+		// The button sits on the Securities tab, beside the list of what it offers to ask about: a price belongs to a security, and
+		// every other way one is written is on this tab too. It opens the modal and does nothing else — nothing is sent by the
+		// press itself, and what leaves the machine is stated on the page that sends it.
 		if(tab === 'securities' && orderedSecurities.length > 0) {
 			return (
-				<div className='investments-screen-update-prices'>
-					<div className='investments-screen-update-prices-buttons'>
-						<AppButton
-							disabled={isFetchingPrices}
-							onClick={() => {
-								setIsChoosingSpan(true);
-							}}>
-							{isFetchingPrices ? t('updatePrices.busy') : t('updatePrices.button')}
-						</AppButton>
-						<AppButton
-							variant='primary'
-							onClick={() => {
-								setSecurityDraft({ security: undefined });
-							}}>
-							{t('securities.add')}
-						</AppButton>
-					</div>
-					{isFetchingPrices && passProgress !== undefined && (
-						<span className='investments-screen-update-prices-progress' role='status'>
-							{t('updatePrices.progress', {
-								done: formatter.integer(passProgress.done),
-								total: formatter.integer(passProgress.total),
-								ticker: passProgress.ticker
-							})}
-						</span>
-					)}
-					<p>{t('updatePrices.whatLeaves', { provider: t('updatePrices.providerName') })}</p>
+				<div className='investments-screen-update-prices-buttons'>
+					<AppButton
+						onClick={() => {
+							setNotice(undefined);
+							setIsUpdatingPrices(true);
+						}}>
+						{t('updatePrices.button')}
+					</AppButton>
+					<AppButton
+						variant='primary'
+						onClick={() => {
+							setSecurityDraft({ security: undefined });
+						}}>
+						{t('securities.add')}
+					</AppButton>
 				</div>
 			);
 		}
@@ -874,26 +804,19 @@ export const InvestmentsScreen = (): ReactElement => {
 			{tab === 'sales' && renderTradesTab('sale')}
 			{tab === 'securities' && renderSecuritiesTab()}
 
-			{isChoosingSpan && (
-				<UpdatePricesSpanDialog
-					onChoose={(span) => {
-						setIsChoosingSpan(false);
-						void runPricePass(span);
+			{isUpdatingPrices && document && (
+				<UpdatePricesDialog
+					securities={document.securities}
+					prices={prices}
+					trades={trades}
+					positions={securityPositions}
+					today={today}
+					onWrite={writeFetchedPrices}
+					onPassFailed={() => {
+						setRefusal(t('updatePrices.passFailed'));
+						setIsUpdatingPrices(false);
 					}}
-					onCancel={() => {
-						setIsChoosingSpan(false);
-					}}/>
-			)}
-
-			{pricePass && (
-				<UpdatePricesPanel
-					review={pricePass.review}
-					askedCount={pricePass.askedCount}
-					span={pricePass.span}
-					onConfirm={() => {
-						confirmPricePass(pricePass.review);
-					}}
-					onCancel={cancelPricePass}/>
+					onClose={closePriceModal}/>
 			)}
 
 			{securityDraft && (

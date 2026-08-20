@@ -28,7 +28,7 @@ const chartResponse = (meta: Record<string, unknown>): unknown => {
 
 const MILAN_CLOSE = { currency: 'EUR', regularMarketPrice: 92.31, regularMarketTime: 1786116600, gmtoffset: 7200 };
 
-const SINCE: PriceSpan = { kind: 'since', from: '2026-08-05' };
+const SINCE: PriceSpan = { kind: 'window', from: '2026-08-05', to: '2026-08-08' };
 
 // Milan opens at 09:00 local, which in the summer is 07:00 UTC. One bar a day, each stamped at the open.
 const MILAN_OPEN_5_AUGUST = 1785913200;

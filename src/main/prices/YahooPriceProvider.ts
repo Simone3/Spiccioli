@@ -202,17 +202,18 @@ const readCloses = (result: YahooChartResult): unknown[] => {
  * Reads the bars, which is what a span asks for.
  *
  * **A day the provider listed and carried no figure for is dropped and counted** — a holiday it lists anyway, a halt, a gap it
- * does not fill — rather than passed on as something the refusals have to recognise. **A day before the span asked for is
- * dropped silently**: the window sent is deliberately a little wider than the span, so that no venue's first day is lost to its
- * offset from UTC, and the days outside it were never asked for.
+ * does not fill — rather than passed on as something the refusals have to recognise. **A day outside the span asked for is
+ * dropped silently**: the window sent is deliberately a little wider at both ends, so that no venue's first or last day is lost
+ * to its offset from UTC, and the days beyond it were never asked for.
  *
  * **One day holds one figure.** A response repeating a day keeps its last, the file having nowhere to put two prices for one
  * security and one date and its reader refusing a pair outright.
  * @param payload What the provider answered.
  * @param from The first day the span wanted.
+ * @param to The last day the span wanted.
  * @returns The days it carries, oldest first, or that it carries none.
  */
-const readSeries = (payload: unknown, from: IsoDate): ProviderQuoteResult => {
+const readSeries = (payload: unknown, from: IsoDate, to: IsoDate): ProviderQuoteResult => {
 	const result = readResult(payload);
 	const meta = readMeta(payload);
 
@@ -235,7 +236,7 @@ const readSeries = (payload: unknown, from: IsoDate): ProviderQuoteResult => {
 
 		const date = toExchangeDay(at, offset);
 
-		if(date < from) {
+		if(date < from || date > to) {
 			continue;
 		}
 
@@ -262,8 +263,9 @@ const readSeries = (payload: unknown, from: IsoDate): ProviderQuoteResult => {
 /**
  * Builds the query one span is asked with.
  *
- * The window sent for a span starts a day before the one wanted and ends a day after today: a venue's own offset from UTC decides
- * which day a bar falls on, and neither end may be lost to it. What is actually kept is decided against the span afterwards.
+ * The window sent for a span starts a day before the first day wanted and ends a day after the last: a venue's own offset from
+ * UTC decides which day a bar falls on, and neither end may be lost to it. What is actually kept is decided against the span
+ * afterwards.
  * @param span The span.
  * @returns The query string, without its leading question mark.
  */
@@ -273,7 +275,7 @@ const toChartQuery = (span: PriceSpan): string => {
 	}
 
 	const from = Math.floor(Date.parse(`${span.from}T00:00:00Z`) / MILLIS_PER_SECOND) - SECONDS_PER_DAY;
-	const until = Math.floor(Date.now() / MILLIS_PER_SECOND) + SECONDS_PER_DAY;
+	const until = Math.floor(Date.parse(`${span.to}T00:00:00Z`) / MILLIS_PER_SECOND) + SECONDS_PER_DAY;
 
 	return `${DAILY_INTERVAL}&period1=${from}&period2=${until}`;
 };
@@ -311,7 +313,7 @@ export const createYahooPriceProvider = ({
 
 				const payload = await response.json();
 
-				return span.kind === 'latest' ? readLatest(payload) : readSeries(payload, span.from);
+				return span.kind === 'latest' ? readLatest(payload) : readSeries(payload, span.from, span.to);
 			}
 			catch(error) {
 				return { outcome: 'failed', message: getErrorMessage(error) };

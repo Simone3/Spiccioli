@@ -42,6 +42,9 @@ export const stubPricesBridge = (overrides: Partial<SpiccioliPricesApi> = {}): S
 		updatePrices: () => {
 			return Promise.resolve({ referenceDate: null, outcomes: [] });
 		},
+		cancelPricePass: () => {
+			return Promise.resolve();
+		},
 		reportPricesWritten: () => {
 			return Promise.resolve();
 		},

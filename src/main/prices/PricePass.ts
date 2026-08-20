@@ -14,17 +14,21 @@ import type {
 /**
  * One press of *Update prices*, from end to end.
  *
- * **One request per security in the file, held or fully sold**, paced rather than fired at once, and **each failing on its own
- * without taking the pass down**: a security the provider has no quote for, one whose quote is refused and one whose request
- * never completed are three lines in the review panel, and the twelve securities around them are still asked about.
+ * **One request per listing the renderer sent**, which is one per security the user ticked, paced rather than fired at once, and
+ * **each failing on its own without taking the pass down**: a security the provider has no quote for, one whose quote is refused
+ * and one whose request never completed are three rows in the review, and the twelve securities around them are still asked
+ * about.
  *
- * **What each request asks for is the listing's own.** A listing carrying no first day wants the latest quote alone; one carrying
- * a day wants every day from it onwards. The choice between the two is the user's and is made once for the whole pass, but it
+ * **What each request asks for is the listing's own.** A listing carrying no window wants the latest quote alone; one carrying a
+ * window wants every day of it. The choice between the three spans is the user's and is made once for the whole pass, but it
  * reaches here already resolved to a span per security, a security with no history to build having nothing to ask for but the
- * latest quote either way.
+ * latest quote whichever answer was given.
  *
- * **A pass says how far it has got as it goes**, one report per listing answered. It is the only thing the main process pushes to
- * the renderer, and a pass over a file asked day by day is slow enough to need it.
+ * **A pass says how far it has got as it goes**, one report per listing answered, carrying the answer with it: the review is
+ * drawn while the pass runs and fills in row by row. It is the only thing the main process pushes to the renderer.
+ *
+ * **A pass can be abandoned and cannot be paused.** Asked to stop, it finishes the request in flight, asks for nothing further
+ * and reports nothing more — and what it gathered goes nowhere, a cancelled pass ending at nothing.
  *
  * **Nothing here writes anything.** The pass reaches the network and reports what came back; the file is the renderer's, and a
  * Price record is written only after the user has confirmed the panel.
@@ -46,6 +50,10 @@ export interface RunPricePassOptions {
 
 	// Told how far the pass has got, once per listing answered. Absent where nobody is watching.
 	onProgress?: (progress: PricePassProgress) => void;
+
+	// Asked before each listing. A pass the user has abandoned finishes the request in flight, asks for nothing further and comes
+	// back with what it happens to hold — which nobody reads: a cancelled pass ends at nothing.
+	isCancelled?: () => boolean;
 }
 
 const sleep = (milliseconds: number): Promise<void> => {
@@ -60,9 +68,11 @@ const truncateFailure = (message: string): string => {
 		`${message.slice(0, PRICES_CONFIG.maximumFailureMessageLength)}…`;
 };
 
-// What one listing is asking for: the latest quote alone, or every day from the one it carries
+// What one listing is asking for: the latest quote alone, or every day of the window it carries
 const toSpan = (listing: PriceListingRequest): PriceSpan => {
-	return listing.from === null ? { kind: 'latest' } : { kind: 'since', from: listing.from };
+	return listing.from === null || listing.to === null ?
+		{ kind: 'latest' } :
+		{ kind: 'window', from: listing.from, to: listing.to };
 };
 
 // One listing, asked about and read. The listing given to the provider is the ticker and the exchange: the identity the renderer
@@ -129,6 +139,7 @@ const countOutcomes = (outcomes: readonly PriceFetchOutcome[], wanted: PriceFetc
  * @param options.spacingMs How long the pass waits between requests.
  * @param options.delay What the waiting is done with.
  * @param options.onProgress Told how far the pass has got, once per listing answered.
+ * @param options.isCancelled Asked before each listing, and again before its answer is reported.
  * @returns What came back, one outcome per listing, and the provider's reference date where it states one.
  */
 export const runPricePass = async({
@@ -136,7 +147,8 @@ export const runPricePass = async({
 	listings,
 	spacingMs = PRICES_CONFIG.requestSpacingMs,
 	delay = sleep,
-	onProgress
+	onProgress,
+	isCancelled
 }: RunPricePassOptions): Promise<PricePassResult> => {
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
 	const outcomes: PriceFetchOutcome[] = [];
@@ -152,7 +164,15 @@ export const runPricePass = async({
 		}).length
 	});
 
+	let cancelled = false;
+
 	for(const listing of listings) {
+		if(isCancelled?.()) {
+			cancelled = true;
+
+			break;
+		}
+
 		if(outcomes.length > 0) {
 			await delay(spacingMs);
 		}
@@ -161,12 +181,21 @@ export const runPricePass = async({
 
 		logListing(listing, outcome);
 		outcomes.push(outcome);
-		onProgress?.({ done: outcomes.length, total: listings.length, ticker: listing.ticker });
+
+		// The request in flight when the user cancelled is finished and then dropped: reporting it would draw a row into a modal
+		// that has already closed
+		if(isCancelled?.()) {
+			cancelled = true;
+
+			break;
+		}
+
+		onProgress?.({ done: outcomes.length, total: listings.length, ticker: listing.ticker, outcome });
 	}
 
-	appLogger.info('Finished a price pass', {
+	appLogger.info(cancelled ? 'Abandoned a price pass' : 'Finished a price pass', {
 		type: 'prices.pass',
-		stage: 'end',
+		stage: cancelled ? 'cancelled' : 'end',
 		listings: listings.length,
 		quoted: countOutcomes(outcomes, 'quoted'),
 		noQuote: countOutcomes(outcomes, 'no-quote'),

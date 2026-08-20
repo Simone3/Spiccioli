@@ -980,70 +980,146 @@ export const EN_TRANSLATIONS = {
 		}
 	},
 
-	// The one press that contacts the network, and the panel that puts what came back to the user before a single record is written
+	// The modal the *Update prices* button opens: which securities, how far back, what came back, and what writing it would do
 	updatePrices: {
 		button: 'Update prices',
-		busy: 'Fetching prices…',
+		title: 'Update prices',
+		fetching: 'Fetching prices',
+		fetched: 'Prices fetched',
 		providerName: 'Yahoo Finance',
+		steps: {
+			choose: '1 Choose',
+			fetch: '2 Fetch and review'
+		},
 
-		// Said beside the button, and again in the panel — the moment the user sees what a request brought back is the moment the
-		// question of what it took occurs to them
-		whatLeaves: 'The only thing in Spiccioli that contacts the network. It sends each security’s ticker and exchange to {provider} — and, when fetching a history, the day to start from — and nothing else: never the ISIN, never an amount, a quantity or an account.',
-		title: 'Prices fetched — nothing written yet',
-		subtitle: '{securities} asked for',
-		subtitleWithReference: '{securities} asked for · provider reference date {date}',
+		// Said on the page that sends, beside the listings it will send and the column of first days that goes with them
+		whatLeaves: 'Fetching sends each ticked security’s ticker and exchange to {provider} — and, where more than the latest quote is asked for, the day in the Ask from column — and nothing else: never the ISIN, never an amount, a quantity or an account.',
+
+		// How far back, which is one question with three answers and covers every ticked security
+		spanLegend: 'How far back',
+		spans: {
+			latest: 'Latest quote only',
+			latestNote: 'One figure per security, whatever day the provider has it for. This is what keeps an open file current.',
+			sinceLast: 'Since the last price',
+			sinceLastNote: 'From the day after each security’s most recent price. One with no price at all is asked from its first purchase.',
+			wholeHistory: 'The whole history',
+			wholeHistoryNote: 'From each security’s first purchase to today, or to its last sale where the position is closed. This is what fills a history in, and it asks for years of days at a time.'
+		},
+
+		select: 'Select',
+		selectors: {
+			all: 'All',
+			none: 'None',
+			held: 'Held',
+			neverPriced: 'Never priced',
+			stale: 'Stale',
+			writable: 'All that can be written'
+		},
+		selectAll: 'Ask about every security',
+		askAbout: 'Ask about {ticker}',
+		tickAll: 'Write every security that can be written',
+		write: 'Write the prices fetched for {ticker}',
+		cannotWrite: 'Nothing to write for {ticker}',
+
+		chooseTable: 'Securities to ask about',
+		reviewTable: 'What came back',
+		columns: {
+			security: 'Security',
+			lastPrice: 'Last price',
+			pricedOn: 'Priced on',
+			askFrom: 'Ask from',
+			days: 'Days',
+			quote: 'Newest quote',
+			quoteDate: 'Quote is for',
+			cameBack: 'What came back'
+		},
+		neverPriced: 'never priced',
+		notHeld: 'no longer held',
+		latestOnly: 'latest quote',
 		securityCount: {
 			one: '1 security',
 			other: '{count} securities'
 		},
-		securityCountForHistory: {
-			one: '1 security, every day since its last price',
-			other: '{count} securities, every day since their last price'
+		dayCount: {
+			one: '1 day to ask for',
+			other: '{count} days to ask for'
 		},
-		table: 'Prices fetched',
-		columns: {
-			security: 'Security',
-			quote: 'Quote',
-			quoteDate: 'Quote is for',
-			holds: 'That day currently holds',
-			days: 'Days fetched',
-			replaces: 'Days already priced'
+		chooseFooter: '{securities} ticked · {days}',
+		fetch: 'Fetch {securities}',
+		fetchDays: 'Fetch {securities} · {days}',
+
+		// How far the running pass has got, which a file asked day by day is slow enough to need
+		progress: '{done} of {total} asked · {ticker}',
+		progressAsked: '{done} of {total} asked',
+		stillRunning: 'Nothing is written while the pass runs.',
+		queued: 'queued',
+		asking: 'asking…',
+		notAsked: 'not asked for',
+
+		// What one row says came back, which is what writing it would do to the file
+		daysBack: {
+			one: '1 day',
+			other: '{count} days'
 		},
-		newDay: 'nothing — a new day',
-		footer: '{written} · {replaced} · {quoted}',
-		writtenCount: {
-			one: '1 to write',
-			other: '{count} to write'
+		newDays: {
+			one: '1 new',
+			other: '{count} new'
+		},
+		replacedDays: {
+			one: '1 replaces',
+			other: '{count} replace'
+		},
+		unchangedDays: {
+			one: '1 unchanged',
+			other: '{count} unchanged'
+		},
+		droppedDays: {
+			one: '1 dropped',
+			other: '{count} dropped'
+		},
+		showReplacements: 'Show the days that change',
+		hideReplacements: 'Hide the days that change',
+		replacementsTitle: {
+			one: 'The day that changes',
+			other: 'The {count} days that change'
+		},
+		replacementNow: 'now {value} · {source}',
+
+		referenceDate: 'Provider reference date {date}',
+		reviewFooter: '{writes} over {securities} · {replaced} · {rest}',
+		writeCount: {
+			one: '1 price to write',
+			other: '{count} prices to write'
 		},
 		replacedNone: 'every day is new',
-		replaced: {
-			one: '1 replaces a value',
-			other: '{count} replace a value'
+		replaced: '{count} replace a different value, {manual}',
+		replacedManual: {
+			one: '1 of them typed by hand',
+			other: '{count} of them typed by hand'
 		},
-		replacedWithManual: {
-			one: '{replaced}, 1 of them typed by hand',
-			other: '{replaced}, {count} of them typed by hand'
+		unchangedAndDropped: '{unchanged} · {dropped}',
+		unchangedCount: {
+			one: '1 day unchanged',
+			other: '{count} days unchanged'
 		},
-		quotedOnOneDay: 'all quoted {date}',
-		quotedOverSeveralDays: 'quoted over several days',
-		droppedNone: 'every day the provider carried was usable',
-		dropped: {
-			one: '1 day dropped — no figure, or one that could not be written',
-			other: '{count} days dropped — no figure, or one that could not be written'
-		},
-
-		// The one question the button puts, and the two answers it takes
-		span: {
-			title: 'Update prices — how far back?',
-			subtitle: 'The answer covers every security in the file.',
-			latest: 'Just the latest quote',
-			latestNote: 'One figure per security, whatever day the provider has it for. This is what keeps an open file current.',
-			history: 'Every day since the last price',
-			historyNote: 'Each security from the day after its most recent price, or from its first purchase where it has none, through to today. This is what fills a history in — it asks for years of days at a time and takes considerably longer.'
+		droppedCount: {
+			one: '1 day dropped',
+			other: '{count} days dropped'
 		},
 
-		// How far the running pass has got, which a pass over a whole file is slow enough to need
-		progress: '{done} of {total} asked · {ticker}',
+		changeOptions: '← Change options',
+		retry: {
+			one: 'Retry the 1 that failed',
+			other: 'Retry the {count} that failed'
+		},
+		canRetry: 'can be retried',
+
+		// Cancelling a running pass, which throws away what is already on screen
+		stopTitle: 'Stop fetching?',
+		stopMessage: 'The pass is not finished. Closing now discards the prices already fetched, including the ones you can see — nothing has been written, and every price the file holds still stands.',
+		stopConfirm: 'Stop and close',
+		stopCancel: 'Keep fetching',
+
 		problems: 'Nothing to write for these — they keep the prices they have',
 		reasons: {
 			noQuote: 'the provider has no quote for it',
@@ -1054,7 +1130,7 @@ export const EN_TRANSLATIONS = {
 			failed: 'could not be fetched — {message}'
 		},
 		passFailed: 'The price pass could not be started.',
-		nothingToWrite: 'Nothing came back that can be written. Every price the file holds still stands, and pressing the button again is the remedy — as is typing a price in by hand.',
+		nothingToWrite: 'Nothing came back that can be written. Every price the file holds still stands, and fetching again is the remedy — as is typing a price in by hand.',
 		confirm: {
 			one: 'Write 1 price',
 			other: 'Write {count} prices'
@@ -1063,8 +1139,7 @@ export const EN_TRANSLATIONS = {
 		wrote: {
 			one: '1 price written.',
 			other: '{count} prices written.'
-		},
-		cancelled: 'Nothing was written.'
+		}
 	},
 
 	// The two tabs of the Salaries screen. Contracts is the denominator every figure on Payslips divides by, which is why they sit together.

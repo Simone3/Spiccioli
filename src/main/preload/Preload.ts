@@ -100,6 +100,9 @@ const spiccioliPrices: SpiccioliPricesApi = {
 	updatePrices: (listings) => {
 		return ipcRenderer.invoke(SPICCIOLI_PRICES_IPC_CHANNELS.updatePrices, listings);
 	},
+	cancelPricePass: () => {
+		return ipcRenderer.invoke(SPICCIOLI_PRICES_IPC_CHANNELS.cancelPricePass);
+	},
 	reportPricesWritten: (report) => {
 		return ipcRenderer.invoke(SPICCIOLI_PRICES_IPC_CHANNELS.reportPricesWritten, report);
 	},

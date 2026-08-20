@@ -204,31 +204,15 @@
 	cursor: pointer;
 }
 
-/* The button that contacts the network, and the sentence that says what it sends. The sentence is beside the button and not
-   behind a hint, because it is the whole of what leaves the machine. */
-.investments-screen-update-prices {
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
-	align-items: flex-end;
-	max-width: 420px;
-}
-
+/* The button that opens the modal, beside the one that adds a security. The press sends nothing: what leaves the machine is
+   stated on the page that sends it. */
 .investments-screen-update-prices-buttons {
 	display: flex;
 	gap: 8px;
 	align-items: center;
 }
 
-.investments-screen-update-prices p {
-	margin: 0;
-	font-size: 12px;
-	line-height: 1.5;
-	color: var(--colors-text-secondary);
-	text-align: right;
-}
-
-/* The review panel: what a pass brought back, before a single record is written */
+/* The modal: which securities, how far back, what came back, and what writing it would do */
 .update-prices-overlay {
 	position: fixed;
 	inset: 0;
@@ -245,10 +229,10 @@
 .update-prices-panel {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 14px;
 	box-sizing: border-box;
 	width: 100%;
-	max-width: 860px;
+	max-width: 980px;
 	padding: 22px;
 	background-color: var(--colors-background-secondary);
 	border: 1px solid var(--colors-border-strong);
@@ -258,8 +242,9 @@
 
 .update-prices-heading {
 	display: flex;
-	flex-direction: column;
-	gap: 2px;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 20px;
 }
 
 .update-prices-title {
@@ -269,44 +254,216 @@
 	font-weight: 700;
 }
 
-.update-prices-actions {
+/* Which of the two pages is up. A step is a label and never a control: the way back is a button in the footer. */
+.update-prices-steps {
 	display: flex;
-	gap: 8px;
-	justify-content: flex-end;
+	gap: 6px;
+	flex: none;
 }
 
-/* The question the button puts before it contacts anything. Narrower than the review panel: it holds two choices, not a table. */
-.update-prices-panel-narrow {
-	max-width: 520px;
+.update-prices-steps span {
+	padding: 2px 9px;
+	font-family: var(--font-family-mono);
+	font-size: 10px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--colors-text-faint);
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 20px;
 }
 
-.update-prices-choices {
+.update-prices-steps span.update-prices-step-on {
+	color: var(--colors-accent-primary);
+	border-color: var(--colors-accent-primary);
+}
+
+/* The one question the pass puts, as three real radios: each says what it will do rather than leaving a label to be decoded */
+.update-prices-spans {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+.update-prices-spans legend {
+	padding: 0 0 8px;
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--colors-text-faint);
+}
+
+.update-prices-span {
 	display: flex;
 	flex-direction: column;
-	gap: 14px;
+	gap: 5px;
+	padding: 11px 13px;
+	background-color: var(--colors-background-primary);
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 8px;
+	cursor: pointer;
 }
 
-/* Each choice is a real button with the sentence that says what it will do beneath it, rather than a label to be decoded */
-.update-prices-choice {
+.update-prices-span-chosen {
+	border-color: var(--colors-accent-primary);
+}
+
+.update-prices-span-name {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13.5px;
+}
+
+.update-prices-span-radio {
+	width: 13px;
+	height: 13px;
+	margin: 0;
+	accent-color: var(--colors-accent-primary);
+}
+
+.update-prices-span-note {
+	font-size: 11.5px;
+	line-height: 1.5;
+	color: var(--colors-text-secondary);
+}
+
+/* The selectors, which set the whole selection rather than adding to it */
+.update-prices-selectors {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.update-prices-selectors-label {
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--colors-text-faint);
+}
+
+.update-prices-reference {
+	margin-left: auto;
+	font-family: var(--font-family-mono);
+	font-size: 11.5px;
+	color: var(--colors-text-faint);
+}
+
+/* A row nothing will be written for: stated rather than hidden, and quieter than the ones that will */
+.update-prices-row-quiet td {
+	color: var(--colors-text-faint);
+}
+
+.update-prices-unpriced {
+	color: var(--colors-accent-primary);
+}
+
+.update-prices-asking {
+	color: var(--colors-accent-primary);
+	font-variant-numeric: tabular-nums;
+}
+
+.update-prices-days {
+	margin-right: 6px;
+	font-family: var(--font-family-mono);
+	font-variant-numeric: tabular-nums;
+}
+
+/* The days that would land on a different value, which are the only writes that take something away */
+.update-prices-expand {
+	margin-left: 8px;
+	padding: 0;
+	font-size: 11.5px;
+	color: var(--colors-text-secondary);
+	background: none;
+	border: none;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.update-prices-replacements {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	margin: 8px 0 2px;
+	padding: 8px 10px;
+	background-color: var(--colors-background-primary);
+	border-radius: 6px;
+}
+
+.update-prices-replacements dt {
+	font-family: var(--font-family-mono);
+	font-size: 10px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--colors-text-faint);
+}
+
+.update-prices-replacements dd {
+	margin: 0;
+	font-family: var(--font-family-mono);
+	font-size: 11.5px;
+	font-variant-numeric: tabular-nums;
+}
+
+/* How far the running pass has got. Nothing else moves while it fills: the table below it is the one it will end on. */
+.update-prices-progress {
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
-	align-items: flex-start;
-}
-
-.update-prices-choice p {
-	margin: 0;
-	font-size: 12px;
-	line-height: 1.5;
-	color: var(--colors-text-secondary);
-}
-
-/* How far a running pass has got. It replaces nothing and pushes nothing about: the sentence below it stays where it was. */
-.investments-screen-update-prices-progress {
-	font-size: 12px;
-	line-height: 1.5;
+	font-family: var(--font-family-mono);
+	font-size: 11.5px;
 	color: var(--colors-text-secondary);
 	font-variant-numeric: tabular-nums;
+}
+
+.update-prices-bar {
+	height: 4px;
+	background-color: var(--colors-background-primary);
+	border-radius: 3px;
+	overflow: hidden;
+}
+
+.update-prices-bar i {
+	display: block;
+	height: 100%;
+	background-color: var(--colors-accent-primary);
+	transition: width 0.2s ease;
+}
+
+/* What leaves the machine, said on the page that sends it */
+.update-prices-note {
+	margin: 0;
+	padding: 10px 12px;
+	font-size: 11.5px;
+	line-height: 1.6;
+	color: var(--colors-text-secondary);
+	background-color: var(--colors-background-primary);
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 6px;
+}
+
+.update-prices-actions {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.update-prices-actions-right {
+	display: flex;
+	gap: 8px;
+	margin-left: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.update-prices-bar i {
+		transition: none;
+	}
 }
 
 /* What a confirmed or a cancelled pass says it did. It states a fact rather than a problem, so it is not the refusal's colour. */

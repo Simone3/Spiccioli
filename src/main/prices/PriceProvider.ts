@@ -8,7 +8,8 @@ import type { Exchange, IsoDate } from 'src/types/LedgerTypes';
  *
  * **A listing is the whole of what leaves the machine** — a ticker and an exchange, and never the ISIN, an amount, a quantity or
  * an account. The exchange is Spiccioli's own enum of eurozone venues; whatever a provider spells it as is the adapter's business
- * and never reaches the file. **A span carries no more than a date**: how far back the history is wanted from.
+ * and never reaches the file. **A span carries no more than two dates**: the day the history is wanted from, and the day it is
+ * wanted to.
  *
  * **The currency belongs to the answer and not to the day.** A provider states it once for everything it sends back, which is
  * what lets a whole series be refused on one reading of it, and what keeps a day down to a figure and the date it is for.
@@ -20,17 +21,18 @@ export interface PriceListing {
 }
 
 /**
- * How far back one request reaches.
+ * How far back one request reaches, and how far forward.
  *
- * **"latest" is the pass that keeps a file current** and asks for one figure per security. **"since" is the pass that fills a
- * history in** and asks for every day from `from` through to today, that day being the one after the file's most recent price or
- * the security's first purchase.
+ * **"latest" is the request that keeps a file current** and asks for one figure. **"window" is the request that fills a history
+ * in** and asks for every day from `from` to `to` — the first being the day after the file's most recent price or the security's
+ * first purchase, and the last being today where the position is open and the day of the last sale where it is closed.
  */
 export type PriceSpan = {
 	kind: 'latest';
 } | {
-	kind: 'since';
+	kind: 'window';
 	from: IsoDate;
+	to: IsoDate;
 };
 
 // One day the provider carries, before any of the refusals of the specification are applied to it

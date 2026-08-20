@@ -26,7 +26,10 @@
   <a href="#sales"><b>§7.3</b> Sales tab</a>
   <a href="#securities"><b>§7.4</b> Securities tab</a>
   <a href="#record-trade"><b>§7.5</b> Record a purchase · new security</a>
-  <a href="#fetch-review"><b>§7.6</b> Update prices · the review panel</a>
+  <a href="#fetch-choose"><b>§7.6</b> Update prices · choosing</a>
+  <a href="#fetch-running"><b>§7.6</b> Update prices · while it runs</a>
+  <a href="#fetch-review"><b>§7.6</b> Update prices · the review</a>
+  <a href="#fetch-nothing"><b>§7.6</b> Update prices · nothing to write</a>
 </nav>
 
 
@@ -287,38 +290,337 @@
   </div>
 </section>
 
+<section class="doc" id="fetch-choose">
+  <header>
+    <div class="num">§7.6</div>
+    <h2>Update prices · choosing</h2>
+    <p>The button opens a modal of two pages, and this is the first. Everything that will leave the machine is on
+    it, per row, before anything does: the listing, and the day the request starts from. Changing the span rewrites
+    the <i>Ask from</i> column, so the cost of the choice is read rather than described.</p>
+  </header>
+  <div class="scroller"><div class="modal">
+    <div class="mhead">
+      <div class="mtitle"><h5>Update prices</h5></div>
+      <div class="steps"><span class="on">1 Choose</span><span>2 Fetch and review</span></div>
+    </div>
+
+    <div class="spanpick">
+      <div class="pick">
+        <div class="pt"><i class="rd"></i> Latest quote only</div>
+        <p>One figure per security, whatever day the provider has it for. Keeps an open file current.</p>
+      </div>
+      <div class="pick on">
+        <div class="pt"><i class="rd"></i> Since the last price</div>
+        <p>From the day after each security’s most recent price. One with no price at all is asked from its first purchase.</p>
+      </div>
+      <div class="pick">
+        <div class="pt"><i class="rd"></i> The whole history</div>
+        <p>From each security’s first purchase to today, or to its last sale where the position is closed. Fills a history in.</p>
+      </div>
+    </div>
+
+    <hr class="sep">
+
+    <div class="bulk">
+      <span class="lbl">Select</span>
+      <span class="pill">All</span>
+      <span class="pill">None</span>
+      <span class="pill on">Held</span>
+      <span class="pill">Never priced</span>
+      <span class="pill">Stale · over 7 days</span>
+    </div>
+
+    <div class="tblwrap"><table class="plist">
+      <thead><tr>
+        <th style="width:22px"><i class="cb some"></i></th>
+        <th>Security</th><th>Type</th><th class="r">Last price</th><th class="r">Priced on</th>
+        <th class="r">Ask from</th><th class="r">Days</th>
+      </tr></thead>
+      <tbody>
+        <tr class="on"><td><i class="cb"></i></td>
+          <td class="sec">AGGH <span class="dim">iShares Core Global Aggregate Bond</span></td>
+          <td><span class="chip quiet">bond etf</span></td>
+          <td class="n r">€ 4,8590</td><td class="n r">12/08/2026</td>
+          <td class="n r">13/08/2026</td><td class="n r">8</td></tr>
+        <tr class="on"><td><i class="cb"></i></td>
+          <td class="sec">EIMI <span class="dim">iShares Core MSCI EM IMI</span></td>
+          <td><span class="chip quiet">stock etf</span></td>
+          <td class="n r">€ 32,4100</td><td class="n r">02/08/2026</td>
+          <td class="n r">03/08/2026</td><td class="n r">18</td></tr>
+        <tr class="on"><td><i class="cb"></i></td>
+          <td class="sec">ENI <span class="dim">Eni S.p.A.</span></td>
+          <td><span class="chip quiet">stock</span></td>
+          <td class="n r">€ 15,1750</td><td class="n r">19/08/2026</td>
+          <td class="n r">20/08/2026</td><td class="n r">1</td></tr>
+        <tr class="on"><td><i class="cb"></i></td>
+          <td class="sec">PHAU <span class="dim">WisdomTree Physical Gold</span></td>
+          <td><span class="chip quiet">etc</span></td>
+          <td class="n r">€ 21,0400</td><td class="n r">11/08/2026</td>
+          <td class="n r">12/08/2026</td><td class="n r">9</td></tr>
+        <tr class="on"><td><i class="cb"></i></td>
+          <td class="sec">SWDA <span class="dim">iShares Core MSCI World</span></td>
+          <td><span class="chip quiet">stock etf</span></td>
+          <td class="n r">€ 90,7700</td><td class="n r">30/06/2026</td>
+          <td class="n r">01/07/2026</td><td class="n r">51</td></tr>
+        <tr class="on"><td><i class="cb"></i></td>
+          <td class="sec">VWCE <span class="dim">Vanguard FTSE All-World</span></td>
+          <td><span class="chip quiet">stock etf</span></td>
+          <td class="n r" style="color:var(--brass)">never priced</td><td class="n r">—</td>
+          <td class="n r">19/03/2024</td><td class="n r">885</td></tr>
+        <tr class="on"><td><i class="cb"></i></td>
+          <td class="sec">XEON <span class="dim">Xtrackers II EUR Overnight Rate</span></td>
+          <td><span class="chip quiet">bond etf</span></td>
+          <td class="n r">€ 145,2200</td><td class="n r">05/08/2026</td>
+          <td class="n r">06/08/2026</td><td class="n r">15</td></tr>
+        <tr class="off"><td><i class="cb off"></i></td>
+          <td class="sec">VUSA <span class="dim">Vanguard S&amp;P 500</span> <span class="chip quiet">no longer held</span></td>
+          <td><span class="chip quiet">stock etf</span></td>
+          <td class="n r">€ 88,9000</td><td class="n r">14/05/2025</td>
+          <td class="n r">15/05/2025</td><td class="n r">463</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="7">7 securities selected · 987 days to ask for</td></tr></tfoot>
+    </table></div>
+
+    <p class="note">Fetching sends each selected security’s ticker and exchange to <b>Yahoo Finance</b> — and, when
+    asking for more than the latest quote, the day in the <i>Ask from</i> column — and nothing else: never the
+    ISIN, never an amount, a quantity or an account.</p>
+
+    <div class="mfoot">
+      <button class="btn ghost">Cancel</button>
+      <div class="right"><button class="btn primary">Fetch 7 securities · 987 days</button></div>
+    </div>
+  </div></div>
+</section>
+
+<section class="doc" id="fetch-running">
+  <header>
+    <div class="num">§7.6</div>
+    <h2>Update prices · while it runs</h2>
+    <p>The review table is drawn the moment the pass starts and fills in row by row, in the order the securities
+    are asked in, so nothing is redrawn when the last answer lands. Ticks are inert and every button but
+    <i>Cancel</i> is dead until the pass ends.</p>
+  </header>
+  <div class="scroller"><div class="modal">
+    <div class="mhead">
+      <div class="mtitle"><h5>Fetching prices</h5></div>
+      <div class="steps"><span class="done">1 Choose</span><span class="on">2 Fetch and review</span></div>
+    </div>
+
+    <div class="prog">
+      <div class="bar"><i></i></div>
+      <div class="pl"><span>2 of 7 asked · ENI</span><span>987 days requested</span></div>
+    </div>
+
+    <div class="tblwrap"><table class="plist">
+      <thead><tr>
+        <th style="width:22px"><i class="cb no"></i></th>
+        <th>Security</th><th class="r">Newest quote</th><th class="r">Quote is for</th>
+        <th>What came back</th><th style="width:20px"></th>
+      </tr></thead>
+      <tbody>
+        <tr><td><i class="cb wait"></i></td>
+          <td class="sec">AGGH <span class="dim">iShares Core Global Aggregate Bond</span></td>
+          <td class="n r">€ 4,8610</td><td class="n r">19/08/2026</td>
+          <td>6 days · <span class="chip new">6 new</span></td><td class="expand">▸</td></tr>
+        <tr><td><i class="cb wait"></i></td>
+          <td class="sec">EIMI <span class="dim">iShares Core MSCI EM IMI</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td class="why">the provider has no quote for it</td><td></td></tr>
+        <tr class="on"><td><i class="cb no"></i></td>
+          <td class="sec">ENI <span class="dim">Eni S.p.A.</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td><span class="rc wait">asking… · 20/08/2026 → today</span></td><td></td></tr>
+        <tr><td><i class="cb no"></i></td>
+          <td class="sec">PHAU <span class="dim">WisdomTree Physical Gold</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td><span class="rc na">queued</span></td><td></td></tr>
+        <tr><td><i class="cb no"></i></td>
+          <td class="sec">SWDA <span class="dim">iShares Core MSCI World</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td><span class="rc na">queued</span></td><td></td></tr>
+        <tr><td><i class="cb no"></i></td>
+          <td class="sec">VWCE <span class="dim">Vanguard FTSE All-World</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td><span class="rc na">queued</span></td><td></td></tr>
+        <tr><td><i class="cb no"></i></td>
+          <td class="sec">XEON <span class="dim">Xtrackers II EUR Overnight Rate</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td><span class="rc na">queued</span></td><td></td></tr>
+        <tr class="bad"><td><i class="cb no"></i></td>
+          <td class="sec">VUSA <span class="dim">Vanguard S&amp;P 500</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td>not asked for</td><td></td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="mfoot">
+      <button class="btn off" disabled>← Change options</button>
+      <div class="right">
+        <button class="btn ghost">Cancel</button>
+        <button class="btn off" disabled>Write prices</button>
+      </div>
+    </div>
+  </div></div>
+
+  <p class="body">Cancelling mid-pass asks first, because what is on screen is about to be thrown away:</p>
+
+  <div class="dlgrow"><div class="dlg" style="max-width:420px">
+    <h5>Stop fetching?</h5>
+    <p class="hint">The pass is not finished. Closing now discards the prices already fetched, including the ones
+    you can see — nothing has been written, and every price the file holds still stands.</p>
+    <div class="dlgfoot">
+      <button class="btn ghost">Keep fetching</button>
+      <button class="btn">Stop and close</button>
+    </div>
+  </div></div>
+</section>
+
 <section class="doc" id="fetch-review">
   <header>
     <div class="num">§7.6</div>
-    <h2>Update prices · the review panel</h2>
+    <h2>Update prices · the review</h2>
+    <p>The same table, unmoved. Each row says what came back and what writing it would do to the file: new days,
+    days that would land on a <i>different</i> value, and days that already hold exactly this figure and are
+    therefore not written at all. A row that failed is stated, disabled and unticked, and only a row whose answer
+    could differ next time is marked <i>can be retried</i>.</p>
   </header>
-  <div class="dlgrow">
-    <div class="dlg" style="max-width:none">
-      <h5>Prices fetched — nothing written yet</h5>
-      <div class="dsub">7 securities asked for · provider reference date 08/08/2026</div>
-      <div class="tblwrap"><table>
-        <thead><tr><th>Security</th><th class="r">Quote</th><th class="r">Quote is for</th><th>That day currently holds</th></tr></thead>
-        <tbody>
-          <tr><td class="desc">AGGH <span class="dim">iShares Core Global Aggregate Bond</span></td><td class="n r">€ 4,8610</td><td class="n r">07/08/2026</td><td class="dim">nothing — a new day</td></tr>
-          <tr><td class="desc">ENI <span class="dim">Eni S.p.A.</span></td><td class="n r">€ 15,2400</td><td class="n r">07/08/2026</td><td>€ 15,1750 <span class="chip">manual</span></td></tr>
-          <tr><td class="desc">SWDA <span class="dim">iShares Core MSCI World</span></td><td class="n r">€ 92,3100</td><td class="n r">07/08/2026</td><td>€ 92,1400 <span class="chip auto">fetched</span></td></tr>
-          <tr><td class="desc dim">VUSA <span class="dim">Vanguard S&amp;P 500 · no longer held</span></td><td class="n r">€ 90,1500</td><td class="n r">07/08/2026</td><td class="dim">nothing — a new day</td></tr>
-          <tr><td class="desc">VWCE <span class="dim">Vanguard FTSE All-World</span></td><td class="n r">€ 125,0200</td><td class="n r">07/08/2026</td><td>€ 124,8600 <span class="chip">manual</span></td></tr>
-        </tbody>
-        <tfoot><tr><td colspan="2">5 to write · 3 replace a value, 2 of them typed by hand</td><td colspan="2">all quoted 07/08/2026</td></tr></tfoot>
-      </table></div>
-      <hr class="sep">
-      <h4 class="subhead">Nothing to write for these — they keep the prices they have</h4>
-      <div class="figs">
-        <div class="fig"><span>PHAU <span class="dim">WisdomTree Physical Gold</span></span><b class="neg">could not be fetched — quoted in USD, not EUR</b></div>
-        <div class="fig"><span>EIMI <span class="dim">iShares Core MSCI EM IMI</span></span><b class="neg">could not be fetched — ISIN not recognised</b></div>
+  <div class="scroller"><div class="modal">
+    <div class="mhead">
+      <div class="mtitle">
+        <h5>Prices fetched</h5>
+        <div class="dsub">7 securities asked · provider reference date 20/08/2026</div>
       </div>
-      <div class="dlgfoot">
+      <div class="steps"><span class="done">1 Choose</span><span class="on">2 Fetch and review</span></div>
+    </div>
+
+    <div class="bulk">
+      <span class="lbl">Select</span>
+      <span class="pill on">All that can be written</span>
+      <span class="pill">None</span>
+    </div>
+
+    <div class="tblwrap"><table class="plist">
+      <thead><tr>
+        <th style="width:22px"><i class="cb"></i></th>
+        <th>Security</th><th class="r">Newest quote</th><th class="r">Quote is for</th>
+        <th>What came back</th><th style="width:20px"></th>
+      </tr></thead>
+      <tbody>
+        <tr class="on"><td><i class="cb"></i></td>
+          <td class="sec">AGGH <span class="dim">iShares Core Global Aggregate Bond</span></td>
+          <td class="n r">€ 4,8610</td><td class="n r">19/08/2026</td>
+          <td>6 days · <span class="chip new">6 new</span></td><td class="expand">▸</td></tr>
+
+        <tr class="bad"><td><i class="cb no"></i></td>
+          <td class="sec">EIMI <span class="dim">iShares Core MSCI EM IMI</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td class="why">the provider has no quote for it</td><td></td></tr>
+
+        <tr class="on"><td><i class="cb"></i></td>
+          <td class="sec">ENI <span class="dim">Eni S.p.A.</span></td>
+          <td class="n r">€ 15,2400</td><td class="n r">19/08/2026</td>
+          <td>1 day · <span class="chip rep">1 replaces</span></td><td class="expand">▾</td></tr>
+        <tr class="detailrow"><td colspan="6"><div class="detailbox">
+          <div class="dt">The days that change · 1 of 1</div>
+          <table class="days">
+            <tr><td>19/08/2026</td><td class="was">now € 15,1750 · manual</td><td>→</td><td class="will">€ 15,2400 · fetched</td></tr>
+          </table>
+        </div></td></tr>
+
+        <tr class="bad"><td><i class="cb no"></i></td>
+          <td class="sec">PHAU <span class="dim">WisdomTree Physical Gold</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td class="why">could not be fetched — quoted in USD, not EUR</td><td></td></tr>
+
+        <tr class="on"><td><i class="cb"></i></td>
+          <td class="sec">SWDA <span class="dim">iShares Core MSCI World</span></td>
+          <td class="n r">€ 92,3100</td><td class="n r">19/08/2026</td>
+          <td>37 days · <span class="chip new">34 new</span> <span class="chip rep">2 replace</span> <span class="chip same">1 unchanged</span></td>
+          <td class="expand">▸</td></tr>
+
+        <tr class="on"><td><i class="cb"></i></td>
+          <td class="sec">VWCE <span class="dim">Vanguard FTSE All-World</span></td>
+          <td class="n r">€ 125,0200</td><td class="n r">19/08/2026</td>
+          <td>621 days · <span class="chip new">621 new</span> <span class="chip drop">12 dropped</span></td>
+          <td class="expand">▸</td></tr>
+
+        <tr class="bad"><td><i class="cb no"></i></td>
+          <td class="sec">XEON <span class="dim">Xtrackers II EUR Overnight Rate</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td class="why">could not be fetched — the request timed out <span class="chip rep">can be retried</span></td><td></td></tr>
+
+        <tr class="bad"><td><i class="cb no"></i></td>
+          <td class="sec">VUSA <span class="dim">Vanguard S&amp;P 500</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td>not asked for</td><td></td></tr>
+      </tbody>
+      <tfoot><tr>
+        <td colspan="3">664 prices to write over 4 securities</td>
+        <td colspan="3" class="r">3 replace a different value, 1 of them typed by hand · 1 day unchanged · 12 days dropped</td>
+      </tr></tfoot>
+    </table></div>
+
+    <div class="mfoot">
+      <button class="btn">← Change options</button>
+      <button class="btn">Retry the 1 that failed</button>
+      <div class="right">
         <button class="btn ghost">Cancel</button>
-        <button class="btn primary">Write 5 prices</button>
+        <button class="btn primary">Write 664 prices</button>
       </div>
     </div>
-  </div>
+  </div></div>
+</section>
+
+<section class="doc" id="fetch-nothing">
+  <header>
+    <div class="num">§7.6</div>
+    <h2>Update prices · nothing to write</h2>
+    <p>No separate panel: the same page, every row disabled, the write button dead. Every security having failed is
+    still a report worth reading, and the way back sits where it always does.</p>
+  </header>
+  <div class="scroller"><div class="modal">
+    <div class="mhead">
+      <div class="mtitle">
+        <h5>Prices fetched</h5>
+        <div class="dsub">2 securities asked · nothing the file can take</div>
+      </div>
+      <div class="steps"><span class="done">1 Choose</span><span class="on">2 Fetch and review</span></div>
+    </div>
+
+    <div class="bulk">
+      <span class="lbl">Select</span>
+      <span class="pill">All that can be written</span>
+      <span class="pill">None</span>
+    </div>
+
+    <div class="tblwrap"><table class="plist">
+      <thead><tr>
+        <th style="width:22px"><i class="cb no"></i></th>
+        <th>Security</th><th class="r">Newest quote</th><th class="r">Quote is for</th>
+        <th>What came back</th><th style="width:20px"></th>
+      </tr></thead>
+      <tbody>
+        <tr class="bad"><td><i class="cb no"></i></td>
+          <td class="sec">PHAU <span class="dim">WisdomTree Physical Gold</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td class="why">could not be fetched — quoted in USD, not EUR</td><td></td></tr>
+        <tr class="bad"><td><i class="cb no"></i></td>
+          <td class="sec">EIMI <span class="dim">iShares Core MSCI EM IMI</span></td>
+          <td class="n r">—</td><td class="n r">—</td>
+          <td class="why">could not be fetched — the provider could not be reached <span class="chip rep">can be retried</span></td><td></td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="6">nothing to write · every price the file holds still stands</td></tr></tfoot>
+    </table></div>
+
+    <div class="mfoot">
+      <button class="btn">← Change options</button>
+      <button class="btn">Retry the 1 that failed</button>
+      <div class="right">
+        <button class="btn ghost">Close</button>
+        <button class="btn off" disabled>Write prices</button>
+      </div>
+    </div>
+  </div></div>
 </section>
 
 </div>

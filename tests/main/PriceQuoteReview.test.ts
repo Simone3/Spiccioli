@@ -12,7 +12,7 @@ const TODAY = '2026-08-08';
 
 const LATEST: PriceSpan = { kind: 'latest' };
 
-const SINCE: PriceSpan = { kind: 'since', from: '2026-08-01' };
+const SINCE: PriceSpan = { kind: 'window', from: '2026-08-01', to: '2026-08-08' };
 
 const quote = (overrides: Partial<ProviderDay> = {}): ProviderResponseToReview => {
 	return { days: [ { price: 92.31, date: '2026-08-07', ...overrides } ], blankDays: 0, currency: ACCEPTED_CURRENCY };

@@ -291,7 +291,7 @@ describe('the Investments screen', () => {
 		expect(within(screen.getByRole('table', { name: 'Price history' })).queryByText('fetched')).not.toBeInTheDocument();
 	});
 
-	test('puts a pass to the user before anything is written, and writes the whole of it on one confirmation', async() => {
+	test('puts a pass to the user before anything is written, and writes what is ticked on one confirmation', async() => {
 		await openInvestments(withRecords({
 			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ],
 			prices: [ makePrice({ securityId: 'swda', date: '2026-08-07', value: 90 * UNITS, source: 'manual' }) ]
@@ -301,15 +301,27 @@ describe('the Investments screen', () => {
 		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Show the price history of SWDA' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
-		await userEvent.click(await screen.findByRole('button', { name: 'Just the latest quote' }));
 
-		const panel = await screen.findByRole('dialog', { name: 'Prices fetched — nothing written yet' });
+		const dialog = await screen.findByRole('dialog', { name: 'Update prices' });
 
-		// The value, the day the quote is for, and what that day currently holds
+		// The security is ticked because it is held, and what will leave the machine is stated on the page that sends it
+		expect(within(dialog).getByRole('checkbox', { name: 'Ask about SWDA' })).toBeChecked();
+		expect(within(dialog).getByText(/never the ISIN, never an amount, a quantity or an account/)).toBeInTheDocument();
+
+		await userEvent.click(within(dialog).getByRole('radio', { name: 'Latest quote only' }));
+		await userEvent.click(within(dialog).getByRole('button', { name: 'Fetch 1 security' }));
+
+		const panel = await screen.findByRole('dialog', { name: 'Prices fetched' });
+
+		// The value, the day the quote is for, and what writing it would do to the file
 		expect(within(panel).getByText('€ 92,3100')).toBeInTheDocument();
 		expect(within(panel).getByText('07/08/2026')).toBeInTheDocument();
-		expect(within(panel).getByText('€ 90,0000')).toBeInTheDocument();
-		expect(within(panel).getByText('manual')).toBeInTheDocument();
+		expect(within(panel).getByText('1 replaces')).toBeInTheDocument();
+
+		// The day it would land on, and what that day holds today, are there to be read before any of it is written
+		await userEvent.click(within(panel).getByRole('button', { name: 'Show the days that change' }));
+
+		expect(within(panel).getByText(/now € 90,0000 · manual/)).toBeInTheDocument();
 
 		// Nothing has been written: the history behind the panel still reads what it held, and still calls it hand-typed
 		const history = (): HTMLElement => {
@@ -362,18 +374,24 @@ describe('the Investments screen', () => {
 
 		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
-		await userEvent.click(await screen.findByRole('button', { name: 'Every day since the last price' }));
 
-		// The day after the one price the file holds, worked out per security before anything left the machine
+		const dialog = await screen.findByRole('dialog', { name: 'Update prices' });
+
+		// The day after the one price the file holds, stated on the row before anything leaves the machine
+		expect(within(dialog).getByRole('cell', { name: '06/08/2026' })).toBeInTheDocument();
+
+		await userEvent.click(within(dialog).getByRole('button', { name: /^Fetch 1 security/ }));
+
 		expect(asked[0][0].from).toBe('2026-08-06');
 
-		const panel = await screen.findByRole('dialog', { name: 'Prices fetched — nothing written yet' });
+		const panel = await screen.findByRole('dialog', { name: 'Prices fetched' });
 
-		// The row still leads with the newest quote, and says how many days came with it
+		// The row still leads with the newest quote, and says what the days behind it would do to the file
 		expect(within(panel).getByText('€ 92,3100')).toBeInTheDocument();
 		expect(within(panel).getByText('08/08/2026')).toBeInTheDocument();
-		expect(within(panel).getByRole('columnheader', { name: 'Days fetched' })).toBeInTheDocument();
-		expect(within(panel).getByText(/2 days dropped/)).toBeInTheDocument();
+		expect(within(panel).getByText('3 days')).toBeInTheDocument();
+		expect(within(panel).getByText('3 new')).toBeInTheDocument();
+		expect(within(panel).getByText('2 dropped')).toBeInTheDocument();
 
 		await userEvent.click(within(panel).getByRole('button', { name: 'Write 3 prices' }));
 
@@ -391,7 +409,44 @@ describe('the Investments screen', () => {
 		expect(within(history).getByText('manual')).toBeInTheDocument();
 	});
 
-	test('cancels a pass and leaves every price the file had standing', async() => {
+	test('writes only the securities left ticked, and never a day already holding the figure', async() => {
+		await openInvestments(withRecords({
+			securities: [ swda, makeSecurity({ id: 'aggh', isin: 'IE00BDBRDM35', ticker: 'AGGH', name: 'iShares Core Global Aggregate Bond' }) ],
+			trades: [
+				purchase({ id: 'one', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }),
+				purchase({ id: 'two', securityId: 'aggh', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 5 * UNITS })
+			],
+			prices: [ makePrice({ securityId: 'swda', date: '2026-08-07', value: 923100, source: 'manual' }) ]
+		}));
+		stubPricesBridge({
+			updatePrices: quotedWith([
+				{ outcome: 'quoted', securityId: 'swda', days: [ { value: 923100, date: '2026-08-07' } ], droppedCount: 0 },
+				{ outcome: 'quoted', securityId: 'aggh', days: [ { value: 48610, date: '2026-08-07' } ], droppedCount: 0 }
+			])
+		});
+
+		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 2' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
+		await userEvent.click(within(await screen.findByRole('dialog', { name: 'Update prices' })).getByRole('radio', { name: 'Latest quote only' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Fetch 2 securities' }));
+
+		const panel = await screen.findByRole('dialog', { name: 'Prices fetched' });
+
+		// The day already holding exactly this figure is not written, and its row cannot be ticked
+		expect(within(panel).getByText('1 unchanged')).toBeInTheDocument();
+		expect(within(panel).getByRole('checkbox', { name: 'Nothing to write for SWDA' })).toBeDisabled();
+
+		await userEvent.click(within(panel).getByRole('button', { name: 'Write 1 price' }));
+
+		expect(screen.getByRole('status')).toHaveTextContent('1 price written.');
+
+		// The hand-typed record the provider agreed with is untouched, so it still says where its figure came from
+		await userEvent.click(screen.getByRole('button', { name: 'Show the price history of SWDA' }));
+
+		expect(within(screen.getByRole('table', { name: 'Price history' })).getByText('manual')).toBeInTheDocument();
+	});
+
+	test('closing the review writes nothing, and leaves every price the file had standing', async() => {
 		await openInvestments(withRecords({
 			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ],
 			prices: [ makePrice({ securityId: 'swda', date: '2026-08-07', value: 90 * UNITS }) ]
@@ -400,17 +455,18 @@ describe('the Investments screen', () => {
 
 		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
-		await userEvent.click(await screen.findByRole('button', { name: 'Just the latest quote' }));
-		await userEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Cancel' }));
+		await userEvent.click(within(await screen.findByRole('dialog', { name: 'Update prices' })).getByRole('radio', { name: 'Latest quote only' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Fetch 1 security' }));
+		await userEvent.click(within(await screen.findByRole('dialog', { name: 'Prices fetched' })).getByRole('button', { name: 'Cancel' }));
 
-		expect(screen.getByRole('status')).toHaveTextContent('Nothing was written.');
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
 		await userEvent.click(screen.getByRole('tab', { name: 'Holdings' }));
 
 		expect(within(screen.getByRole('table', { name: 'Holdings' })).getByText('€ 90,0000')).toBeInTheDocument();
 	});
 
-	test('shows the panel even when there is nothing to write, naming each security and its reason', async() => {
+	test('shows the review even when there is nothing to write, naming each security and its reason', async() => {
 		await openInvestments(withRecords({
 			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]
 		}));
@@ -420,15 +476,16 @@ describe('the Investments screen', () => {
 
 		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
-		await userEvent.click(await screen.findByRole('button', { name: 'Just the latest quote' }));
+		await userEvent.click(within(await screen.findByRole('dialog', { name: 'Update prices' })).getByRole('radio', { name: 'Latest quote only' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Fetch 1 security' }));
 
-		const panel = await screen.findByRole('dialog', { name: 'Prices fetched — nothing written yet' });
+		const panel = await screen.findByRole('dialog', { name: 'Prices fetched' });
 
 		expect(within(panel).getByText('could not be fetched — quoted in USD, not EUR')).toBeInTheDocument();
-		expect(within(panel).queryByRole('button', { name: /^Write/ })).not.toBeInTheDocument();
+		expect(within(panel).getByRole('button', { name: /^Write/ })).toBeDisabled();
 		expect(within(panel).getByRole('button', { name: 'Close' })).toBeInTheDocument();
 
-		// The statement of what left the machine is repeated here, beside what the request brought back
-		expect(within(panel).getByText(/never the ISIN, never an amount, a quantity or an account/)).toBeInTheDocument();
+		// A refusal comes back the same every time, so nothing is offered to ask again
+		expect(within(panel).queryByRole('button', { name: /^Retry/ })).not.toBeInTheDocument();
 	});
 });

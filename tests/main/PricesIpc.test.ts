@@ -46,6 +46,7 @@ describe('PricesIpc', () => {
 		registerPricesIpcHandlers({ ipcMain, provider });
 
 		expect([ ...handlers.keys() ].sort()).toEqual([
+			SPICCIOLI_PRICES_IPC_CHANNELS.cancelPricePass,
 			SPICCIOLI_PRICES_IPC_CHANNELS.reportPricesWritten,
 			SPICCIOLI_PRICES_IPC_CHANNELS.updatePrices
 		].sort());
@@ -77,7 +78,7 @@ describe('PricesIpc', () => {
 
 		expect(sent).toEqual([ {
 			channel: SPICCIOLI_PRICES_IPC_CHANNELS.passProgress,
-			payload: { done: 1, total: 1, ticker: 'SWDA' }
+			payload: { done: 1, total: 1, ticker: 'SWDA', outcome: { outcome: 'no-quote', securityId: 'swda' } }
 		} ]);
 	});
 

@@ -23,18 +23,13 @@ export interface PriceListingRequest {
 	exchange: Exchange;
 
 	// The first day wanted, which is the day after the security's most recent price or the day of its first purchase. Null asks
-	// for the latest quote alone, which is both what the shorter pass asks of every security and what a security with no history
+	// for the latest quote alone, which is both what the shortest pass asks of every security and what a security with no history
 	// to build is asked for whichever pass this is.
 	from: IsoDate | null;
-}
 
-// How far a pass has got, pushed to the renderer as each listing is answered
-export interface PricePassProgress {
-	done: number;
-	total: number;
-
-	// The listing just answered, so that the screen can name what it is waiting on. It is already the renderer's own.
-	ticker: string;
+	// The last day wanted: today where the position is open, and the day of the last sale where it is closed. Null wherever
+	// "from" is null, a request for the latest quote having no window to bound.
+	to: IsoDate | null;
 }
 
 // The four refusals of the specification, applied to what came back before the user ever sees it
@@ -81,6 +76,24 @@ export type PriceFetchOutcome = {
 	message: string;
 };
 
+/**
+ * How far a pass has got, pushed to the renderer as each listing is answered.
+ *
+ * **The answer travels with the count**, because the review is drawn while the pass runs and fills in row by row: a report that
+ * said only how many had been asked would leave the screen to redraw itself whole at the end, which is the one thing the single
+ * page is built to avoid.
+ */
+export interface PricePassProgress {
+	done: number;
+	total: number;
+
+	// The listing just answered, so that the screen can name what it is waiting on. It is already the renderer's own.
+	ticker: string;
+
+	// What that listing came back with, read against the file by the renderer exactly as the finished pass's outcomes are
+	outcome: PriceFetchOutcome;
+}
+
 export interface PricePassResult {
 
 	// The moment the provider's figures are as of, where it states one. Null where it does not, and the panel says nothing.
@@ -104,6 +117,11 @@ export interface PricesWrittenReport {
 export interface SpiccioliPricesApi {
 	updatePrices: (listings: PriceListingRequest[]) => Promise<PricePassResult>;
 	reportPricesWritten: (report: PricesWrittenReport) => Promise<void>;
+
+	// Abandons the running pass, which is what cancelling the modal does. The listing in flight is finished and thrown away, the
+	// ones behind it are never asked for, and the result the renderer is still waiting on is dropped where it stands: a cancelled
+	// pass ends at nothing.
+	cancelPricePass: () => Promise<void>;
 
 	// Listens for how far the running pass has got. What comes back removes the listener again, and the screen calls it when the
 	// pass ends: nothing here outlives the press that started it.
