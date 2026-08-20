@@ -1,31 +1,7 @@
 
 # current
 
-## inv
 
-sales & purch
-
-
-secur
-    update prices modal too big
-    paging in prices
-    delete all in pricing
-
-
-
-
----
-
-
-
----
-
-
-
-
-# tra
-
-remove "Add a note" in the table
 
 
 
