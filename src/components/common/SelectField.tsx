@@ -25,6 +25,9 @@ export interface SelectFieldProps<TValue extends string> {
 
 	// Set by the caller when the choice just made could not be applied
 	refusal?: string;
+
+	// Called when the picker is left, which is when a form marks a required choice as one that has been left unmade
+	onBlur?: () => void;
 }
 
 /**
@@ -36,9 +39,18 @@ export interface SelectFieldProps<TValue extends string> {
  * @param props.label What the control is called.
  * @param props.disabled Whether it can be changed.
  * @param props.refusal Why the last choice was not applied, where it was not.
+ * @param props.onBlur What leaving the picker does, where the form marks it.
  * @returns The picker.
  */
-export const SelectField = <TValue extends string>({ value, options, onChange, label, disabled = false, refusal }: SelectFieldProps<TValue>): ReactElement => {
+export const SelectField = <TValue extends string>({
+	value,
+	options,
+	onChange,
+	label,
+	disabled = false,
+	refusal,
+	onBlur
+}: SelectFieldProps<TValue>): ReactElement => {
 	const refusalId = useId();
 
 	return (
@@ -52,7 +64,8 @@ export const SelectField = <TValue extends string>({ value, options, onChange, l
 				aria-describedby={refusal ? refusalId : undefined}
 				onChange={(event) => {
 					onChange(event.target.value as TValue);
-				}}>
+				}}
+				onBlur={onBlur}>
 				{options.map((option) => {
 					return <option key={option.value} value={option.value}>{option.label}</option>;
 				})}

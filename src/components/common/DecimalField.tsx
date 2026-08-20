@@ -17,6 +17,9 @@ import { formatMinorUnitsAsPlainDecimal, MONEY_SCALES, parseDecimalToMinorUnits 
  * long as it is empty — it does not state a refusal and then quietly put the figure back the moment the field is left. A caller
  * that has nowhere to put an empty value, the settings screen being the one, keeps what it had and the field re-reads it.
  *
+ * **A required field left empty says so on being left**, whether it was emptied by hand or never filled in, which is the one
+ * rule every required field in the application states it on. A field nobody has been in has not been left.
+ *
  * **The decimal character is the one the preferences name**, and a thousands separator is typeable under no setting at all.
  * Changing the preference changes which key produces the separator and nothing else: no figure already entered is re-read.
  */
@@ -156,9 +159,8 @@ export const DecimalField = ({
 						setDraft(undefined);
 
 						// A refusal a keystroke raised goes with the keystrokes, the caller still holding the figure it had.
-						// The one that stays is a required field emptied by hand: there is nothing to go back to, and a field
-						// nobody has typed in has raised no refusal to keep.
-						setRefusal(refusal !== undefined && required && value === undefined ? refusal : undefined);
+						// A required field left empty is what outlasts them: there is nothing to go back to.
+						setRefusal(required && value === undefined ? t('field.required') : undefined);
 					}}/>
 				{suffix && <span className='decimal-field-affix'>{suffix}</span>}
 			</div>

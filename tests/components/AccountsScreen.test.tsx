@@ -28,6 +28,24 @@ describe('the Accounts screen', () => {
 		expect(screen.getByRole('dialog', { name: 'Add account' })).toBeInTheDocument();
 	});
 
+	// Every required field in the application says so on the same terms: left empty, whether or not anything was ever typed in it
+	test('opens on no refusal at all, and states one under each required field that is left empty', async() => {
+		await openAccounts();
+		await userEvent.click(screen.getByRole('button', { name: 'Add account' }));
+
+		expect(screen.queryByText('This is required.')).not.toBeInTheDocument();
+
+		// The name and the date open empty; the opening balance opens on a zero, so it is emptied by hand
+		await userEvent.click(screen.getByRole('textbox', { name: 'Name' }));
+		await userEvent.clear(screen.getByRole('textbox', { name: 'Opening balance' }));
+		await userEvent.click(screen.getByRole('textbox', { name: 'Opening date' }));
+		await userEvent.click(screen.getByRole('heading', { name: 'Add account' }));
+
+		// A text field, a numeric one and a date, all three on the one rule
+		expect(screen.getAllByText('This is required.')).toHaveLength(3);
+		expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+	});
+
 	test('records an account and shows it with the counts it starts at', async() => {
 		await openAccounts();
 		await userEvent.click(screen.getByRole('button', { name: 'Add account' }));

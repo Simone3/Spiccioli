@@ -70,7 +70,7 @@ export const AccountForm = ({ account, onSave, onCancel }: AccountFormProps): Re
 	const [ closingDate, setClosingDate ] = useState<IsoDate | undefined>(account?.closingDate ?? undefined);
 	const [ notes, setNotes ] = useState(account?.notes ?? '');
 
-	// A required field states that it is required once it has been left empty, so a form nobody has touched yet is not covered in refusals
+	// A required field states that it is required once it has been left empty, so a form nobody has been in is not covered in refusals
 	const [ touched, setTouched ] = useState<readonly string[]>([]);
 
 	const accounts = document?.accounts ?? [];
@@ -174,6 +174,9 @@ export const AccountForm = ({ account, onSave, onCancel }: AccountFormProps): Re
 					onChange={(value) => {
 						markTouched('name');
 						setName(value);
+					}}
+					onBlur={() => {
+						markTouched('name');
 					}}/>
 			</FormField>
 
@@ -187,6 +190,9 @@ export const AccountForm = ({ account, onSave, onCancel }: AccountFormProps): Re
 					onChange={(value) => {
 						markTouched('institution');
 						setInstitutionId(value);
+					}}
+					onBlur={() => {
+						markTouched('institution');
 					}}/>
 			</FormField>
 

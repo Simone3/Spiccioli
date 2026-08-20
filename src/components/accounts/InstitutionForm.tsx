@@ -82,6 +82,9 @@ export const InstitutionForm = ({ institution, onSave, onCancel }: InstitutionFo
 					onChange={(value) => {
 						setIsNameTouched(true);
 						setName(value);
+					}}
+					onBlur={() => {
+						setIsNameTouched(true);
 					}}/>
 			</FormField>
 

@@ -167,13 +167,16 @@ describe('the one numeric field', () => {
 		expect(field).toHaveValue('');
 	});
 
-	test('says nothing about a required field nobody has typed in yet', async() => {
+	test('says a required field is required once it has been left empty, and not on opening', async() => {
 		stubLedgerBridge();
 		renderWithProviders(<AmountFieldHarness/>);
+
+		expect(screen.queryByText('This is required.')).not.toBeInTheDocument();
+
 		await userEvent.click(screen.getByRole('textbox', { name: 'Amount' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Elsewhere' }));
 
-		expect(screen.queryByText('This is required.')).not.toBeInTheDocument();
+		expect(screen.getByText('This is required.')).toBeInTheDocument();
 	});
 
 	// A refusal a keystroke raised goes with the keystrokes: the caller still holds the figure it had

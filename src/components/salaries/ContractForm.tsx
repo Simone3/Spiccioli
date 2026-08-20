@@ -81,7 +81,7 @@ export const ContractForm = ({ contract, onSave, onCancel }: ContractFormProps):
 	const [ endDate, setEndDate ] = useState<IsoDate | undefined>(contract?.endDate ?? undefined);
 	const [ notes, setNotes ] = useState(contract?.notes ?? '');
 
-	// A required field states that it is required once it has been left empty, so a form nobody has touched yet is not covered in refusals
+	// A required field states that it is required once it has been left empty, so a form nobody has been in is not covered in refusals
 	const [ touched, setTouched ] = useState<readonly string[]>([]);
 
 	const contracts = document?.contracts ?? [];
@@ -188,6 +188,9 @@ export const ContractForm = ({ contract, onSave, onCancel }: ContractFormProps):
 					onChange={(value) => {
 						markTouched('name');
 						setName(value);
+					}}
+					onBlur={() => {
+						markTouched('name');
 					}}/>
 			</FormField>
 

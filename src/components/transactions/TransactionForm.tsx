@@ -72,7 +72,7 @@ export const TransactionForm = ({ transaction, onSave, onCancel }: TransactionFo
 	const [ receiptState, setReceiptState ] = useState<ReceiptState>(transaction?.receiptState ?? 'na');
 	const [ notes, setNotes ] = useState(transaction?.notes ?? '');
 
-	// A required field states that it is required once it has been left empty, so a form nobody has touched yet is not covered in refusals
+	// A required field states that it is required once it has been left empty, so a form nobody has been in is not covered in refusals
 	const [ isDescriptionTouched, setIsDescriptionTouched ] = useState(false);
 
 	const trimmedDescription = description.trim();
@@ -155,6 +155,9 @@ export const TransactionForm = ({ transaction, onSave, onCancel }: TransactionFo
 					onChange={(value) => {
 						setIsDescriptionTouched(true);
 						setDescription(value);
+					}}
+					onBlur={() => {
+						setIsDescriptionTouched(true);
 					}}/>
 			</FormField>
 
