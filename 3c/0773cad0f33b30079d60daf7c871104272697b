@@ -1,0 +1,34 @@
+docs/functional/mockups/07-investments.html
+  s_5766f78c250d98::t_be585d49dd3250 215,217-223,225
+docs/functional/specs/07-investments.md
+  s_5766f78c250d98::t_b51db2ffd3d4ee 64
+src/components/investments/InvestmentsScreen.tsx
+  s_5766f78c250d98::t_941c86f5c21627 38,195-199,614
+src/components/investments/SecuritiesTable.tsx
+  s_5766f78c250d98::t_bf73ed5583a06b 5,8-9,20-25,38-40,56,68,77-84,100-120,191-196
+src/i18n/lang/en.ts
+  s_5766f78c250d98::t_a5e1009487e272 884-885,888-889
+tests/components/InvestmentsScreen.test.tsx
+  s_5766f78c250d98::t_d582439835da92 285-324
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "3c0773cad0f33b30079d60daf7c871104272697b",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_5766f78c250d98": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cf4b19d6-b4cf-4cf9-87ed-e89c5bf15f84",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
