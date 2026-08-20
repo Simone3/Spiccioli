@@ -18,9 +18,9 @@ import type { IsoDate } from 'src/types/LedgerTypes';
  * **The format is the preference's**, never a system locale's, and **no day after today is offerable** — every date in the
  * application is a fact about a day that has happened. A caller that needs a different ceiling says so.
  *
- * **A required field says it is required once it has been left empty, and not before.** A form opens on the record it is about
- * to create and not on a refusal of a field nobody has been in yet; leave the field, or clear a day already in it, and it says
- * so from then on.
+ * **A required field says it is required once a day has been taken out of it, and not before.** A form opens on the record it
+ * is about to create and not on a refusal of a field nobody has typed in yet, and being in the field is not typing in it:
+ * exactly the terms every other field in the application states the same thing on.
  */
 
 // What each of the three formats is written as for the library, and which character separates its parts
@@ -111,7 +111,7 @@ export const DateField = ({ value, onChange, label, disabled = false, required =
 	const { preferences } = usePreferences();
 	const refusalId = useId();
 
-	// A field nobody has been in yet is not covered in refusals: it is empty because the form has just opened
+	// A field nobody has typed in yet is not covered in refusals: it is empty because the form has just opened
 	const [ touched, setTouched ] = useState(false);
 	const selected = DateUtils.fromStandardYearMonthDay(value);
 	const latest = DateUtils.startOfDay(maximum ?? new Date());
@@ -136,11 +136,7 @@ export const DateField = ({ value, onChange, label, disabled = false, required =
 	};
 
 	return (
-		<div
-			className='date-field'
-			onBlur={() => {
-				setTouched(true);
-			}}>
+		<div className='date-field'>
 			<ReactDatePicker
 				selected={selected ?? null}
 				dateFormat={LIBRARY_DATE_FORMATS[preferences.dateFormat]}

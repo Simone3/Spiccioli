@@ -1,10 +1,25 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState, type ReactElement } from 'react';
 import { renderWithProviders, stubLedgerBridge } from '../testUtils';
 import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { DataTable } from 'src/components/common/DataTable';
 import { EmptyState } from 'src/components/common/EmptyState';
+import { AmountField } from 'src/components/common/NumericFields';
 import { RowMenu } from 'src/components/common/RowMenu';
+
+// A form holds what the field hands it, which is what a save button is enabled against
+const AmountFieldHarness = ({ initial }: { initial?: number }): ReactElement => {
+	const [ value, setValue ] = useState<number | undefined>(initial);
+
+	return (
+		<>
+			<AmountField value={value} label='Amount' minimum={0} required onChange={setValue}/>
+			<output>{value === undefined ? 'nothing' : String(value)}</output>
+			<button type='button'>Elsewhere</button>
+		</>
+	);
+};
 
 describe('the row menu', () => {
 	test('opens on a real button and closes on Escape', async() => {
@@ -130,6 +145,52 @@ describe('the table', () => {
 		// The one column with nothing to total is spanned by the label, and the total sits under the figure it is the sum of
 		expect(within(totals).getByRole('cell', { name: 'Total' })).toHaveAttribute('colspan', '1');
 		expect(within(totals).getByRole('cell', { name: '€ 30,00' })).toBeInTheDocument();
+	});
+});
+
+describe('the one numeric field', () => {
+	test('hands the caller nothing when a required figure is taken out of it, and goes on saying so', async() => {
+		stubLedgerBridge();
+		renderWithProviders(<AmountFieldHarness initial={1250}/>);
+
+		const field = await screen.findByDisplayValue('12,50');
+
+		await userEvent.clear(field);
+
+		expect(screen.getByText('This is required.')).toBeInTheDocument();
+		expect(screen.getByText('nothing')).toBeInTheDocument();
+
+		// The figure is not put back the moment the field is left: there is nothing to go back to
+		await userEvent.click(screen.getByRole('button', { name: 'Elsewhere' }));
+
+		expect(screen.getByText('This is required.')).toBeInTheDocument();
+		expect(field).toHaveValue('');
+	});
+
+	test('says nothing about a required field nobody has typed in yet', async() => {
+		stubLedgerBridge();
+		renderWithProviders(<AmountFieldHarness/>);
+		await userEvent.click(screen.getByRole('textbox', { name: 'Amount' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Elsewhere' }));
+
+		expect(screen.queryByText('This is required.')).not.toBeInTheDocument();
+	});
+
+	// A refusal a keystroke raised goes with the keystrokes: the caller still holds the figure it had
+	test('keeps the figure it had when one below the floor is typed, and drops the refusal when the field is left', async() => {
+		stubLedgerBridge();
+		renderWithProviders(<AmountFieldHarness initial={1250}/>);
+
+		const field = await screen.findByDisplayValue('12,50');
+
+		await userEvent.clear(field);
+		await userEvent.type(field, '-');
+
+		expect(screen.getByText('nothing')).toBeInTheDocument();
+
+		await userEvent.click(screen.getByRole('button', { name: 'Elsewhere' }));
+
+		expect(field).toHaveValue('');
 	});
 });
 

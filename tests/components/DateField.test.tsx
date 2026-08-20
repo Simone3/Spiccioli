@@ -62,14 +62,22 @@ describe('the date field', () => {
 		expect(screen.getByText('2020-08-08')).toBeInTheDocument();
 	});
 
-	// A form opens on the record it is about to create, not on a refusal of a field nobody has been in yet
-	test('says nothing about a required field until it has been left empty', async() => {
+	// A form opens on the record it is about to create, not on a refusal of a field nobody has typed in yet
+	test('says nothing about a required field that has only been visited', async() => {
 		await renderDateField(undefined, DEFAULT_PREFERENCES.dateFormat, true);
-
-		expect(screen.queryByText('This is required.')).not.toBeInTheDocument();
 
 		await userEvent.click(screen.getByRole('textbox', { name: 'Date' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Elsewhere' }));
+
+		expect(screen.queryByText('This is required.')).not.toBeInTheDocument();
+	});
+
+	test('says a required field is required once the day in it has been taken out', async() => {
+		await renderDateField('2020-08-08', DEFAULT_PREFERENCES.dateFormat, true);
+
+		expect(screen.queryByText('This is required.')).not.toBeInTheDocument();
+
+		await userEvent.clear(await screen.findByDisplayValue('08/08/2020'));
 
 		expect(screen.getByText('This is required.')).toBeInTheDocument();
 	});

@@ -9,8 +9,13 @@ import { formatMinorUnitsAsPlainDecimal, MONEY_SCALES, parseDecimalToMinorUnits 
  *
  * **Invalid input is refused as it is typed rather than on save.** A letter, a second separator, a sign where a sign is not
  * allowed, a decimal past the scale, a figure above the field's ceiling: none of them ever appears in the box. What cannot be
- * judged keystroke by keystroke — an empty required field, a figure below the field's floor — marks the field and states the
- * reason beside it, and **the value the caller holds is left exactly as it was**. Nothing here is ever rounded into shape.
+ * judged keystroke by keystroke — a figure below the field's floor — marks the field and states the reason beside it, and
+ * **the value the caller holds is left exactly as it was**. Nothing here is ever rounded into shape.
+ *
+ * **An emptied field is not a refused keystroke, and the caller is told about it.** A required field that has been cleared
+ * hands the caller nothing, which is what disables the form's save button, and it goes on saying that it is required for as
+ * long as it is empty — it does not state a refusal and then quietly put the figure back the moment the field is left. A caller
+ * that has nowhere to put an empty value, the settings screen being the one, keeps what it had and the field re-reads it.
  *
  * **The decimal character is the one the preferences name**, and a thousands separator is typeable under no setting at all.
  * Changing the preference changes which key produces the separator and nothing else: no figure already entered is re-read.
@@ -108,10 +113,7 @@ export const DecimalField = ({
 
 		if(parsed === undefined) {
 			setRefusal(required ? t('field.required') : undefined);
-
-			if(!required) {
-				onChange(undefined);
-			}
+			onChange(undefined);
 
 			return;
 		}
@@ -152,7 +154,11 @@ export const DecimalField = ({
 					}}
 					onBlur={() => {
 						setDraft(undefined);
-						setRefusal(undefined);
+
+						// A refusal a keystroke raised goes with the keystrokes, the caller still holding the figure it had.
+						// The one that stays is a required field emptied by hand: there is nothing to go back to, and a field
+						// nobody has typed in has raised no refusal to keep.
+						setRefusal(refusal !== undefined && required && value === undefined ? refusal : undefined);
 					}}/>
 				{suffix && <span className='decimal-field-affix'>{suffix}</span>}
 			</div>
