@@ -18,7 +18,8 @@ import {
 	matchPensionContributions,
 	matchTradesToTransactions,
 	pensionFigureKey,
-	sortPayslipsForMatching
+	sortPayslipsForMatching,
+	type TransferMatchWindow
 } from 'src/logic/checks/Matching';
 import { createSpiccioliTranslator } from 'src/i18n/Translations';
 import { tradeTotal } from 'src/logic/investments/Trades';
@@ -26,10 +27,15 @@ import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
 import type { LedgerDocument, Payslip, Trade, Transaction } from 'src/types/LedgerTypes';
 
 /**
- * The five greedy pairings. What is being pinned down here is the determinism the specification is explicit about: the order the
- * claiming side is walked in, the nearest-dated counterpart each record takes, and the fact that nothing is left to iteration
- * order.
+ * The five pairings. What is being pinned down here is the determinism the specification is explicit about: the order the
+ * claiming side is walked in, the nearest-dated counterpart each record takes, the displacement that keeps a first fit from
+ * stranding a pair, and the fact that nothing is left to iteration order.
  */
+
+// What most of these run with: the forward reach alone, the backward one being the subject of its own tests
+const forwardWindow = (forwardDays: number): TransferMatchWindow => {
+	return { forwardDays, backwardDays: 0 };
+};
 
 const translator = createSpiccioliTranslator('en');
 
@@ -53,7 +59,7 @@ describe('internal transfer legs', () => {
 			]
 		});
 
-		const matching = matchInternalTransfers(document, 5);
+		const matching = matchInternalTransfers(document, forwardWindow(5));
 
 		expect(matching.counterparts.get('out')).toBe('in');
 		expect(matching.counterparts.get('in')).toBe('out');
@@ -70,7 +76,7 @@ describe('internal transfer legs', () => {
 			]
 		});
 
-		expect(matchInternalTransfers(document, 5).unpaired.map((unpaired) => {
+		expect(matchInternalTransfers(document, forwardWindow(5)).unpaired.map((unpaired) => {
 			return unpaired.id;
 		})).toEqual([ 'in', 'out' ]);
 	});
@@ -84,10 +90,10 @@ describe('internal transfer legs', () => {
 			]
 		});
 
-		expect(matchInternalTransfers(document, 5).unpaired).toHaveLength(2);
+		expect(matchInternalTransfers(document, forwardWindow(5)).unpaired).toHaveLength(2);
 	});
 
-	it('runs the window forwards only, so a leg that arrived before the money left does not pair', () => {
+	it('runs the window forwards only while the backward reach is zero, so a leg dated before the money left does not pair', () => {
 		const document = withRecords({
 			accounts,
 			transactions: [
@@ -96,7 +102,68 @@ describe('internal transfer legs', () => {
 			]
 		});
 
-		expect(matchInternalTransfers(document, 5).unpaired).toHaveLength(2);
+		expect(matchInternalTransfers(document, forwardWindow(5)).unpaired).toHaveLength(2);
+	});
+
+	it('pairs a receiving leg dated before the sending one, two banks dating one movement differently', () => {
+		const document = withRecords({
+			accounts,
+			transactions: [
+				leg('in', 'account-2', '2025-01-25', 20000),
+				leg('out', 'account-1', '2025-01-27', -20000, 2)
+			]
+		});
+
+		const matching = matchInternalTransfers(document, { forwardDays: 5, backwardDays: 3 });
+
+		expect(matching.counterparts.get('out')).toBe('in');
+		expect(matching.unpaired).toHaveLength(0);
+	});
+
+	it('leaves a receiving leg further back than the backward reach unpaired', () => {
+		const document = withRecords({
+			accounts,
+			transactions: [
+				leg('in', 'account-2', '2025-01-23', 20000),
+				leg('out', 'account-1', '2025-01-27', -20000, 2)
+			]
+		});
+
+		expect(matchInternalTransfers(document, { forwardDays: 5, backwardDays: 3 }).unpaired).toHaveLength(2);
+	});
+
+	it('takes the later of two legs equally far either side, forwards being the direction the money runs in', () => {
+		const document = withRecords({
+			accounts,
+			transactions: [
+				leg('before', 'account-2', '2026-08-04', 200000),
+				leg('out', 'account-1', '2026-08-05', -200000, 2),
+				leg('after', 'account-2', '2026-08-06', 200000, 3)
+			]
+		});
+
+		expect(matchInternalTransfers(document, { forwardDays: 5, backwardDays: 3 }).counterparts.get('out')).toBe('after');
+	});
+
+	it('displaces a paired leg rather than stranding one that has nowhere else to go', () => {
+		const document = withRecords({
+			accounts: [ ...accounts, makeAccount({ id: 'account-3', name: 'ING' }) ],
+			transactions: [
+
+				// One day, one amount, and a transfer through the middle account: account-2 → account-1 → account-3
+				leg('through-out', 'account-2', '2026-08-05', -150000, 1),
+				leg('end-in', 'account-3', '2026-08-05', 150000, 2),
+				leg('middle-in', 'account-1', '2026-08-05', 150000, 3),
+				leg('middle-out', 'account-1', '2026-08-05', -150000, 4)
+			]
+		});
+
+		const matching = matchInternalTransfers(document, forwardWindow(5));
+
+		// The first leg walked takes the nearest free counterpart, and gives it up when the leg after it can pair with nothing else
+		expect(matching.counterparts.get('middle-out')).toBe('end-in');
+		expect(matching.counterparts.get('through-out')).toBe('middle-in');
+		expect(matching.unpaired).toHaveLength(0);
 	});
 
 	it('takes a window of zero days as the same day only', () => {
@@ -116,8 +183,8 @@ describe('internal transfer legs', () => {
 			]
 		});
 
-		expect(matchInternalTransfers(sameDay, 0).unpaired).toHaveLength(0);
-		expect(matchInternalTransfers(nextDay, 0).unpaired).toHaveLength(2);
+		expect(matchInternalTransfers(sameDay, forwardWindow(0)).unpaired).toHaveLength(0);
+		expect(matchInternalTransfers(nextDay, forwardWindow(0)).unpaired).toHaveLength(2);
 	});
 
 	it('claims the nearest-dated receiving leg, and breaks a tie by insertion sequence', () => {
@@ -131,10 +198,10 @@ describe('internal transfer legs', () => {
 			]
 		});
 
-		expect(matchInternalTransfers(document, 5).counterparts.get('out')).toBe('tie-a');
+		expect(matchInternalTransfers(document, forwardWindow(5)).counterparts.get('out')).toBe('tie-a');
 	});
 
-	it('pairs greedily in the order the sending legs are walked, so an earlier leg takes the earlier counterpart', () => {
+	it('pairs in the order the sending legs are walked, so an earlier leg takes the earlier counterpart', () => {
 		const document = withRecords({
 			accounts,
 			transactions: [
@@ -145,7 +212,7 @@ describe('internal transfer legs', () => {
 			]
 		});
 
-		const matching = matchInternalTransfers(document, 5);
+		const matching = matchInternalTransfers(document, forwardWindow(5));
 
 		expect(matching.counterparts.get('out-early')).toBe('in-early');
 		expect(matching.counterparts.get('out-late')).toBe('in-late');
@@ -160,7 +227,7 @@ describe('internal transfer legs', () => {
 			]
 		});
 
-		const matching = matchInternalTransfers(document, 5);
+		const matching = matchInternalTransfers(document, forwardWindow(5));
 
 		expect(matching.counterparts.get('out')).toBe('in');
 		expect(matching.unpaired).toHaveLength(0);
@@ -169,7 +236,7 @@ describe('internal transfer legs', () => {
 	it('reports a lone leg of zero once rather than twice', () => {
 		const document = withRecords({ accounts, transactions: [ leg('alone', 'account-1', '2026-08-05', 0) ] });
 
-		expect(matchInternalTransfers(document, 5).unpaired.map((unpaired) => {
+		expect(matchInternalTransfers(document, forwardWindow(5)).unpaired.map((unpaired) => {
 			return unpaired.id;
 		})).toEqual([ 'alone' ]);
 	});
@@ -183,7 +250,7 @@ describe('internal transfer legs', () => {
 			]
 		});
 
-		const matching = matchInternalTransfers(document, 5);
+		const matching = matchInternalTransfers(document, forwardWindow(5));
 
 		expect(matching.legCount).toBe(1);
 		expect(matching.unpaired.map((unpaired) => {

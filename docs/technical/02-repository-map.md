@@ -94,7 +94,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `logic/categories/Categorisation.ts` | The rule engine: what a rule compares, which rule claims a description, the pass that keeps an `automatic` category the one the rules produce, what each rule accounts for, and the four figures applying a list would produce |
 | `logic/categories/RuleDraft.ts` | The draft the rule list is edited as, and what tells it apart from the list the file holds |
 | `logic/categories/CategoryReport.ts` | The categories × years matrix: the columns, the four groups, the three subtotals and Net |
-| `logic/checks/Matching.ts` | The five greedy pairings of [§11.6](../functional/specs/11-calculations.md#116-derived-matching) and the one bucketed walk all of them are made of, plus what the three *Matched* columns name |
+| `logic/checks/Matching.ts` | The five pairings of [§11.6](../functional/specs/11-calculations.md#116-derived-matching) and the one bucketed walk all of them are made of, displacement included, plus what the three *Matched* columns name |
 | `logic/checks/Checks.ts` | The fourteen checks of [§9](../functional/specs/09-checks.md), in that document's order: what each one examined, the records a failing one names, and the way back to each of them |
 | `logic/checks/CheckDates.ts` | The day arithmetic the windows, the ages and the net worth line's month ends are written in |
 | `logic/portfolio/NetWorth.ts` | Every account's balance and the four lines net worth divides into, in one pass, plus the pension fund half of [§11.3](../functional/specs/11-calculations.md#113-hypothetical-liquidation) with its two clamps |

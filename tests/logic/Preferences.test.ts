@@ -22,6 +22,8 @@ describe('parsePreferences', () => {
 		expect(parsePreferences({ backupCount: 3 }).backupCount).toBe(3);
 		expect(parsePreferences({ transferMatchWindowDays: 0 }).transferMatchWindowDays).toBe(0);
 		expect(parsePreferences({ transferMatchWindowDays: 32 }).transferMatchWindowDays).toBe(DEFAULT_PREFERENCES.transferMatchWindowDays);
+		expect(parsePreferences({ transferMatchBackwardDays: 0 }).transferMatchBackwardDays).toBe(0);
+		expect(parsePreferences({ transferMatchBackwardDays: 32 }).transferMatchBackwardDays).toBe(DEFAULT_PREFERENCES.transferMatchBackwardDays);
 	});
 
 	test('refuses a separator pair that collides', () => {

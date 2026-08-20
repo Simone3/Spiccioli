@@ -19,7 +19,8 @@ Preferences, and nothing else. Every kind of reference data lives on the screen 
 | priceStalenessDays | integer ≥ 1 | 30 | Check 3; the *Last priced* highlight in the Holdings detail panel ([§7.1](07-investments.md#71-holdings)) |
 | pensionRevaluationMonths | integer ≥ 1 | 3 | Check 10 |
 | receiptPendingMonths | integer ≥ 1 | 3 | Check 14 |
-| transferMatchWindowDays | integer 0 – 31 | 5 | [§11.6](11-calculations.md#116-derived-matching), check 1 |
+| transferMatchWindowDays | integer 0 – 31 | 5 | [§11.6](11-calculations.md#116-derived-matching), check 1. How far **after** the sending leg the receiving one may be dated |
+| transferMatchBackwardDays | integer 0 – 31 | 3 | [§11.6](11-calculations.md#116-derived-matching), check 1. How far **before** it the receiving leg may be dated, two banks dating one movement differently; **0 is the forward-only rule** |
 | tradeMatchWindowDays | integer 0 – 31 | 5 | [§11.6](11-calculations.md#116-derived-matching), checks 6 and 7 |
 | backupCount | integer 1 – 100 | 10 | [§12](12-storage.md) |
 

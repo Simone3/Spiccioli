@@ -28,6 +28,9 @@ export const DEFAULT_PREFERENCES: Preferences = {
 	pensionRevaluationMonths: 3,
 	receiptPendingMonths: 3,
 	transferMatchWindowDays: 5,
+
+	// A weekend and a day, which is what two banks dating one movement differently comes to
+	transferMatchBackwardDays: 3,
 	tradeMatchWindowDays: 5,
 	backupCount: 10
 };
@@ -76,6 +79,7 @@ export const parsePreferences = (value: unknown): Preferences => {
 		pensionRevaluationMonths: readBoundedInteger(record.pensionRevaluationMonths, 1, Number.MAX_SAFE_INTEGER, DEFAULT_PREFERENCES.pensionRevaluationMonths),
 		receiptPendingMonths: readBoundedInteger(record.receiptPendingMonths, 1, Number.MAX_SAFE_INTEGER, DEFAULT_PREFERENCES.receiptPendingMonths),
 		transferMatchWindowDays: readBoundedInteger(record.transferMatchWindowDays, 0, 31, DEFAULT_PREFERENCES.transferMatchWindowDays),
+		transferMatchBackwardDays: readBoundedInteger(record.transferMatchBackwardDays, 0, 31, DEFAULT_PREFERENCES.transferMatchBackwardDays),
 		tradeMatchWindowDays: readBoundedInteger(record.tradeMatchWindowDays, 0, 31, DEFAULT_PREFERENCES.tradeMatchWindowDays),
 		backupCount: readBoundedInteger(record.backupCount, 1, 100, DEFAULT_PREFERENCES.backupCount)
 	};

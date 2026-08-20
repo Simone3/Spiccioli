@@ -1,4 +1,4 @@
-import { addDaysToIsoDate, firstDayOfMonth, lastDayOfNextMonth } from 'src/logic/checks/CheckDates';
+import { addDaysToIsoDate, daysBetweenIsoDates, firstDayOfMonth, lastDayOfNextMonth } from 'src/logic/checks/CheckDates';
 import { compareNames, formatAccountName, indexInstitutions } from 'src/logic/accounts/Accounts';
 import { categoryIdsWithRole } from 'src/logic/categories/Categories';
 import { sortTrades, tradeTotal } from 'src/logic/investments/Trades';
@@ -20,7 +20,7 @@ import type {
 import type { Preferences } from 'src/types/PreferencesTypes';
 
 /**
- * The five greedy pairings of [§11.6], and the one walk all of them are made of.
+ * The five pairings of [§11.6], and the one walk all of them are made of.
  *
  * **Nothing here is stored.** Matching is recomputed from the file every time, and the pairs it produces are what the *Matched*
  * columns name and what checks 1, 4, 5, 6 and 7 report the leftovers of.
@@ -29,14 +29,20 @@ import type { Preferences } from 'src/types/PreferencesTypes';
  * compares them as they stand: opposite for a transfer's two legs and for a purchase against its trade, equal for a sale, a
  * salary payment and a pension credit.
  *
- * **Every one of them is greedy and every one of them states its order.** The side being matched *from* is walked in the
+ * **Every one of them is one-to-one and every one of them states its order.** The side being matched *from* is walked in the
  * ascending ordering of its own records — `date ASC, insertionSeq ASC, id ASC` for transactions and trades, year then month then label
- * for payslips — and each record claims the **nearest-dated** unclaimed counterpart that satisfies the conditions, ties broken
+ * for payslips — and each record claims the **nearest-dated** free counterpart that satisfies the conditions, ties broken
  * by that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteration order, so the same file pairs the same
  * way on every machine.
  *
- * **Every window runs forwards only**: money leaves before it arrives, a trade is executed before it settles, and a month's pay
- * is earned before it is paid. The leading record opens the window and the bank's record of it falls inside.
+ * **A claim that finds every eligible counterpart taken displaces one**, provided the record holding it can pair elsewhere — a
+ * search that follows the same rule, so one displacement runs down a chain. What comes out is therefore the greatest number of
+ * pairs the conditions admit, and a record is reported by its check only when there was no counterpart it could have had.
+ *
+ * **Every window but the transfer's runs forwards only**: money leaves before it arrives, a trade is executed before it settles,
+ * and a month's pay is earned before it is paid, so the leading record opens the window and the bank's record of it falls inside.
+ * **The transfer window reaches backwards as well**, by a preference of its own, because neither leg is the event: both are one
+ * bank's record of it, and two banks date one movement differently.
  *
  * **Each side is bucketed by amount**, which is the intended implementation rather than an optimisation to reach for later: a
  * pairing keys off an amount and a date window, so the search for a counterpart is a lookup among the few records that could
@@ -53,7 +59,7 @@ export interface MatchCandidate {
 	amount: Cents;
 }
 
-interface GreedyMatchOptions<TClaim> {
+interface OneToOneMatchOptions<TClaim> {
 
 	// Already in the order the claims are walked in, which is the ascending ordering of the claiming side's own records
 	claims: readonly TClaim[];
@@ -69,6 +75,10 @@ interface GreedyMatchOptions<TClaim> {
 	// The window the counterpart has to fall in, both ends inclusive
 	windowOf: (claim: TClaim) => { fromDate: IsoDate; toDate: IsoDate };
 
+	// The day distances are measured from, which is the leading record's own. Defaults to the day the window opens on, the two
+	// being the same wherever the window only runs forwards.
+	pivotOf?: (claim: TClaim) => IsoDate;
+
 	// Everything else the pair has to satisfy: a different account, a shared institution
 	accepts?: (claim: TClaim, candidate: MatchCandidate) => boolean;
 
@@ -76,13 +86,23 @@ interface GreedyMatchOptions<TClaim> {
 	candidateIdOf?: (claim: TClaim) => LedgerId;
 }
 
-interface GreedyMatchResult<TClaim> {
+interface OneToOneMatchResult<TClaim> {
 
 	// The claim's key against the counterpart it claimed
 	matches: Map<string, LedgerId>;
 
 	unmatchedClaims: TClaim[];
 	unmatchedCandidateIds: Set<LedgerId>;
+}
+
+/** How far either way the receiving leg of a transfer may be dated from the sending one. */
+export interface TransferMatchWindow {
+
+	// How many days after the sending leg the receiving one may be dated. Zero is same day only.
+	forwardDays: number;
+
+	// How many days before it the receiving leg may be dated, two banks dating one movement differently. Zero is forwards only.
+	backwardDays: number;
 }
 
 /** The two legs of every transfer that paired, and the legs that did not. */
@@ -150,7 +170,7 @@ export interface DerivedMatching {
 export interface MatchingOptions {
 	document: LedgerDocument;
 
-	// The two windows are preferences, and both open on the leading record's date. Zero means same day only.
+	// The windows are preferences, and every one of them opens on the leading record's date. Zero means same day only.
 	preferences: Preferences;
 }
 
@@ -183,10 +203,10 @@ export const pensionFigureAmount = (payslip: Payslip, figure: PensionFigure): Ce
 };
 
 /**
- * Orders two candidates the way “nearest-dated” is decided: by date, then by the counterpart's `insertionSeq`, then by its `id`.
+ * Orders two candidates the way a bucket is held: by date, then by `insertionSeq`, then by `id`.
  * @param first The first candidate.
  * @param second The second candidate.
- * @returns Negative when the first is nearer, positive when the second is.
+ * @returns Negative when the first comes earlier, positive when the second does.
  */
 const compareCandidates = (first: MatchCandidate, second: MatchCandidate): number => {
 	if(first.date !== second.date) {
@@ -201,17 +221,50 @@ const compareCandidates = (first: MatchCandidate, second: MatchCandidate): numbe
 };
 
 /**
- * The one walk every pairing below is made of: each claim, in the order it was handed over, takes the nearest-dated unclaimed
+ * Orders the counterparts one claim may take the way “nearest-dated” is decided once a window can reach both ways: by how many
+ * days separate them from the leading record, then — two of them being equally far on either side — the **later** one first,
+ * forwards being the direction the events themselves run in, then by `insertionSeq` and by `id` as everywhere else.
+ *
+ * On a window that only runs forwards this is the bucket's own order, so nothing about the other four pairings changes.
+ * @param eligible The counterparts inside the claim's window, in the bucket's order.
+ * @param pivotDate The leading record's day, which is what the distances are measured from.
+ * @returns The same counterparts, nearest first.
+ */
+const orderByDistance = (eligible: readonly MatchCandidate[], pivotDate: IsoDate): MatchCandidate[] => {
+	return eligible.map((candidate) => {
+		return { candidate, distance: Math.abs(daysBetweenIsoDates(pivotDate, candidate.date)) };
+	}).sort((first, second) => {
+		if(first.distance !== second.distance) {
+			return first.distance - second.distance;
+		}
+
+		// Equally far on either side of the pivot: the later day is the one the window runs towards
+		if(first.candidate.date !== second.candidate.date) {
+			return first.candidate.date < second.candidate.date ? 1 : -1;
+		}
+
+		return compareCandidates(first.candidate, second.candidate);
+	}).map((entry) => {
+		return entry.candidate;
+	});
+};
+
+/**
+ * The one walk every pairing below is made of: each claim, in the order it was handed over, takes the nearest-dated free
  * counterpart carrying the amount it is looking for inside the window it is looking in.
  *
- * **The candidates are bucketed by amount and each bucket is ordered**, so a claim looks at the few records that could possibly
- * match it rather than at the file. Every window opens forwards, so the nearest candidate is the earliest one in the bucket that
- * has not been taken.
+ * **The candidates are bucketed by amount**, so a claim looks at the few records that could possibly match it rather than at the
+ * file, and each claim's own shortlist is then ordered nearest first.
+ *
+ * **A claim whose every counterpart is taken displaces one rather than stranding**, provided the claim holding it can pair
+ * elsewhere — which is asked in exactly the same way, so a displacement runs down a chain and is undone whole when the chain
+ * ends nowhere. Both sides are walked in fixed orders and the search is depth-first over them, so the pairing is deterministic;
+ * what it adds over taking the first fit is that no pair the conditions admit is thrown away by the order the claims arrived in.
  * @param options What is being matched against what.
  * @returns The pairs, and what was left on each side.
  */
-const runGreedyMatching = <TClaim>(options: GreedyMatchOptions<TClaim>): GreedyMatchResult<TClaim> => {
-	const { claims, candidates, keyOf, amountOf, windowOf, accepts, candidateIdOf } = options;
+const runOneToOneMatching = <TClaim>(options: OneToOneMatchOptions<TClaim>): OneToOneMatchResult<TClaim> => {
+	const { claims, candidates, keyOf, amountOf, windowOf, pivotOf, accepts, candidateIdOf } = options;
 	const buckets = new Map<Cents, MatchCandidate[]>();
 
 	for(const candidate of candidates) {
@@ -229,44 +282,108 @@ const runGreedyMatching = <TClaim>(options: GreedyMatchOptions<TClaim>): GreedyM
 		bucket.sort(compareCandidates);
 	}
 
-	const matches = new Map<string, LedgerId>();
-	const unmatchedClaims: TClaim[] = [];
-	const claimed = new Set<LedgerId>();
-
-	for(const claim of claims) {
+	// Every counterpart one claim may take, nearest first. What is left to decide is only which of them it ends up with.
+	const shortlists = claims.map((claim) => {
+		const { fromDate, toDate } = windowOf(claim);
 		const ownId = candidateIdOf?.(claim);
 
-		// A leg the other side of the walk already paired with takes no further part: it is matched, from the other end
-		if(ownId !== undefined && claimed.has(ownId)) {
-			continue;
-		}
-
-		const { fromDate, toDate } = windowOf(claim);
-		const bucket = buckets.get(amountOf(claim)) ?? [];
-		const counterpart = bucket.find((candidate) => {
+		return orderByDistance((buckets.get(amountOf(claim)) ?? []).filter((candidate) => {
 			return candidate.date >= fromDate &&
 				candidate.date <= toDate &&
 				candidate.id !== ownId &&
-				!claimed.has(candidate.id) &&
 				(accepts?.(claim, candidate) ?? true);
+		}), pivotOf?.(claim) ?? fromDate);
+	});
+
+	const matches = new Map<string, LedgerId>();
+	const unmatchedClaims: TClaim[] = [];
+
+	// Which claim holds each counterpart, which is what a displacement rewrites
+	const holderByCandidate = new Map<LedgerId, number>();
+
+	// The claims that are themselves candidates and have paired. A leg that pairs is spent on both sides of the walk.
+	const spent = new Set<LedgerId>();
+
+	/**
+	 * Finds one claim a counterpart: the nearest one nobody holds, and only when there is no such thing the nearest one whose
+	 * holder can be moved elsewhere.
+	 * @param index The claim.
+	 * @param visited The counterparts this search has already offered, which is what keeps a chain from circling.
+	 * @returns Whether the claim, and everything it displaced, ended up paired.
+	 */
+	const takeCounterpart = (index: number, visited: Set<LedgerId>): boolean => {
+		const shortlist = shortlists[index];
+		const available = (candidate: MatchCandidate): boolean => {
+			return !visited.has(candidate.id) && !spent.has(candidate.id);
+		};
+
+		const free = shortlist.find((candidate) => {
+			return available(candidate) && !holderByCandidate.has(candidate.id);
 		});
 
-		if(!counterpart) {
+		if(free) {
+			visited.add(free.id);
+			holderByCandidate.set(free.id, index);
+
+			return true;
+		}
+
+		// Every counterpart it could have is held, so the nearest holder is asked to move, and the one after it if it will not
+		for(const candidate of shortlist) {
+			if(!available(candidate)) {
+				continue;
+			}
+
+			visited.add(candidate.id);
+
+			const holder = holderByCandidate.get(candidate.id);
+
+			if(holder !== undefined && takeCounterpart(holder, visited)) {
+				holderByCandidate.set(candidate.id, index);
+
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	claims.forEach((claim, index) => {
+		const ownId = candidateIdOf?.(claim);
+
+		// A leg the other side of the walk already paired with takes no further part: it is matched, from the other end
+		if(ownId !== undefined && holderByCandidate.has(ownId)) {
+			return;
+		}
+
+		if(!takeCounterpart(index, new Set())) {
 			unmatchedClaims.push(claim);
 
-			continue;
+			return;
 		}
-
-		matches.set(keyOf(claim), counterpart.id);
-		claimed.add(counterpart.id);
 
 		if(ownId !== undefined) {
-			claimed.add(ownId);
+			spent.add(ownId);
 		}
+	});
+
+	// Read back in the order the claims were walked in, so the pairs come out in it rather than in the order they were found
+	const takenByClaim = new Map<number, LedgerId>();
+
+	for(const [ candidateId, index ] of holderByCandidate) {
+		takenByClaim.set(index, candidateId);
 	}
 
+	claims.forEach((claim, index) => {
+		const counterpartId = takenByClaim.get(index);
+
+		if(counterpartId !== undefined) {
+			matches.set(keyOf(claim), counterpartId);
+		}
+	});
+
 	const unmatchedCandidateIds = new Set(candidates.filter((candidate) => {
-		return !claimed.has(candidate.id);
+		return !holderByCandidate.has(candidate.id) && !spent.has(candidate.id);
 	}).map((candidate) => {
 		return candidate.id;
 	}));
@@ -296,18 +413,24 @@ const transactionsInRole = (document: LedgerDocument, role: Category['role']): T
 };
 
 /**
- * Pairs the two legs of every internal transfer: exactly opposite amounts, different accounts, and the receiving leg dated on or
- * after the sending one inside the window.
+ * Pairs the two legs of every internal transfer: exactly opposite amounts, different accounts, and the receiving leg dated
+ * inside the window either side of the sending one.
  *
- * **The negative legs are what is walked**, each claiming the nearest-dated unclaimed positive leg in its window. **A leg of
+ * **This is the one window that reaches backwards**, because neither leg is the event: both are one bank's record of it, and a
+ * bank posting the credit on the operation date against a bank posting the debit on its value date puts the receiving leg first
+ * with nothing wrong in the file. The reach is short and is a preference of its own, `0` being the forward-only rule exactly.
+ *
+ * **The negative legs are what is walked**, each claiming the nearest-dated free positive leg in its window. **A leg of
  * zero is on both sides of that sentence** — it is neither a sending leg nor a receiving one, and its own opposite — so it is
  * walked like a sending leg and claimed like a receiving one, which pairs two zero legs on two accounts and leaves a lone one
  * reported. That is the one reading the specification's *negative* and *positive* need, a zero amount being legal everywhere.
+ * **It is also the one place the walk can leave a pair on the table**: a zero leg claimed from the other end takes no further
+ * part, so a displacement that later frees it does not bring it back. Nothing else here is on both sides of its own walk.
  * @param document The ledger.
- * @param windowDays How many days after the sending leg the receiving one may be dated. Zero is same day only.
+ * @param window How far either way the receiving leg may be dated from the sending one.
  * @returns The pairs, and every leg that has none.
  */
-export const matchInternalTransfers = (document: LedgerDocument, windowDays: number): TransferMatching => {
+export const matchInternalTransfers = (document: LedgerDocument, window: TransferMatchWindow): TransferMatching => {
 	const legs = transactionsInRole(document, 'internal-transfer');
 
 	const sending = legs.filter((leg) => {
@@ -321,7 +444,7 @@ export const matchInternalTransfers = (document: LedgerDocument, windowDays: num
 		return [ leg.id, leg ];
 	}));
 
-	const { matches } = runGreedyMatching<Transaction>({
+	const { matches } = runOneToOneMatching<Transaction>({
 		claims: sending,
 		candidates: receiving,
 		keyOf: (leg) => {
@@ -331,7 +454,13 @@ export const matchInternalTransfers = (document: LedgerDocument, windowDays: num
 			return -leg.amount;
 		},
 		windowOf: (leg) => {
-			return { fromDate: leg.date, toDate: addDaysToIsoDate(leg.date, windowDays) };
+			return {
+				fromDate: addDaysToIsoDate(leg.date, -window.backwardDays),
+				toDate: addDaysToIsoDate(leg.date, window.forwardDays)
+			};
+		},
+		pivotOf: (leg) => {
+			return leg.date;
 		},
 		accepts: (leg, candidate) => {
 			return byId.get(candidate.id)?.accountId !== leg.accountId;
@@ -388,7 +517,7 @@ export const matchTradesToTransactions = (document: LedgerDocument, kind: TradeK
 		return accounts.get(accountId)?.institutionId ?? null;
 	};
 
-	const { matches, unmatchedClaims, unmatchedCandidateIds } = runGreedyMatching<Trade>({
+	const { matches, unmatchedClaims, unmatchedCandidateIds } = runOneToOneMatching<Trade>({
 		claims: trades,
 		candidates: transactions.map(toCandidate),
 		keyOf: (trade) => {
@@ -488,7 +617,7 @@ export const matchPayslipsToSalaries = (document: LedgerDocument): SalaryMatchin
 	const payslips = sortPayslipsForMatching(document.payslips, document.contracts);
 	const transactions = transactionsInRole(document, 'salary');
 
-	const { matches, unmatchedClaims, unmatchedCandidateIds } = runGreedyMatching<Payslip>({
+	const { matches, unmatchedClaims, unmatchedCandidateIds } = runOneToOneMatching<Payslip>({
 		claims: payslips,
 		candidates: transactions.map(toCandidate),
 		keyOf: (payslip) => {
@@ -550,7 +679,7 @@ export const matchPensionContributions = (document: LedgerDocument): PensionMatc
 		}
 	}
 
-	const { matches, unmatchedClaims, unmatchedCandidateIds } = runGreedyMatching<PensionClaim>({
+	const { matches, unmatchedClaims, unmatchedCandidateIds } = runOneToOneMatching<PensionClaim>({
 		claims,
 		candidates: transactions.map(toCandidate),
 		keyOf: (claim) => {
@@ -596,7 +725,10 @@ export const matchPensionContributions = (document: LedgerDocument): PensionMatc
  */
 export const deriveMatching = ({ document, preferences }: MatchingOptions): DerivedMatching => {
 	return {
-		transfers: matchInternalTransfers(document, preferences.transferMatchWindowDays),
+		transfers: matchInternalTransfers(document, {
+			forwardDays: preferences.transferMatchWindowDays,
+			backwardDays: preferences.transferMatchBackwardDays
+		}),
 		purchases: matchTradesToTransactions(document, 'purchase', preferences.tradeMatchWindowDays),
 		sales: matchTradesToTransactions(document, 'sale', preferences.tradeMatchWindowDays),
 		salaries: matchPayslipsToSalaries(document),

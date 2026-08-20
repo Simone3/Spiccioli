@@ -143,6 +143,7 @@ What the forms refuse. Everything here is enforced at the point of entry, by the
 | --- | --- |
 | priceStalenessDays, pensionRevaluationMonths, receiptPendingMonths | Integer ≥ 1. |
 | transferMatchWindowDays, tradeMatchWindowDays | Integer 0 – 31. **The window runs forwards from the leading record** — the sending leg, the trade — so zero means same day only ([§11.6](11-calculations.md#116-derived-matching)). |
+| transferMatchBackwardDays | Integer 0 – 31. How many days **before** the sending leg the receiving one may be dated, which is the one backward reach in [§11.6](11-calculations.md#116-derived-matching); zero is the forward-only rule, and there is no trade equivalent. |
 | backupCount | Integer 1 – 100. |
 | defaultTaxRate | 0 – 100, at most 1 decimal, entered as a percentage and stored as a fraction, exactly as `Security.taxRate` above. |
 | dateFormat, decimalSeparator | Pickers over the closed sets of [§10](10-settings.md). There is nothing to reject: the only values offered are the legal ones. |

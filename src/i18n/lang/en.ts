@@ -1321,6 +1321,7 @@ export const EN_TRANSLATIONS = {
 		pensionRevaluationMonths: 'Revalue pension every',
 		receiptPendingMonths: 'Receipt pending for',
 		transferMatchWindowDays: 'Transfer match window',
+		transferMatchBackwardDays: 'Receiving leg may precede by',
 		tradeMatchWindowDays: 'Trade match window',
 		backupCount: 'Backups kept',
 		units: {

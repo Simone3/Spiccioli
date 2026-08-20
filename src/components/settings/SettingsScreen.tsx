@@ -224,6 +224,18 @@ export const SettingsScreen = (): ReactElement => {
 									applyNumber('transferMatchWindowDays', value);
 								}}/>
 						</SettingsField>
+						<SettingsField label={t('settings.transferMatchBackwardDays')}>
+							<IntegerField
+								value={preferences.transferMatchBackwardDays}
+								label={t('settings.transferMatchBackwardDays')}
+								minimum={0}
+								maximum={MATCH_WINDOW_MAXIMUM_DAYS}
+								required
+								suffix={t('settings.units.days')}
+								onChange={(value) => {
+									applyNumber('transferMatchBackwardDays', value);
+								}}/>
+						</SettingsField>
 						<SettingsField label={t('settings.tradeMatchWindowDays')}>
 							<IntegerField
 								value={preferences.tradeMatchWindowDays}

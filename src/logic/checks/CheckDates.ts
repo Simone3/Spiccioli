@@ -4,9 +4,11 @@ import type { IsoDate } from 'src/types/LedgerTypes';
 /**
  * The day arithmetic the matchers, the checks and the net worth line are written in.
  *
- * **Every window in the matching of [§11.6] runs forwards only**, so each of these takes a day the file holds and produces the
- * other end of a window or the age of a record. They work on stored `YYYY-MM-DD` days rather than on `Date`, because that is
- * what every comparison downstream is: two stored days compare as text, and nothing here ever needs a time or a zone.
+ * **Every window in the matching of [§11.6] opens on the leading record's date**, and each of these takes a day the file holds
+ * and produces the other end of a window, the distance to a counterpart or the age of a record. Only the transfer window reaches
+ * backwards, which is a negative count of days rather than anything new here. They work on stored `YYYY-MM-DD` days rather than
+ * on `Date`, because that is what every comparison downstream is: two stored days compare as text, and nothing here ever needs a
+ * time or a zone.
  *
  * **“Today” is the computer's own clock**, read at the moment a figure is computed and never cached, so it is passed in rather
  * than read here.

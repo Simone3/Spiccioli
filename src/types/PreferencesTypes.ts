@@ -40,6 +40,9 @@ export interface Preferences {
 	pensionRevaluationMonths: number;
 	receiptPendingMonths: number;
 	transferMatchWindowDays: number;
+
+	// How many days before the sending leg the receiving one may be dated. Zero is the forward-only rule of [§11.6].
+	transferMatchBackwardDays: number;
 	tradeMatchWindowDays: number;
 	backupCount: number;
 }
