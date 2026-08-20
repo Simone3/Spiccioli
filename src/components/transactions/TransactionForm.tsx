@@ -11,7 +11,7 @@ import { useTranslator } from 'src/i18n/TranslationContext';
 import { RECEIPT_STATES, type Cents, type IsoDate, type LedgerId, type ReceiptState, type Transaction } from 'src/types/LedgerTypes';
 
 /**
- * The add-transaction form: the seven fields the user fills in, and no others.
+ * The transaction form: the seven fields the user fills in, and no others. It is what creates a row and what corrects one.
  *
  * The three stored fields it does not ask for follow from what it does. `categorySource` is the category picker — *Automatic*
  * means the rules own the row and any category means the user does — and `id` and `insertionSeq` are the application's.
@@ -20,7 +20,8 @@ import { RECEIPT_STATES, type Cents, type IsoDate, type LedgerId, type ReceiptSt
  * duplicate — creates it *N/A* and leaves the state to be moved afterwards.
  *
  * **Save and add another** keeps the panel open with the account and the date retained, which are the two fields a run of rows
- * from one statement shares, and clears the rest.
+ * from one statement shares, and clears the rest. It is offered while a row is being created and not while one is corrected,
+ * there being no second row to add.
  */
 
 export interface TransactionFormValues {
@@ -38,6 +39,9 @@ export interface TransactionFormValues {
 
 export interface TransactionFormProps {
 
+	// The transaction being corrected, or undefined while one is being created
+	transaction: Transaction | undefined;
+
 	// Called with the row to write, and with whether the panel stays open for the next one
 	onSave: (values: TransactionFormValues, addAnother: boolean) => void;
 
@@ -45,21 +49,28 @@ export interface TransactionFormProps {
 }
 
 /**
- * The add-transaction form.
+ * The transaction form.
  * @param props The form's props.
+ * @param props.transaction The transaction being corrected, where one is.
  * @param props.onSave What to do with the transaction the form holds.
  * @param props.onCancel What abandoning it does.
  * @returns The form.
  */
-export const TransactionForm = ({ onSave, onCancel }: TransactionFormProps): ReactElement => {
+export const TransactionForm = ({ transaction, onSave, onCancel }: TransactionFormProps): ReactElement => {
 	const { t } = useTranslator();
-	const [ accountId, setAccountId ] = useState<LedgerId | undefined>(undefined);
-	const [ date, setDate ] = useState<IsoDate | undefined>(DateUtils.toStandardYearMonthDay(new Date()));
-	const [ description, setDescription ] = useState('');
-	const [ amount, setAmount ] = useState<Cents | undefined>(undefined);
-	const [ category, setCategory ] = useState<string>(AUTOMATIC_CATEGORY);
-	const [ receiptState, setReceiptState ] = useState<ReceiptState>('na');
-	const [ notes, setNotes ] = useState('');
+	const [ accountId, setAccountId ] = useState<LedgerId | undefined>(transaction?.accountId);
+	const [ date, setDate ] = useState<IsoDate | undefined>(transaction?.date ?? DateUtils.toStandardYearMonthDay(new Date()));
+	const [ description, setDescription ] = useState(transaction?.description ?? '');
+	const [ amount, setAmount ] = useState<Cents | undefined>(transaction?.amount);
+	const [ category, setCategory ] = useState<string>(() => {
+		if(!transaction || transaction.categorySource === 'automatic') {
+			return AUTOMATIC_CATEGORY;
+		}
+
+		return transaction.categoryId ?? AUTOMATIC_CATEGORY;
+	});
+	const [ receiptState, setReceiptState ] = useState<ReceiptState>(transaction?.receiptState ?? 'na');
+	const [ notes, setNotes ] = useState(transaction?.notes ?? '');
 
 	// A required field states that it is required once it has been left empty, so a form nobody has touched yet is not covered in refusals
 	const [ isDescriptionTouched, setIsDescriptionTouched ] = useState(false);
@@ -104,14 +115,16 @@ export const TransactionForm = ({ onSave, onCancel }: TransactionFormProps): Rea
 
 	return (
 		<FormDialog
-			title={t('transactions.form.addTitle')}
+			title={transaction ? t('transactions.form.editTitle') : t('transactions.form.addTitle')}
 			canSave={canSave}
-			secondaryAction={{
-				label: t('transactions.form.saveAndAddAnother'),
-				onSelect: () => {
-					save(true);
-				}
-			}}
+			secondaryAction={transaction ?
+				undefined :
+				{
+					label: t('transactions.form.saveAndAddAnother'),
+					onSelect: () => {
+						save(true);
+					}
+				}}
 			onSave={() => {
 				save(false);
 			}}

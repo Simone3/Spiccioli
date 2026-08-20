@@ -1,48 +1,10 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useState, type ReactElement } from 'react';
 import { renderWithProviders, stubLedgerBridge } from '../testUtils';
 import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { DataTable } from 'src/components/common/DataTable';
 import { EmptyState } from 'src/components/common/EmptyState';
-import { InlineEditCell } from 'src/components/common/InlineEditCell';
 import { RowMenu } from 'src/components/common/RowMenu';
-
-const REFUSAL = 'That name is already taken.';
-
-const InlineEditHarness = ({ refuses }: { refuses: boolean }): ReactElement => {
-	const [ value, setValue ] = useState('Conto Corrente');
-	const [ draft, setDraft ] = useState(value);
-
-	return (
-		<InlineEditCell
-			label='Edit name'
-			renderEditor={() => {
-				return (
-					<input
-						aria-label='Name'
-						value={draft}
-						onChange={(event) => {
-							setDraft(event.target.value);
-						}}/>
-				);
-			}}
-			onCommit={() => {
-				if(refuses) {
-					return REFUSAL;
-				}
-
-				setValue(draft);
-
-				return undefined;
-			}}
-			onCancel={() => {
-				setDraft(value);
-			}}>
-			{value}
-		</InlineEditCell>
-	);
-};
 
 describe('the row menu', () => {
 	test('opens on a real button and closes on Escape', async() => {
@@ -105,43 +67,6 @@ describe('the confirmation', () => {
 		await userEvent.keyboard('{Escape}');
 
 		expect(cancelled).toBe(true);
-	});
-});
-
-describe('the inline edit', () => {
-	test('keeps the cell open with the reason when the value is refused, and never half-changes the row', async() => {
-		stubLedgerBridge();
-		renderWithProviders(<InlineEditHarness refuses/>);
-
-		await userEvent.click(screen.getByRole('button', { name: 'Edit name' }));
-		await userEvent.clear(screen.getByRole('textbox', { name: 'Name' }));
-		await userEvent.type(screen.getByRole('textbox', { name: 'Name' }), 'Conto Titoli');
-		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
-
-		expect(screen.getByRole('alert')).toHaveTextContent(REFUSAL);
-		expect(screen.getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
-	});
-
-	test('puts back the previous value when the edit is abandoned', async() => {
-		stubLedgerBridge();
-		renderWithProviders(<InlineEditHarness refuses={false}/>);
-
-		await userEvent.click(screen.getByRole('button', { name: 'Edit name' }));
-		await userEvent.type(screen.getByRole('textbox', { name: 'Name' }), ' 2');
-		await userEvent.keyboard('{Escape}');
-
-		expect(screen.getByRole('button', { name: 'Edit name' })).toHaveTextContent('Conto Corrente');
-	});
-
-	test('takes a value the caller accepts and closes', async() => {
-		stubLedgerBridge();
-		renderWithProviders(<InlineEditHarness refuses={false}/>);
-
-		await userEvent.click(screen.getByRole('button', { name: 'Edit name' }));
-		await userEvent.type(screen.getByRole('textbox', { name: 'Name' }), ' 2');
-		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
-
-		expect(screen.getByRole('button', { name: 'Edit name' })).toHaveTextContent('Conto Corrente 2');
 	});
 });
 

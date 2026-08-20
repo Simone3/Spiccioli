@@ -378,16 +378,6 @@ export const EN_TRANSLATIONS = {
 			noneLabel: 'Nothing is paired with this row'
 		},
 
-		// A cell is opened by the control that reads it, so each one says which row and which field it belongs to
-		edit: {
-			date: 'Edit the date of {description}',
-			account: 'Edit the account of {description}',
-			description: 'Edit the description of {description}',
-			amount: 'Edit the amount of {description}',
-			category: 'Edit the category of {description}',
-			receipt: 'Edit the receipt state of {description}',
-			notes: 'Edit the notes of {description}'
-		},
 		noCategory: 'no category',
 		noNotes: 'Add a note',
 		select: 'Select {description}',
@@ -441,6 +431,7 @@ export const EN_TRANSLATIONS = {
 		},
 		form: {
 			addTitle: 'Add transaction',
+			editTitle: 'Edit transaction',
 			account: 'Account',
 			accountChoose: 'Choose an account',
 			date: 'Date',
@@ -776,11 +767,9 @@ export const EN_TRANSLATIONS = {
 			other: 'Annualised return, every trade in the file including positions since sold — what the money has earned per year, before tax: {rate}. {count} positions are left out whole: they are oversold, or their security has never been priced.'
 		},
 		select: 'Show the detail of {security}',
-		editPrice: 'Edit the price of {security}',
-		priceValue: 'Price',
-		priceDate: 'As of',
-		priceNote: 'A price belongs to the security, not to this holding, so the same instrument held at another institution moves with it.',
-		priceMustBePositive: 'A price is more than zero.',
+
+		// A price belongs to the security and not to this holding, so the cell that states it is the way to where it is kept
+		managePrices: 'Show the prices of {security}',
 
 		// The detail panel: the facts about the position's history first, and what selling it today would produce after them
 		detail: {
@@ -853,16 +842,6 @@ export const EN_TRANSLATIONS = {
 			date: '⇄ {date}',
 			none: '—',
 			noneLabel: 'No bank transaction is paired with this trade'
-		},
-		edit: {
-			date: 'Edit the date of the {security} trade of {date}',
-			security: 'Edit the security of the trade of {date}',
-			account: 'Edit the account of the {security} trade of {date}',
-			quantity: 'Edit the quantity of the {security} trade of {date}',
-			unitPrice: 'Edit the unit price of the {security} trade of {date}',
-			fees: 'Edit the fees of the {security} trade of {date}',
-			taxes: 'Edit the taxes of the {security} trade of {date}',
-			notes: 'Edit the notes of the {security} trade of {date}'
 		},
 		noNotes: 'Add a note',
 		rowMenu: 'What can be done to the {security} trade of {date}',
@@ -983,22 +962,18 @@ export const EN_TRANSLATIONS = {
 			manual: 'manual',
 			fetched: 'fetched'
 		},
-		edit: {
-			date: 'Edit the date of the price of {date}',
-			value: 'Edit the value of the price of {date}'
-		},
 		rowMenu: 'What can be done to the price of {date}',
 		deleteTitle: 'Delete this price?',
 		deleteMessage: 'Delete the price of {date}, {value}? There is no undo.',
 		deleteConfirm: 'Delete price',
 		form: {
 			addTitle: 'Add price',
+			editTitle: 'Edit price',
 			subtitle: '{ticker} — one price per day, and a second one for a day replaces it',
 			date: 'As of',
 			value: 'Value',
 			replaces: 'This day already holds {value}, and saving replaces it.'
-		},
-		mustBePositive: 'A price is more than zero.'
+		}
 	},
 
 	// The one press that contacts the network, and the panel that puts what came back to the user before a single record is written
@@ -1169,7 +1144,7 @@ export const EN_TRANSLATIONS = {
 				one: 'These dates would leave the working days recorded for {years} outside the contract. Clear that year first, or leave the dates as they are.',
 				other: 'These dates would leave the working days recorded for {years} outside the contract. Clear those years first, or leave the dates as they are.'
 			},
-			workingDaysHint: 'Working days belong to a year of a contract, and are typed into the per-year table on the Payslips tab.',
+			workingDaysHint: 'Working days belong to a year of a contract, and are entered from the per-year table on the Payslips tab.',
 			notes: 'Notes'
 		}
 	},
@@ -1209,9 +1184,12 @@ export const EN_TRANSLATIONS = {
 			notes: 'Notes'
 		},
 
-		// The one delete that is not confirmed: the record is the cell, so clearing it puts the year back where it was
+		// The one delete that is not confirmed: the record is the form, so saving it empty puts the year back where it was
 		selectYear: 'Show the payslips of {year}',
-		editWorkingDays: 'Working days of {year}',
+		editWorkingDays: 'Edit the working days of {year}',
+		workingDaysTitle: 'Working days',
+		workingDaysSubtitle: 'the year {year} of this contract',
+		workingDaysClears: 'Leave this empty and the year goes back to having no working days recorded, which is what it was before a number was entered.',
 		workingDaysHint: 'Working days are always the whole calendar year, never the part worked — so a partial first or last year understates both hourly figures.',
 		yearFooter: '{years} · {payslips} · {days}',
 		workingDaysMissing: {
@@ -1347,11 +1325,6 @@ export const EN_TRANSLATIONS = {
 	},
 
 	dialog: {
-		cancel: 'Cancel'
-	},
-
-	inlineEdit: {
-		save: 'Save',
 		cancel: 'Cancel'
 	},
 

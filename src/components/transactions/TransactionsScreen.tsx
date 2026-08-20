@@ -35,7 +35,7 @@ import {
 import type { Account, LedgerId, Transaction } from 'src/types/LedgerTypes';
 
 /**
- * Transactions: the whole history in one order, seven filters over it, and every cell edited where it sits.
+ * Transactions: the whole history in one order, seven filters over it, and one form that both records a row and corrects one.
  *
  * **The order is fixed and the list is shown newest first**, so the screen opens on its first page with the most recent rows in
  * view and the pager is how the history is walked back. **Changing a filter lands on the first page of what it now matches** —
@@ -44,9 +44,14 @@ import type { Account, LedgerId, Transaction } from 'src/types/LedgerTypes';
  * **The categorisation invariant is restored on every write from here**: a row created, duplicated, switched back to *Automatic*
  * or given a new description carries whatever the rule list produces, and a category set by hand is never touched by any of it.
  *
- * **A selection survives paging and nothing else.** Changing a filter, editing a cell, duplicating, deleting and the bulk delete
- * itself all clear it.
+ * **A selection survives paging and nothing else.** Changing a filter, correcting a row, duplicating, deleting and the bulk
+ * delete itself all clear it.
  */
+
+// The record a form is open on. An undefined record is one being created; an undefined draft is a form that is not open.
+interface TransactionDraft {
+	transaction: Transaction | undefined;
+}
 
 // The one bulk action, which confirms once with the count and the total because there is no undo
 interface BulkDeletion {
@@ -73,7 +78,7 @@ export const TransactionsScreen = (): ReactElement => {
 	});
 	const [ selection, setSelection ] = useState<ReadonlySet<LedgerId>>(new Set<LedgerId>());
 	const [ rangeAnchorId, setRangeAnchorId ] = useState<LedgerId | undefined>(undefined);
-	const [ isAdding, setIsAdding ] = useState(false);
+	const [ transactionDraft, setTransactionDraft ] = useState<TransactionDraft | undefined>(undefined);
 	const [ transactionToDelete, setTransactionToDelete ] = useState<Transaction | undefined>(undefined);
 	const [ bulkDeletion, setBulkDeletion ] = useState<BulkDeletion | undefined>(undefined);
 
@@ -179,19 +184,6 @@ export const TransactionsScreen = (): ReactElement => {
 		setRangeAnchorId(undefined);
 	};
 
-	// Every write from this screen goes through the pass, which is what keeps an automatic row's category the one the rules produce
-	const editTransaction = (transaction: Transaction, changes: Partial<Transaction>): void => {
-		updateDocument((current) => {
-			return {
-				...current,
-				transactions: current.transactions.map((candidate) => {
-					return candidate.id === transaction.id ? categoriseTransaction({ ...candidate, ...changes }, current.rules) : candidate;
-				})
-			};
-		});
-		clearSelection();
-	};
-
 	// A row the screen has just written is followed to wherever the ordering put it
 	const writeAndFollow = (created: Transaction): void => {
 		updateDocument((current) => {
@@ -201,7 +193,25 @@ export const TransactionsScreen = (): ReactElement => {
 		clearSelection();
 	};
 
-	const addTransaction = (values: TransactionFormValues, addAnother: boolean): void => {
+	// Every write from this screen goes through the pass, which is what keeps an automatic row's category the one the rules produce
+	const saveTransaction = (values: TransactionFormValues, addAnother: boolean): void => {
+		const existing = transactionDraft?.transaction;
+
+		if(existing) {
+			updateDocument((current) => {
+				return {
+					...current,
+					transactions: current.transactions.map((candidate) => {
+						return candidate.id === existing.id ? categoriseTransaction({ ...candidate, ...values }, current.rules) : candidate;
+					})
+				};
+			});
+			clearSelection();
+			setTransactionDraft(undefined);
+
+			return;
+		}
+
 		writeAndFollow(categoriseTransaction({
 			id: createLedgerId(),
 			...values,
@@ -209,12 +219,16 @@ export const TransactionsScreen = (): ReactElement => {
 		}, rules));
 
 		if(!addAnother) {
-			setIsAdding(false);
+			setTransactionDraft(undefined);
 		}
 	};
 
+	// The copy is written where the ordering puts it and then opened, a duplicate being for the recurring row that differs in one field
 	const duplicate = (transaction: Transaction): void => {
-		writeAndFollow(duplicateTransaction({ transaction, transactions, rules }));
+		const copy = duplicateTransaction({ transaction, transactions, rules });
+
+		writeAndFollow(copy);
+		setTransactionDraft({ transaction: copy });
 	};
 
 	const deleteTransactions = (going: readonly Transaction[]): void => {
@@ -250,7 +264,7 @@ export const TransactionsScreen = (): ReactElement => {
 	const addButton = (
 		<AppButton
 			onClick={() => {
-				setIsAdding(true);
+				setTransactionDraft({ transaction: undefined });
 			}}>
 			{t('transactions.add')}
 		</AppButton>
@@ -314,18 +328,21 @@ export const TransactionsScreen = (): ReactElement => {
 								footer={footer}
 								onToggleRow={toggleRow}
 								onToggleEverything={toggleEverything}
-								onEdit={editTransaction}
+								onEdit={(transaction) => {
+									setTransactionDraft({ transaction });
+								}}
 								onDuplicate={duplicate}
 								onDelete={setTransactionToDelete}/>
 							<TransactionsPager page={page} pageCount={pageCount} onChange={setRequestedPage}/>
 						</>}
 				</>}
 
-			{isAdding && (
+			{transactionDraft && (
 				<TransactionForm
-					onSave={addTransaction}
+					transaction={transactionDraft.transaction}
+					onSave={saveTransaction}
 					onCancel={() => {
-						setIsAdding(false);
+						setTransactionDraft(undefined);
 					}}/>
 			)}
 

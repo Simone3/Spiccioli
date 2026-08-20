@@ -11,6 +11,7 @@ import { ContractYearsTable } from 'src/components/salaries/ContractYearsTable';
 import { PayslipForm, type PayslipFormValues } from 'src/components/salaries/PayslipForm';
 import { formatPayslipMonth, PayslipsTable } from 'src/components/salaries/PayslipsTable';
 import { SalaryCharts } from 'src/components/salaries/SalaryCharts';
+import { WorkingDaysForm } from 'src/components/salaries/WorkingDaysForm';
 import { useSalariesHandoff } from 'src/components/shell/RecordLinks';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useLedger } from 'src/contexts/LedgerContext';
@@ -21,7 +22,7 @@ import { createLedgerId } from 'src/logic/ledger/LedgerDocument';
 import { formatMinorUnitsAsPlainDecimal, MONEY_SCALES } from 'src/logic/money/Money';
 import { countPayslipsPerContract, contractYearRange, sortContracts } from 'src/logic/salaries/Contracts';
 import { netSalary, payslipsOfContract, sortPayslipsOfYear } from 'src/logic/salaries/Payslips';
-import { deriveSalaryYears } from 'src/logic/salaries/SalaryFigures';
+import { deriveSalaryYears, type SalaryYearFigures } from 'src/logic/salaries/SalaryFigures';
 import type { Contract, ContractYear, LedgerId, Payslip } from 'src/types/LedgerTypes';
 
 /**
@@ -34,8 +35,9 @@ import type { Contract, ContractYear, LedgerId, Payslip } from 'src/types/Ledger
  * **Two selections drive the tab and both are always made**: a contract, and a year within it. The year is the contract's last
  * one on arriving, and it follows a payslip saved into another year so that the new row is visible where it landed.
  *
- * **`Working days` is the ContractYear record and not a report of one.** Typing into the cell creates it and clearing the cell
- * deletes it, which is the one delete in the application that is not confirmed: it puts the year back exactly where it was.
+ * **`Working days` is the ContractYear record and not a report of one.** The cell opens the form that is the whole of it: a
+ * number creates the record and an empty field deletes it, which is the one delete in the application that is not confirmed —
+ * it puts the year back exactly where it was.
  */
 
 type SalariesTab = 'payslips' | 'contracts';
@@ -65,6 +67,7 @@ export const SalariesScreen = (): ReactElement => {
 	const [ payslipDraft, setPayslipDraft ] = useState<PayslipDraft | undefined>(undefined);
 	const [ contractToDelete, setContractToDelete ] = useState<Contract | undefined>(undefined);
 	const [ payslipToDelete, setPayslipToDelete ] = useState<Payslip | undefined>(undefined);
+	const [ workingDaysDraft, setWorkingDaysDraft ] = useState<SalaryYearFigures | undefined>(undefined);
 	const [ refusal, setRefusal ] = useState<string | undefined>(undefined);
 
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
@@ -180,18 +183,19 @@ export const SalariesScreen = (): ReactElement => {
 	};
 
 	/**
-	 * Writes the ContractYear the cell **is**, or deletes it where the cell was cleared.
+	 * Writes the ContractYear the form **is**, or deletes it where the form was saved empty.
 	 *
-	 * Clearing puts the year back exactly where it was before anything was typed, which is why the record goes rather than
-	 * being written as a zero. The field itself refuses everything outside 1 – 366 as it is typed, so nothing reaches here that
-	 * has to be refused again.
-	 * @param year The year the cell belongs to.
-	 * @param workingDays What was typed, or undefined where the cell was cleared.
-	 * @returns Nothing: there is no value this can be handed that it has to refuse.
+	 * An empty field puts the year back exactly where it was before anything was entered, which is why the record goes rather
+	 * than being written as a zero. The field itself refuses everything outside 1 – 366 as it is typed, so nothing reaches here
+	 * that has to be refused again.
+	 * @param year The year the record belongs to.
+	 * @param workingDays What was entered, or undefined where the field was left empty.
 	 */
-	const writeWorkingDays = (year: number, workingDays: number | undefined): string | undefined => {
+	const writeWorkingDays = (year: number, workingDays: number | undefined): void => {
+		setWorkingDaysDraft(undefined);
+
 		if(!selectedContract) {
-			return undefined;
+			return;
 		}
 
 		const contractId = selectedContract.id;
@@ -209,8 +213,6 @@ export const SalariesScreen = (): ReactElement => {
 
 			return { ...current, contractYears: [ ...others, written ] };
 		});
-
-		return undefined;
 	};
 
 	const savePayslip = (values: PayslipFormValues): void => {
@@ -386,7 +388,7 @@ export const SalariesScreen = (): ReactElement => {
 						years={years}
 						selectedYear={selectedYear}
 						onSelectYear={setChosenYear}
-						onWriteWorkingDays={writeWorkingDays}/>
+						onEditWorkingDays={setWorkingDaysDraft}/>
 				</section>
 
 				<section className='salaries-screen-card'>
@@ -481,6 +483,18 @@ export const SalariesScreen = (): ReactElement => {
 					onSave={savePayslip}
 					onCancel={() => {
 						setPayslipDraft(undefined);
+					}}/>
+			)}
+
+			{workingDaysDraft && (
+				<WorkingDaysForm
+					year={workingDaysDraft.year}
+					workingDays={workingDaysDraft.workingDays}
+					onSave={(workingDays) => {
+						writeWorkingDays(workingDaysDraft.year, workingDays);
+					}}
+					onCancel={() => {
+						setWorkingDaysDraft(undefined);
 					}}/>
 			)}
 

@@ -10,20 +10,23 @@ import {
 	SecurityFields,
 	type SecurityFormValues
 } from 'src/components/investments/SecurityFields';
+import { SecurityPicker } from 'src/components/investments/SecurityPicker';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter, usePreferences } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { findSecurityByIsinOrTicker, isIsinTaken } from 'src/logic/investments/Securities';
 import { tradeTotal } from 'src/logic/investments/Trades';
-import type { IsoDate, LedgerId, Millionths, TenThousandths, TradeKind } from 'src/types/LedgerTypes';
+import type { IsoDate, LedgerId, Millionths, TenThousandths, Trade, TradeKind } from 'src/types/LedgerTypes';
 
 /**
- * The form a trade is recorded on, and the one place a security is created without going to the Securities tab first.
+ * The form a trade is recorded on and corrected in, and the one place a security is created without going to the Securities tab
+ * first.
  *
  * **Typing an ISIN or a ticker searches the securities already recorded**; if none matches, the form expands with the fields
  * needed to create one and it is saved together with the trade. The fields are the same either way and so is the record — there
- * is no such thing as a security that came in by one path rather than the other.
+ * is no such thing as a security that came in by one path rather than the other. **A trade being corrected picks from the
+ * securities that exist instead**: creating one belongs to the trade that first needs it, and every row already has its own.
  *
  * **The total is computed and shown live as the figures are typed, and never entered.** On a sale it is net proceeds instead,
  * with a *Taxes* field that defaults to zero and is never pre-filled from the hypothetical rate: what goes there is what the
@@ -57,6 +60,10 @@ export interface TradeFormValues {
 
 export interface TradeFormProps {
 	kind: TradeKind;
+
+	// The trade being corrected, or undefined while one is being recorded
+	trade: Trade | undefined;
+
 	onSave: (values: TradeFormValues) => void;
 	onCancel: () => void;
 }
@@ -65,11 +72,12 @@ export interface TradeFormProps {
  * The trade form.
  * @param props The form's props.
  * @param props.kind Which of the two tabs opened it.
+ * @param props.trade The trade being corrected, where one is.
  * @param props.onSave What to do with the trade the form holds.
  * @param props.onCancel What abandoning it does.
  * @returns The form.
  */
-export const TradeForm = ({ kind, onSave, onCancel }: TradeFormProps): ReactElement => {
+export const TradeForm = ({ kind, trade, onSave, onCancel }: TradeFormProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
 	const { document } = useLedger();
@@ -77,23 +85,30 @@ export const TradeForm = ({ kind, onSave, onCancel }: TradeFormProps): ReactElem
 	const isSale = kind === 'sale';
 
 	const [ date, setDate ] = useState<IsoDate | undefined>(() => {
-		return DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
+		return trade?.date ?? DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
 	});
-	const [ accountId, setAccountId ] = useState<LedgerId | undefined>(undefined);
+	const [ accountId, setAccountId ] = useState<LedgerId | undefined>(trade?.accountId);
+	const [ securityId, setSecurityId ] = useState<LedgerId | undefined>(trade?.securityId);
 	const [ securityText, setSecurityText ] = useState('');
 	const [ newSecurity, setNewSecurity ] = useState<SecurityFormValues>(() => {
 		return emptySecurityValues(preferences.defaultTaxRate);
 	});
-	const [ quantity, setQuantity ] = useState<Millionths | undefined>(undefined);
-	const [ unitPrice, setUnitPrice ] = useState<TenThousandths | undefined>(undefined);
-	const [ fees, setFees ] = useState<number | undefined>(0);
-	const [ taxes, setTaxes ] = useState<number | undefined>(0);
-	const [ notes, setNotes ] = useState('');
+	const [ quantity, setQuantity ] = useState<Millionths | undefined>(trade?.quantity);
+	const [ unitPrice, setUnitPrice ] = useState<TenThousandths | undefined>(trade?.unitPrice);
+	const [ fees, setFees ] = useState<number | undefined>(trade?.fees ?? 0);
+	const [ taxes, setTaxes ] = useState<number | undefined>(trade?.taxes ?? 0);
+	const [ notes, setNotes ] = useState(trade?.notes ?? '');
 
+	const isCorrecting = trade !== undefined;
 	const securities = document?.securities ?? [];
-	const matched = findSecurityByIsinOrTicker(securities, securityText);
+	const chosen = isCorrecting ?
+		securities.find((security) => {
+			return security.id === securityId;
+		}) :
+		undefined;
+	const matched = isCorrecting ? chosen : findSecurityByIsinOrTicker(securities, securityText);
 	const isSearching = securityText.trim() !== '';
-	const isCreating = isSearching && !matched;
+	const isCreating = !isCorrecting && isSearching && !matched;
 
 	// The expanded form opens on what was typed, and holds its own value the moment the ISIN field itself is used
 	const newValues: SecurityFormValues = { ...newSecurity, isin: newSecurity.isin || securityText.trim() };
@@ -130,6 +145,14 @@ export const TradeForm = ({ kind, onSave, onCancel }: TradeFormProps): ReactElem
 		});
 	};
 
+	const tradeFormTitle = (): string => {
+		if(isCorrecting) {
+			return isSale ? t('trades.form.editSaleTitle') : t('trades.form.editPurchaseTitle');
+		}
+
+		return isSale ? t('trades.form.addSaleTitle') : t('trades.form.addPurchaseTitle');
+	};
+
 	const securityHint = (): string | undefined => {
 		if(matched) {
 			return t('securities.option', { ticker: matched.ticker, name: matched.name });
@@ -140,7 +163,7 @@ export const TradeForm = ({ kind, onSave, onCancel }: TradeFormProps): ReactElem
 
 	return (
 		<FormDialog
-			title={isSale ? t('trades.form.addSaleTitle') : t('trades.form.addPurchaseTitle')}
+			title={tradeFormTitle()}
 			subtitle={isSale ? t('trades.form.saleSubtitle') : t('trades.form.purchaseSubtitle')}
 			canSave={canSave}
 			onSave={save}
@@ -158,12 +181,18 @@ export const TradeForm = ({ kind, onSave, onCancel }: TradeFormProps): ReactElem
 					onChange={setAccountId}/>
 			</FormField>
 
-			<FormField label={t('trades.form.security')} hint={securityHint()}>
-				<TextField
-					value={securityText}
-					label={t('trades.form.security')}
-					placeholder={t('trades.form.securitySearch')}
-					onChange={setSecurityText}/>
+			<FormField label={t('trades.form.security')} hint={isCorrecting ? undefined : securityHint()}>
+				{isCorrecting ?
+					<SecurityPicker
+						value={securityId}
+						label={t('trades.form.security')}
+						placeholder={t('trades.form.securityChoose')}
+						onChange={setSecurityId}/> :
+					<TextField
+						value={securityText}
+						label={t('trades.form.security')}
+						placeholder={t('trades.form.securitySearch')}
+						onChange={setSecurityText}/>}
 			</FormField>
 
 			{isCreating && (

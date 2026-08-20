@@ -6,6 +6,7 @@ import { EmptyState } from 'src/components/common/EmptyState';
 import { TabBar } from 'src/components/common/TabBar';
 import { HoldingDetailPanel } from 'src/components/investments/HoldingDetailPanel';
 import { HoldingsTable } from 'src/components/investments/HoldingsTable';
+import type { PriceFormValues } from 'src/components/investments/PriceForm';
 import { PriceHistoryPanel } from 'src/components/investments/PriceHistoryPanel';
 import { SecuritiesTable } from 'src/components/investments/SecuritiesTable';
 import { SecurityForm } from 'src/components/investments/SecurityForm';
@@ -45,7 +46,6 @@ import {
 	indexSecurities,
 	isPriceStale,
 	priceHistoryOf,
-	priceOnDay,
 	sortSecurities,
 	writePrice,
 	writePrices,
@@ -78,6 +78,9 @@ import type { PricePassProgress } from 'src/types/PriceIpcTypes';
  * **A security is created from two tabs and is the same record either way.** The purchase form expands to create one while the
  * first trade that needs it is recorded; the Securities tab creates one on its own and is where every correction afterwards is
  * made, the price history included.
+ *
+ * **Every price is handled on the Securities tab and nowhere else**: the history, the form that writes one and *Update prices*
+ * all sit there, because a price belongs to a security. Holdings states the price it derives from and links to that tab.
  */
 
 type InvestmentsTab = 'holdings' | 'purchases' | 'sales' | 'securities';
@@ -85,6 +88,12 @@ type InvestmentsTab = 'holdings' | 'purchases' | 'sales' | 'securities';
 // The record a form is open on. An undefined record is one being created; an undefined draft is a form that is not open.
 interface SecurityDraft {
 	security: Security | undefined;
+}
+
+// The trade a form is open on, and which of the two tabs it belongs to. An undefined trade is one being recorded.
+interface TradeDraft {
+	kind: TradeKind;
+	trade: Trade | undefined;
 }
 
 /**
@@ -107,7 +116,7 @@ export const InvestmentsScreen = (): ReactElement => {
 	const [ selectedHoldingKey, setSelectedHoldingKey ] = useState<string | undefined>(undefined);
 	const [ selectedSecurityId, setSelectedSecurityId ] = useState<LedgerId | undefined>(undefined);
 	const [ securityDraft, setSecurityDraft ] = useState<SecurityDraft | undefined>(undefined);
-	const [ tradeToAdd, setTradeToAdd ] = useState<TradeKind | undefined>(undefined);
+	const [ tradeDraft, setTradeDraft ] = useState<TradeDraft | undefined>(undefined);
 	const [ securityToDelete, setSecurityToDelete ] = useState<Security | undefined>(undefined);
 	const [ tradeToDelete, setTradeToDelete ] = useState<Trade | undefined>(undefined);
 	const [ refusal, setRefusal ] = useState<string | undefined>(undefined);
@@ -214,19 +223,21 @@ export const InvestmentsScreen = (): ReactElement => {
 	const selectedSecurity = selectedSecurityId === undefined ? undefined : securities.get(selectedSecurityId);
 
 	// Every write from this screen is a whole-document replacement, the file being read whole and written whole
-	const writePriceRecord = (price: Price): void => {
+	//
+	// One save covers both a record being written and one being corrected, a correction that moves the date being the record
+	// leaving the day it was on and replacing whatever occupied the day it lands on. Either way it is `manual` afterwards.
+	const savePriceRecord = (securityId: LedgerId, original: Price | undefined, values: PriceFormValues): void => {
 		updateDocument((current) => {
-			return { ...current, prices: writePrice(current.prices, price) };
-		});
-	};
+			const kept = original === undefined ?
+				current.prices :
+				current.prices.filter((candidate) => {
+					return candidate.securityId !== original.securityId || candidate.date !== original.date;
+				});
 
-	const movePriceRecord = (price: Price, date: IsoDate): void => {
-		updateDocument((current) => {
-			const withoutIt = current.prices.filter((candidate) => {
-				return candidate.securityId !== price.securityId || candidate.date !== price.date;
-			});
-
-			return { ...current, prices: writePrice(withoutIt, { ...price, date, source: 'manual' }) };
+			return {
+				...current,
+				prices: writePrice(kept, { securityId, date: values.date, value: values.value, source: 'manual' })
+			};
 		});
 	};
 
@@ -365,7 +376,33 @@ export const InvestmentsScreen = (): ReactElement => {
 		setSecurityToDelete(undefined);
 	};
 
-	const addTrade = (kind: TradeKind, values: TradeFormValues): void => {
+	const saveTrade = (kind: TradeKind, existing: Trade | undefined, values: TradeFormValues): void => {
+		if(existing) {
+			updateDocument((current) => {
+				return {
+					...current,
+					trades: current.trades.map((candidate) => {
+						return candidate.id === existing.id ?
+							{
+								...candidate,
+								securityId: values.securityId ?? candidate.securityId,
+								accountId: values.accountId,
+								date: values.date,
+								quantity: values.quantity,
+								unitPrice: values.unitPrice,
+								fees: values.fees,
+								taxes: values.taxes,
+								notes: values.notes
+							} :
+							candidate;
+					})
+				};
+			});
+			setTradeDraft(undefined);
+
+			return;
+		}
+
 		const securityId = values.securityId ?? createLedgerId();
 
 		updateDocument((current) => {
@@ -391,18 +428,7 @@ export const InvestmentsScreen = (): ReactElement => {
 				trades: [ ...current.trades, created ]
 			};
 		});
-		setTradeToAdd(undefined);
-	};
-
-	const editTrade = (trade: Trade, changes: Partial<Trade>): void => {
-		updateDocument((current) => {
-			return {
-				...current,
-				trades: current.trades.map((candidate) => {
-					return candidate.id === trade.id ? { ...candidate, ...changes } : candidate;
-				})
-			};
-		});
+		setTradeDraft(undefined);
 	};
 
 	const deleteTrade = (trade: Trade): void => {
@@ -536,7 +562,7 @@ export const InvestmentsScreen = (): ReactElement => {
 			<AppButton
 				variant='primary'
 				onClick={() => {
-					setTradeToAdd(kind);
+					setTradeDraft({ kind, trade: undefined });
 				}}>
 				{kind === 'purchase' ? t('trades.addPurchase') : t('trades.addSale')}
 			</AppButton>
@@ -577,7 +603,9 @@ export const InvestmentsScreen = (): ReactElement => {
 						realisedGains={walk.realisedGains}
 						matchedDates={matchedDates}
 						footer={tradesFooter(kind, matching)}
-						onEdit={editTrade}
+						onEdit={(trade) => {
+							setTradeDraft({ kind, trade });
+						}}
 						onDelete={setTradeToDelete}/>}
 			</>
 		);
@@ -591,7 +619,7 @@ export const InvestmentsScreen = (): ReactElement => {
 						variant='primary'
 						onClick={() => {
 							setTab('purchases');
-							setTradeToAdd('purchase');
+							setTradeDraft({ kind: 'purchase', trade: undefined });
 						}}>
 						{t('trades.addPurchase')}
 					</AppButton>
@@ -607,16 +635,15 @@ export const InvestmentsScreen = (): ReactElement => {
 					accounts={accounts}
 					institutions={institutions}
 					selected={selectedHolding}
-					today={today}
 					footer={holdingsFooter()}
-					priceOn={(securityId, date) => {
-						return priceOnDay(prices, securityId, date)?.value;
-					}}
 					onSelect={(holding) => {
 						setSelectedHoldingKey(positionKey(holding.securityId, holding.accountId));
 					}}
-					onWritePrice={(securityId, date, value) => {
-						writePriceRecord({ securityId, date, value, source: 'manual' });
+					onManagePrices={(holding) => {
+						setRefusal(undefined);
+						setNotice(undefined);
+						setSelectedSecurityId(holding.securityId);
+						setTab('securities');
 					}}/>
 
 				{selectedHolding && (
@@ -679,8 +706,9 @@ export const InvestmentsScreen = (): ReactElement => {
 					<PriceHistoryPanel
 						security={selectedSecurity}
 						prices={priceHistoryOf(prices, selectedSecurity.id)}
-						onWrite={writePriceRecord}
-						onMove={movePriceRecord}
+						onSave={(original, values) => {
+							savePriceRecord(selectedSecurity.id, original, values);
+						}}
 						onDelete={deletePriceRecord}
 						onClose={() => {
 							setSelectedSecurityId(undefined);
@@ -720,19 +748,29 @@ export const InvestmentsScreen = (): ReactElement => {
 	};
 
 	const actions = (): ReactNode => {
-		// The button sits on the Holdings tab. It puts one question — how far back — and is otherwise a button and nothing else:
-		// no selection first, no row to tick and no setting behind it. The sentence under it is what leaves the machine, stated
-		// here, again in the question and again in the panel.
-		if(tab === 'holdings' && orderedSecurities.length > 0) {
+		// The button sits on the Securities tab, beside the list of what it asks about: a price belongs to a security, and every
+		// other way one is written is on this tab too. It puts one question — how far back — and is otherwise a button and nothing
+		// else: no selection first, no row to tick and no setting behind it. The sentence under it is what leaves the machine,
+		// stated here, again in the question and again in the panel.
+		if(tab === 'securities' && orderedSecurities.length > 0) {
 			return (
 				<div className='investments-screen-update-prices'>
-					<AppButton
-						disabled={isFetchingPrices}
-						onClick={() => {
-							setIsChoosingSpan(true);
-						}}>
-						{isFetchingPrices ? t('updatePrices.busy') : t('updatePrices.button')}
-					</AppButton>
+					<div className='investments-screen-update-prices-buttons'>
+						<AppButton
+							disabled={isFetchingPrices}
+							onClick={() => {
+								setIsChoosingSpan(true);
+							}}>
+							{isFetchingPrices ? t('updatePrices.busy') : t('updatePrices.button')}
+						</AppButton>
+						<AppButton
+							variant='primary'
+							onClick={() => {
+								setSecurityDraft({ security: undefined });
+							}}>
+							{t('securities.add')}
+						</AppButton>
+					</div>
 					{isFetchingPrices && passProgress !== undefined && (
 						<span className='investments-screen-update-prices-progress' role='status'>
 							{t('updatePrices.progress', {
@@ -747,18 +785,6 @@ export const InvestmentsScreen = (): ReactElement => {
 			);
 		}
 
-		if(tab === 'securities' && orderedSecurities.length > 0) {
-			return (
-				<AppButton
-					variant='primary'
-					onClick={() => {
-						setSecurityDraft({ security: undefined });
-					}}>
-					{t('securities.add')}
-				</AppButton>
-			);
-		}
-
 		if((tab === 'purchases' && purchases.length > 0) || (tab === 'sales' && sales.length > 0)) {
 			const kind: TradeKind = tab === 'purchases' ? 'purchase' : 'sale';
 
@@ -766,7 +792,7 @@ export const InvestmentsScreen = (): ReactElement => {
 				<AppButton
 					variant='primary'
 					onClick={() => {
-						setTradeToAdd(kind);
+						setTradeDraft({ kind, trade: undefined });
 					}}>
 					{kind === 'purchase' ? t('trades.addPurchase') : t('trades.addSale')}
 				</AppButton>
@@ -785,21 +811,22 @@ export const InvestmentsScreen = (): ReactElement => {
 						variant='primary'
 						onClick={() => {
 							setTab('purchases');
-							setTradeToAdd('purchase');
+							setTradeDraft({ kind: 'purchase', trade: undefined });
 						}}>
 						{t('trades.addPurchase')}
 					</AppButton>
 					<AppLinkButton to={APP_ROUTES.accounts}>{t('emptyState.goToAccounts')}</AppLinkButton>
 				</EmptyState>
 
-				{tradeToAdd && (
+				{tradeDraft && (
 					<TradeForm
-						kind={tradeToAdd}
+						kind={tradeDraft.kind}
+						trade={tradeDraft.trade}
 						onCancel={() => {
-							setTradeToAdd(undefined);
+							setTradeDraft(undefined);
 						}}
 						onSave={(values) => {
-							addTrade(tradeToAdd, values);
+							saveTrade(tradeDraft.kind, tradeDraft.trade, values);
 						}}/>
 				)}
 			</ScreenLayout>
@@ -877,14 +904,15 @@ export const InvestmentsScreen = (): ReactElement => {
 					}}/>
 			)}
 
-			{tradeToAdd && (
+			{tradeDraft && (
 				<TradeForm
-					kind={tradeToAdd}
+					kind={tradeDraft.kind}
+					trade={tradeDraft.trade}
 					onCancel={() => {
-						setTradeToAdd(undefined);
+						setTradeDraft(undefined);
 					}}
 					onSave={(values) => {
-						addTrade(tradeToAdd, values);
+						saveTrade(tradeDraft.kind, tradeDraft.trade, values);
 					}}/>
 			)}
 

@@ -45,13 +45,13 @@ Filters affect the footer totals and the page count. **No filter is applied by d
 
 ## 5.4 Editing
 
-- **Every cell is editable in place** — date, account, description, amount, category, receipt state, notes. Click to edit. The account picker offers only cash accounts; a transaction can never be moved onto a brokerage one.
+- **A row is corrected on the form it was recorded on**, opened by *Edit* in the row menu and carrying the same seven fields ([§5.5](#55-add-transaction)) filled in with what the row holds. **Nothing on a row is edited where it sits**: the table states the record and the form is what changes it. The account picker offers only cash accounts; a transaction can never be moved onto a brokerage one.
 - Setting a category by hand sets `categorySource = manual`, which protects it from every automatic re-categorisation.
 - **The picker has no way to choose nothing.** It offers *Automatic* at the top and the twenty-seven categories **alphabetically** below it ([§6.3](06-categories.md#63-category-list)), and no clearing entry ([§13](13-validation.md)). The only empty category in the file is therefore one no rule matched, which is exactly what check 2 is counting.
 - **This is reversible.** The category picker's special entry — *Automatic (let rules decide)* — sets `categorySource` back to `automatic` and immediately re-applies the rule list to that transaction, leaving the category empty if no rule matches. There is no state a hand-edit can trap a row in.
-- **Editing the description of an `automatic` row re-runs the rule list over that row** as the edit is committed ([§2](02-domain-model.md)). A `manual` row keeps its category whatever its description becomes.
-- Row menu: **Duplicate**, **Delete**. Delete asks for confirmation — there is no undo.
-- **Duplicate copies the record and opens the copy for editing, last among the rows sharing its date.** It carries over account, date, description, amount, category and notes; it takes a new `id` and a new `insertionSeq`, and that sequence is the highest in the file, so the ordering of [§5.2](#52-ordering-and-paging) puts it before every other row of that date, the list being shown newest first — immediately above the original when the original is the newest of them, which is the usual case, and a few rows further up when it is not. Change the date and it moves to where that date belongs, on the next redraw. Two fields do not come across as-is. `receiptState` resets to `na` ([§5.5](#55-add-transaction), [§6.3](06-categories.md#63-category-list)). `categorySource` is preserved: a copy of a hand-set row is itself hand-set and keeps the category, a copy of an automatic row is automatic and is re-derived from the description it inherited.
+- **Editing the description of an `automatic` row re-runs the rule list over that row** as the form is saved ([§2](02-domain-model.md)). A `manual` row keeps its category whatever its description becomes.
+- Row menu: **Edit**, **Duplicate**, **Delete**. Delete asks for confirmation — there is no undo.
+- **Duplicate copies the record, writes it last among the rows sharing its date, and opens the copy on the form.** The copy is in the file the moment it is made and the form is what corrects it, so abandoning that form leaves the copy standing rather than undoing it. It carries over account, date, description, amount, category and notes; it takes a new `id` and a new `insertionSeq`, and that sequence is the highest in the file, so the ordering of [§5.2](#52-ordering-and-paging) puts it before every other row of that date, the list being shown newest first — immediately above the original when the original is the newest of them, which is the usual case, and a few rows further up when it is not. Change the date and it moves to where that date belongs, on the next redraw. Two fields do not come across as-is. `receiptState` resets to `na` ([§5.5](#55-add-transaction), [§6.3](06-categories.md#63-category-list)). `categorySource` is preserved: a copy of a hand-set row is itself hand-set and keeps the category, a copy of an automatic row is automatic and is re-derived from the description it inherited.
 - **“Duplicate” here is not the “duplicate” of [§5.7](#57-bulk-import).** A row created by this action is not flagged by that detection — it is only consulted when rows are pasted.
 - **There is no “apply rules” action on this screen.** The one place the list is applied is the Rules tab, and it is applied there as part of changing it ([§6.2](06-categories.md#62-rules)).
 
@@ -64,7 +64,8 @@ Filters affect the footer totals and the page count. **No filter is applied by d
 - **Date** is a date picker defaulting to today and **offering no day after it** ([§13](13-validation.md)); **amount** is a validated numeric field, signed, negative being money out. **Neither holds text that has to be interpreted.** The date picker shows dates in the format `dateFormat` names and returns a day, not a string; the amount field accepts digits and **the one decimal character `decimalSeparator` names**, and nothing else — the other character is not typeable and a thousands separator is not typeable at all ([§10](10-settings.md), [§13](13-validation.md)). A preference decides which key means *decimal*; it never decides what an entered figure meant.
 - **Category** defaults to *Automatic*, so a manually added row is categorised by the same rules as an imported one.
 - **Receipt** defaults to *N/A*, and this form is **the one place a row can be given a state before it exists**: the picker offers all three values and whatever it holds on save is what the row is created with. Every other way a row arrives — an import, a duplicate — creates it `na` and leaves the state to be moved afterwards ([§5.7](#57-bulk-import), [§6.3](06-categories.md#63-category-list)). Nothing about the category the row ends up with changes it, on this form as everywhere else.
-- **Save and add another** keeps the dialog open with account and date retained and the other fields cleared.
+- **Save and add another** keeps the dialog open with account and date retained and the other fields cleared. It is offered while a row is being created and **not while one is being corrected** ([§5.4](#54-editing)), there being no second row to add.
+- **The same form corrects a row**, opened by *Edit* in the row menu with every field filled in with what the row holds ([§5.4](#54-editing)). The fields are the same either way and so is the record.
 
 ## 5.6 Selecting and deleting in bulk
 
@@ -72,7 +73,7 @@ Filters affect the footer totals and the page count. **No filter is applied by d
 - The only bulk action is **delete**. It confirms once, stating the count and the total amount about to disappear — *Delete 214 transactions totalling − € 8.412,90?* — because there is no undo ([§12](12-storage.md)).
 - **There is no bulk edit.**
 - **Selection survives paging, and nothing else.** Turning the page keeps every tick, so a selection may span pages and the count in the header and the footer is the whole of it, not the part in view. Coming back to a page shows the ticks still there.
-- **Every other action clears it**: changing a filter, editing any cell, a row-menu *Duplicate* or *Delete*, leaving the screen, and the bulk delete itself.
+- **Every other action clears it**: changing a filter, correcting a row, a row-menu *Duplicate* or *Delete*, leaving the screen, and the bulk delete itself.
 
 ## 5.7 Bulk import
 
@@ -136,7 +137,7 @@ One screen. One job: get raw rows in without duplicating anything. It is reached
 
 Rows are inserted with `categorySource = automatic`, which means the rule list applies to them as they are written and they arrive categorised wherever a rule matches ([§2](02-domain-model.md)), and with `receiptState = na`. **The paste has no receipt column and the screen has no picker for one** ([§5.5](#55-add-transaction), [§6.3](06-categories.md#63-category-list)). Check 13 therefore fails straight after an import, which is that check working ([§9](09-checks.md)).
 
-**No categorisation is previewed on this screen.** The user lands on Transactions filtered to the account imported into and to the date range of the rows imported — the ordinary screen on its first page, with two filters already set ([§5.2](#52-ordering-and-paging)) — where a wrong category can be fixed in place with the full filter set available.
+**No categorisation is previewed on this screen.** The user lands on Transactions filtered to the account imported into and to the date range of the rows imported — the ordinary screen on its first page, with two filters already set ([§5.2](#52-ordering-and-paging)) — where a wrong category is fixed on the row's own form, with the full filter set available ([§5.4](#54-editing)).
 
 That filter is an ordinary account-and-period filter, reachable by hand like any other. **An import leaves no trace on the transactions it created**, and a row that came from a paste is indistinguishable from one typed by hand.
 

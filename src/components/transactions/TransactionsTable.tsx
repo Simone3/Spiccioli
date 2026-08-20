@@ -1,28 +1,21 @@
 import type { ReactElement, ReactNode } from 'react';
-import { AccountPicker } from 'src/components/accounts/AccountPicker';
-import { AUTOMATIC_CATEGORY, CategoryPicker } from 'src/components/categories/CategoryPicker';
 import { Chip } from 'src/components/common/Chip';
 import { DataTable, type DataTableColumn } from 'src/components/common/DataTable';
-import { DateField } from 'src/components/common/DateField';
-import { EditableCell } from 'src/components/common/EditableCell';
-import { AmountField } from 'src/components/common/NumericFields';
 import { RowMenu } from 'src/components/common/RowMenu';
-import { SelectField, type SelectOption } from 'src/components/common/SelectField';
-import { TextField } from 'src/components/common/TextField';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { formatAccountName } from 'src/logic/accounts/Accounts';
-import { RECEIPT_STATES, type Account, type Category, type Cents, type Institution, type IsoDate, type LedgerId, type ReceiptState, type Transaction } from 'src/types/LedgerTypes';
+import type { Account, Category, Institution, LedgerId, Transaction } from 'src/types/LedgerTypes';
 
 /**
- * The transactions themselves: one page of them, every cell edited where it sits.
+ * The transactions themselves: one page of them, read as they stand and corrected in the form the row menu opens.
  *
  * **The category chip states provenance rather than correctness**: violet where a rule assigned it, neutral where the user did,
  * red where no rule matched — which is what check 2 counts. **Notes are the user's**, and the application never writes to them.
  *
- * ***Matched* is derived and read-only**, and it names the counterpart of every kind of pairing there is: the counterpart account
- * for a paired internal transfer, the security for a trade-matched securities transaction, and the payslip — its month and its
- * label — for a salary payment or a pension credit. An em dash otherwise.
+ * ***Matched* is derived**, and it names the counterpart of every kind of pairing there is: the counterpart account for a paired
+ * internal transfer, the security for a trade-matched securities transaction, and the payslip — its month and its label — for a
+ * salary payment or a pension credit. An em dash otherwise.
  */
 
 export interface TransactionsTableProps {
@@ -51,9 +44,7 @@ export interface TransactionsTableProps {
 
 	onToggleEverything: () => void;
 
-	// Called with what a committed cell changed. The invariant on an automatic row's category is restored above this.
-	onEdit: (transaction: Transaction, changes: Partial<Transaction>) => void;
-
+	onEdit: (transaction: Transaction) => void;
 	onDuplicate: (transaction: Transaction) => void;
 	onDelete: (transaction: Transaction) => void;
 }
@@ -72,7 +63,7 @@ export interface TransactionsTableProps {
  * @param props.footer What goes under the rule.
  * @param props.onToggleRow What ticking a row does.
  * @param props.onToggleEverything What the header's checkbox does.
- * @param props.onEdit What a committed cell does.
+ * @param props.onEdit What correcting a row does.
  * @param props.onDuplicate What duplicating a row does.
  * @param props.onDelete What deleting a row does.
  * @returns The table.
@@ -96,10 +87,6 @@ export const TransactionsTable = ({
 	const translator = useTranslator();
 	const { t } = translator;
 	const formatter = useFormatter();
-
-	const receiptOptions: readonly SelectOption<ReceiptState>[] = RECEIPT_STATES.map((state) => {
-		return { value: state, label: t(`receiptStates.${state}`) };
-	});
 
 	const accountNameOf = (transaction: Transaction): string => {
 		const account = accounts.get(transaction.accountId);
@@ -151,82 +138,21 @@ export const TransactionsTable = ({
 			header: t('transactions.columns.date'),
 			numeric: true,
 			render: (transaction) => {
-				return (
-					<EditableCell<IsoDate | undefined>
-						value={transaction.date}
-						label={t('transactions.edit.date', { description: transaction.description })}
-						renderEditor={(value, onChange) => {
-							return <DateField value={value} label={t('transactions.columns.date')} required onChange={onChange}/>;
-						}}
-						onCommit={(value) => {
-							if(value === undefined) {
-								return t('field.required');
-							}
-
-							onEdit(transaction, { date: value });
-
-							return undefined;
-						}}>
-						{formatter.storedDate(transaction.date)}
-					</EditableCell>
-				);
+				return formatter.storedDate(transaction.date);
 			}
 		},
 		{
 			key: 'account',
 			header: t('transactions.columns.account'),
 			render: (transaction) => {
-				return (
-					<EditableCell<LedgerId | undefined>
-						value={transaction.accountId}
-						label={t('transactions.edit.account', { description: transaction.description })}
-						renderEditor={(value, onChange) => {
-							return (
-								<AccountPicker
-									value={value}
-									side='cash'
-									label={t('transactions.columns.account')}
-									placeholder={t('transactions.form.accountChoose')}
-									onChange={onChange}/>
-							);
-						}}
-						onCommit={(value) => {
-							if(value === undefined) {
-								return t('field.required');
-							}
-
-							onEdit(transaction, { accountId: value });
-
-							return undefined;
-						}}>
-						<span className='transactions-screen-account'>{accountNameOf(transaction)}</span>
-					</EditableCell>
-				);
+				return <span className='transactions-screen-account'>{accountNameOf(transaction)}</span>;
 			}
 		},
 		{
 			key: 'description',
 			header: t('transactions.columns.description'),
 			render: (transaction) => {
-				return (
-					<EditableCell<string>
-						value={transaction.description}
-						label={t('transactions.edit.description', { description: transaction.description })}
-						renderEditor={(value, onChange) => {
-							return <TextField value={value} label={t('transactions.columns.description')} onChange={onChange}/>;
-						}}
-						onCommit={(value) => {
-							if(value.trim() === '') {
-								return t('field.required');
-							}
-
-							onEdit(transaction, { description: value.trim() });
-
-							return undefined;
-						}}>
-						{transaction.description}
-					</EditableCell>
-				);
+				return transaction.description;
 			}
 		},
 		{
@@ -235,50 +161,16 @@ export const TransactionsTable = ({
 			numeric: true,
 			render: (transaction) => {
 				return (
-					<EditableCell<Cents | undefined>
-						value={transaction.amount}
-						label={t('transactions.edit.amount', { description: transaction.description })}
-						renderEditor={(value, onChange) => {
-							return <AmountField value={value} label={t('transactions.columns.amount')} allowNegative required onChange={onChange}/>;
-						}}
-						onCommit={(value) => {
-							if(value === undefined) {
-								return t('field.required');
-							}
-
-							onEdit(transaction, { amount: value });
-
-							return undefined;
-						}}>
-						<span className={transaction.amount < 0 ? 'transactions-screen-negative' : 'transactions-screen-positive'}>
-							{formatter.amount(transaction.amount, true)}
-						</span>
-					</EditableCell>
+					<span className={transaction.amount < 0 ? 'transactions-screen-negative' : 'transactions-screen-positive'}>
+						{formatter.amount(transaction.amount, true)}
+					</span>
 				);
 			}
 		},
 		{
 			key: 'category',
 			header: t('transactions.columns.category'),
-			render: (transaction) => {
-				return (
-					<EditableCell<string>
-						value={transaction.categorySource === 'automatic' ? AUTOMATIC_CATEGORY : transaction.categoryId ?? AUTOMATIC_CATEGORY}
-						label={t('transactions.edit.category', { description: transaction.description })}
-						renderEditor={(value, onChange) => {
-							return <CategoryPicker value={value} mode='assign' label={t('transactions.columns.category')} onChange={onChange}/>;
-						}}
-						onCommit={(value) => {
-							onEdit(transaction, value === AUTOMATIC_CATEGORY ?
-								{ categorySource: 'automatic' } :
-								{ categoryId: value, categorySource: 'manual' });
-
-							return undefined;
-						}}>
-						{categoryChipOf(transaction)}
-					</EditableCell>
-				);
-			}
+			render: categoryChipOf
 		},
 		{
 			key: 'matched',
@@ -302,21 +194,9 @@ export const TransactionsTable = ({
 			header: t('transactions.columns.receipt'),
 			render: (transaction) => {
 				return (
-					<EditableCell<ReceiptState>
-						value={transaction.receiptState}
-						label={t('transactions.edit.receipt', { description: transaction.description })}
-						renderEditor={(value, onChange) => {
-							return <SelectField value={value} options={receiptOptions} label={t('transactions.columns.receipt')} onChange={onChange}/>;
-						}}
-						onCommit={(value) => {
-							onEdit(transaction, { receiptState: value });
-
-							return undefined;
-						}}>
-						<span className={`transactions-screen-receipt transactions-screen-receipt-${transaction.receiptState}`}>
-							{t(`receiptStates.${transaction.receiptState}`)}
-						</span>
-					</EditableCell>
+					<span className={`transactions-screen-receipt transactions-screen-receipt-${transaction.receiptState}`}>
+						{t(`receiptStates.${transaction.receiptState}`)}
+					</span>
 				);
 			}
 		},
@@ -324,21 +204,7 @@ export const TransactionsTable = ({
 			key: 'notes',
 			header: t('transactions.columns.notes'),
 			render: (transaction) => {
-				return (
-					<EditableCell<string>
-						value={transaction.notes}
-						label={t('transactions.edit.notes', { description: transaction.description })}
-						renderEditor={(value, onChange) => {
-							return <TextField value={value} label={t('transactions.columns.notes')} placeholder={t('form.optional')} onChange={onChange}/>;
-						}}
-						onCommit={(value) => {
-							onEdit(transaction, { notes: value.trim() });
-
-							return undefined;
-						}}>
-						<span className='transactions-screen-notes'>{transaction.notes || t('transactions.noNotes')}</span>
-					</EditableCell>
-				);
+				return <span className='transactions-screen-notes'>{transaction.notes || t('transactions.noNotes')}</span>;
 			}
 		},
 		{
@@ -349,6 +215,13 @@ export const TransactionsTable = ({
 					<RowMenu
 						label={t('transactions.rowMenu', { description: transaction.description })}
 						actions={[
+							{
+								key: 'edit',
+								label: t('rowMenu.edit'),
+								onSelect: () => {
+									onEdit(transaction);
+								}
+							},
 							{
 								key: 'duplicate',
 								label: t('rowMenu.duplicate'),

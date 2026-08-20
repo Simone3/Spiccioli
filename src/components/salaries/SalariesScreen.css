@@ -83,6 +83,13 @@
 	text-underline-offset: 3px;
 }
 
+/* The same link in a right-aligned column, which is the working-days cell and the way to the record it is */
+.salaries-screen-link-figure {
+	display: block;
+	width: 100%;
+	text-align: right;
+}
+
 /* A refusal a screen states above its list. It is never a modal and it never blocks. */
 .salaries-screen-refusal {
 	display: flex;

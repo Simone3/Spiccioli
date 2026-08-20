@@ -1,7 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
 import { DataTable, type DataTableColumn } from 'src/components/common/DataTable';
-import { EditableCell } from 'src/components/common/EditableCell';
-import { IntegerField } from 'src/components/common/NumericFields';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import type { SalaryYearFigures } from 'src/logic/salaries/SalaryFigures';
@@ -12,17 +10,15 @@ import type { SalaryYearFigures } from 'src/logic/salaries/SalaryFigures';
  * **The rows come from the contract's own dates and not from the payslips**, so a year in the middle with nothing recorded in it
  * is a row of zeros rather than a missing row. Choosing a row is what swaps the payslip table under it.
  *
- * **`Working days` is not a column that reports a record — it *is* the record.** Typing a number into the cell creates the
- * ContractYear, and clearing it deletes it, putting the year back exactly where it was before anything was typed. That delete is
- * the one in the application that is not confirmed, the cell being the whole of it. **A year without one reads *undefined* in the
- * two hourly columns** rather than zero or a dash: the rate cannot be computed, which is not the same as being nothing.
+ * **`Working days` is not a column that reports a record — it *is* the record.** The cell opens the form that is the whole of
+ * the ContractYear: a number creates it, and saving the form empty deletes it, putting the year back exactly where it was before
+ * anything was entered. That delete is the one in the application that is not confirmed, the form being the whole of it. **A year
+ * without one reads *undefined* in the two hourly columns** rather than zero or a dash: the rate cannot be computed, which is not
+ * the same as being nothing.
  *
  * **Working days are always the whole calendar year**, never the part worked, so a partial first or last year understates both
  * hourly figures. That is accepted rather than corrected.
  */
-
-// The bounds of the validation specification: a day of the year, and a leap year's worth of them
-const WORKING_DAYS_RANGE = { minimum: 1, maximum: 366 };
 
 export interface ContractYearsTableProps {
 
@@ -34,8 +30,8 @@ export interface ContractYearsTableProps {
 
 	onSelectYear: (year: number) => void;
 
-	// Writes the ContractYear, or deletes it where the cell was cleared. Returns the reason it was refused, where it was.
-	onWriteWorkingDays: (year: number, workingDays: number | undefined) => string | undefined;
+	// Opens the form that is the ContractYear
+	onEditWorkingDays: (row: SalaryYearFigures) => void;
 }
 
 /**
@@ -44,14 +40,14 @@ export interface ContractYearsTableProps {
  * @param props.years The rows, ascending.
  * @param props.selectedYear Which year's payslips are showing.
  * @param props.onSelectYear What choosing a row does.
- * @param props.onWriteWorkingDays What typing into the working-days cell does.
+ * @param props.onEditWorkingDays What the working-days cell does.
  * @returns The table.
  */
 export const ContractYearsTable = ({
 	years,
 	selectedYear,
 	onSelectYear,
-	onWriteWorkingDays
+	onEditWorkingDays
 }: ContractYearsTableProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
@@ -117,26 +113,17 @@ export const ContractYearsTable = ({
 			numeric: true,
 			render: (row) => {
 				return (
-					<EditableCell<number | undefined>
-						value={row.workingDays}
-						label={t('payslips.editWorkingDays', { year: String(row.year) })}
-						renderEditor={(value, onChange) => {
-							return (
-								<IntegerField
-									value={value}
-									label={t('payslips.yearColumns.workingDays')}
-									minimum={WORKING_DAYS_RANGE.minimum}
-									maximum={WORKING_DAYS_RANGE.maximum}
-									onChange={onChange}/>
-							);
-						}}
-						onCommit={(value) => {
-							return onWriteWorkingDays(row.year, value);
+					<button
+						type='button'
+						className='salaries-screen-link salaries-screen-link-figure'
+						aria-label={t('payslips.editWorkingDays', { year: String(row.year) })}
+						onClick={() => {
+							onEditWorkingDays(row);
 						}}>
 						{row.workingDays === undefined ?
 							<span className='salaries-screen-quiet'>{t('table.notApplicable')}</span> :
 							formatter.integer(row.workingDays)}
-					</EditableCell>
+					</button>
 				);
 			}
 		},

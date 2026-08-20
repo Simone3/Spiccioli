@@ -19,7 +19,7 @@ What the forms refuse. Everything here is enforced at the point of entry, by the
 
 - **Invalid input is refused as it is typed**, not on save, wherever the field can tell: letters in an amount, a thirteenth month, a fifth decimal. What cannot be judged until the whole form is known — a required field left empty, a duplicate name — marks the field and disables the save button, with the reason beside the field.
 - **Never a modal.** The message sits where the offending value is ([§14](14-empty-and-error-states.md)).
-- In an **inline edit**, a refused value keeps the cell open and the previous value in force. The row is never left half-changed.
+- **A record is only ever changed by a form.** No table cell in the application is edited where it sits, so there is no half-changed row to reason about: a form that cannot be saved is not saved, and abandoning one leaves the record exactly as it was ([§5.4](05-transactions.md#54-editing), [§7.2](07-investments.md#72-purchases)).
 - **Text is trimmed on save**, everywhere, and a field that trims to nothing counts as empty. Interior whitespace is left alone — bank descriptions carry it and rules match on it.
 - **`notes` is optional on every entity that has one**, trimmed like any other text, of no bounded length, and read by nothing in the application ([§5.1](05-transactions.md#51-columns)).
 - **An imported row is validated exactly as a typed one.** A pasted row whose date does not parse under the import's date control, **whose date is in the future**, whose amount does not parse under its two separator controls, or whose description is empty after trimming **cannot be read**, is marked with the reason and cannot be ticked ([§5.7](05-transactions.md#57-bulk-import)). **There is no value the form refuses that a paste can nevertheless put in the file.** **A zero amount is not one of them** — it is legal on both paths, and an import that met one would bring it in.
@@ -58,7 +58,7 @@ What the forms refuse. Everything here is enforced at the point of entry, by the
 | Field | Rule |
 | --- | --- |
 | accountId | Required. The picker lists **cash accounts only**; a brokerage account can never be chosen, here or on an import. **Closed accounts are listed**, marked and after the open ones ([§4.3](04-accounts.md#43-creating-and-editing)). |
-| date | Required, date picker. **Not in the future** — the picker offers no day after today, on the form and in an inline edit alike. A pasted row dated ahead cannot be read ([§5.7](05-transactions.md#57-bulk-import)). No bound against the *account's* dates — check 12 reports those. |
+| date | Required, date picker. **Not in the future** — the picker offers no day after today, on every form that carries a date. A pasted row dated ahead cannot be read ([§5.7](05-transactions.md#57-bulk-import)). No bound against the *account's* dates — check 12 reports those. |
 | description | Required, trimmed, non-empty. It is the only thing a rule matches on. |
 | amount | Amount field, required, either sign. **Zero is legal.** Empty still blocks the save: zero is a value that was typed, empty is a field that was not. |
 | categoryId | **Either a category or *Automatic* — never nothing.** The picker offers no clearing entry, so a `manual` row always carries a category and the only empty category in the file is one no rule matched ([§2](02-domain-model.md)). |
@@ -114,7 +114,7 @@ What the forms refuse. Everything here is enforced at the point of entry, by the
 | Field | Rule |
 | --- | --- |
 | workingDays | Integer 1 – 366, **or empty**. Empty is a legitimate state meaning “not entered yet”, and is what makes the hourly columns read *undefined* rather than wrong ([§11.7](11-calculations.md#117-salary-figures)). Zero is refused. |
-| the record | **Created by typing into the cell and deleted by emptying it** ([§8.1](08-salaries.md#81-payslips)). Emptying returns the year to exactly the state it had before anything was typed. It is the one delete that is **not confirmed**, everywhere else there being no undo and therefore a confirmation ([§12](12-storage.md)). |
+| the record | **The one-field form is the record**: saving a number creates it and saving the form empty deletes it ([§8.1](08-salaries.md#81-payslips)). Saving it empty returns the year to exactly the state it had before anything was entered. It is the one delete that is **not confirmed**, everywhere else there being no undo and therefore a confirmation ([§12](12-storage.md)). |
 
 ### Payslip
 

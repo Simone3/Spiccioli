@@ -130,18 +130,47 @@ describe('the Investments screen', () => {
 		expect(within(panel).getByText('€ 855,94')).toBeInTheDocument();
 	});
 
-	test('records a price from the holdings row, replacing whatever that day held', async() => {
+	test('reaches the prices of a holding\'s security from its price cell, and states what is recorded there', async() => {
 		await openInvestments(withRecords({
 			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]
 		}));
-		await userEvent.click(screen.getByRole('button', { name: 'Edit the price of SWDA' }));
-		await userEvent.type(screen.getByRole('textbox', { name: 'Price' }), '77');
+
+		// A price belongs to the security, so the cell that states it opens the tab where it is kept
+		await userEvent.click(screen.getByRole('button', { name: 'Show the prices of SWDA' }));
+
+		expect(screen.getByRole('complementary', { name: 'Price history' })).toBeInTheDocument();
+
+		await userEvent.click(screen.getByRole('button', { name: 'Add price' }));
+		await userEvent.type(screen.getByRole('textbox', { name: 'Value' }), '77');
 		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+		await userEvent.click(screen.getByRole('tab', { name: 'Holdings' }));
 
 		const table = screen.getByRole('table', { name: 'Holdings' });
 
 		expect(within(table).getByText('€ 77,0000')).toBeInTheDocument();
 		expect(within(table).getByText('€ 770,00')).toBeInTheDocument();
+	});
+
+	test('corrects a trade on the form it was recorded on, picking its security from the ones that exist', async() => {
+		await openInvestments(withRecords({
+			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]
+		}));
+		await userEvent.click(screen.getByRole('tab', { name: 'Purchases · 1' }));
+		await userEvent.click(screen.getByRole('button', { name: 'What can be done to the SWDA trade of 10/01/2020' }));
+		await userEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
+
+		const form = screen.getByRole('dialog', { name: 'Edit purchase' });
+
+		// A row being corrected already has a security, so the field picks from the ones recorded rather than searching or creating
+		expect(within(form).getByRole('combobox', { name: 'Security' })).toHaveValue('swda');
+		expect(within(form).queryByRole('textbox', { name: 'Security' })).not.toBeInTheDocument();
+
+		await userEvent.clear(within(form).getByRole('textbox', { name: 'Quantity' }));
+		await userEvent.type(within(form).getByRole('textbox', { name: 'Quantity' }), '12');
+		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+		expect(within(screen.getByRole('table', { name: 'Purchases' })).getByText('12,000000')).toBeInTheDocument();
 	});
 
 	test('reads the realised gain of a sale, and undefined where the position went below zero', async() => {
@@ -238,7 +267,8 @@ describe('the Investments screen', () => {
 		expect(within(rows[1]).getByText('fetched')).toBeInTheDocument();
 
 		// An edit to a fetched record stops it claiming to be the provider's
-		await userEvent.click(within(table).getByRole('button', { name: 'Edit the value of the price of 08/08/2026' }));
+		await userEvent.click(within(table).getByRole('button', { name: 'What can be done to the price of 08/08/2026' }));
+		await userEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
 		await userEvent.clear(screen.getByRole('textbox', { name: 'Value' }));
 		await userEvent.type(screen.getByRole('textbox', { name: 'Value' }), '95');
 		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
@@ -253,6 +283,8 @@ describe('the Investments screen', () => {
 		}));
 		stubPricesBridge({ updatePrices: quotedWith([ { outcome: 'quoted', securityId: 'swda', days: [ { value: 923100, date: '2026-08-07' } ], droppedCount: 0 } ]) });
 
+		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Show the price history of SWDA' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
 		await userEvent.click(await screen.findByRole('button', { name: 'Just the latest quote' }));
 
@@ -264,19 +296,25 @@ describe('the Investments screen', () => {
 		expect(within(panel).getByText('€ 90,0000')).toBeInTheDocument();
 		expect(within(panel).getByText('manual')).toBeInTheDocument();
 
-		// Nothing has been written: the holding is still reading the price it had
-		expect(within(screen.getByRole('table', { name: 'Holdings' })).getByText('€ 90,0000')).toBeInTheDocument();
+		// Nothing has been written: the history behind the panel still reads what it held, and still calls it hand-typed
+		const history = (): HTMLElement => {
+			return screen.getByRole('table', { name: 'Price history' });
+		};
+
+		expect(within(history()).getByText('€ 90,0000')).toBeInTheDocument();
+		expect(within(history()).getByText('manual')).toBeInTheDocument();
 
 		await userEvent.click(within(panel).getByRole('button', { name: 'Write 1 price' }));
 
 		expect(screen.getByRole('status')).toHaveTextContent('1 price written.');
-		expect(within(screen.getByRole('table', { name: 'Holdings' })).getByText('€ 92,3100')).toBeInTheDocument();
 
 		// And the record that replaced a hand-typed value says it is the provider's
-		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
-		await userEvent.click(screen.getByRole('button', { name: 'Show the price history of SWDA' }));
+		expect(within(history()).getByText('€ 92,3100')).toBeInTheDocument();
+		expect(within(history()).getByText('fetched')).toBeInTheDocument();
 
-		expect(within(screen.getByRole('table', { name: 'Price history' })).getByText('fetched')).toBeInTheDocument();
+		await userEvent.click(screen.getByRole('tab', { name: 'Holdings' }));
+
+		expect(within(screen.getByRole('table', { name: 'Holdings' })).getByText('€ 92,3100')).toBeInTheDocument();
 	});
 
 	test('fills a history in, reporting the days it fetched and writing every one of them', async() => {
@@ -307,6 +345,7 @@ describe('the Investments screen', () => {
 			}
 		});
 
+		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
 		await userEvent.click(await screen.findByRole('button', { name: 'Every day since the last price' }));
 
@@ -344,11 +383,15 @@ describe('the Investments screen', () => {
 		}));
 		stubPricesBridge({ updatePrices: quotedWith([ { outcome: 'quoted', securityId: 'swda', days: [ { value: 923100, date: '2026-08-07' } ], droppedCount: 0 } ]) });
 
+		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
 		await userEvent.click(await screen.findByRole('button', { name: 'Just the latest quote' }));
 		await userEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Cancel' }));
 
 		expect(screen.getByRole('status')).toHaveTextContent('Nothing was written.');
+
+		await userEvent.click(screen.getByRole('tab', { name: 'Holdings' }));
+
 		expect(within(screen.getByRole('table', { name: 'Holdings' })).getByText('€ 90,0000')).toBeInTheDocument();
 	});
 
@@ -360,6 +403,7 @@ describe('the Investments screen', () => {
 			updatePrices: quotedWith([ { outcome: 'refused', securityId: 'swda', refusal: 'not-euro', currency: 'USD' } ])
 		});
 
+		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Update prices' }));
 		await userEvent.click(await screen.findByRole('button', { name: 'Just the latest quote' }));
 

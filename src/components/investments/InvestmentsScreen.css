@@ -153,6 +153,12 @@
 	text-underline-offset: 3px;
 }
 
+/* The same link in a right-aligned column, which is the holdings price cell and the way to where that price is kept */
+.investments-screen-link-figure {
+	align-items: flex-end;
+	text-align: right;
+}
+
 /* The two ends of the period filter, side by side under the one label */
 .investments-screen-filter-pair {
 	display: flex;
@@ -206,6 +212,12 @@
 	gap: 6px;
 	align-items: flex-end;
 	max-width: 420px;
+}
+
+.investments-screen-update-prices-buttons {
+	display: flex;
+	gap: 8px;
+	align-items: center;
 }
 
 .investments-screen-update-prices p {

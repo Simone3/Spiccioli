@@ -3,14 +3,11 @@ import { AppButton } from 'src/components/common/AppButton';
 import { Chip } from 'src/components/common/Chip';
 import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { DataTable, type DataTableColumn } from 'src/components/common/DataTable';
-import { DateField } from 'src/components/common/DateField';
-import { EditableCell } from 'src/components/common/EditableCell';
-import { PriceField } from 'src/components/common/NumericFields';
 import { RowMenu } from 'src/components/common/RowMenu';
 import { PriceForm, type PriceFormValues } from 'src/components/investments/PriceForm';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
-import type { IsoDate, Price, Security, TenThousandths } from 'src/types/LedgerTypes';
+import type { Price, Security } from 'src/types/LedgerTypes';
 
 /**
  * One security's whole price history, and the only place a price is deleted.
@@ -19,12 +16,16 @@ import type { IsoDate, Price, Security, TenThousandths } from 'src/types/LedgerT
  * for here is the most recent one.
  *
  * **Every edit a user makes sets the source to `manual`**, an edit to the value and an edit to the date alike, so a fetched
- * figure somebody has corrected stops claiming to be the provider's. Editing a date **moves** the record, replacing whatever
+ * figure somebody has corrected stops claiming to be the provider's. Changing the date **moves** the record, replacing whatever
  * occupied the day it lands on, and **neither edit is confirmed**; deleting is, like every delete in the application.
+ *
+ * **This panel and the form it opens are the whole of what a user does to a price**, the *Update prices* pass above it aside.
  */
 
-// The lowest price this field admits, in the ten-thousandths a price is stored in
-const SMALLEST_PRICE = 1;
+// The record a form is open on. An undefined record is one being recorded; an undefined draft is a form that is not open.
+interface PriceDraft {
+	price: Price | undefined;
+}
 
 export interface PriceHistoryPanelProps {
 	security: Security;
@@ -32,11 +33,8 @@ export interface PriceHistoryPanelProps {
 	// The security's prices, already newest first
 	prices: readonly Price[];
 
-	// Records a price against a day, replacing whatever that day held
-	onWrite: (price: Price) => void;
-
-	// Moves a record to another day, replacing whatever that day held
-	onMove: (price: Price, date: IsoDate) => void;
+	// Writes what the form holds: a new record, or the one being corrected, moved to the day it now carries
+	onSave: (original: Price | undefined, values: PriceFormValues) => void;
 
 	onDelete: (price: Price) => void;
 	onClose: () => void;
@@ -47,21 +45,20 @@ export interface PriceHistoryPanelProps {
  * @param props The panel's props.
  * @param props.security The security the history belongs to.
  * @param props.prices Its prices, newest first.
- * @param props.onWrite What recording a price does.
- * @param props.onMove What moving one to another day does.
+ * @param props.onSave What saving the form does.
  * @param props.onDelete What deleting one does.
  * @param props.onClose What closing the panel does.
  * @returns The panel.
  */
-export const PriceHistoryPanel = ({ security, prices, onWrite, onMove, onDelete, onClose }: PriceHistoryPanelProps): ReactElement => {
+export const PriceHistoryPanel = ({ security, prices, onSave, onDelete, onClose }: PriceHistoryPanelProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
-	const [ isAdding, setIsAdding ] = useState(false);
+	const [ priceDraft, setPriceDraft ] = useState<PriceDraft | undefined>(undefined);
 	const [ priceToDelete, setPriceToDelete ] = useState<Price | undefined>(undefined);
 
-	const addPrice = (values: PriceFormValues): void => {
-		onWrite({ securityId: security.id, date: values.date, value: values.value, source: 'manual' });
-		setIsAdding(false);
+	const savePrice = (values: PriceFormValues): void => {
+		onSave(priceDraft?.price, values);
+		setPriceDraft(undefined);
 	};
 
 	const columns: readonly DataTableColumn<Price>[] = [
@@ -70,25 +67,7 @@ export const PriceHistoryPanel = ({ security, prices, onWrite, onMove, onDelete,
 			header: t('prices.columns.date'),
 			numeric: true,
 			render: (price) => {
-				return (
-					<EditableCell<IsoDate | undefined>
-						value={price.date}
-						label={t('prices.edit.date', { date: formatter.storedDate(price.date) })}
-						renderEditor={(value, onChange) => {
-							return <DateField value={value} label={t('prices.columns.date')} required onChange={onChange}/>;
-						}}
-						onCommit={(value) => {
-							if(value === undefined) {
-								return t('field.required');
-							}
-
-							onMove(price, value);
-
-							return undefined;
-						}}>
-						{formatter.storedDate(price.date)}
-					</EditableCell>
-				);
+				return formatter.storedDate(price.date);
 			}
 		},
 		{
@@ -96,36 +75,7 @@ export const PriceHistoryPanel = ({ security, prices, onWrite, onMove, onDelete,
 			header: t('prices.columns.value'),
 			numeric: true,
 			render: (price) => {
-				return (
-					<EditableCell<TenThousandths | undefined>
-						value={price.value}
-						label={t('prices.edit.value', { date: formatter.storedDate(price.date) })}
-						renderEditor={(value, onChange) => {
-							return (
-								<PriceField
-									value={value}
-									label={t('prices.columns.value')}
-									required
-									minimum={SMALLEST_PRICE}
-									onChange={onChange}/>
-							);
-						}}
-						onCommit={(value) => {
-							if(value === undefined) {
-								return t('field.required');
-							}
-
-							if(value <= 0) {
-								return t('prices.mustBePositive');
-							}
-
-							onWrite({ ...price, value, source: 'manual' });
-
-							return undefined;
-						}}>
-						{formatter.unitPrice(price.value)}
-					</EditableCell>
-				);
+				return formatter.unitPrice(price.value);
 			}
 		},
 		{
@@ -143,6 +93,13 @@ export const PriceHistoryPanel = ({ security, prices, onWrite, onMove, onDelete,
 					<RowMenu
 						label={t('prices.rowMenu', { date: formatter.storedDate(price.date) })}
 						actions={[
+							{
+								key: 'edit',
+								label: t('rowMenu.edit'),
+								onSelect: () => {
+									setPriceDraft({ price });
+								}
+							},
 							{
 								key: 'delete',
 								label: t('rowMenu.delete'),
@@ -182,7 +139,7 @@ export const PriceHistoryPanel = ({ security, prices, onWrite, onMove, onDelete,
 				<h3 className='investments-screen-subhead'>{t('prices.heading', { count: prices.length })}</h3>
 				<AppButton
 					onClick={() => {
-						setIsAdding(true);
+						setPriceDraft({ price: undefined });
 					}}>
 					{t('prices.add')}
 				</AppButton>
@@ -199,12 +156,13 @@ export const PriceHistoryPanel = ({ security, prices, onWrite, onMove, onDelete,
 						return price.date;
 					}}/>}
 
-			{isAdding && (
+			{priceDraft && (
 				<PriceForm
 					security={security}
-					onSave={addPrice}
+					price={priceDraft.price}
+					onSave={savePrice}
 					onCancel={() => {
-						setIsAdding(false);
+						setPriceDraft(undefined);
 					}}/>
 			)}
 

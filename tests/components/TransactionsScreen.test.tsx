@@ -81,23 +81,25 @@ describe('the Transactions screen', () => {
 
 		expect(within(table()).getByText('no category')).toBeInTheDocument();
 
-		await userEvent.click(screen.getByRole('button', { name: 'Edit the description of ADDEBITO DIVERSI 4471' }));
+		await userEvent.click(screen.getByRole('button', { name: 'What can be done to ADDEBITO DIVERSI 4471' }));
+		await userEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
 		await userEvent.clear(screen.getByRole('textbox', { name: 'Description' }));
 		await userEvent.type(screen.getByRole('textbox', { name: 'Description' }), 'ADDEBITO SDD ENEL ENERGIA');
-		await userEvent.click(within(table()).getByRole('button', { name: 'Save' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
 		expect(within(table()).getByText('Electricity')).toBeInTheDocument();
 	});
 
-	test('keeps a refused value out and leaves the row exactly as it was', async() => {
+	test('refuses an emptied description beside the field, and leaves the row exactly as it was', async() => {
 		await openTransactions(withRecords({ transactions: [ groceries ] }));
-		await userEvent.click(screen.getByRole('button', { name: 'Edit the description of PAGAMENTO POS ESSELUNGA MILANO' }));
+		await userEvent.click(screen.getByRole('button', { name: 'What can be done to PAGAMENTO POS ESSELUNGA MILANO' }));
+		await userEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
 		await userEvent.clear(screen.getByRole('textbox', { name: 'Description' }));
-		await userEvent.click(within(table()).getByRole('button', { name: 'Save' }));
 
-		expect(screen.getByRole('alert')).toHaveTextContent('This is required.');
+		expect(screen.getByText('This is required.')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
 
-		await userEvent.click(within(table()).getByRole('button', { name: 'Cancel' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
 		expect(within(table()).getByText('PAGAMENTO POS ESSELUNGA MILANO')).toBeInTheDocument();
 	});
@@ -110,9 +112,10 @@ describe('the Transactions screen', () => {
 
 		expect(within(table()).getByText('Salary')).toBeInTheDocument();
 
-		await userEvent.click(screen.getByRole('button', { name: 'Edit the category of STIPENDIO LUGLIO 2026' }));
-		await userEvent.selectOptions(within(table()).getByRole('combobox', { name: 'Category' }), 'automatic');
-		await userEvent.click(within(table()).getByRole('button', { name: 'Save' }));
+		await userEvent.click(screen.getByRole('button', { name: 'What can be done to STIPENDIO LUGLIO 2026' }));
+		await userEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
+		await userEvent.selectOptions(within(screen.getByRole('dialog')).getByRole('combobox', { name: 'Category' }), 'automatic');
+		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
 		expect(within(table()).getByText('Other income')).toBeInTheDocument();
 	});
@@ -128,7 +131,7 @@ describe('the Transactions screen', () => {
 		expect(within(table()).getByText('PAGAMENTO POS ESSELUNGA MILANO')).toBeInTheDocument();
 	});
 
-	test('duplicates a row, resetting the receipt state and taking a new sequence', async() => {
+	test('duplicates a row, resetting the receipt state and taking a new sequence, and opens the copy on the form', async() => {
 		await openTransactions(withRecords({ transactions: [ makeTransaction({ ...groceries, receiptState: 'checked' }) ] }));
 		await userEvent.click(screen.getByRole('button', { name: 'What can be done to PAGAMENTO POS ESSELUNGA MILANO' }));
 		await userEvent.click(screen.getByRole('menuitem', { name: 'Duplicate' }));
@@ -136,6 +139,14 @@ describe('the Transactions screen', () => {
 		expect(within(table()).getAllByText('PAGAMENTO POS ESSELUNGA MILANO')).toHaveLength(2);
 		expect(within(table()).getByText('Checked')).toBeInTheDocument();
 		expect(within(table()).getByText('N/A')).toBeInTheDocument();
+
+		// A duplicate is for the recurring row that differs in one field, so the copy is written and then opened to be changed
+		expect(screen.getByRole('dialog', { name: 'Edit transaction' })).toBeInTheDocument();
+
+		// The copy is in the file already, so abandoning the form leaves it standing rather than undoing it
+		await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+		expect(within(table()).getAllByText('PAGAMENTO POS ESSELUNGA MILANO')).toHaveLength(2);
 	});
 
 	test('deletes in bulk, once the confirmation says the count and the total', async() => {

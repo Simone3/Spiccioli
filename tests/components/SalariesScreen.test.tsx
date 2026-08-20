@@ -95,29 +95,29 @@ describe('the Salaries screen', () => {
 		expect(within(row).getByText('€ 2.170,00')).toBeInTheDocument();
 	});
 
-	test('reads the hourly figures as undefined until the working days are typed into the cell', async() => {
+	test('reads the hourly figures as undefined until the working days are entered', async() => {
 		await openSalaries(withContract({ payslips: [ payslip({ id: 'january', month: 1, gross: 201600, netPayment: 100800 }) ] }));
 
 		expect(within(yearRow('2025')).getAllByText('undefined')).toHaveLength(2);
 
-		await userEvent.click(within(yearRow('2025')).getByRole('button', { name: 'Working days of 2025' }));
+		await userEvent.click(within(yearRow('2025')).getByRole('button', { name: 'Edit the working days of 2025' }));
 		await userEvent.type(screen.getByRole('textbox', { name: 'Working days' }), '252');
-		await userEvent.click(within(yearRow('2025')).getByRole('button', { name: 'Save' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
 		// 252 days of 8 hours is 2 016 hours, so € 2 016,00 of gross is exactly one euro an hour
 		expect(within(yearRow('2025')).queryByText('undefined')).not.toBeInTheDocument();
 		expect(within(yearRow('2025')).getByText('€ 1,00')).toBeInTheDocument();
 	});
 
-	test('puts the year back where it was when the working-days cell is cleared, without confirming', async() => {
+	test('puts the year back where it was when the working-days form is saved empty, without confirming', async() => {
 		await openSalaries(withContract({
 			payslips: [ payslip({ id: 'january', month: 1 }) ],
 			contractYears: [ makeContractYear({ contractId: 'acme', year: 2025, workingDays: 252 }) ]
 		}));
 
-		await userEvent.click(within(yearRow('2025')).getByRole('button', { name: 'Working days of 2025' }));
+		await userEvent.click(within(yearRow('2025')).getByRole('button', { name: 'Edit the working days of 2025' }));
 		await userEvent.clear(screen.getByRole('textbox', { name: 'Working days' }));
-		await userEvent.click(within(yearRow('2025')).getByRole('button', { name: 'Save' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
 		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 		expect(within(yearRow('2025')).getAllByText('undefined')).toHaveLength(2);

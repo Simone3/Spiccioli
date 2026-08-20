@@ -1,25 +1,21 @@
 import type { ReactElement, ReactNode } from 'react';
 import { Chip } from 'src/components/common/Chip';
 import { DataTable, type DataTableColumn } from 'src/components/common/DataTable';
-import { DateField } from 'src/components/common/DateField';
-import { EditableCell } from 'src/components/common/EditableCell';
-import { PriceField } from 'src/components/common/NumericFields';
 import { useFormatter, usePreferences } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { formatAccountName } from 'src/logic/accounts/Accounts';
 import { isPriceStale } from 'src/logic/investments/Securities';
 import type { Holding } from 'src/logic/investments/Holdings';
 import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
-import type { Account, Institution, IsoDate, LedgerId, Security, TenThousandths } from 'src/types/LedgerTypes';
+import type { Account, Institution, LedgerId, Security } from 'src/types/LedgerTypes';
 
 /**
- * The holdings: one row per (security, brokerage account) holding a position, every figure derived and every column read-only
- * **except the price**.
+ * The holdings: one row per (security, brokerage account) holding a position, and **every column derived and read-only**, the
+ * price and its date included.
  *
- * **This is where prices are kept up to date.** The price cell opens an inline editor — a value and an as-of date defaulting to
- * today — and saving writes a Price record, replacing whatever that day already held. Nothing is confirmed, and the editor shows
- * the value the chosen day currently holds where it holds one. **A price belongs to the security and not to a holding**, so the
- * same instrument held at two institutions is two rows and one price, and the editor says so.
+ * **A price belongs to the security and not to a holding** — the same instrument held at two institutions is two rows and one
+ * price — so this table states the price and the Securities tab is where it is kept. The price cell is the way there: it opens
+ * that tab on this row's security, with the whole history and *Update prices* on it.
  *
  * **A date older than the staleness threshold is marked in the cell itself**: the date is the thing that has gone wrong, so the
  * date is what is marked, and the row says *how* stale rather than only *that* it is. **A security with no price at all is marked
@@ -30,15 +26,6 @@ import type { Account, Institution, IsoDate, LedgerId, Security, TenThousandths 
  *
  * The table is **gross** throughout: market price, no tax, no fees. The net counterpart is the Portfolio headline.
  */
-
-// The lowest price this field admits, in the ten-thousandths a price is stored in
-const SMALLEST_PRICE = 1;
-
-/** What the inline editor holds: a value, and the day it is as of. */
-export interface HoldingPriceEdit {
-	value: TenThousandths | undefined;
-	date: IsoDate | undefined;
-}
 
 export interface HoldingsTableProps {
 
@@ -52,15 +39,11 @@ export interface HoldingsTableProps {
 	// Which holding's detail panel is open beside the table
 	selected: Holding | undefined;
 
-	// What a security's given day currently holds, which is what the editor opens on
-	priceOn: (securityId: LedgerId, date: IsoDate) => TenThousandths | undefined;
-
-	// The day the editor defaults to
-	today: IsoDate;
-
 	footer: ReactNode;
 	onSelect: (holding: Holding) => void;
-	onWritePrice: (securityId: LedgerId, date: IsoDate, value: TenThousandths) => void;
+
+	// Opens the Securities tab on this row's security, which is where its prices are kept
+	onManagePrices: (holding: Holding) => void;
 }
 
 /**
@@ -71,11 +54,9 @@ export interface HoldingsTableProps {
  * @param props.accounts The accounts, by id.
  * @param props.institutions The institutions, by id.
  * @param props.selected Which row's detail is open.
- * @param props.priceOn What a security's given day holds.
- * @param props.today The day the editor defaults to.
  * @param props.footer What goes under the rule.
  * @param props.onSelect What choosing a row does.
- * @param props.onWritePrice What recording a price does.
+ * @param props.onManagePrices What the price cell does.
  * @returns The table.
  */
 export const HoldingsTable = ({
@@ -84,11 +65,9 @@ export const HoldingsTable = ({
 	accounts,
 	institutions,
 	selected,
-	priceOn,
-	today,
 	footer,
 	onSelect,
-	onWritePrice
+	onManagePrices
 }: HoldingsTableProps): ReactElement => {
 	const translator = useTranslator();
 	const { t } = translator;
@@ -187,49 +166,17 @@ export const HoldingsTable = ({
 			numeric: true,
 			render: (holding) => {
 				return (
-					<EditableCell<HoldingPriceEdit>
-						value={{ value: priceOn(holding.securityId, today), date: today }}
-						label={t('holdings.editPrice', { security: tickerOf(holding) })}
-						renderEditor={(edit, onChange) => {
-							return (
-								<div className='investments-screen-price-editor'>
-									<PriceField
-										value={edit.value}
-										label={t('holdings.priceValue')}
-										required
-										minimum={SMALLEST_PRICE}
-										onChange={(value) => {
-											onChange({ ...edit, value });
-										}}/>
-									<DateField
-										value={edit.date}
-										label={t('holdings.priceDate')}
-										required
-										onChange={(date) => {
-											// The editor shows what the chosen day currently holds, which is the record a save would replace
-											onChange({ date, value: date === undefined ? undefined : priceOn(holding.securityId, date) });
-										}}/>
-									<p className='investments-screen-note'>{t('holdings.priceNote')}</p>
-								</div>
-							);
-						}}
-						onCommit={(edit) => {
-							if(edit.value === undefined || edit.date === undefined) {
-								return t('field.required');
-							}
-
-							if(edit.value <= 0) {
-								return t('holdings.priceMustBePositive');
-							}
-
-							onWritePrice(holding.securityId, edit.date, edit.value);
-
-							return undefined;
+					<button
+						type='button'
+						className='investments-screen-link investments-screen-link-figure'
+						aria-label={t('holdings.managePrices', { security: tickerOf(holding) })}
+						onClick={() => {
+							onManagePrices(holding);
 						}}>
 						{holding.price === undefined ?
 							<span className='investments-screen-nothing'>{t('holdings.noPrice')}</span> :
 							formatter.unitPrice(holding.price)}
-					</EditableCell>
+					</button>
 				);
 			}
 		},
