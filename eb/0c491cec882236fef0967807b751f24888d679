@@ -1,0 +1,14 @@
+src/components/investments/InvestmentsScreen.css
+  h_08e8a5184a38af 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "eb0c491cec882236fef0967807b751f24888d679",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
