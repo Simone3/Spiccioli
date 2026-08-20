@@ -55,7 +55,7 @@ import {
 	countTradedSecurities,
 	filterTrades,
 	NO_TRADE_FILTERS,
-	sortTrades,
+	sortTradesNewestFirst,
 	sumRealisedGains,
 	sumTradeAmounts,
 	tradesOfKind,
@@ -206,8 +206,9 @@ export const InvestmentsScreen = (): ReactElement => {
 		return indexInstitutions(document?.institutions ?? []);
 	}, [ document ]);
 
+	// Newest first, the way the Transactions list is shown; everything that walks the trades reads them ascending instead
 	const orderedTrades = useMemo(() => {
-		return sortTrades(trades);
+		return sortTradesNewestFirst(trades);
 	}, [ trades ]);
 
 	// What the *Matched* column shows, which is derived on the same run that reports the trades nothing paired with

@@ -103,13 +103,13 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `logic/portfolio/NetWorthSeries.ts` | Net worth at every month end of the file and one final point at today, with the per-point fallback to cost of [§11.5](../functional/specs/11-calculations.md#115-net-worth-over-time) |
 | `logic/investments/Holdings.ts` | The weighted-average-cost walk in its one order, the realised gain a sale leaves, the holdings that survive it, and what each one would leave you with if it were sold today |
 | `logic/investments/AnnualisedReturn.ts` | The money-weighted return: the flows a position produces, the bisection that solves them, and every case that has no figure |
-| `logic/investments/Trades.ts` | Everything pure about the two trade tables: the one ordering, the three filters, the derived total and what the footers sum |
+| `logic/investments/Trades.ts` | Everything pure about the two trade tables: the one ordering and the two directions it is read in, the three filters, the derived total and what the footers sum |
 | `logic/investments/Securities.ts` | The ticker ordering, what points at a security, what makes an ISIN a duplicate, and the price history — which day a record lands on and when one has gone stale |
 | `logic/investments/PriceUpdate.ts` | Everything pure about a price pass: the listings that go out, what came back read against the file, and the records confirming it would write |
 | `logic/salaries/Contracts.ts` | Everything pure about a contract: the ordering, the years it covers, what falls inside its life, and what a narrowing or a deletion would run into |
 | `logic/salaries/Payslips.ts` | Which contract and which year a payslip belongs to, the order the table shows it in, and `netSalary` — the one derived field on the record |
 | `logic/salaries/SalaryFigures.ts` | The salary figures of [§11.7](../functional/specs/11-calculations.md#117-salary-figures): one row per year, the years that read 0, the hourly rates that read *undefined*, and what the payslip table's footer sums |
-| `logic/transactions/Transactions.ts` | Everything pure about the list: the one ordering, the seven filters, the footer total, the pages, and what a duplicate carries over |
+| `logic/transactions/Transactions.ts` | Everything pure about the list: the one ordering and the two directions it is read in, the seven filters, the footer total, the pages, and what a duplicate carries over |
 | `logic/transactions/TransactionImport.ts` | Everything pure about a paste: how a line becomes a row, what makes one unreadable, which rows the file already holds, and what the ticked ones are written as |
 | `logic/format/DateFormat.ts` `NumberFormat.ts` | Printing a day and printing a figure, the way the preferences say — including the compact amount a chart's value axis writes, which is the one place a figure is not printed in full |
 | `logic/format/Formatter.ts` | Both of those, bound once to the preferences in force |

@@ -20,7 +20,7 @@ The screen with the most hours on it. No tabs.
 ## 5.2 Ordering and paging
 
 - Always the three keys `date`, `insertionSeq`, `id`. Columns are not sortable and the order is not configurable.
-- **The list is shown newest first** — `date DESC, insertionSeq DESC, id DESC` — so the most recent row is the first row. **The ascending order of the same three keys is what everything else reads them in**, and it is what [§7.2](07-investments.md#72-purchases), [§9](09-checks.md) and [§11.6](11-calculations.md#116-derived-matching) name when they name this ordering: the direction is a decision of this screen, the keys are the file's.
+- **The list is shown newest first** — `date DESC, insertionSeq DESC, id DESC` — so the most recent row is the first row. **The ascending order of the same three keys is what everything else reads them in**, and it is what [§9](09-checks.md) and [§11.6](11-calculations.md#116-derived-matching) name when they name this ordering: the direction is a decision of the screen the rows are shown on — Purchases and Sales make the same one over the trades ([§7.2](07-investments.md#72-purchases)) — and the keys are the file's.
 - **50 rows per page.** This is the only paginated table in the application; every other table is shown in full.
 - **The screen opens on the first page**, so the most recent rows are in view. The pager is how you go back.
 - **The pager is five controls**: first, previous, the page in view as a box that can be typed into, next, last. A page number typed outside the range is refused and the box goes back to the page in view; nothing is clamped. **It states how many pages there are** and nothing else — how many rows a page holds is fixed above and is not a thing the pager repeats.

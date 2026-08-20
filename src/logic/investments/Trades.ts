@@ -5,8 +5,10 @@ import type { Cents, IsoDate, LedgerId, Trade, TradeKind } from 'src/types/Ledge
  * Everything pure about the two trade tables: the one order they are in, the three filters over them, and what their footers sum.
  *
  * **Purchases and Sales are the same table with three columns between them**, so everything here takes a `kind` rather than being
- * written twice. The order is the transactions' — `date ASC, insertionSeq ASC, id ASC` — and neither table pages: the filters
- * narrow the list instead.
+ * written twice. The keys are the transactions' — `date`, then `insertionSeq`, then `id`. **Ascending is the order everything
+ * else reads them in** — the walk of the weighted average cost, the checks and the matchers; **the two tabs show them
+ * descending**, most recent first, the way the Transactions list is shown. Neither table pages: the filters narrow the list
+ * instead.
  *
  * **A trade's total is derived and never entered**, and it is the figure the derived matching pairs against the bank transaction.
  * It is rounded to the cent, a quantity times a unit price landing eight decimal places down before anything is shown.
@@ -53,9 +55,9 @@ export const isAnyTradeFilterSet = (filters: TradeFilters): boolean => {
 };
 
 /**
- * Orders the trades the one way both tables show them, which is the ordering of the transactions list.
+ * Orders the trades the one way everything that walks them reads them: oldest first.
  * @param trades The trades.
- * @returns The trades, ordered by date, then insertion sequence, then id.
+ * @returns The trades, ordered by date, then insertion sequence, then id, all ascending.
  */
 export const sortTrades = (trades: readonly Trade[]): Trade[] => {
 	return [ ...trades ].sort((first, second) => {
@@ -69,6 +71,16 @@ export const sortTrades = (trades: readonly Trade[]): Trade[] => {
 
 		return first.id < second.id ? -1 : 1;
 	});
+};
+
+/**
+ * Orders the trades the one way the two trade tables show them: the same three keys, reversed, so the most recent row is the
+ * first row.
+ * @param trades The trades.
+ * @returns The trades, newest first.
+ */
+export const sortTradesNewestFirst = (trades: readonly Trade[]): Trade[] => {
+	return sortTrades(trades).reverse();
 };
 
 /**

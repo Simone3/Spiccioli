@@ -30,7 +30,7 @@ import type { Preferences } from 'src/types/PreferencesTypes';
  * salary payment and a pension credit.
  *
  * **Every one of them is greedy and every one of them states its order.** The side being matched *from* is walked in the
- * ordering its own screen uses — `date ASC, insertionSeq ASC, id ASC` for transactions and trades, year then month then label
+ * ascending ordering of its own records — `date ASC, insertionSeq ASC, id ASC` for transactions and trades, year then month then label
  * for payslips — and each record claims the **nearest-dated** unclaimed counterpart that satisfies the conditions, ties broken
  * by that counterpart's `insertionSeq` and then its `id`. Nothing is left to iteration order, so the same file pairs the same
  * way on every machine.
@@ -55,7 +55,7 @@ export interface MatchCandidate {
 
 interface GreedyMatchOptions<TClaim> {
 
-	// Already in the order the claims are walked in, which is the order of the screen the claiming side lives on
+	// Already in the order the claims are walked in, which is the ascending ordering of the claiming side's own records
 	claims: readonly TClaim[];
 
 	candidates: readonly MatchCandidate[];

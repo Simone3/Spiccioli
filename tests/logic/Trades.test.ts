@@ -6,6 +6,7 @@ import {
 	isAnyTradeFilterSet,
 	NO_TRADE_FILTERS,
 	sortTrades,
+	sortTradesNewestFirst,
 	sumRealisedGains,
 	sumTradeAmounts,
 	tradeTotal,
@@ -60,6 +61,28 @@ describe('the trades ordering', () => {
 		const sold = sale({ id: 'sold', date: '2020-01-01', insertionSeq: 1 });
 
 		expect(sortTrades([ bought, sold ])[0].id).toBe('sold');
+	});
+
+	test('is the same three keys reversed where the two tabs show them, so the most recent row is the first row', () => {
+		const trades = [
+			purchase({ id: 'c', date: '2021-01-01', insertionSeq: 3 }),
+			purchase({ id: 'a', date: '2020-01-01', insertionSeq: 2 }),
+			purchase({ id: 'b', date: '2020-01-01', insertionSeq: 1 })
+		];
+
+		expect(sortTradesNewestFirst(trades).map((trade) => {
+			return trade.id;
+		})).toEqual([ 'c', 'a', 'b' ]);
+	});
+
+	test('leaves the trades it was given alone', () => {
+		const trades = [ purchase({ id: 'a', insertionSeq: 1 }), purchase({ id: 'b', insertionSeq: 2 }) ];
+
+		sortTradesNewestFirst(trades);
+
+		expect(trades.map((trade) => {
+			return trade.id;
+		})).toEqual([ 'a', 'b' ]);
 	});
 });
 

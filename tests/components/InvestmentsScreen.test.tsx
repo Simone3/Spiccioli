@@ -173,6 +173,21 @@ describe('the Investments screen', () => {
 		expect(within(screen.getByRole('table', { name: 'Purchases' })).getByText('12,000000')).toBeInTheDocument();
 	});
 
+	test('shows the trades newest first, the way the transactions list is shown', async() => {
+		await openInvestments(withRecords({
+			trades: [
+				purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }),
+				purchase({ id: 'two', date: '2022-03-04', quantity: 4 * QUANTITY_UNITS, unitPrice: 70 * UNITS, insertionSeq: 2 })
+			]
+		}));
+		await userEvent.click(screen.getByRole('tab', { name: 'Purchases · 2' }));
+
+		const rows = within(screen.getByRole('table', { name: 'Purchases' })).getAllByRole('row');
+
+		expect(within(rows[1]).getByText('04/03/2022')).toBeInTheDocument();
+		expect(within(rows[2]).getByText('10/01/2020')).toBeInTheDocument();
+	});
+
 	test('reads the realised gain of a sale, and undefined where the position went below zero', async() => {
 		await openInvestments(withRecords({
 			securities: [ swda, makeSecurity({ id: 'vwce', isin: 'IE00BK5BQT80', ticker: 'VWCE', name: 'Vanguard FTSE All-World' }) ],

@@ -31,7 +31,7 @@ import type { Preferences } from 'src/types/PreferencesTypes';
  *
  * **A passing check states its reach** — “117 payslips”, “41 purchases” — so a check that passed because it examined nothing is
  * distinguishable from one that passed properly. **A failing one names at most five records and states the whole count**, the
- * five being the first five in the order of the screen those records live on. There is no “show all”: the fix for a check naming
+ * five being the first five in the ascending ordering of the records themselves, oldest first. There is no “show all”: the fix for a check naming
  * two hundred records is the screen the records live on, which is one click away through any of the five links.
  *
  * **Every check reads the whole file, closed accounts included**, and **every one of them keys off category roles rather than
@@ -164,7 +164,7 @@ interface CheckContext extends ChecksOptions {
 }
 
 /**
- * Builds one side of a failing check: the whole count, and the first five records in the order of the screen they live on.
+ * Builds one side of a failing check: the whole count, and the first five records in the ascending ordering of the records themselves.
  * @param key What tells this side from the other one.
  * @param label What the side is called, on a check that reports two.
  * @param entries Every record the side names, already ordered.
