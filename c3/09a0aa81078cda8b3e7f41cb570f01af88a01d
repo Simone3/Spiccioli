@@ -1,0 +1,44 @@
+src/components/accounts/AccountForm.tsx
+  s_4919511ee1e8a7::t_6525ef36c404b8 73,177-179,193-195
+src/components/accounts/InstitutionForm.tsx
+  s_4919511ee1e8a7::t_b9104b3486650f 85-87
+src/components/common/DateField.tsx
+  s_4919511ee1e8a7::t_3e56f024ed03bb 21-23,114,139-143
+src/components/common/DecimalField.tsx
+  s_4919511ee1e8a7::t_f97a8db73cf8d8 20-22,162-163
+src/components/common/SelectField.tsx
+  s_4919511ee1e8a7::t_5205e7ef20a02d 28-30,42,45-53,67-68
+src/components/common/TextField.tsx
+  s_4919511ee1e8a7::t_64205e6e7d2074 11-14,28-30,42,45,62-63
+src/components/salaries/ContractForm.tsx
+  s_4919511ee1e8a7::t_8bc9ada06e8c7a 84,191-193
+src/components/transactions/TransactionForm.tsx
+  s_4919511ee1e8a7::t_849bb9b1df00c0 75,158-160
+tests/components/CommonKit.test.tsx
+  s_4919511ee1e8a7::t_8b2f0455b91fb6 170,173-175,179
+tests/components/DateField.test.tsx
+  s_4919511ee1e8a7::t_2cfb996e750ac2 65-66,69-70,74,77
+tests/components/AccountsScreen.test.tsx
+  s_4919511ee1e8a7::t_2e998232ba845e 31-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c309a0aa81078cda8b3e7f41cb570f01af88a01d",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_4919511ee1e8a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "07474130-156e-483b-98b9-60c89b1fa395",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
