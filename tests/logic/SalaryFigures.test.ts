@@ -1,6 +1,6 @@
 import { makeContract, makeContractYear, makePayslip } from '../testUtils';
 import { netSalary, sortPayslipsOfYear } from 'src/logic/salaries/Payslips';
-import { deriveSalaryYears, totalPayslips, type SalaryYearFigures } from 'src/logic/salaries/SalaryFigures';
+import { deriveSalaryYears, type SalaryYearFigures } from 'src/logic/salaries/SalaryFigures';
 import type { ContractYear, Payslip } from 'src/types/LedgerTypes';
 
 const TODAY = '2026-08-18';
@@ -142,19 +142,5 @@ describe('the per-year rows', () => {
 		]);
 
 		expect(rowOf(rows, 2025).payslipCount).toBe(1);
-	});
-});
-
-describe('the payslip totals', () => {
-	test('sum every column the footer states, net salary included', () => {
-		const totals = totalPayslips([
-			payslip({ id: 'a', month: 1, gross: 330000, netPayment: 199000, refunds: 0, carPayment: 18000, employeeContribution: 4100 }),
-			payslip({ id: 'b', month: 2, gross: 330000, netPayment: 217250, refunds: 18250, carPayment: 18000, employeeContribution: 4100 })
-		]);
-
-		expect(totals.gross).toBe(660000);
-		expect(totals.netPayment).toBe(416250);
-		expect(totals.netSalary).toBe(434000);
-		expect(totals.employeeContribution).toBe(8200);
 	});
 });

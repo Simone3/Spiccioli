@@ -29,8 +29,8 @@ import type { Contract, Hundredths, IsoDate } from 'src/types/LedgerTypes';
  * Payslips tab, closed years included: the current values are applied to the whole contract.
  */
 
-// What a contract is created with, which is the Italian norm and what the mockup shows
-const DEFAULT_MONTHS_PER_YEAR = 13;
+// What a contract is created with: the twelve months of the year, a contract carrying extra months of pay being the exception
+const DEFAULT_MONTHS_PER_YEAR = 12;
 
 const DEFAULT_HOURS_PER_DAY: Hundredths = 800;
 
@@ -231,7 +231,7 @@ export const ContractForm = ({ contract, onSave, onCancel }: ContractFormProps):
 					onChange={setEndDate}/>
 			</FormField>
 
-			<FormField label={t('contracts.form.notes')} hint={t('contracts.form.workingDaysHint')}>
+			<FormField label={t('contracts.form.notes')}>
 				<TextField
 					value={notes}
 					label={t('contracts.form.notes')}

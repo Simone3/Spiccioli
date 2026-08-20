@@ -1,11 +1,10 @@
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 import { Chip } from 'src/components/common/Chip';
 import { DataTable, type DataTableColumn } from 'src/components/common/DataTable';
 import { RowMenu } from 'src/components/common/RowMenu';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { netSalary } from 'src/logic/salaries/Payslips';
-import { totalPayslips } from 'src/logic/salaries/SalaryFigures';
 import type { Payslip } from 'src/types/LedgerTypes';
 
 /**
@@ -22,6 +21,9 @@ import type { Payslip } from 'src/types/LedgerTypes';
  *
  * **`Net payment` may be negative**, alone among the figures here: a December whose year-end tax recalculation exceeds the
  * month's net is a real payslip, and net salary follows it down.
+ *
+ * **The table states no totals of its own.** Every sum it could carry is a figure of the year, and the year is what the
+ * per-year table above it is: the totals are read there, against the years around them, rather than twice over.
  */
 
 // A month is written with both of its digits wherever it is named
@@ -186,26 +188,11 @@ export const PayslipsTable = ({ payslips, year, onEdit, onDuplicate, onDelete }:
 		}
 	];
 
-	const footer = ((): ReactNode => {
-		const totals = totalPayslips(payslips);
-
-		return t('payslips.footer', {
-			payslips: t('contracts.payslipCount', { count: payslips.length }),
-			gross: formatter.amount(totals.gross),
-			netPayment: formatter.amount(totals.netPayment),
-			netSalary: formatter.amount(totals.netSalary),
-			employee: formatter.amount(totals.employeeContribution),
-			employer: formatter.amount(totals.employerContribution),
-			severance: formatter.amount(totals.severanceContribution)
-		});
-	})();
-
 	return (
 		<DataTable
 			columns={columns}
 			rows={payslips}
 			label={t('payslips.table', { year: String(year) })}
-			footer={footer}
 			getRowKey={(payslip) => {
 				return payslip.id;
 			}}/>

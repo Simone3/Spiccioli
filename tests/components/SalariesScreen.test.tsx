@@ -77,7 +77,7 @@ describe('the Salaries screen', () => {
 		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
 		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-		expect(screen.getByText('Acme S.p.A. · 13 months per year · 8,00 hours per day')).toBeInTheDocument();
+		expect(screen.getByText('Acme S.p.A. · 12 months per year · 8,00 hours per day')).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: 'Show the payslips of 2025' })).toBeInTheDocument();
 		expect(screen.getByText('Nothing has been recorded against this contract yet — add the first payslip and its year fills itself in.')).toBeInTheDocument();
 	});
@@ -143,7 +143,7 @@ describe('the Salaries screen', () => {
 		}));
 
 		const table = screen.getByRole('table', { name: 'Payslips of 2025' });
-		const months = within(table).getAllByRole('row').slice(1, -1).map((row) => {
+		const months = within(table).getAllByRole('row').slice(1).map((row) => {
 			return within(row).getAllByRole('cell')[0].textContent;
 		});
 

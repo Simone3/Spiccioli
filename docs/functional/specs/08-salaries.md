@@ -32,7 +32,7 @@ Two tabs: Payslips, Contracts. Scoped to one contract, then to one year.
 > **Mockup —** [Contracts tab](../mockups/08-salaries.html#contracts)
 
 - One row per employer, **ordered by `startDate`, then by name** to break the tie.
-- **Months per year** and **hours per day** are contract terms that every figure on the other tab divides by, which is why the two tabs sit together: this is the denominator, that is the numerator.
+- **Months per year** and **hours per day** are contract terms that every figure on the other tab divides by, which is why the two tabs sit together: this is the denominator, that is the numerator. **A new contract opens on 12 and on 8,00**, the ordinary year and the ordinary day; a contract carrying extra months of pay is typed over the twelve.
 - **A contract is never retired, only ended.** Filling in `endDate` records when it finished; it stays in the selector, keeps its payslips and keeps its years. There is nothing to exclude from a total, because no figure in the application sums across contracts ([§8.1](#81-payslips)).
 - **The dates cannot be narrowed past the records that depend on them.** The form refuses it and names what is in the way ([§13](13-validation.md)). Widening is always fine, and is what an employer extending a contract looks like.
 - **Payslips** counts what points at the contract, and is what decides whether it can be deleted: at zero it can, otherwise it cannot ([§13](13-validation.md)). Its ContractYear records go with it.

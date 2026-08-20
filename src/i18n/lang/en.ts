@@ -1181,7 +1181,7 @@ export const EN_TRANSLATIONS = {
 			namePlaceholder: 'e.g. Acme S.p.A.',
 			nameTaken: 'There is already a contract with this employer.',
 			monthsPerYear: 'Months per year',
-			monthsPerYearHint: 'Thirteen where the year carries an extra month’s pay. The contract line on the totals chart is this times the monthly contract gross.',
+			monthsPerYearHint: 'It may be thirteen or fourteen where the year carries extra months of pay.',
 			hoursPerDay: 'Hours per day',
 			startDate: 'Start date',
 			endDate: 'End date',
@@ -1197,7 +1197,6 @@ export const EN_TRANSLATIONS = {
 				one: 'These dates would leave the working days recorded for {years} outside the contract. Clear that year first, or leave the dates as they are.',
 				other: 'These dates would leave the working days recorded for {years} outside the contract. Clear those years first, or leave the dates as they are.'
 			},
-			workingDaysHint: 'Working days belong to a year of a contract, and are entered from the per-year table on the Payslips tab.',
 			notes: 'Notes'
 		}
 	},
@@ -1250,7 +1249,6 @@ export const EN_TRANSLATIONS = {
 			other: '{count} years without working days'
 		},
 		workingDaysComplete: 'every year has its working days',
-		footer: '{payslips} · gross {gross} · net payment {netPayment} · net salary {netSalary} · pension fund {employee} + {employer} + {severance}',
 		rowMenu: 'Actions for the payslip of {month}',
 		deleteTitle: 'Delete this payslip?',
 		deleteMessage: 'The payslip of {month} for {net} will be removed. This cannot be undone.',
@@ -1276,9 +1274,7 @@ export const EN_TRANSLATIONS = {
 			labelPlaceholder: 'e.g. 13th',
 			contractGross: 'Contract gross',
 			gross: 'Gross',
-			grossHint: 'The payslip’s own totale lordo line, typed as printed.',
 			netPayment: 'Net payment',
-			netPaymentHint: 'What reached the bank. It may be negative — a December whose tax recalculation exceeded the month’s net is a real payslip.',
 			refunds: 'Refunds',
 			carPayment: 'Car',
 			pensionSection: 'Pension fund',

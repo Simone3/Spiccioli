@@ -212,7 +212,7 @@ export const PayslipForm = ({ contract, years, initialYear, payslip, onSave, onC
 					onChange={setContractGross}/>
 			</FormField>
 
-			<FormField label={t('payslips.form.gross')} hint={t('payslips.form.grossHint')}>
+			<FormField label={t('payslips.form.gross')}>
 				<AmountField
 					value={gross}
 					label={t('payslips.form.gross')}
@@ -221,7 +221,7 @@ export const PayslipForm = ({ contract, years, initialYear, payslip, onSave, onC
 					onChange={setGross}/>
 			</FormField>
 
-			<FormField label={t('payslips.form.netPayment')} hint={t('payslips.form.netPaymentHint')}>
+			<FormField label={t('payslips.form.netPayment')}>
 				<AmountField
 					value={netPayment}
 					label={t('payslips.form.netPayment')}
