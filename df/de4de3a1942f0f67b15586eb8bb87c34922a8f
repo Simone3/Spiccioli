@@ -1,0 +1,32 @@
+TODO.md
+  h_08e8a5184a38af 6,13
+src/components/investments/InvestmentsScreen.tsx
+  s_6e45c3484152d8::t_82a42b78a0d960 473
+src/components/investments/TradeForm.tsx
+  s_6e45c3484152d8::t_bc760b95d8133a 179-182
+src/i18n/lang/en.ts
+  s_6e45c3484152d8::t_deda24ab2e394d 382,839
+tests/logic/Trades.test.ts
+  s_6e45c3484152d8::t_f6b49a751e0756 13,136
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "dfde4de3a1942f0f67b15586eb8bb87c34922a8f",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6e45c3484152d8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c47c1612-5278-492a-a854-5fbac12df601",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
