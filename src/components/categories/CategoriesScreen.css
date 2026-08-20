@@ -134,6 +134,15 @@
 	margin: 0 0 14px;
 }
 
+.categories-screen-apply-figures-heading {
+	margin: 0 0 8px;
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--colors-text-faint);
+}
+
 .categories-screen-apply-figures {
 	display: flex;
 	flex-direction: column;

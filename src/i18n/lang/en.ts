@@ -619,6 +619,10 @@ export const EN_TRANSLATIONS = {
 		add: 'Add rule',
 		discard: 'Discard changes',
 		table: 'Categorisation rules',
+		count: {
+			one: '1 rule',
+			other: '{count} rules'
+		},
 		summary: {
 			one: '1 rule · first match wins · case and accent insensitive',
 			other: '{count} rules · first match wins · case and accent insensitive'
@@ -657,7 +661,6 @@ export const EN_TRANSLATIONS = {
 		form: {
 			addTitle: 'Add rule',
 			editTitle: 'Edit rule',
-			subtitle: 'The rule joins the draft. Nothing is written until the list is applied.',
 			substring: 'Matches description containing',
 			substringPlaceholder: 'e.g. ESSELUNGA',
 			substringHint: 'Matched anywhere in the description, ignoring case and accents.',
@@ -672,6 +675,7 @@ export const EN_TRANSLATIONS = {
 				one: '1 edit in this session. Nothing has been written yet.',
 				other: '{count} edits in this session. Nothing has been written yet.'
 			},
+			figures: 'What will happen to transactions',
 			changed: 'Change category',
 			lost: 'Lose their category',
 			gained: 'Uncategorised → categorised',

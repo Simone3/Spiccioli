@@ -59,6 +59,7 @@ export const ApplyChangesDialog = ({ summary, pendingChanges, onConfirm, onCance
 			message={
 				<>
 					<p className='categories-screen-apply-lead'>{t('rules.apply.lead', { count: pendingChanges })}</p>
+					<p className='categories-screen-apply-figures-heading'>{t('rules.apply.figures')}</p>
 					<dl className='categories-screen-apply-figures'>
 						{figures.map((figure) => {
 							return (

@@ -208,7 +208,7 @@ export const CategoriesScreen = (): ReactElement => {
 		}
 
 		if(tab === 'rules') {
-			const rules = t('rules.summary', { count: draft.length });
+			const rules = t('rules.count', { count: draft.length });
 
 			return isDraftPending ? t('rules.summaryPending', { rules, pending: t('rules.pendingCount', { count: pendingChanges }) }) : rules;
 		}

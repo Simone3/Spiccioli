@@ -45,7 +45,6 @@ export const RuleForm = ({ rule, onSave, onCancel }: RuleFormProps): ReactElemen
 	return (
 		<FormDialog
 			title={rule ? t('rules.form.editTitle') : t('rules.form.addTitle')}
-			subtitle={t('rules.form.subtitle')}
 			canSave={canSave}
 			onSave={() => {
 				onSave({ substring: trimmed, categoryId });
