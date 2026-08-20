@@ -2,11 +2,11 @@ import type { ReactElement, ReactNode } from 'react';
 import { Chip } from 'src/components/common/Chip';
 import { DataTable, type DataTableColumn } from 'src/components/common/DataTable';
 import { RowMenu } from 'src/components/common/RowMenu';
-import { useFormatter } from 'src/contexts/PreferencesContext';
+import { useFormatter, usePreferences } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import type { SecurityPosition } from 'src/logic/investments/Holdings';
-import type { SecurityUsage } from 'src/logic/investments/Securities';
-import type { LedgerId, Security } from 'src/types/LedgerTypes';
+import { isPriceStale, type SecurityUsage } from 'src/logic/investments/Securities';
+import type { LedgerId, Price, Security } from 'src/types/LedgerTypes';
 
 /**
  * The securities, by ticker, with what is held of each one across every brokerage account.
@@ -17,6 +17,12 @@ import type { LedgerId, Security } from 'src/types/LedgerTypes';
  * reading as the position. One dash means nothing is held, the other means nothing can be said.
  *
  * *Trades* is what decides whether a security can be deleted; *Prices* does not, the history going with it.
+ *
+ * ***Last priced* is the day the newest price in that history is as of, and it is marked where check 3 would name the security**:
+ * held, and either priced longer ago than the threshold in the preferences or never priced at all. The date is the thing that
+ * has gone stale, so the date is what is marked, and the row says *how* stale rather than only *that* it is; a security nobody
+ * has ever priced reads an em dash marked the same way, the check making no distinction between the two and neither does this.
+ * **Nothing is marked on a security that is not held**: its price is an input to no figure, so an old one is not a fault.
  */
 
 export interface SecuritiesTableProps {
@@ -28,6 +34,9 @@ export interface SecuritiesTableProps {
 
 	// What is held of each one, and whether anything can be said about it
 	positions: ReadonlyMap<LedgerId, SecurityPosition>;
+
+	// The most recent price of each one, and no entry at all for a security that has never been priced
+	latestPrices: ReadonlyMap<LedgerId, Price>;
 
 	// Which security's price history is open beside the table
 	selectedId: LedgerId | undefined;
@@ -44,6 +53,7 @@ export interface SecuritiesTableProps {
  * @param props.securities The securities, ordered.
  * @param props.usage What points at each one.
  * @param props.positions What is held of each one.
+ * @param props.latestPrices The newest price of each one.
  * @param props.selectedId Which one's history is open.
  * @param props.footer What goes under the rule.
  * @param props.onSelect What choosing a row does.
@@ -55,6 +65,7 @@ export const SecuritiesTable = ({
 	securities,
 	usage,
 	positions,
+	latestPrices,
 	selectedId,
 	footer,
 	onSelect,
@@ -63,6 +74,14 @@ export const SecuritiesTable = ({
 }: SecuritiesTableProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
+	const { preferences } = usePreferences();
+
+	// Whether a quantity is actually held, which is what makes a price matter and what check 3 goes over
+	const isHeld = (security: Security): boolean => {
+		const position = positions.get(security.id);
+
+		return position !== undefined && !position.oversold && position.quantity > 0;
+	};
 
 	const heldCell = (security: Security): ReactNode => {
 		const position = positions.get(security.id);
@@ -76,6 +95,27 @@ export const SecuritiesTable = ({
 		}
 
 		return formatter.quantity(position.quantity);
+	};
+
+	const lastPricedCell = (security: Security): ReactNode => {
+		const latest = latestPrices.get(security.id);
+		const held = isHeld(security);
+
+		if(!latest) {
+			return held ?
+				<span className='investments-screen-stale' title={t('securities.neverPriced')}>{t('table.notApplicable')}</span> :
+				<span className='investments-screen-quiet'>{t('table.notApplicable')}</span>;
+		}
+
+		const stale = held && isPriceStale(latest.date, preferences.priceStalenessDays);
+
+		return (
+			<span
+				className={stale ? 'investments-screen-stale' : 'investments-screen-quiet'}
+				title={stale ? t('securities.stalePrice') : undefined}>
+				{formatter.storedDate(latest.date)}
+			</span>
+		);
 	};
 
 	const columns: readonly DataTableColumn<Security>[] = [
@@ -147,6 +187,12 @@ export const SecuritiesTable = ({
 			render: (security) => {
 				return <span className='investments-screen-quiet'>{formatter.integer(usage.get(security.id)?.prices ?? 0)}</span>;
 			}
+		},
+		{
+			key: 'lastPriced',
+			header: t('securities.columns.lastPriced'),
+			numeric: true,
+			render: lastPricedCell
 		},
 		{
 			key: 'actions',

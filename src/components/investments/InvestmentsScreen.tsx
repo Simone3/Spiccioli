@@ -35,6 +35,7 @@ import {
 } from 'src/logic/investments/Holdings';
 import {
 	countSecurityUsage,
+	indexLatestPrices,
 	indexSecurities,
 	isPriceStale,
 	priceHistoryOf,
@@ -190,6 +191,11 @@ export const InvestmentsScreen = (): ReactElement => {
 	const securityPositions = useMemo(() => {
 		return summariseSecurityPositions(walk);
 	}, [ walk ]);
+
+	// The newest price of each security, which is the day the *Last priced* column states and ages
+	const latestPrices = useMemo(() => {
+		return indexLatestPrices(prices);
+	}, [ prices ]);
 
 	const accounts = useMemo((): ReadonlyMap<LedgerId, Account> => {
 		return new Map((document?.accounts ?? []).map((account) => {
@@ -605,6 +611,7 @@ export const InvestmentsScreen = (): ReactElement => {
 					securities={orderedSecurities}
 					usage={securityUsage}
 					positions={securityPositions}
+					latestPrices={latestPrices}
 					selectedId={selectedSecurityId}
 					footer={t('securities.footer', {
 						securities: t('securities.count', { count: orderedSecurities.length }),

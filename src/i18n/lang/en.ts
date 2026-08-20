@@ -881,9 +881,12 @@ export const EN_TRANSLATIONS = {
 			taxRate: 'Tax rate',
 			held: 'Held',
 			trades: 'Trades',
-			prices: 'Prices'
+			prices: 'Prices',
+			lastPriced: 'Last priced'
 		},
 		oversold: 'Oversold — no quantity can be stated',
+		stalePrice: 'Stale — this security is held and its latest price is older than your staleness threshold',
+		neverPriced: 'Never priced — this security is held and is carried at what it cost',
 		select: 'Show the price history of {ticker}',
 		rowMenu: 'What can be done to {ticker}',
 		deleteTitle: 'Delete this security?',

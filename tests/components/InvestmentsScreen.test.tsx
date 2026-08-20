@@ -282,6 +282,46 @@ describe('the Investments screen', () => {
 		expect(within(row).getByTitle('Oversold — no quantity can be stated')).toBeInTheDocument();
 	});
 
+	test('marks the last price of a held security when it has aged or was never written, and leaves the rest alone', async() => {
+		const vwce = makeSecurity({ id: 'vwce', isin: 'IE00BK5BQT80', ticker: 'VWCE', name: 'Vanguard FTSE All-World' });
+		const aggh = makeSecurity({ id: 'aggh', isin: 'IE00BDBRDM35', ticker: 'AGGH', name: 'iShares Core Global Aggregate Bond' });
+
+		// SWDA is held and long past the threshold, VWCE is held and has never been priced, AGGH is as old as SWDA and sold out
+		await openInvestments(withRecords({
+			securities: [ swda, vwce, aggh ],
+			trades: [
+				purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }),
+				purchase({ id: 'two', securityId: 'vwce', date: '2020-01-10', quantity: 5 * QUANTITY_UNITS, unitPrice: 90 * UNITS, insertionSeq: 2 }),
+				purchase({ id: 'three', securityId: 'aggh', date: '2020-01-10', quantity: 4 * QUANTITY_UNITS, unitPrice: 5 * UNITS, insertionSeq: 3 }),
+				makeTrade({
+					id: 'four',
+					kind: 'sale',
+					securityId: 'aggh',
+					accountId: 'dossier',
+					date: '2021-01-10',
+					quantity: 4 * QUANTITY_UNITS,
+					unitPrice: 6 * UNITS,
+					fees: 0,
+					taxes: 0,
+					insertionSeq: 4
+				})
+			],
+			prices: [
+				makePrice({ securityId: 'swda', date: '2020-01-31', value: 60 * UNITS }),
+				makePrice({ securityId: 'aggh', date: '2020-01-31', value: 6 * UNITS })
+			]
+		}));
+		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 3' }));
+
+		// Ordered by ticker, so AGGH, SWDA and VWCE follow the header row
+		const rows = within(screen.getByRole('table', { name: 'Securities' })).getAllByRole('row');
+
+		expect(within(rows[2]).getByTitle(/^Stale/)).toHaveTextContent('31/01/2020');
+		expect(within(rows[3]).getByTitle(/^Never priced/)).toBeInTheDocument();
+		expect(within(rows[1]).getByText('31/01/2020')).toBeInTheDocument();
+		expect(within(rows[1]).queryByTitle(/^Stale/)).not.toBeInTheDocument();
+	});
+
 	test('refuses to delete a security a trade points at, above the list and not in a modal', async() => {
 		await openInvestments(withRecords({
 			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]
