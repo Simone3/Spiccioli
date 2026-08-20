@@ -1,20 +1,40 @@
 
 # current
 
+## inv
+
+sales & purch
+
+
+secur
+    update prices modal too big
+    paging in prices
+    delete all in pricing
 
 
 
 
-
-remove in-line edits everywhere?
-
-duplicates check not working?
-dont start at last page
-allow to change pages typing a number
-
-always override prices? show how many days it would override and how many are manual? checkbox to select a subset of tickers? single modal with fetch data for selected / write for selected (or 2 screens)?
+---
 
 
+
+---
+
+
+
+
+# tra
+
+remove "Add a note" in the table
+
+
+
+## misc
+
+The arrows of the dropdowns are too close to the left border of the select input.
+Can me move them a few pixels left?
+
+change all placeholders in text inputs, like "e.g. ESSELUNGA"
 
 
 

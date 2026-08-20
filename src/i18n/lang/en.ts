@@ -754,7 +754,7 @@ export const EN_TRANSLATIONS = {
 
 		// What the columns with nothing to total read, the last row of the table stating every total under its own column
 		total: 'Total',
-		footerDerived: 'Everything on this tab — what is held, what it averaged, what it is worth and what it has returned — is computed from your purchases, your sales and your securities, and none of it is stored. Value and gain are gross of tax and fees.',
+		footerDerived: 'Everything in this table is computed from your purchases, your sales and your securities. Value and gain are gross of tax and fees.',
 		footerReturnOmitted: {
 			one: '1 position is left out of the annualised return whole: it is oversold, or its security has never been priced.',
 			other: '{count} positions are left out of the annualised return whole: they are oversold, or their security has never been priced.'
