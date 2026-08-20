@@ -1,0 +1,40 @@
+docs/functional/mockups/08-salaries.html
+  s_4919511ee1e8a7::t_d9edc6db762ee0 185
+docs/functional/specs/08-salaries.md
+  s_4919511ee1e8a7::t_1f40ccd0f513fb 35
+docs/technical/02-repository-map.md
+  s_4919511ee1e8a7::t_7bc2158657855d 111
+src/components/salaries/ContractForm.tsx
+  s_4919511ee1e8a7::t_146b502ac852dc 32-33,234
+src/components/salaries/PayslipForm.tsx
+  s_4919511ee1e8a7::t_2e4ec67c4c12d5 215,224
+src/components/salaries/PayslipsTable.tsx
+  s_4919511ee1e8a7::t_83e3abd82921b4 1,24-26
+src/i18n/lang/en.ts
+  s_4919511ee1e8a7::t_dc23ca3c2d77ad 1184
+tests/components/SalariesScreen.test.tsx
+  s_4919511ee1e8a7::t_11c901684af041 80,146
+tests/logic/SalaryFigures.test.ts
+  s_4919511ee1e8a7::t_5b41cdf1d02ab5 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "5bd1c8532bce7fdc4866414ce4c32786878a3f37",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_4919511ee1e8a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "07474130-156e-483b-98b9-60c89b1fa395",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
