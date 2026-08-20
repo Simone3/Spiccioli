@@ -164,14 +164,9 @@ export const TradeForm = ({ kind, trade, onSave, onCancel }: TradeFormProps): Re
 	return (
 		<FormDialog
 			title={tradeFormTitle()}
-			subtitle={isSale ? t('trades.form.saleSubtitle') : t('trades.form.purchaseSubtitle')}
 			canSave={canSave}
 			onSave={save}
 			onCancel={onCancel}>
-			<FormField label={t('trades.form.date')}>
-				<DateField value={date} label={t('trades.form.date')} required onChange={setDate}/>
-			</FormField>
-
 			<FormField label={t('trades.form.account')}>
 				<AccountPicker
 					side='brokerage'
@@ -179,6 +174,10 @@ export const TradeForm = ({ kind, trade, onSave, onCancel }: TradeFormProps): Re
 					label={t('trades.form.account')}
 					placeholder={t('trades.form.accountChoose')}
 					onChange={setAccountId}/>
+			</FormField>
+
+			<FormField label={t('trades.form.date')}>
+				<DateField value={date} label={t('trades.form.date')} required onChange={setDate}/>
 			</FormField>
 
 			<FormField label={t('trades.form.security')} hint={isCorrecting ? undefined : securityHint()}>

@@ -52,7 +52,6 @@ import {
 	sumTradeAmounts,
 	tradesOfKind,
 	tradeTotal,
-	tradeYearRange,
 	type TradeFilters
 } from 'src/logic/investments/Trades';
 import { createLedgerId, nextInsertionSeq } from 'src/logic/ledger/LedgerDocument';
@@ -471,11 +470,7 @@ export const InvestmentsScreen = (): ReactElement => {
 			return t('trades.summaryFiltered', { shown: formatter.integer(matching.length), trades: counted });
 		}
 
-		const range = tradeYearRange(all);
-
-		return range ?
-			t('trades.summary', { trades: counted, range: t('trades.range', { from: range.from, to: range.to }) }) :
-			counted;
+		return counted;
 	};
 
 	const renderTradesTab = (kind: TradeKind): ReactElement => {

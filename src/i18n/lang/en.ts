@@ -379,7 +379,7 @@ export const EN_TRANSLATIONS = {
 		},
 
 		noCategory: 'no category',
-		noNotes: 'Add a note',
+		noNotes: '—',
 		select: 'Select {description}',
 		selectAll: 'Select every transaction these filters match',
 		rowMenu: 'What can be done to {description}',
@@ -807,9 +807,7 @@ export const EN_TRANSLATIONS = {
 			one: '1 security',
 			other: '{count} securities'
 		},
-		summary: '{trades} · {range}',
 		summaryFiltered: '{shown} of {trades}',
-		range: '{from} – {to}',
 		shownCount: '{shown} of {total} shown',
 		footerPurchases: '{purchases} · {securities} · fees {fees} · total cost {total}',
 		footerSales: '{sales} · {securities} · fees {fees} · taxes {taxes} · net proceeds {total} · realised gain {gain}',
@@ -838,7 +836,7 @@ export const EN_TRANSLATIONS = {
 			none: '—',
 			noneLabel: 'No bank transaction is paired with this trade'
 		},
-		noNotes: 'Add a note',
+		noNotes: '—',
 		rowMenu: 'What can be done to the {security} trade of {date}',
 		deleteTitle: 'Delete this trade?',
 		deleteMessage: 'Delete the {security} trade of {date} for {total}? There is no undo.',
@@ -857,8 +855,6 @@ export const EN_TRANSLATIONS = {
 			addSaleTitle: 'Add sale',
 			editPurchaseTitle: 'Edit purchase',
 			editSaleTitle: 'Edit sale',
-			purchaseSubtitle: 'from the Purchases tab',
-			saleSubtitle: 'from the Sales tab',
 			date: 'Date',
 			account: 'Account',
 			accountChoose: 'Choose an account',

@@ -198,20 +198,3 @@ export const sumRealisedGains = (trades: readonly Trade[], realisedGains: Readon
 			{ total: running.total + gain, omitted: running.omitted };
 	}, { total: 0, omitted: 0 });
 };
-
-/**
- * The years the trades span, which is what a tab states beside its count.
- * @param trades The trades.
- * @returns The first and last year, or undefined when there are no trades.
- */
-export const tradeYearRange = (trades: readonly Trade[]): { from: number; to: number } | undefined => {
-	if(trades.length === 0) {
-		return undefined;
-	}
-
-	const years = trades.map((trade) => {
-		return Number(trade.date.slice(0, 4));
-	});
-
-	return { from: Math.min(...years), to: Math.max(...years) };
-};

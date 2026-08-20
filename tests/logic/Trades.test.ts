@@ -10,8 +10,7 @@ import {
 	sumRealisedGains,
 	sumTradeAmounts,
 	tradeTotal,
-	tradesOfKind,
-	tradeYearRange
+	tradesOfKind
 } from 'src/logic/investments/Trades';
 import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
 import type { Trade } from 'src/types/LedgerTypes';
@@ -134,7 +133,7 @@ describe('what a footer states', () => {
 		})).toBe(3100);
 	});
 
-	test('counts the securities the rows are spread over, and the years they span', () => {
+	test('counts the securities the rows are spread over', () => {
 		const trades = [
 			purchase({ id: 'a', securityId: 'swda', date: '2018-01-01' }),
 			purchase({ id: 'b', securityId: 'vwce', date: '2026-01-01' }),
@@ -142,11 +141,6 @@ describe('what a footer states', () => {
 		];
 
 		expect(countTradedSecurities(trades)).toBe(2);
-		expect(tradeYearRange(trades)).toEqual({ from: 2018, to: 2026 });
-	});
-
-	test('has no year range where there are no rows', () => {
-		expect(tradeYearRange([])).toBeUndefined();
 	});
 
 	test('sums the realised gains that exist and says how many it left out', () => {
