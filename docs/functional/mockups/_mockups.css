@@ -210,6 +210,7 @@ a.det::after{content:" →";color:var(--brass);}
 .frm .inp.sel::after{content:" ▾";color:var(--faint);}
 .frm .inp.chipset{font-family:var(--sans);display:flex;gap:6px;flex-wrap:wrap;background:none;border:none;padding:0;}
 .frm .full{grid-column:1 / -1;}
+.frm .fsec{grid-column:1 / -1;margin-top:5px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);}
 .dlg .hint{font-size:11.5px;color:var(--faint);line-height:1.55;margin:0;}
 .dlg .hint b{color:var(--muted);}
 .dlgfoot{display:flex;justify-content:flex-end;gap:8px;padding-top:2px;}

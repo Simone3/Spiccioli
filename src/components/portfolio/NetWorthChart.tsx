@@ -93,8 +93,7 @@ export const NetWorthChart = ({ points, hasHistory }: NetWorthChartProps): React
 						series={series}
 						label={t('portfolio.netWorthChart')}
 						formatValue={formatter.amount}
-						formatAxisValue={axisValue}
-						showSeriesKey={false}/>
+						formatAxisValue={axisValue}/>
 					<p className='portfolio-screen-note'>{t('portfolio.chart.rates')}</p>
 				</> :
 				<p className='portfolio-screen-note'>{t('portfolio.chart.needsHistory')}</p>}

@@ -54,6 +54,18 @@
 	align-items: start;
 }
 
+/* The name of a run of fields, spanning both columns: it is a heading over them rather than a label beside one */
+.form-dialog-section {
+	grid-column: 1 / -1;
+	margin: 6px 0 0;
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--colors-text-faint);
+}
+
 .form-dialog-field-label {
 	padding-top: 7px;
 	font-size: 13px;

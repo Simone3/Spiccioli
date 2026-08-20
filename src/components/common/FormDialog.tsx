@@ -6,6 +6,10 @@ import { useTranslator } from 'src/i18n/TranslationContext';
 /**
  * The panel a record is created and corrected in, and the row a field sits on inside it.
  *
+ * **A heading is what a run of fields that belong together is named by**, where the labels alone would not say what they are of:
+ * the three pension figures of a payslip are *employee*, *employer* and *TFR* under *Pension fund*, rather than three fields
+ * carrying the fund's name in each of their own labels.
+ *
  * **A refused value is stated beside the field that holds it** and never here: what this panel does about a form it cannot
  * save is disable the saving button, which is what the validation specification asks of every form. The keyboard opens on the
  * first field, Escape cancels, and nothing outside the panel is reachable while it is up.
@@ -36,6 +40,22 @@ export interface FormDialogAction {
 	label: string;
 	onSelect: () => void;
 }
+
+export interface FormSectionProps {
+
+	// What the fields under it are of
+	label: string;
+}
+
+/**
+ * What a run of fields that belong together is called, spanning both columns above the first of them.
+ * @param props The section's props.
+ * @param props.label What the fields under it are of.
+ * @returns The heading.
+ */
+export const FormSection = ({ label }: FormSectionProps): ReactElement => {
+	return <h3 className='form-dialog-section'>{label}</h3>;
+};
 
 export interface FormFieldProps {
 	label: string;

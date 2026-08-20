@@ -12,57 +12,32 @@
 	height: 200px;
 }
 
-/* The key under the chart, which is ours rather than the library's so that a dashed line reads as dashed here too */
-.line-chart-key {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 16px;
-	margin: 0;
-	padding: 0;
-	list-style: none;
-	font-family: var(--font-family-mono);
-	font-size: 10.5px;
-	color: var(--colors-text-secondary);
-}
-
-.line-chart-key li {
-	display: flex;
-	gap: 6px;
-	align-items: center;
-}
-
-.line-chart-key-mark {
+/* What a series is marked by where it is named, which is the tooltip: the chart itself carries no key */
+.line-chart-mark {
 	display: block;
 	width: 14px;
 	height: 2px;
 	border-radius: 1px;
 }
 
-.line-chart-key-mark-1 {
+.line-chart-mark-1 {
 	background-color: var(--colors-chart-series-1);
 }
 
-.line-chart-key-mark-2 {
+.line-chart-mark-2 {
 	background-color: var(--colors-chart-series-2);
 }
 
-.line-chart-key-mark-3 {
+.line-chart-mark-3 {
 	background-color: var(--colors-chart-series-3);
 }
 
-.line-chart-key-mark-4 {
+.line-chart-mark-4 {
 	background-color: var(--colors-chart-series-4);
 }
 
-.line-chart-key-mark-5 {
+.line-chart-mark-5 {
 	background-color: var(--colors-chart-series-5);
-}
-
-/* A term rather than a measurement, marked the same way in the key as it is on the chart. The gaps are painted in the card's
-   own surface, a chart always being drawn on one. */
-.line-chart-key-mark-dashed {
-	background-image: linear-gradient(90deg, var(--colors-background-secondary) 0 3px, transparent 3px 6px);
-	background-size: 6px 2px;
 }
 
 .line-chart-tooltip {

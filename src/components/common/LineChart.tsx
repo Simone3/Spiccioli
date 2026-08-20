@@ -10,13 +10,11 @@ import { CartesianGrid, Line, LineChart as RechartsLineChart, ResponsiveContaine
  * hands over points, series and the one function that writes a figure; it never sees the library and never states a colour.
  *
  * **A series may be `null` at a point**, which is a stretch the line does not reach rather than a zero — the two are different
- * facts and the chart draws them differently. The key is ours rather than the library's, so a dashed line reads as dashed in
- * the key as well as on the chart.
+ * facts and the chart draws them differently.
  *
- * **A chart whose series are one line in two states says so on hover instead of in a key.** The tooltip names every series that
- * reaches the point under the pointer, which is the same words the key would carry and only where they mean something; a key
- * under such a chart names two lines where the reader sees one. A chart whose series are genuinely different measurements keeps
- * its key, and that is the default.
+ * **A chart names its series on hover and never in a key under it.** The tooltip names every series that reaches the point
+ * under the pointer, which is the same words a key would carry and only where they mean something — over the point being read
+ * rather than over the whole chart, and without a row of names standing under every chart in the application.
  */
 
 // Which of the five fixed series colours a line is drawn in
@@ -57,8 +55,6 @@ export interface LineChartProps {
 	// written in full, which is right for a chart whose figures are short to begin with.
 	formatAxisValue?: (value: number) => string;
 
-	// Whether the series are named under the chart. False where they are one line in two states, which the tooltip says better.
-	showSeriesKey?: boolean;
 }
 
 // What recharts hands a tooltip of ours. Every field is optional because the library injects them into an element it clones.
@@ -94,7 +90,7 @@ const toneVariable = (tone: ChartSeriesTone): string => {
 };
 
 const toneClassName = (tone: ChartSeriesTone): string => {
-	return `line-chart-key-mark line-chart-key-mark-${tone}`;
+	return `line-chart-mark line-chart-mark-${tone}`;
 };
 
 /**
@@ -151,16 +147,14 @@ const ChartTooltip = ({ active, label, payload, series, formatValue }: ChartTool
  * @param props.label What the chart is called.
  * @param props.formatValue How a figure is written.
  * @param props.formatAxisValue How the value axis writes one, the figure in full by default.
- * @param props.showSeriesKey Whether the series are named under the chart.
- * @returns The chart, and the key under it where the series are named there.
+ * @returns The chart.
  */
 export const LineChart = ({
 	points,
 	series,
 	label,
 	formatValue,
-	formatAxisValue = formatValue,
-	showSeriesKey = true
+	formatAxisValue = formatValue
 }: LineChartProps): ReactElement => {
 	// The library reads a flat row, so the values are spread onto the label the axis reads
 	const rows = points.map((point) => {
@@ -208,18 +202,6 @@ export const LineChart = ({
 					</RechartsLineChart>
 				</ResponsiveContainer>
 			</div>
-			{showSeriesKey && (
-				<ul className='line-chart-key'>
-					{series.map((line) => {
-						return (
-							<li key={line.key}>
-								<span className={line.dashed ? `${toneClassName(line.tone)} line-chart-key-mark-dashed` : toneClassName(line.tone)}/>
-								{line.label}
-							</li>
-						);
-					})}
-				</ul>
-			)}
 		</div>
 	);
 };

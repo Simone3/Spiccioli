@@ -364,11 +364,11 @@ export const SalariesScreen = (): ReactElement => {
 			return undefined;
 		}
 
-		// The empty state carries the button that fills the year, so the heading does not offer the same control twice
+		// The button stays in the heading whatever the year holds, so it is where it always is rather than only where the table is full
 		return (
 			<div className='salaries-screen-actions'>
 				{contractSelector()}
-				{payslipsOfYear.length === 0 ? undefined : addPayslipButton}
+				{addPayslipButton}
 			</div>
 		);
 	};

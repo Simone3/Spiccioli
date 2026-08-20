@@ -14,10 +14,11 @@ import type { Payslip } from 'src/types/LedgerTypes';
  * **A month may hold several rows.** The *tredicesima* is a second December row with a label rather than a synthetic thirteenth
  * month, which is why the ordering carries the label behind the month and puts the unlabelled row first.
  *
- * **Twelve columns, which is every stored field except the three the screen already carries** — the identity, the contract in
- * the selector above and the year in the row selected in the per-year table. **The one derived column is inserted rather than
- * appended**: net salary sits immediately after the car, beside the three entered figures it is made of, and that is the only
- * departure from the order the domain model lists them in.
+ * **Ten columns**: every stored field except the three the screen already carries — the identity, the contract in the selector
+ * above and the year in the row selected in the per-year table — with **the three pension figures written into one column**,
+ * because they are three credits into one place and reading them apart is what the fund's own statement is for. **The one
+ * derived column is inserted rather than appended**: net salary sits immediately after the car, beside the three entered
+ * figures it is made of, and that is the only departure from the order the domain model lists them in.
  *
  * **`Net payment` may be negative**, alone among the figures here: a December whose year-end tax recalculation exceeds the
  * month's net is a real payslip, and net salary follows it down.
@@ -72,6 +73,23 @@ export const PayslipsTable = ({ payslips, year, onEdit, onDuplicate, onDelete }:
 		});
 	};
 
+	// A payslip with nothing under any of the three headings states the one zero rather than three of them
+	const pensionFundCell = (payslip: Payslip): string => {
+		const credits = [ payslip.employeeContribution, payslip.employerContribution, payslip.severanceContribution ];
+
+		if(credits.every((credit) => {
+			return credit === 0;
+		})) {
+			return formatter.amount(0);
+		}
+
+		return t('payslips.pensionFundSum', {
+			employee: formatter.amount(payslip.employeeContribution),
+			employer: formatter.amount(payslip.employerContribution),
+			severance: formatter.amount(payslip.severanceContribution)
+		});
+	};
+
 	// Every amount column is the same column: the stored figure, written as an amount and right-aligned on its decimal place
 	const amountColumn = (key: string, header: string, figure: (payslip: Payslip) => number): DataTableColumn<Payslip> => {
 		return {
@@ -117,15 +135,14 @@ export const PayslipsTable = ({ payslips, year, onEdit, onDuplicate, onDelete }:
 
 		// The one derived column, inserted here rather than appended: it sits beside the three figures it is made of
 		amountColumn('netSalary', t('payslips.columns.netSalary'), netSalary),
-		amountColumn('employeeContribution', t('payslips.columns.employeeContribution'), (payslip) => {
-			return payslip.employeeContribution;
-		}),
-		amountColumn('employerContribution', t('payslips.columns.employerContribution'), (payslip) => {
-			return payslip.employerContribution;
-		}),
-		amountColumn('severanceContribution', t('payslips.columns.severanceContribution'), (payslip) => {
-			return payslip.severanceContribution;
-		}),
+
+		// The three credits are one column because they are one destination: the fund they reach separately
+		{
+			key: 'pensionFund',
+			header: t('payslips.columns.pensionFund'),
+			numeric: true,
+			render: pensionFundCell
+		},
 		{
 			key: 'notes',
 			header: t('payslips.columns.notes'),

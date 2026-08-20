@@ -1,5 +1,5 @@
 import { useState, type ReactElement } from 'react';
-import { FormDialog, FormField } from 'src/components/common/FormDialog';
+import { FormDialog, FormField, FormSection } from 'src/components/common/FormDialog';
 import { AmountField, IntegerField } from 'src/components/common/NumericFields';
 import { SelectField, type SelectOption } from 'src/components/common/SelectField';
 import { TextField } from 'src/components/common/TextField';
@@ -17,6 +17,11 @@ import type { Cents, Contract, Payslip } from 'src/types/LedgerTypes';
  *
  * **Every other field is empty**: no month is proposed, no figure is carried over from the previous payslip, and no amount is
  * filled in on the user's behalf. *Duplicate* is what exists for a row that resembles another.
+ *
+ * **The three pension figures are named by the heading over them** rather than by their own labels: *employee*, *employer* and
+ * *TFR* say which credit, and *Pension fund* says what they are credits into. **They are the last three fields on the form**,
+ * so the heading has nothing under it that it does not name, and the derived net salary sits where the table inserts it —
+ * immediately after the three entered figures it is made of.
  *
  * **The month has to fall inside the contract's life**, which is what a partial first or last year is caught by, and the
  * refusal says so beside the month rather than in a modal.
@@ -164,7 +169,7 @@ export const PayslipForm = ({ contract, years, initialYear, payslip, onSave, onC
 			canSave={canSave}
 			onSave={save}
 			onCancel={onCancel}>
-			<FormField label={t('payslips.form.year')} hint={t('payslips.form.yearHint')}>
+			<FormField label={t('payslips.form.year')}>
 				<SelectField
 					value={String(year)}
 					options={yearOptions}
@@ -233,16 +238,10 @@ export const PayslipForm = ({ contract, years, initialYear, payslip, onSave, onC
 				{magnitudeField(t('payslips.form.carPayment'), carPayment, setCarPayment)}
 			</FormField>
 
-			<FormField label={t('payslips.form.employeeContribution')} hint={t('payslips.form.pensionHint')}>
-				{magnitudeField(t('payslips.form.employeeContribution'), employeeContribution, setEmployeeContribution)}
-			</FormField>
-
-			<FormField label={t('payslips.form.employerContribution')}>
-				{magnitudeField(t('payslips.form.employerContribution'), employerContribution, setEmployerContribution)}
-			</FormField>
-
-			<FormField label={t('payslips.form.severanceContribution')}>
-				{magnitudeField(t('payslips.form.severanceContribution'), severanceContribution, setSeveranceContribution)}
+			<FormField label={t('payslips.form.netSalary')} hint={t('payslips.form.netSalaryHint')}>
+				<p className='salaries-screen-derived'>
+					{derivedNetSalary === undefined ? t('table.notApplicable') : formatter.amount(derivedNetSalary)}
+				</p>
 			</FormField>
 
 			<FormField label={t('payslips.form.notes')}>
@@ -253,10 +252,18 @@ export const PayslipForm = ({ contract, years, initialYear, payslip, onSave, onC
 					onChange={setNotes}/>
 			</FormField>
 
-			<FormField label={t('payslips.form.netSalary')} hint={t('payslips.form.netSalaryHint')}>
-				<p className='salaries-screen-derived'>
-					{derivedNetSalary === undefined ? t('table.notApplicable') : formatter.amount(derivedNetSalary)}
-				</p>
+			<FormSection label={t('payslips.form.pensionSection')}/>
+
+			<FormField label={t('payslips.form.employeeContribution')}>
+				{magnitudeField(t('payslips.form.employeeContribution'), employeeContribution, setEmployeeContribution)}
+			</FormField>
+
+			<FormField label={t('payslips.form.employerContribution')}>
+				{magnitudeField(t('payslips.form.employerContribution'), employerContribution, setEmployerContribution)}
+			</FormField>
+
+			<FormField label={t('payslips.form.severanceContribution')}>
+				{magnitudeField(t('payslips.form.severanceContribution'), severanceContribution, setSeveranceContribution)}
 			</FormField>
 		</FormDialog>
 	);

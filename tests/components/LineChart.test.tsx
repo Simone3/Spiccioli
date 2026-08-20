@@ -23,7 +23,7 @@ const POINTS: readonly LineChartPoint[] = [
 
 beforeAll(stubChartLayout);
 
-const renderChart = async(showSeriesKey?: boolean): Promise<void> => {
+const renderChart = async(): Promise<void> => {
 	stubLedgerBridge();
 	renderWithProviders(
 		<LineChart
@@ -32,8 +32,7 @@ const renderChart = async(showSeriesKey?: boolean): Promise<void> => {
 			label='Totals per year'
 			formatValue={(value) => {
 				return `€ ${value / 100}`;
-			}}
-			showSeriesKey={showSeriesKey}/>
+			}}/>
 	);
 	await screen.findByRole('img', { name: 'Totals per year' });
 };
@@ -68,16 +67,9 @@ describe('the one chart', () => {
 		expect((lines[0].getAttribute('d') ?? '').match(/M/g)).toHaveLength(1);
 	});
 
-	test('names every series in a key of ours, so a dashed line reads as dashed there too', async() => {
+	// The series are named on hover, where they mean something, and never in a key standing under the chart
+	test('draws no key under the chart, the tooltip being where a series is named', async() => {
 		await renderChart();
-
-		expect(screen.getByText('gross')).toBeInTheDocument();
-		expect(screen.getByText('contract × months')).toBeInTheDocument();
-	});
-
-	// A chart whose series are one line in two states names them on hover instead, where they mean something
-	test('draws no key at all where the caller says the series are not named under it', async() => {
-		await renderChart(false);
 
 		expect(screen.queryByText('gross')).not.toBeInTheDocument();
 		expect(screen.queryByText('contract × months')).not.toBeInTheDocument();

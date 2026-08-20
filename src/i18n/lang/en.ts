@@ -1181,11 +1181,11 @@ export const EN_TRANSLATIONS = {
 			namePlaceholder: 'e.g. Acme S.p.A.',
 			nameTaken: 'There is already a contract with this employer.',
 			monthsPerYear: 'Months per year',
-			monthsPerYearHint: 'Thirteen where the year carries a tredicesima. The contract line on the totals chart is this times the monthly contract gross.',
+			monthsPerYearHint: 'Thirteen where the year carries an extra month’s pay. The contract line on the totals chart is this times the monthly contract gross.',
 			hoursPerDay: 'Hours per day',
 			startDate: 'Start date',
 			endDate: 'End date',
-			endDateHint: 'Left empty while the contract is running. Ending a contract changes no figure: nothing in Spiccioli sums across contracts.',
+			endDateHint: 'Left empty while the contract is running.',
 			endBeforeStart: 'The end date cannot be before the start date.',
 
 			// Narrowing is what is refused; widening is always fine, and is what an employer extending a contract looks like
@@ -1231,26 +1231,26 @@ export const EN_TRANSLATIONS = {
 			refunds: 'Refunds',
 			carPayment: 'Car',
 			netSalary: 'Net salary',
-			employeeContribution: 'Employee',
-			employerContribution: 'Employer',
-			severanceContribution: 'TFR',
+			pensionFund: 'Pension fund',
 			notes: 'Notes'
 		},
+
+		// The three credits in the one column they reach the fund through, in the order the form asks for them
+		pensionFundSum: '{employee} + {employer} + {severance}',
 
 		// The one delete that is not confirmed: the record is the form, so saving it empty puts the year back where it was
 		selectYear: 'Show the payslips of {year}',
 		editWorkingDays: 'Edit the working days of {year}',
 		workingDaysTitle: 'Working days',
 		workingDaysSubtitle: 'the year {year} of this contract',
-		workingDaysClears: 'Leave this empty and the year goes back to having no working days recorded, which is what it was before a number was entered.',
-		workingDaysHint: 'Working days are always the whole calendar year, never the part worked — so a partial first or last year understates both hourly figures.',
+		workingDaysClears: 'Leave this empty and the year goes back to having no working days recorded.',
 		yearFooter: '{years} · {payslips} · {days}',
 		workingDaysMissing: {
 			one: '1 year without working days',
 			other: '{count} years without working days'
 		},
 		workingDaysComplete: 'every year has its working days',
-		footer: '{payslips} · gross {gross} · net payment {netPayment} · net salary {netSalary} · employee {employee} · employer {employer} · TFR {severance}',
+		footer: '{payslips} · gross {gross} · net payment {netPayment} · net salary {netSalary} · pension fund {employee} + {employer} + {severance}',
 		rowMenu: 'Actions for the payslip of {month}',
 		deleteTitle: 'Delete this payslip?',
 		deleteMessage: 'The payslip of {month} for {net} will be removed. This cannot be undone.',
@@ -1270,7 +1270,6 @@ export const EN_TRANSLATIONS = {
 			addTitle: 'Add payslip',
 			editTitle: 'Edit payslip',
 			year: 'Year',
-			yearHint: 'The contract’s own years, opening on the one the table below is showing. Saving into another year moves the table to it.',
 			month: 'Month',
 			monthOutsideContract: 'The contract does not cover {month}.',
 			label: 'Label',
@@ -1282,12 +1281,12 @@ export const EN_TRANSLATIONS = {
 			netPaymentHint: 'What reached the bank. It may be negative — a December whose tax recalculation exceeded the month’s net is a real payslip.',
 			refunds: 'Refunds',
 			carPayment: 'Car',
+			pensionSection: 'Pension fund',
 			employeeContribution: 'Employee',
 			employerContribution: 'Employer',
 			severanceContribution: 'TFR',
-			pensionHint: 'The three credits that reach the pension fund separately. Zero is the ordinary value for a heading the payslip has nothing under.',
 			netSalary: 'Net salary',
-			netSalaryHint: 'Derived, never entered: net payment − refunds + car.',
+			netSalaryHint: 'Derived: net payment − refunds + car.',
 			notes: 'Notes'
 		}
 	},

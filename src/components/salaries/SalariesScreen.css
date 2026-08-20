@@ -42,13 +42,6 @@
 	color: var(--colors-text-faint);
 }
 
-/* What the specification says about a figure, under the figures it qualifies */
-.salaries-screen-note {
-	margin-top: 4px;
-	font-size: 12px;
-	color: var(--colors-text-secondary);
-}
-
 /* A zero is a figure and not an absence, and so are a note and a count beside the figures they qualify */
 .salaries-screen-quiet {
 	color: var(--colors-text-secondary);

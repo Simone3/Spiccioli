@@ -44,6 +44,16 @@ const openSalaries = async(document: LedgerDocument): Promise<void> => {
 	await userEvent.click(screen.getByRole('link', { name: 'Salaries' }));
 };
 
+// The heading carries the button whatever the year holds, and an empty year offers it a second time in its empty state
+const addPayslip = (): HTMLElement => {
+	const heading = document.querySelector('.screen-layout-actions') as HTMLElement;
+
+	return within(heading).getByRole('button', { name: 'Add payslip' });
+};
+
+// Month, label, the five entered figures, the derived net salary, and then the one column the three credits are written into
+const PENSION_FUND_COLUMN = 8;
+
 const yearRow = (year: string): HTMLElement => {
 	return screen.getByRole('button', { name: `Show the payslips of ${year}` }).closest('tr') as HTMLElement;
 };
@@ -74,7 +84,7 @@ describe('the Salaries screen', () => {
 
 	test('records a payslip and derives the year it lands in', async() => {
 		await openSalaries(withContract());
-		await userEvent.click(screen.getByRole('button', { name: 'Add payslip' }));
+		await userEvent.click(addPayslip());
 		await userEvent.type(screen.getByRole('textbox', { name: 'Month' }), '1');
 		await userEvent.type(screen.getByRole('textbox', { name: 'Contract gross' }), '3300');
 		await userEvent.type(screen.getByRole('textbox', { name: 'Gross' }), '3300');
@@ -141,6 +151,30 @@ describe('the Salaries screen', () => {
 		expect(within(within(table).getAllByRole('row')[3]).getByText('13th')).toBeInTheDocument();
 	});
 
+	// The three credits are one column, because they are three credits into one place
+	test('writes the three pension figures into one cell, and one zero where the payslip has nothing under any of them', async() => {
+		await openSalaries(withContract({
+			payslips: [
+				payslip({ id: 'january', month: 1 }),
+				payslip({
+					id: 'february',
+					month: 2,
+					employeeContribution: 5000,
+					employerContribution: 12000,
+					severanceContribution: 0
+				})
+			]
+		}));
+
+		const rows = within(screen.getByRole('table', { name: 'Payslips of 2025' })).getAllByRole('row');
+		const pensionFund = (row: HTMLElement): string | null => {
+			return within(row).getAllByRole('cell')[PENSION_FUND_COLUMN].textContent;
+		};
+
+		expect(pensionFund(rows[1])).toBe('€ 0,00');
+		expect(pensionFund(rows[2])).toBe('€ 50,00 + € 120,00 + € 0,00');
+	});
+
 	test('refuses to delete a contract a payslip points at, and says what points at it', async() => {
 		await openSalaries(withContract({ payslips: [ payslip({ id: 'january', month: 1 }) ] }));
 		await userEvent.click(screen.getByRole('tab', { name: /Contracts/ }));
@@ -156,7 +190,7 @@ describe('the Salaries screen', () => {
 			...withContract(),
 			contracts: [ { ...acme, startDate: '2025-06-01' } ]
 		});
-		await userEvent.click(screen.getByRole('button', { name: 'Add payslip' }));
+		await userEvent.click(addPayslip());
 		await userEvent.type(screen.getByRole('textbox', { name: 'Month' }), '1');
 
 		expect(screen.getByText('The contract does not cover 01/2025.')).toBeInTheDocument();
@@ -173,7 +207,7 @@ describe('the Salaries screen', () => {
 			...withContract({ payslips: [ payslip({ id: 'january', month: 1, year: 2026 }) ] }),
 			contracts: [ { ...acme, endDate: '2026-12-31' } ]
 		});
-		await userEvent.click(screen.getByRole('button', { name: 'Add payslip' }));
+		await userEvent.click(addPayslip());
 
 		const yearPicker = screen.getByRole('combobox', { name: 'Year' });
 

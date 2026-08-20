@@ -1,4 +1,4 @@
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 import { DataTable, type DataTableColumn } from 'src/components/common/DataTable';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
@@ -153,21 +153,11 @@ export const ContractYearsTable = ({
 		return row.workingDays === undefined;
 	}).length;
 
-	// The caveat goes under the counts because it is what the two hourly columns have to be read against
-	const footer = ((): ReactNode => {
-		return (
-			<>
-				<div>
-					{t('payslips.yearFooter', {
-						years: t('contracts.yearCount', { count: years.length }),
-						payslips: t('contracts.payslipCount', { count: payslipCount }),
-						days: missingDays === 0 ? t('payslips.workingDaysComplete') : t('payslips.workingDaysMissing', { count: missingDays })
-					})}
-				</div>
-				<div className='salaries-screen-note'>{t('payslips.workingDaysHint')}</div>
-			</>
-		);
-	})();
+	const footer = t('payslips.yearFooter', {
+		years: t('contracts.yearCount', { count: years.length }),
+		payslips: t('contracts.payslipCount', { count: payslipCount }),
+		days: missingDays === 0 ? t('payslips.workingDaysComplete') : t('payslips.workingDaysMissing', { count: missingDays })
+	});
 
 	return (
 		<DataTable
