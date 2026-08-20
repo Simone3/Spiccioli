@@ -206,7 +206,7 @@ A holding exists while its quantity is greater than 0 **and its running quantity
 
 **A running quantity that has gone below 0 produces no holding and no figures.** The row is absent from [§7.1](07-investments.md#71-holdings) and checks 8 and 9 name the trade that did it ([§9](09-checks.md)). **A dip disqualifies the position, not merely the moment it happened in**: a walk that went below zero and was brought back above it by a later purchase yields no holding either. The position stays underived until the trades are corrected.
 
-**All three quantities are kept, and all three are shown** ([§7.1](07-investments.md#71-holdings)). The table column is the net `quantity`; `purchasedQuantity` and `soldQuantity` sit in the detail panel beside it.
+**All three quantities are kept, and all three are shown** ([§7.1](07-investments.md#71-holdings)), all three in the detail panel: the net `quantity` first, then `purchasedQuantity` with the lots it came from and `soldQuantity` beside it. The table itself carries no quantity — it states what a position is worth, not what it is made of.
 
 ---
 

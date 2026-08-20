@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders, stubLedgerBridge } from '../testUtils';
 import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
@@ -93,6 +93,43 @@ describe('the table', () => {
 
 		expect(screen.getByRole('cell', { name: '€ 0,00' })).toBeInTheDocument();
 		expect(screen.getByText('1 account')).toBeInTheDocument();
+	});
+
+	test('ends on a totals row that states every total in the column it totals, the rest spanned by one label', () => {
+		stubLedgerBridge();
+		renderWithProviders(
+			<DataTable
+				label='Accounts'
+				columns={[
+					{
+						key: 'name',
+						header: 'Name',
+						render: (row: { name: string; balance: string }) => {
+							return row.name;
+						}
+					},
+					{
+						key: 'balance',
+						header: 'Balance',
+						numeric: true,
+						total: '€ 30,00',
+						render: (row: { name: string; balance: string }) => {
+							return row.balance;
+						}
+					}
+				]}
+				rows={[ { name: 'Conto Corrente', balance: '€ 30,00' } ]}
+				getRowKey={(row) => {
+					return row.name;
+				}}
+				totalLabel='Total'/>
+		);
+
+		const totals = screen.getByRole('row', { name: 'Total € 30,00' });
+
+		// The one column with nothing to total is spanned by the label, and the total sits under the figure it is the sum of
+		expect(within(totals).getByRole('cell', { name: 'Total' })).toHaveAttribute('colspan', '1');
+		expect(within(totals).getByRole('cell', { name: '€ 30,00' })).toBeInTheDocument();
 	});
 });
 

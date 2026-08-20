@@ -70,12 +70,13 @@ describe('the Investments screen', () => {
 		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
 		await userEvent.click(screen.getByRole('tab', { name: 'Holdings' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Show the detail of SWDA' }));
 
-		const table = screen.getByRole('table', { name: 'Holdings' });
+		const panel = screen.getByRole('complementary', { name: 'Holdings' });
 
-		// € 500,00 of stock and € 19,00 of commission over ten units
-		expect(within(table).getByText('€ 51,9000')).toBeInTheDocument();
-		expect(within(table).getByText('none')).toBeInTheDocument();
+		// € 500,00 of stock and € 19,00 of commission over ten units, and a security nobody has priced
+		expect(within(panel).getByText('€ 51,9000')).toBeInTheDocument();
+		expect(within(panel).getByText('none')).toBeInTheDocument();
 	});
 
 	test('creates a security inline when the code typed names none', async() => {
@@ -109,8 +110,37 @@ describe('the Investments screen', () => {
 
 		const table = screen.getByRole('table', { name: 'Holdings' });
 
-		expect(within(table).getByText('€ 900,00')).toBeInTheDocument();
-		expect(within(table).getByText('+ € 400,00 · 80,0%')).toBeInTheDocument();
+		// The one row and the totals row under it, which states every total in the column it totals
+		expect(within(table).getAllByText('€ 900,00')).toHaveLength(2);
+		expect(within(table).getAllByText('+ € 400,00 · 80,0%')).toHaveLength(2);
+		expect(within(table).getByText('Total')).toBeInTheDocument();
+	});
+
+	test('states what each position earned per year, and what every trade in the file did, in the totals row', async() => {
+		await openInvestments(withRecords({
+			trades: [ purchase({ id: 'one', date: '2021-08-08', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ],
+			prices: [ makePrice({ securityId: 'swda', date: '2026-08-08', value: 100 * UNITS }) ]
+		}));
+
+		const table = screen.getByRole('table', { name: 'Holdings' });
+
+		// One position and one purchase, so the row and the total are computed from the same flows and read the same rate
+		const rates = within(table).getAllByText(/^\d+,\d%$/u);
+
+		expect(rates).toHaveLength(2);
+		expect(rates[1]).toHaveTextContent(rates[0]?.textContent ?? '');
+	});
+
+	test('leaves an unpriced position out of the annualised return whole, and says so under the table', async() => {
+		await openInvestments(withRecords({
+			trades: [ purchase({ id: 'one', date: '2021-08-08', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]
+		}));
+
+		const table = screen.getByRole('table', { name: 'Holdings' });
+
+		// No price at all, so a rate would be a performance claim nobody measured — the position is dropped instead
+		expect(within(table).getAllByText('undefined')).toHaveLength(2);
+		expect(within(table).getByText(/1 position is left out of the annualised return whole/u)).toBeInTheDocument();
 	});
 
 	test('opens the detail panel with the whole liquidation breakdown', async() => {
@@ -130,25 +160,24 @@ describe('the Investments screen', () => {
 		expect(within(panel).getByText('€ 855,94')).toBeInTheDocument();
 	});
 
-	test('reaches the prices of a holding\'s security from its price cell, and states what is recorded there', async() => {
+	test('values a holding at the price written on its security, and states that price in the detail panel', async() => {
 		await openInvestments(withRecords({
 			trades: [ purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ]
 		}));
 
-		// A price belongs to the security, so the cell that states it opens the tab where it is kept
-		await userEvent.click(screen.getByRole('button', { name: 'Show the prices of SWDA' }));
-
-		expect(screen.getByRole('complementary', { name: 'Price history' })).toBeInTheDocument();
-
+		// A price belongs to the security, so no row states one and the Securities tab is where it is written
+		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Show the price history of SWDA' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Add price' }));
 		await userEvent.type(screen.getByRole('textbox', { name: 'Value' }), '77');
 		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 		await userEvent.click(screen.getByRole('tab', { name: 'Holdings' }));
 
-		const table = screen.getByRole('table', { name: 'Holdings' });
+		expect(within(screen.getByRole('table', { name: 'Holdings' })).getAllByText('€ 770,00')).toHaveLength(2);
 
-		expect(within(table).getByText('€ 77,0000')).toBeInTheDocument();
-		expect(within(table).getByText('€ 770,00')).toBeInTheDocument();
+		await userEvent.click(screen.getByRole('button', { name: 'Show the detail of SWDA' }));
+
+		expect(within(screen.getByRole('complementary', { name: 'Holdings' })).getByText('€ 77,0000')).toBeInTheDocument();
 	});
 
 	test('corrects a trade on the form it was recorded on, picking its security from the ones that exist', async() => {
@@ -340,8 +369,9 @@ describe('the Investments screen', () => {
 		expect(within(history()).getByText('fetched')).toBeInTheDocument();
 
 		await userEvent.click(screen.getByRole('tab', { name: 'Holdings' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Show the detail of SWDA' }));
 
-		expect(within(screen.getByRole('table', { name: 'Holdings' })).getByText('€ 92,3100')).toBeInTheDocument();
+		expect(within(screen.getByRole('complementary', { name: 'Holdings' })).getByText('€ 92,3100')).toBeInTheDocument();
 	});
 
 	test('fills a history in, reporting the days it fetched and writing every one of them', async() => {
@@ -462,8 +492,9 @@ describe('the Investments screen', () => {
 		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
 		await userEvent.click(screen.getByRole('tab', { name: 'Holdings' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Show the detail of SWDA' }));
 
-		expect(within(screen.getByRole('table', { name: 'Holdings' })).getByText('€ 90,0000')).toBeInTheDocument();
+		expect(within(screen.getByRole('complementary', { name: 'Holdings' })).getByText('€ 90,0000')).toBeInTheDocument();
 	});
 
 	test('shows the review even when there is nothing to write, naming each security and its reason', async() => {

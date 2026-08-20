@@ -16,7 +16,7 @@ Preferences, and nothing else. Every kind of reference data lives on the screen 
 | decimalSeparator | `,` · `.` | `,` | Display; **the one decimal character the amount field accepts** ([§13](13-validation.md)); the opening value of the import's decimal control |
 | thousandsSeparator | `.` · `,` · space · **none** | `.` | Display; the opening value of the import's thousands control. Never typeable in a form. |
 | defaultTaxRate | 0 – 100%, one decimal | 26% | Initial value of `Security.taxRate` ([§2](02-domain-model.md)). Entered as a percentage, **stored as the fraction it names** — 26% is `0,26` ([§11](11-calculations.md)). Changing it does not touch securities that already exist. |
-| priceStalenessDays | integer ≥ 1 | 30 | Check 3; the *Last priced* highlight on Holdings ([§7.1](07-investments.md#71-holdings)) |
+| priceStalenessDays | integer ≥ 1 | 30 | Check 3; the *Last priced* highlight in the Holdings detail panel ([§7.1](07-investments.md#71-holdings)) |
 | pensionRevaluationMonths | integer ≥ 1 | 3 | Check 10 |
 | receiptPendingMonths | integer ≥ 1 | 3 | Check 14 |
 | transferMatchWindowDays | integer 0 – 31 | 5 | [§11.6](11-calculations.md#116-derived-matching), check 1 |

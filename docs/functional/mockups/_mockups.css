@@ -127,6 +127,9 @@ table.spec td s{color:var(--faint);}
 .app td.desc{color:var(--text);}
 .app td.dim{color:var(--muted);}
 .app td.stale{color:var(--brass);background:#2A2214;}
+/* The last row of a table that totals its columns: every total under the column it totals */
+.app tbody tr.tot td{border-top:1px solid var(--line);border-bottom:none;padding-top:9px;color:var(--text);}
+.app tbody tr.tot td[colspan]{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);}
 .app tfoot td{padding:9px 10px 0;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--muted);}
 .app tfoot td.tot{color:var(--text);}
 .rowact{color:var(--faint);text-align:center;width:26px;letter-spacing:.1em;}

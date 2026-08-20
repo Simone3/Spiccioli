@@ -25,7 +25,7 @@ import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { indexInstitutions, isCashAccountType } from 'src/logic/accounts/Accounts';
 import { matchedTradeDates } from 'src/logic/checks/Matching';
-import { holdingAnnualisedReturn, portfolioAnnualisedReturn } from 'src/logic/investments/AnnualisedReturn';
+import { holdingAnnualisedReturn, portfolioAnnualisedReturn, type PortfolioReturn } from 'src/logic/investments/AnnualisedReturn';
 import {
 	deriveHoldings,
 	positionKey,
@@ -57,7 +57,7 @@ import {
 } from 'src/logic/investments/Trades';
 import { createLedgerId, nextInsertionSeq } from 'src/logic/ledger/LedgerDocument';
 import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
-import type { Account, IsoDate, LedgerId, Price, Security, Trade, TradeKind } from 'src/types/LedgerTypes';
+import type { Account, IsoDate, LedgerId, Price, Security, TenThousandths, Trade, TradeKind } from 'src/types/LedgerTypes';
 
 /**
  * Investments: four tabs, of which Holdings is entirely derived from the middle two and Securities is what all three point at.
@@ -163,6 +163,18 @@ export const InvestmentsScreen = (): ReactElement => {
 	const holdings = useMemo(() => {
 		return document ? deriveHoldings({ document, walk, translator }) : [];
 	}, [ document, translator, walk ]);
+
+	// One rate per position, the column stating each and the panel repeating the one it is open on
+	const holdingReturns = useMemo((): ReadonlyMap<string, TenThousandths | undefined> => {
+		return new Map(holdings.map((holding) => {
+			return [ positionKey(holding.securityId, holding.accountId), holdingAnnualisedReturn(holding, walk, today) ];
+		}));
+	}, [ holdings, today, walk ]);
+
+	// The one total that is not a sum of the column above it: every trade in the file, and the positions it cannot cover
+	const portfolioReturn = useMemo((): PortfolioReturn => {
+		return document ? portfolioAnnualisedReturn(document, walk, today) : { rate: undefined, omitted: 0 };
+	}, [ document, today, walk ]);
 
 	const securities = useMemo(() => {
 		return indexSecurities(document?.securities ?? []);
@@ -391,24 +403,13 @@ export const InvestmentsScreen = (): ReactElement => {
 		const brokerageAccounts = (document?.accounts ?? []).filter((account) => {
 			return !isCashAccountType(account.type);
 		}).length;
-		const dated = holdings.map((holding) => {
-			return holding.priceDate;
-		}).filter((date): date is IsoDate => {
-			return date !== undefined;
-		});
-		const latest = dated.length === 0 ?
-			t('holdings.noPrices') :
-			t('holdings.latestPrice', { date: formatter.storedDate(dated.reduce((newest, date) => {
-				return date > newest ? date : newest;
-			})) });
 		const stale = holdings.filter((holding) => {
 			return holding.priceDate !== undefined && isPriceStale(holding.priceDate, preferences.priceStalenessDays);
 		}).length;
 
 		const figures = {
 			positions: t('holdings.positionCount', { count: holdings.length }),
-			accounts: t('holdings.accountCount', { count: brokerageAccounts }),
-			priced: latest
+			accounts: t('holdings.accountCount', { count: brokerageAccounts })
 		};
 
 		return stale === 0 ?
@@ -416,32 +417,12 @@ export const InvestmentsScreen = (): ReactElement => {
 			t('holdings.summaryStale', { ...figures, stale: t('holdings.staleCount', { count: stale }) });
 	};
 
-	const holdingsFooter = (): ReactNode => {
-		const totals = totalHoldings(holdings);
-		const gain = narrowFromWorkingScale(totals.gain, MONEY_SCALES.amount);
-		const portfolio = document ? portfolioAnnualisedReturn(document, walk, today) : { rate: undefined, omitted: 0 };
-		const rate = portfolio.rate === undefined ? t('table.undefined') : formatter.percentage(portfolio.rate);
-
+	// Everything on this tab is derived, and the exclusions of the portfolio-wide return are a sentence rather than a figure
+	const holdingsFooter = (omitted: number): ReactNode => {
 		return (
 			<>
-				<div>
-					{t('holdings.footer', {
-						holdings: t('holdings.holdingCount', { count: holdings.length }),
-						days: t('holdings.staleAfter', { count: preferences.priceStalenessDays }),
-						value: formatter.amount(narrowFromWorkingScale(totals.value, MONEY_SCALES.amount)),
-						gain: totals.gainPct === undefined ?
-							formatter.amount(gain, true) :
-							t('holdings.gainWithPercentage', {
-								gain: formatter.amount(gain, true),
-								percentage: formatter.percentage(totals.gainPct)
-							})
-					})}
-				</div>
-				<div className='investments-screen-note'>
-					{portfolio.omitted === 0 ?
-						t('holdings.footerReturn', { rate }) :
-						t('holdings.footerReturnOmitted', { rate, count: portfolio.omitted })}
-				</div>
+				<div>{t('holdings.footerDerived')}</div>
+				{omitted > 0 && <div>{t('holdings.footerReturnOmitted', { count: omitted })}</div>}
 			</>
 		);
 	};
@@ -578,16 +559,13 @@ export const InvestmentsScreen = (): ReactElement => {
 					securities={securities}
 					accounts={accounts}
 					institutions={institutions}
+					returns={holdingReturns}
+					totals={totalHoldings(holdings)}
+					portfolioReturn={portfolioReturn.rate}
 					selected={selectedHolding}
-					footer={holdingsFooter()}
+					footer={holdingsFooter(portfolioReturn.omitted)}
 					onSelect={(holding) => {
 						setSelectedHoldingKey(positionKey(holding.securityId, holding.accountId));
-					}}
-					onManagePrices={(holding) => {
-						setRefusal(undefined);
-						setNotice(undefined);
-						setSelectedSecurityId(holding.securityId);
-						setTab('securities');
 					}}/>
 
 				{selectedHolding && (
@@ -596,7 +574,7 @@ export const InvestmentsScreen = (): ReactElement => {
 						security={securities.get(selectedHolding.securityId)}
 						account={accounts.get(selectedHolding.accountId)}
 						institutions={institutions}
-						annualisedReturn={holdingAnnualisedReturn(selectedHolding, walk, today)}
+						annualisedReturn={holdingReturns.get(positionKey(selectedHolding.securityId, selectedHolding.accountId))}
 						onClose={() => {
 							setSelectedHoldingKey(undefined);
 						}}/>

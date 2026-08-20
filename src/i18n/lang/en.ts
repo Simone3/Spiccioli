@@ -727,8 +727,8 @@ export const EN_TRANSLATIONS = {
 	// The Holdings tab: every figure derived, every column read-only except the price, and gross of tax and fees throughout
 	holdings: {
 		table: 'Holdings',
-		summary: '{positions} · {accounts} · {priced}',
-		summaryStale: '{positions} · {accounts} · {priced} · {stale}',
+		summary: '{positions} · {accounts}',
+		summaryStale: '{positions} · {accounts} · {stale}',
 		positionCount: {
 			one: '1 open position',
 			other: '{count} open positions'
@@ -737,8 +737,6 @@ export const EN_TRANSLATIONS = {
 			one: '1 brokerage account',
 			other: '{count} brokerage accounts'
 		},
-		latestPrice: 'latest price {date}',
-		noPrices: 'nothing priced yet',
 		staleCount: {
 			one: '1 stale',
 			other: '{count} stale'
@@ -747,36 +745,25 @@ export const EN_TRANSLATIONS = {
 			security: 'Security',
 			type: 'Type',
 			account: 'Where',
-			quantity: 'Qty',
-			avgCost: 'Avg cost',
-			price: 'Price',
-			lastPriced: 'Last priced',
 			value: 'Value',
-			gain: 'Gain'
+			gain: 'Gain',
+			annualisedReturn: 'Ann. return'
 		},
 		noPrice: 'none',
 		gainWithPercentage: '{gain} · {percentage}',
-		footer: '{holdings} · by ticker · gross of tax and fees · stale after {days} · {value} · {gain}',
-		holdingCount: {
-			one: '1 holding',
-			other: '{count} holdings'
-		},
-		staleAfter: {
-			one: '1 day',
-			other: '{count} days'
-		},
-		footerReturn: 'Annualised return, every trade in the file including positions since sold — what the money has earned per year, before tax: {rate}',
+
+		// What the columns with nothing to total read, the last row of the table stating every total under its own column
+		total: 'Total',
+		footerDerived: 'Everything on this tab — what is held, what it averaged, what it is worth and what it has returned — is computed from your purchases, your sales and your securities, and none of it is stored. Value and gain are gross of tax and fees.',
 		footerReturnOmitted: {
-			one: 'Annualised return, every trade in the file including positions since sold — what the money has earned per year, before tax: {rate}. 1 position is left out whole: it is oversold, or its security has never been priced.',
-			other: 'Annualised return, every trade in the file including positions since sold — what the money has earned per year, before tax: {rate}. {count} positions are left out whole: they are oversold, or their security has never been priced.'
+			one: '1 position is left out of the annualised return whole: it is oversold, or its security has never been priced.',
+			other: '{count} positions are left out of the annualised return whole: they are oversold, or their security has never been priced.'
 		},
 		select: 'Show the detail of {security}',
 
-		// A price belongs to the security and not to this holding, so the cell that states it is the way to where it is kept
-		managePrices: 'Show the prices of {security}',
-
 		// The detail panel: the facts about the position's history first, and what selling it today would produce after them
 		detail: {
+			held: 'Held',
 			purchased: 'Purchased',
 			purchasedLots: {
 				one: 'Purchased, 1 lot',
@@ -785,6 +772,10 @@ export const EN_TRANSLATIONS = {
 			sold: 'Sold',
 			avgCost: 'Weighted average cost',
 			invested: 'Invested, incl. fees',
+
+			// A price belongs to the security and not to this holding, which is why it is stated here and kept on Securities
+			latestPrice: 'Latest price',
+			lastPriced: 'Last priced',
 			annualisedReturn: 'Annualised return',
 			returnExplanation: 'What the money in this position has earned per year, counting when each purchase was made and not just how much went in. Before tax.',
 			ifSoldToday: 'If sold today',
