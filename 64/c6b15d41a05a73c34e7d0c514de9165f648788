@@ -1,0 +1,44 @@
+docs/functional/specs/05-transactions.md
+  s_32f646de7e3cb4::t_eab76cae8a2933 23
+docs/functional/specs/07-investments.md
+  s_32f646de7e3cb4::t_9c55e30a282b70 36
+docs/functional/specs/11-calculations.md
+  s_32f646de7e3cb4::t_95d2e60569b2fd 30
+docs/functional/why/07-investments.md
+  s_32f646de7e3cb4::t_fd3a94ddc8c8fc 19
+docs/technical/02-repository-map.md
+  s_32f646de7e3cb4::t_2c444eaa6b7858 106,112
+src/components/investments/InvestmentsScreen.tsx
+  s_32f646de7e3cb4::t_3ad50a96f2f965 58,209,211
+src/logic/investments/Trades.ts
+  s_32f646de7e3cb4::t_a25b2c9218e06d 8-11,58,60,76-85
+tests/components/InvestmentsScreen.test.tsx
+  s_32f646de7e3cb4::t_2a938a45c6965f 176-190
+tests/logic/Trades.test.ts
+  s_32f646de7e3cb4::t_8f89668cde69a6 9,65-86
+src/logic/checks/Checks.ts
+  s_32f646de7e3cb4::t_b4029d8770a31b 34,167
+src/logic/checks/Matching.ts
+  s_32f646de7e3cb4::t_c66a2b855fca81 33,58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "64c6b15d41a05a73c34e7d0c514de9165f648788",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_32f646de7e3cb4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8a9accac-6517-4cc8-bf02-277db3843f52",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
