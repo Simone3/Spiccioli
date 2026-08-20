@@ -1,0 +1,52 @@
+docs/functional/specs/02-domain-model.md
+  s_db56abeee69aab::t_60aa630c064641 209
+docs/functional/specs/07-investments.md
+  s_db56abeee69aab::t_2a83c581b7fb67 13,15-19,21,23-26
+docs/functional/specs/10-settings.md
+  s_db56abeee69aab::t_8a33bcd591836a 19
+docs/functional/specs/11-calculations.md
+  s_db56abeee69aab::t_c3df8e885cbb0f 54,240,242-246,249
+docs/functional/mockups/07-investments.html
+  s_db56abeee69aab::t_f35ace9490e8ee 52,58,60-65,68,75,80-81
+docs/functional/mockups/_mockups.css
+  s_db56abeee69aab::t_63545c35f9c951 130-132
+docs/technical/02-repository-map.md
+  s_db56abeee69aab::t_bae984214e9709 62
+src/components/common/DataTable.css
+  s_db56abeee69aab::t_7b809cea505874 47-66
+src/components/common/DataTable.tsx
+  s_db56abeee69aab::t_53100b53d8db75 5,11-15,28-30,44-47,63,67-79,109,111-129
+src/components/investments/HoldingDetailPanel.tsx
+  s_db56abeee69aab::t_56af110b624ae8 3,7,14-27,80,92-103,130,139-144
+src/components/investments/HoldingsTable.tsx
+  s_db56abeee69aab::t_12a7bba3af80c4 4,7,9,12-16,19-22,24-26,40-47,62-64,75-77,80,90-94,96-102,105-106,155-156,158,160,164-165,167,169,173-174,176,178,188,191
+src/components/investments/InvestmentsScreen.tsx
+  s_db56abeee69aab::t_298e200b38314b 28,60,167-178,412,420-421,424-425,562-564,566,577
+src/i18n/lang/en.ts
+  s_db56abeee69aab::t_9e3bb0547612ac 730-731,749-750,754-757,759-760,766,775-778
+tests/components/CommonKit.test.tsx
+  s_db56abeee69aab::t_81c1421d5a99fc 1,97-133
+tests/components/InvestmentsScreen.test.tsx
+  s_db56abeee69aab::t_6abd2512d1d54e 73,75,77-79,113-143,163,168-170,176,178-180,372,374,495,497
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e5b38532a73a673091fb388c5da1f529b8b9547d",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_db56abeee69aab": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a2555e94-3790-4ea7-8101-75f51efe0665",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
