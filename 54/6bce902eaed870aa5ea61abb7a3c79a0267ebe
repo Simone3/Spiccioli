@@ -1,0 +1,26 @@
+src/components/common/DateField.tsx
+  s_4919511ee1e8a7::t_78d616164363c1 4,20-23,113-115,118,122,139-143
+tests/components/DateField.test.tsx
+  s_4919511ee1e8a7::t_c7962b9fbd9bb2 10,15,17,22,29,65-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "546bce902eaed870aa5ea61abb7a3c79a0267ebe",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_4919511ee1e8a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "07474130-156e-483b-98b9-60c89b1fa395",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
