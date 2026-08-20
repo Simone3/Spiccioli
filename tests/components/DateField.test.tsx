@@ -7,25 +7,26 @@ import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
 import type { DateFormat } from 'src/types/PreferencesTypes';
 import type { IsoDate } from 'src/types/LedgerTypes';
 
-const DateFieldHarness = ({ initial }: { initial?: IsoDate }): ReactElement => {
+const DateFieldHarness = ({ initial, required }: { initial?: IsoDate; required?: boolean }): ReactElement => {
 	const [ value, setValue ] = useState<IsoDate | undefined>(initial);
 
 	return (
 		<>
-			<DateField value={value} label='Date' onChange={setValue}/>
+			<DateField value={value} label='Date' required={required} onChange={setValue}/>
 			<output>{value ?? 'nothing'}</output>
+			<button type='button'>Elsewhere</button>
 		</>
 	);
 };
 
-const renderDateField = async(initial?: IsoDate, dateFormat: DateFormat = DEFAULT_PREFERENCES.dateFormat): Promise<void> => {
+const renderDateField = async(initial?: IsoDate, dateFormat: DateFormat = DEFAULT_PREFERENCES.dateFormat, required?: boolean): Promise<void> => {
 	stubLedgerBridge({
 		getPreferences: () => {
 			return Promise.resolve({ ...DEFAULT_PREFERENCES, dateFormat });
 		}
 	});
 
-	renderWithProviders(<DateFieldHarness initial={initial}/>);
+	renderWithProviders(<DateFieldHarness initial={initial} required={required}/>);
 	await screen.findByRole('textbox', { name: 'Date' });
 };
 
@@ -59,6 +60,18 @@ describe('the date field', () => {
 		await userEvent.type(screen.getByRole('textbox', { name: 'Date' }), '08/08/2020');
 
 		expect(screen.getByText('2020-08-08')).toBeInTheDocument();
+	});
+
+	// A form opens on the record it is about to create, not on a refusal of a field nobody has been in yet
+	test('says nothing about a required field until it has been left empty', async() => {
+		await renderDateField(undefined, DEFAULT_PREFERENCES.dateFormat, true);
+
+		expect(screen.queryByText('This is required.')).not.toBeInTheDocument();
+
+		await userEvent.click(screen.getByRole('textbox', { name: 'Date' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Elsewhere' }));
+
+		expect(screen.getByText('This is required.')).toBeInTheDocument();
 	});
 
 	test('refuses a day after today, which never reaches the caller', async() => {

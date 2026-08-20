@@ -1,7 +1,7 @@
 import 'react-datepicker/dist/react-datepicker.css';
 import 'src/components/common/DateField.css';
 import ReactDatePicker from 'react-datepicker';
-import { useId, type ChangeEvent, type ReactElement, type Ref } from 'react';
+import { useId, useState, type ChangeEvent, type ReactElement, type Ref } from 'react';
 import { usePreferences } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
@@ -17,6 +17,10 @@ import type { IsoDate } from 'src/types/LedgerTypes';
  *
  * **The format is the preference's**, never a system locale's, and **no day after today is offerable** — every date in the
  * application is a fact about a day that has happened. A caller that needs a different ceiling says so.
+ *
+ * **A required field says it is required once it has been left empty, and not before.** A form opens on the record it is about
+ * to create and not on a refusal of a field nobody has been in yet; leave the field, or clear a day already in it, and it says
+ * so from then on.
  */
 
 // What each of the three formats is written as for the library, and which character separates its parts
@@ -106,12 +110,16 @@ export const DateField = ({ value, onChange, label, disabled = false, required =
 	const { t } = useTranslator();
 	const { preferences } = usePreferences();
 	const refusalId = useId();
+
+	// A field nobody has been in yet is not covered in refusals: it is empty because the form has just opened
+	const [ touched, setTouched ] = useState(false);
 	const selected = DateUtils.fromStandardYearMonthDay(value);
 	const latest = DateUtils.startOfDay(maximum ?? new Date());
-	const isMissing = required && !selected;
+	const isMissing = required && touched && !selected;
 
 	const handleChange = (date: Date | null): void => {
 		if(!date) {
+			setTouched(true);
 			onChange(undefined);
 
 			return;
@@ -128,7 +136,11 @@ export const DateField = ({ value, onChange, label, disabled = false, required =
 	};
 
 	return (
-		<div className='date-field'>
+		<div
+			className='date-field'
+			onBlur={() => {
+				setTouched(true);
+			}}>
 			<ReactDatePicker
 				selected={selected ?? null}
 				dateFormat={LIBRARY_DATE_FORMATS[preferences.dateFormat]}
