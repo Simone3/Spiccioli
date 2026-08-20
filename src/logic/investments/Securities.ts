@@ -1,4 +1,6 @@
+import { PRICE_HISTORY_CONFIG } from 'src/config/AppConfig';
 import { DateUtils } from 'src/framework/utils/DateUtils';
+import { FIRST_PAGE, pageCountOf, pageHolding, pageOf } from 'src/framework/utils/Paging';
 import { compareNames, isSameName } from 'src/logic/accounts/Accounts';
 import type { IsoDate, LedgerDocument, LedgerId, Price, Security } from 'src/types/LedgerTypes';
 
@@ -8,7 +10,8 @@ import type { IsoDate, LedgerDocument, LedgerId, Price, Security } from 'src/typ
  *
  * **A security is ordered by its `ticker` wherever it appears** — the Holdings tab and the Securities tab alike — with the same
  * case- and accent-insensitive comparison every other name in the application is ordered by. **Its price history is the one table
- * in the application that reads newest first.**
+ * in the application that reads newest first**, and it pages, a history of years being longer than a panel: the first page is
+ * the most recent records, and the pager is how the rest is walked back.
  *
  * A price belongs to the security and not to a holding, so the same instrument held at two brokers is two holdings and one price
  * history. **One price per security per day**: recording a second one for a day replaces it, and that is what makes the day the
@@ -128,6 +131,41 @@ export const priceHistoryOf = (prices: readonly Price[], securityId: LedgerId): 
 	}).sort((first, second) => {
 		return first.date < second.date ? 1 : -1;
 	});
+};
+
+// The page the panel opens on and the one a written record lands back on when the history no longer holds it: the first, which
+// is where the most recent records are
+export const FIRST_PRICE_PAGE = FIRST_PAGE;
+
+/**
+ * How many pages a price history makes. An empty history still has one page, which is the page the empty state is shown on.
+ * @param count How many records there are.
+ * @returns The number of pages, never less than one.
+ */
+export const priceHistoryPageCount = (count: number): number => {
+	return pageCountOf(count, PRICE_HISTORY_CONFIG.rowsPerPage);
+};
+
+/**
+ * Takes one page out of a price history.
+ * @param prices The security's price history, newest first.
+ * @param page The page, counting from one.
+ * @returns The records on that page.
+ */
+export const priceHistoryPage = (prices: readonly Price[], page: number): Price[] => {
+	return pageOf(prices, page, PRICE_HISTORY_CONFIG.rowsPerPage);
+};
+
+/**
+ * Which page a record sits on, which is how the panel follows a price that has just been written or moved.
+ * @param prices The security's price history, newest first.
+ * @param date The day the record sits on, a day being what identifies one.
+ * @returns The page holding it, or the first page when the history does not hold that day.
+ */
+export const priceHistoryPageHolding = (prices: readonly Price[], date: IsoDate): number => {
+	return pageHolding(prices, (price) => {
+		return price.date === date;
+	}, PRICE_HISTORY_CONFIG.rowsPerPage);
 };
 
 /**

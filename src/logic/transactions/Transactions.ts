@@ -1,4 +1,5 @@
 import { TRANSACTIONS_CONFIG } from 'src/config/AppConfig';
+import { FIRST_PAGE, pageCountOf, pageHolding, pageOf } from 'src/framework/utils/Paging';
 import { categoriseTransaction, normalizeForMatching } from 'src/logic/categories/Categorisation';
 import { createLedgerId, nextInsertionSeq } from 'src/logic/ledger/LedgerDocument';
 import type { CategorySource, Cents, IsoDate, LedgerId, ReceiptState, Rule, Transaction } from 'src/types/LedgerTypes';
@@ -59,7 +60,7 @@ export interface TransactionDuplicationOptions {
 }
 
 // The page the screen opens on and the one a filter change lands on: the first, which is where the most recent rows are
-export const FIRST_TRANSACTION_PAGE = 1;
+export const FIRST_TRANSACTION_PAGE = FIRST_PAGE;
 
 // What the screen opens with: the whole history, nothing filtered
 export const NO_TRANSACTION_FILTERS: TransactionFilters = {
@@ -189,7 +190,7 @@ export const sumTransactionAmounts = (transactions: readonly Transaction[]): Cen
  * @returns The number of pages, never less than one.
  */
 export const transactionPageCount = (count: number): number => {
-	return Math.max(1, Math.ceil(count / TRANSACTIONS_CONFIG.rowsPerPage));
+	return pageCountOf(count, TRANSACTIONS_CONFIG.rowsPerPage);
 };
 
 /**
@@ -199,9 +200,7 @@ export const transactionPageCount = (count: number): number => {
  * @returns The rows on that page.
  */
 export const transactionPage = (transactions: readonly Transaction[], page: number): Transaction[] => {
-	const start = (page - 1) * TRANSACTIONS_CONFIG.rowsPerPage;
-
-	return transactions.slice(start, start + TRANSACTIONS_CONFIG.rowsPerPage);
+	return pageOf(transactions, page, TRANSACTIONS_CONFIG.rowsPerPage);
 };
 
 /**
@@ -211,15 +210,9 @@ export const transactionPage = (transactions: readonly Transaction[], page: numb
  * @returns The page holding it, or the first page when the filters do not match it.
  */
 export const pageHoldingTransaction = (transactions: readonly Transaction[], id: LedgerId): number => {
-	const position = transactions.findIndex((transaction) => {
+	return pageHolding(transactions, (transaction) => {
 		return transaction.id === id;
-	});
-
-	if(position < 0) {
-		return FIRST_TRANSACTION_PAGE;
-	}
-
-	return Math.floor(position / TRANSACTIONS_CONFIG.rowsPerPage) + 1;
+	}, TRANSACTIONS_CONFIG.rowsPerPage);
 };
 
 /**

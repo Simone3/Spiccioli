@@ -320,6 +320,41 @@ describe('the Investments screen', () => {
 		expect(within(screen.getByRole('table', { name: 'Price history' })).queryByText('fetched')).not.toBeInTheDocument();
 	});
 
+	test('pages the price history twenty records at a time, opening on the most recent ones', async() => {
+		// Twenty-five days of January and February 2026, so the history is two pages of the twenty the panel holds
+		await openInvestments(withRecords({
+			prices: Array.from({ length: 25 }, (_, position) => {
+				const day = new Date(Date.UTC(2026, 0, 1 + position));
+
+				return makePrice({ securityId: 'swda', date: day.toISOString().slice(0, 10), value: (60 + position) * UNITS });
+			})
+		}));
+		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Show the price history of SWDA' }));
+
+		const history = (): HTMLElement => {
+			return screen.getByRole('table', { name: 'Price history' });
+		};
+
+		// Newest first, so the first page opens on the last day recorded and the oldest is a page away
+		expect(within(history()).getAllByRole('row')).toHaveLength(22);
+		expect(within(history()).getByText('25/01/2026')).toBeInTheDocument();
+		expect(within(history()).queryByText('01/01/2026')).not.toBeInTheDocument();
+		expect(screen.getByRole('group', { name: 'Pages' })).toHaveTextContent('of 2');
+
+		await userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+
+		expect(within(history()).getByText('01/01/2026')).toBeInTheDocument();
+		expect(within(history()).queryByText('25/01/2026')).not.toBeInTheDocument();
+
+		// A record written while a later page was in view is followed to the page it landed on, rather than recorded out of sight
+		await userEvent.click(screen.getByRole('button', { name: 'Add price' }));
+		await userEvent.type(screen.getByRole('textbox', { name: 'Value' }), '99');
+		await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+		expect(within(history()).getByText('25/01/2026')).toBeInTheDocument();
+	});
+
 	test('puts a pass to the user before anything is written, and writes what is ticked on one confirmation', async() => {
 		await openInvestments(withRecords({
 			trades: [ purchase({ id: 'one', date: '2026-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS }) ],

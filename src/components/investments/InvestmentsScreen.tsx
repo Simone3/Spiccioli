@@ -621,6 +621,7 @@ export const InvestmentsScreen = (): ReactElement => {
 
 				{selectedSecurity && (
 					<PriceHistoryPanel
+						key={selectedSecurity.id}
 						security={selectedSecurity}
 						prices={priceHistoryOf(prices, selectedSecurity.id)}
 						onSave={(original, values) => {

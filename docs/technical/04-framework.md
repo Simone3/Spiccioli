@@ -10,7 +10,7 @@
 
 **It came from SPOT, the application it was first written in, and the two copies are meant to stay in step.** The two projects improve it in turn, and a divergence that starts as a small local edit is what makes carrying a fix from one to the other expensive later. So a change that belongs in the framework is made in the framework, in both places — and never as a local edit that quietly makes this copy Spiccioli's.
 
-**It is no longer byte-identical to SPOT's copy, and the difference is additive.** The three whole-file storage modules of [§4.2](#42-what-spiccioli-uses-today) were written here, for a model SPOT does not have. They sit **beside** SPOT's own storage modules rather than replacing them, and none of those was edited — which makes them the change to carry back rather than a divergence to reconcile.
+**It is no longer byte-identical to SPOT's copy, and the difference is additive.** The three whole-file storage modules of [§4.2](#42-what-spiccioli-uses-today) were written here, for a model SPOT does not have, and `utils/Paging.ts` was written here too. They sit **beside** SPOT's own modules rather than replacing them, and none of those was edited — which makes them the change to carry back rather than a divergence to reconcile.
 
 **The rule that keeps it liftable** is enforced by ESLint: nothing under `src/framework` may import from `src/components`, `src/contexts`, `src/logic`, `src/main`, `src/types`, `src/utils`, `src/config` or `src/index*`. Everything it needs about the application arrives through its options — configuration values, wording, clocks. It holds no module-level state either, so everything is created by a factory; the process-wide `appLogger` and the pure `Intl` memoization caches inside the translator are the only exceptions.
 
@@ -33,6 +33,7 @@
 | `main/window/WindowLoadTarget.ts` | Built file or development server |
 | `main/window/WindowNavigationGuard.ts` | Keeping the window on the page the main process chose |
 | `utils/ErrorUtils.ts` | Turning an unknown thrown value into a message |
+| `utils/Paging.ts` | The arithmetic behind the two paginated tables: how many pages a list makes, which rows one page holds, and which page a row sits on. **How long a page is is passed in**, so the transactions list at fifty and a price history at twenty share the one implementation ([§5.2](../functional/specs/05-transactions.md#52-ordering-and-paging), [§7.4](../functional/specs/07-investments.md#74-securities)) |
 
 ## 4.3 What is present and not used yet
 

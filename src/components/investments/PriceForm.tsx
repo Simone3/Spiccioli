@@ -73,14 +73,14 @@ export const PriceForm = ({ security, price, onSave, onCancel }: PriceFormProps)
 					onSave({ date, value });
 				}
 			}}>
+			<FormField label={t('prices.form.value')}>
+				<PriceField value={value} label={t('prices.form.value')} required minimum={SMALLEST_PRICE} onChange={setValue}/>
+			</FormField>
+
 			<FormField
 				label={t('prices.form.date')}
 				hint={standing ? t('prices.form.replaces', { value: formatter.unitPrice(standing.value) }) : undefined}>
 				<DateField value={date} label={t('prices.form.date')} required onChange={setDate}/>
-			</FormField>
-
-			<FormField label={t('prices.form.value')}>
-				<PriceField value={value} label={t('prices.form.value')} required minimum={SMALLEST_PRICE} onChange={setValue}/>
 			</FormField>
 		</FormDialog>
 	);

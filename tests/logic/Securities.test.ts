@@ -6,6 +6,9 @@ import {
 	isIsinTaken,
 	isPriceStale,
 	priceHistoryOf,
+	priceHistoryPage,
+	priceHistoryPageCount,
+	priceHistoryPageHolding,
 	priceOnDay,
 	sortSecurities,
 	writePrice,
@@ -76,6 +79,52 @@ describe('finding a security while a trade is recorded', () => {
 	test('finds nothing for a code no security carries, and nothing for an empty field', () => {
 		expect(findSecurityByIsinOrTicker(securities, 'SPPW')).toBeUndefined();
 		expect(findSecurityByIsinOrTicker(securities, '   ')).toBeUndefined();
+	});
+});
+
+// A history long enough to page: fifty consecutive days of one security, which the panel reads twenty at a time
+const longHistory = (): Price[] => {
+	return Array.from({ length: 50 }, (_, position) => {
+		return makePrice({ securityId: 'swda', date: dayAgo(position), value: 100 + position });
+	});
+};
+
+describe('the price history paging', () => {
+	test('counts the pages a history makes, twenty records to a page', () => {
+		expect(priceHistoryPageCount(50)).toBe(3);
+		expect(priceHistoryPageCount(20)).toBe(1);
+	});
+
+	test('an empty history still reads as one page', () => {
+		expect(priceHistoryPageCount(0)).toBe(1);
+	});
+
+	test('the first page is the most recent records, the history being newest first', () => {
+		const history = priceHistoryOf(longHistory(), 'swda');
+		const first = priceHistoryPage(history, 1);
+
+		expect(first).toHaveLength(20);
+		expect(first[0].date).toBe(dayAgo(0));
+		expect(first[19].date).toBe(dayAgo(19));
+	});
+
+	test('the last page holds what is left of the history', () => {
+		const history = priceHistoryOf(longHistory(), 'swda');
+
+		expect(priceHistoryPage(history, 3)).toHaveLength(10);
+		expect(priceHistoryPage(history, 3)[9].date).toBe(dayAgo(49));
+	});
+
+	test('finds the page a written day landed on, so the panel can follow it', () => {
+		const history = priceHistoryOf(longHistory(), 'swda');
+
+		expect(priceHistoryPageHolding(history, dayAgo(0))).toBe(1);
+		expect(priceHistoryPageHolding(history, dayAgo(20))).toBe(2);
+		expect(priceHistoryPageHolding(history, dayAgo(49))).toBe(3);
+	});
+
+	test('a day the history does not hold reads as the first page', () => {
+		expect(priceHistoryPageHolding(priceHistoryOf(longHistory(), 'swda'), '1999-01-01')).toBe(1);
 	});
 });
 

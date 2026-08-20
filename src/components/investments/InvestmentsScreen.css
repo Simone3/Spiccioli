@@ -223,9 +223,10 @@
 	box-sizing: border-box;
 	padding: 24px;
 	background-color: var(--colors-modal-overlay);
-	overflow-y: auto;
 }
 
+/* The panel never grows past the window it is centred in: a file of many securities lists them all, and it is the list that
+   scrolls rather than the modal that runs off the top and the bottom of the screen. */
 .update-prices-panel {
 	display: flex;
 	flex-direction: column;
@@ -233,11 +234,30 @@
 	box-sizing: border-box;
 	width: 100%;
 	max-width: 980px;
+	max-height: 100%;
 	padding: 22px;
 	background-color: var(--colors-background-secondary);
 	border: 1px solid var(--colors-border-strong);
 	border-radius: 10px;
 	box-shadow: 0 24px 48px var(--colors-modal-shadow);
+}
+
+/* The one part of either page that can be any length. Everything above and below it keeps its size, so the height the panel
+   gives up is taken here. */
+.update-prices-panel .data-table-scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+}
+
+/* The columns stay named while the list is scrolled past them. A collapsed table's border scrolls away with the cells it was
+   drawn between, so the rule under a stuck header is painted on the header itself. */
+.update-prices-panel .data-table thead th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background-color: var(--colors-background-secondary);
+	box-shadow: inset 0 -1px 0 var(--colors-border-strong);
 }
 
 .update-prices-heading {

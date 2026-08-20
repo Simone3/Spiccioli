@@ -1,21 +1,26 @@
+import 'src/components/common/Pager.css';
 import { useEffect, useState, type ReactElement } from 'react';
 import { AppButton } from 'src/components/common/AppButton';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 
 /**
- * The pager of the one paginated table in the application.
+ * The pager of a paginated table, and the same five controls wherever one is: the transactions list and a security's price
+ * history.
  *
- * The screen opens on the first page and a filter change lands there too, the list being shown newest first, so this is how the
- * history is walked back. **The two ends are one step away from anywhere**: first and last beside previous and next, and a page
- * reached by neither is typed into the box between them. It states how many pages there are as well, a page number on its own
- * saying nothing about how much is behind it.
+ * A paged list opens on its first page and a change to what it holds lands there too, both lists being shown newest first, so
+ * this is how a history is walked back. **The two ends are one step away from anywhere**: first and last beside previous and
+ * next, and a page reached by neither is typed into the box between them. It states how many pages there are as well, a page
+ * number on its own saying nothing about how much is behind it.
+ *
+ * **How long a page is belongs to the table and is never repeated here**: this control knows only which page is in view and how
+ * many there are.
  */
 
 // The typing is ours, as it is in the date field: a character that is not a digit never lands in the box
 const DIGITS_ONLY = /^\d*$/u;
 
-export interface TransactionsPagerProps {
+export interface PagerProps {
 	page: number;
 	pageCount: number;
 	onChange: (page: number) => void;
@@ -29,7 +34,7 @@ export interface TransactionsPagerProps {
  * @param props.onChange What turning the page does.
  * @returns The pager.
  */
-export const TransactionsPager = ({ page, pageCount, onChange }: TransactionsPagerProps): ReactElement => {
+export const Pager = ({ page, pageCount, onChange }: PagerProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
 
@@ -54,34 +59,34 @@ export const TransactionsPager = ({ page, pageCount, onChange }: TransactionsPag
 	};
 
 	return (
-		<div className='transactions-screen-pager' role='group' aria-label={t('transactions.pager.label')}>
+		<div className='pager' role='group' aria-label={t('pager.label')}>
 			<AppButton
 				variant='ghost'
 				disabled={page <= 1}
-				label={t('transactions.pager.firstLabel')}
+				label={t('pager.firstLabel')}
 				onClick={() => {
 					onChange(1);
 				}}>
-				{t('transactions.pager.first')}
+				{t('pager.first')}
 			</AppButton>
 			<AppButton
 				variant='ghost'
 				disabled={page <= 1}
-				label={t('transactions.pager.previousLabel')}
+				label={t('pager.previousLabel')}
 				onClick={() => {
 					onChange(page - 1);
 				}}>
-				{t('transactions.pager.previous')}
+				{t('pager.previous')}
 			</AppButton>
-			<span className='transactions-screen-pager-position'>
-				{t('transactions.pager.page')}
+			<span className='pager-position'>
+				{t('pager.page')}
 				<input
 					type='text'
 					inputMode='numeric'
 					autoComplete='off'
-					className='transactions-screen-pager-page'
+					className='pager-page'
 					value={typed}
-					aria-label={t('transactions.pager.goTo')}
+					aria-label={t('pager.goTo')}
 					onChange={(event) => {
 						if(DIGITS_ONLY.test(event.target.value)) {
 							setTyped(event.target.value);
@@ -96,25 +101,25 @@ export const TransactionsPager = ({ page, pageCount, onChange }: TransactionsPag
 							setTyped(String(page));
 						}
 					}}/>
-				{t('transactions.pager.of', { pages: formatter.integer(pageCount) })}
+				{t('pager.of', { pages: formatter.integer(pageCount) })}
 			</span>
 			<AppButton
 				variant='ghost'
 				disabled={page >= pageCount}
-				label={t('transactions.pager.nextLabel')}
+				label={t('pager.nextLabel')}
 				onClick={() => {
 					onChange(page + 1);
 				}}>
-				{t('transactions.pager.next')}
+				{t('pager.next')}
 			</AppButton>
 			<AppButton
 				variant='ghost'
 				disabled={page >= pageCount}
-				label={t('transactions.pager.lastLabel')}
+				label={t('pager.lastLabel')}
 				onClick={() => {
 					onChange(pageCount);
 				}}>
-				{t('transactions.pager.last')}
+				{t('pager.last')}
 			</AppButton>
 		</div>
 	);

@@ -394,22 +394,6 @@ export const EN_TRANSLATIONS = {
 		},
 		bulkDeleteConfirm: 'Delete transactions',
 
-		// The one paginated table in the application. It opens on its first page, which is where the most recent rows are, and the
-		// four steps and the box are the whole of how it is walked: the words are what the buttons say, the labels what they are called.
-		pager: {
-			label: 'Pages',
-			page: 'Page',
-			of: 'of {pages}',
-			goTo: 'Go to page',
-			first: 'First',
-			firstLabel: 'First page',
-			previous: 'Previous',
-			previousLabel: 'Previous page',
-			next: 'Next',
-			nextLabel: 'Next page',
-			last: 'Last',
-			lastLabel: 'Last page'
-		},
 		filters: {
 			account: 'Account',
 			period: 'Period',
@@ -888,7 +872,7 @@ export const EN_TRANSLATIONS = {
 			one: '1 security',
 			other: '{count} securities'
 		},
-		footer: '{securities} · by ticker · {sold} no longer held',
+		footer: '{securities} · {sold} no longer held',
 		columns: {
 			ticker: 'Ticker',
 			isin: 'ISIN',
@@ -942,7 +926,7 @@ export const EN_TRANSLATIONS = {
 			other: 'Price history — {count} records'
 		},
 		empty: 'Nothing has been priced yet. Add a price, or record one on the Holdings tab.',
-		footer: '{count} · newest first · {range}',
+		footer: '{count} · {range}',
 		range: '{from} – {to}',
 		columns: {
 			date: 'Date',
@@ -1376,6 +1360,24 @@ export const EN_TRANSLATIONS = {
 
 		// A figure that cannot be evaluated. It is never zero and never blank, and whatever would make it computable is named by a check.
 		undefined: 'undefined'
+	},
+
+	// What a paged table's pager says, wherever one is: the transactions list and a security's price history. The four steps and
+	// the box are the whole of how a list is walked — the words are what the buttons say, the labels what they are called — and
+	// how long a page is is stated by neither.
+	pager: {
+		label: 'Pages',
+		page: 'Page',
+		of: 'of {pages}',
+		goTo: 'Go to page',
+		first: 'First',
+		firstLabel: 'First page',
+		previous: 'Previous',
+		previousLabel: 'Previous page',
+		next: 'Next',
+		nextLabel: 'Next page',
+		last: 'Last',
+		lastLabel: 'Last page'
 	},
 
 	// A line a screen puts above its list to say what it would not do. It is never a modal and it never blocks.

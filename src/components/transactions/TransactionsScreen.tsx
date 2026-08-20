@@ -3,12 +3,12 @@ import { useMemo, useState, type ReactElement } from 'react';
 import { AppButton, AppLinkButton } from 'src/components/common/AppButton';
 import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { EmptyState } from 'src/components/common/EmptyState';
+import { Pager } from 'src/components/common/Pager';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useTransactionHandoff } from 'src/components/shell/TransactionHandoff';
 import { TransactionFiltersBar } from 'src/components/transactions/TransactionFilters';
 import { TransactionForm, type TransactionFormValues } from 'src/components/transactions/TransactionForm';
-import { TransactionsPager } from 'src/components/transactions/TransactionsPager';
 import { TransactionsTable } from 'src/components/transactions/TransactionsTable';
 import { useChecks } from 'src/contexts/ChecksContext';
 import { useLedger } from 'src/contexts/LedgerContext';
@@ -333,7 +333,7 @@ export const TransactionsScreen = (): ReactElement => {
 								}}
 								onDuplicate={duplicate}
 								onDelete={setTransactionToDelete}/>
-							<TransactionsPager page={page} pageCount={pageCount} onChange={setRequestedPage}/>
+							<Pager page={page} pageCount={pageCount} onChange={setRequestedPage}/>
 						</>}
 				</>}
 

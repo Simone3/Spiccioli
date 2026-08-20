@@ -96,9 +96,15 @@ export const SHUTDOWN_CONFIG = {
 	pollIntervalMs: 50
 } as const;
 
-// The one paginated table in the application. Every other table is shown in full, so this is the only page size there is.
+// The transactions list, one of the two paginated tables in the application. Every other table is shown in full.
 export const TRANSACTIONS_CONFIG = {
 	rowsPerPage: 50
+} as const;
+
+// A security's price history, the other paginated table. It pages shorter than the transactions list because it sits in a panel
+// beside the securities rather than across a screen of its own.
+export const PRICE_HISTORY_CONFIG = {
+	rowsPerPage: 20
 } as const;
 
 // The list of types beside the pie on Portfolio, which runs in columns read downwards. Neither figure is fixed by the
