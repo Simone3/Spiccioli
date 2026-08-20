@@ -1,24 +1,37 @@
-/* The five controls that walk a paginated table, under the table they walk */
+/* The five controls that walk a paginated table, under the table they walk. It is drawn to the narrower of the two places it
+   sits — the panel beside the securities, not the width of the transactions screen — so that one control serves both. */
 .pager {
 	display: flex;
-	gap: 8px;
+	gap: 4px;
 	align-items: center;
 	justify-content: flex-end;
 	padding-top: 4px;
+}
+
+/* Each step is a square rather than a word, so the four of them together are narrower than "Previous" was on its own. The glyph
+   is set larger than the text around it, a chevron drawing lighter than a letter of the same size. */
+.pager .app-button {
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	font-size: 16px;
+	line-height: 1;
 }
 
 .pager-position {
 	display: flex;
 	align-items: center;
 	gap: 6px;
+	margin-left: 4px;
 	font-size: 12px;
 	color: var(--colors-text-secondary);
 	font-variant-numeric: tabular-nums;
 }
 
-/* The page in view is typed into rather than only read, so it is a field: the width of a four-figure page and no wider */
+/* The page in view is typed into rather than only read, so it is a field: wide enough for the page count a real file reaches
+   and no wider, a longer number scrolling inside it rather than widening the row. */
 .pager-page {
-	width: 52px;
+	width: 46px;
 	box-sizing: border-box;
 	padding: 4px 6px;
 	background-color: var(--colors-background-field);

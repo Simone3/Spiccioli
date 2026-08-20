@@ -1362,22 +1362,17 @@ export const EN_TRANSLATIONS = {
 		undefined: 'undefined'
 	},
 
-	// What a paged table's pager says, wherever one is: the transactions list and a security's price history. The four steps and
-	// the box are the whole of how a list is walked — the words are what the buttons say, the labels what they are called — and
-	// how long a page is is stated by neither.
+	// What a paged table's pager says, wherever one is: the transactions list and a security's price history. The four steps are
+	// drawn as glyphs and are named here rather than lettered, the name being what the keyboard and a reading get; how long a page
+	// is is said by none of them.
 	pager: {
 		label: 'Pages',
-		page: 'Page',
 		of: 'of {pages}',
 		goTo: 'Go to page',
-		first: 'First',
-		firstLabel: 'First page',
-		previous: 'Previous',
-		previousLabel: 'Previous page',
-		next: 'Next',
-		nextLabel: 'Next page',
-		last: 'Last',
-		lastLabel: 'Last page'
+		first: 'First page',
+		previous: 'Previous page',
+		next: 'Next page',
+		last: 'Last page'
 	},
 
 	// A line a screen puts above its list to say what it would not do. It is never a modal and it never blocks.

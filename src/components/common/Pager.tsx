@@ -13,12 +13,25 @@ import { useTranslator } from 'src/i18n/TranslationContext';
  * next, and a page reached by neither is typed into the box between them. It states how many pages there are as well, a page
  * number on its own saying nothing about how much is behind it.
  *
+ * **The four steps are glyphs and the box carries no label of its own**, because the narrower of the two tables it sits under is
+ * a panel beside the securities and four words would not fit it. Nothing is lost to the keyboard or to a reading: every step is
+ * a real button carrying its name, and the box says what it is for.
+ *
  * **How long a page is belongs to the table and is never repeated here**: this control knows only which page is in view and how
  * many there are.
  */
 
 // The typing is ours, as it is in the date field: a character that is not a digit never lands in the box
 const DIGITS_ONLY = /^\d*$/u;
+
+// What the four steps are drawn as. They are glyphs rather than words — a pager sits under a table and beside a panel, and four
+// words of it do not fit a panel — so each one is hidden from the reading and the button carries the name instead.
+const STEP_GLYPHS = {
+	first: '«',
+	previous: '‹',
+	next: '›',
+	last: '»'
+} as const;
 
 export interface PagerProps {
 	page: number;
@@ -63,23 +76,22 @@ export const Pager = ({ page, pageCount, onChange }: PagerProps): ReactElement =
 			<AppButton
 				variant='ghost'
 				disabled={page <= 1}
-				label={t('pager.firstLabel')}
+				label={t('pager.first')}
 				onClick={() => {
 					onChange(1);
 				}}>
-				{t('pager.first')}
+				<span aria-hidden='true'>{STEP_GLYPHS.first}</span>
 			</AppButton>
 			<AppButton
 				variant='ghost'
 				disabled={page <= 1}
-				label={t('pager.previousLabel')}
+				label={t('pager.previous')}
 				onClick={() => {
 					onChange(page - 1);
 				}}>
-				{t('pager.previous')}
+				<span aria-hidden='true'>{STEP_GLYPHS.previous}</span>
 			</AppButton>
 			<span className='pager-position'>
-				{t('pager.page')}
 				<input
 					type='text'
 					inputMode='numeric'
@@ -106,20 +118,20 @@ export const Pager = ({ page, pageCount, onChange }: PagerProps): ReactElement =
 			<AppButton
 				variant='ghost'
 				disabled={page >= pageCount}
-				label={t('pager.nextLabel')}
+				label={t('pager.next')}
 				onClick={() => {
 					onChange(page + 1);
 				}}>
-				{t('pager.next')}
+				<span aria-hidden='true'>{STEP_GLYPHS.next}</span>
 			</AppButton>
 			<AppButton
 				variant='ghost'
 				disabled={page >= pageCount}
-				label={t('pager.lastLabel')}
+				label={t('pager.last')}
 				onClick={() => {
 					onChange(pageCount);
 				}}>
-				{t('pager.last')}
+				<span aria-hidden='true'>{STEP_GLYPHS.last}</span>
 			</AppButton>
 		</div>
 	);
