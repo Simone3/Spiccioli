@@ -1,0 +1,56 @@
+docs/functional/mockups/10-settings.html
+  s_e46ae119bf0abd::t_620fc94af8274c 63
+docs/functional/specs/06-categories.md
+  s_e46ae119bf0abd::t_1618f919bd36b3 28
+docs/functional/specs/09-checks.md
+  s_e46ae119bf0abd::t_dd4f19112a0ca9 46
+docs/functional/specs/10-settings.md
+  s_e46ae119bf0abd::t_8ccb3614e4294a 22-23
+docs/functional/specs/11-calculations.md
+  s_e46ae119bf0abd::t_53464e27c1b2fe 158,160-165
+docs/functional/specs/13-validation.md
+  s_e46ae119bf0abd::t_2c967a0ded3c71 146
+docs/functional/why/11-calculations.md
+  s_e46ae119bf0abd::t_c879494d32574a 38-39,43
+docs/technical/02-repository-map.md
+  s_e46ae119bf0abd::t_4420df1d08e51b 97
+docs/technical/08-decisions-why.md
+  s_e46ae119bf0abd::t_71b52e17810ebc 16
+src/components/settings/SettingsScreen.tsx
+  s_e46ae119bf0abd::t_3293935cebf4b7 227-238
+src/i18n/lang/en.ts
+  s_e46ae119bf0abd::t_623191b2c41b34 1324
+src/logic/checks/CheckDates.ts
+  s_e46ae119bf0abd::t_4a85d5ab3c3fed 7-11
+src/logic/checks/Matching.ts
+  s_e46ae119bf0abd::t_1d1247f25febee 1,23,32,34,38-45,62,78-81,89,98-107,173,206,209,224-253,256-262,266-267,285-287,290,295-321,324-326,328,331-363,366,368-374,377-384,386,416-421,423,427-428,430,433,447,457-463,520,620,682,728-731
+src/logic/preferences/Preferences.ts
+  s_e46ae119bf0abd::t_6b63fb2768f0a3 31-33,82
+src/types/PreferencesTypes.ts
+  s_e46ae119bf0abd::t_019d993a153ea9 43-45
+tests/logic/Matching.test.ts
+  s_e46ae119bf0abd::t_15f47e4f765355 21-22,30-32,35-39,62,79,93,96,105-166,186-187,201,204,215,230,239,253
+tests/logic/Preferences.test.ts
+  s_e46ae119bf0abd::t_922641bb758a9c 25-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "ab852be97d40db7130c7f5272f146123a1955efa",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_e46ae119bf0abd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ae3b350e-c7d3-408c-b31c-97bbf9c66457",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
