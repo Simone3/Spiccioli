@@ -1,0 +1,30 @@
+src/components/categories/ApplyChangesDialog.tsx
+  s_f481a2d41214c2::t_801f7401f2c3f5 62
+src/components/categories/CategoriesScreen.css
+  s_f481a2d41214c2::t_f607154efd53ab 137-145
+src/components/categories/CategoriesScreen.tsx
+  s_f481a2d41214c2::t_96337fa40fb1d7 211
+src/i18n/lang/en.ts
+  s_f481a2d41214c2::t_6409f6c0266565 622-625,678
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "7bbe7f604621613899e6c5be9bbf4e6e9017861b",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_f481a2d41214c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8bcd3b89-d0cd-48d9-acc1-be533efa4bdc",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
