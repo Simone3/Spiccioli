@@ -1611,6 +1611,9 @@ export const EN_TRANSLATIONS = {
 		entries: {
 			transaction: '{date} · {account} · {description} · {amount}',
 			trade: '{date} · {ticker} · {account} · {total}',
+
+			// Checks 6 and 7 name the figure the bank moved, which is the trade without its commission, and say so
+			tradeSettlement: '{date} · {ticker} · {account} · {amount} without commission',
 			payslip: '{month} · {contract} · {amount}',
 			pensionFigure: '{month} · {contract} · {figure} · {amount}',
 			stalePrice: {

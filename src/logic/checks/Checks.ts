@@ -5,7 +5,7 @@ import { addMonthsToIsoDate, daysBetweenIsoDates } from 'src/logic/checks/CheckD
 import { pensionFigureAmount, PENSION_FIGURES, type DerivedMatching, type PensionClaim } from 'src/logic/checks/Matching';
 import { compareTradesInWalkOrder, walkPositions, type PositionWalk } from 'src/logic/investments/Holdings';
 import { indexLatestPrices, indexSecurities, sortSecurities } from 'src/logic/investments/Securities';
-import { sortTrades, tradesOfKind, tradeTotal } from 'src/logic/investments/Trades';
+import { sortTrades, tradeSettlement, tradesOfKind, tradeTotal } from 'src/logic/investments/Trades';
 import { formatPayslipPeriod } from 'src/logic/salaries/Payslips';
 import { sortTransactions } from 'src/logic/transactions/Transactions';
 import type { Formatter } from 'src/logic/format/Formatter';
@@ -417,8 +417,8 @@ const checkPensionContributionsMatch = (context: CheckContext): CheckResult => {
 };
 
 const checkTradesMatch = (context: CheckContext, kind: TradeKind): CheckResult => {
-	const { document, matching, translator } = context;
-	const { transactionEntry, tradeEntry } = context.naming;
+	const { document, matching, translator, formatter } = context;
+	const { transactionEntry, tradeEntry, tickerOf, accountName } = context.naming;
 	const id: CheckId = kind === 'purchase' ? 'purchasesMatch' : 'salesMatch';
 	const side = kind === 'purchase' ? matching.purchases : matching.sales;
 	const count = tradesOfKind(document.trades, kind).length;
@@ -437,7 +437,13 @@ const checkTradesMatch = (context: CheckContext, kind: TradeKind): CheckResult =
 				return transactionEntry(transaction);
 			})),
 			buildSide('trades', translator.t(kind === 'purchase' ? 'checks.sides.purchases' : 'checks.sides.sales'), side.unmatchedTrades.map((trade) => {
-				return tradeEntry(trade);
+				// The trade's own tables state its total; what is missing here is the bank row, so the entry states what that row carries
+				return tradeEntry(trade, translator.t('checks.entries.tradeSettlement', {
+					date: formatter.storedDate(trade.date),
+					ticker: tickerOf(trade.securityId),
+					account: accountName(trade.accountId),
+					amount: formatter.amount(tradeSettlement(trade))
+				}));
 			}))
 		]
 	};

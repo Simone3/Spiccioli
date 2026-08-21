@@ -9,6 +9,7 @@ import {
 	sortTradesNewestFirst,
 	sumRealisedGains,
 	sumTradeAmounts,
+	tradeSettlement,
 	tradeTotal,
 	tradesOfKind
 } from 'src/logic/investments/Trades';
@@ -39,6 +40,19 @@ describe('the trade total', () => {
 	test('is rounded to the cent, a quantity times a price landing well below it', () => {
 		// 1,5 units at € 3,3333 is € 4,99995
 		expect(tradeTotal(purchase({ quantity: 1500000, unitPrice: 33333, fees: 0 }))).toBe(500);
+	});
+});
+
+describe('the trade settlement figure', () => {
+	test('leaves the fees out of both kinds and keeps the tax withheld on a sale', () => {
+		expect(tradeSettlement(purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, fees: 1900 }))).toBe(50000);
+		expect(tradeSettlement(sale({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, fees: 1900, taxes: 3200 }))).toBe(46800);
+	});
+
+	test('is the total on a trade that cost nothing to place', () => {
+		const free = purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, fees: 0 });
+
+		expect(tradeSettlement(free)).toBe(tradeTotal(free));
 	});
 });
 

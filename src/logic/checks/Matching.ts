@@ -1,7 +1,7 @@
 import { addDaysToIsoDate, daysBetweenIsoDates, firstDayOfMonth, lastDayOfNextMonth } from 'src/logic/checks/CheckDates';
 import { compareNames, formatAccountName, indexInstitutions } from 'src/logic/accounts/Accounts';
 import { categoryIdsWithRole } from 'src/logic/categories/Categories';
-import { sortTrades, tradeTotal } from 'src/logic/investments/Trades';
+import { sortTrades, tradeSettlement } from 'src/logic/investments/Trades';
 import { formatPayslipPeriod } from 'src/logic/salaries/Payslips';
 import { sortTransactions } from 'src/logic/transactions/Transactions';
 import type { SpiccioliTranslator } from 'src/i18n/Translations';
@@ -489,8 +489,11 @@ export const matchInternalTransfers = (document: LedgerDocument, window: Transfe
  * Pairs one kind of trade against the bank transactions that settled it.
  *
  * **The trade leads, because a trade is executed before it settles**: the cash moves a day or two later on a purchase and on a
- * sale alike. The money leaves the cash account on a purchase, so the transaction is the negation of the trade total; it arrives
- * on a sale, so the two are equal.
+ * sale alike. The money leaves the cash account on a purchase, so the transaction is the negation of the settlement figure; it
+ * arrives on a sale, so the two are equal.
+ *
+ * **What is compared is the trade without its commission**, a commission always being its own transaction in a role `bank fees`
+ * category and never part of the line the bank prints for the trade itself.
  *
  * **The two sides sit in different accounts by construction**, the trade in a brokerage account and the money in a cash one, so
  * the pairing keys off the institution they share. A `Cash` account is the only one that can lack an institution, and it
@@ -524,7 +527,7 @@ export const matchTradesToTransactions = (document: LedgerDocument, kind: TradeK
 			return trade.id;
 		},
 		amountOf: (trade) => {
-			return kind === 'purchase' ? -tradeTotal(trade) : tradeTotal(trade);
+			return kind === 'purchase' ? -tradeSettlement(trade) : tradeSettlement(trade);
 		},
 		windowOf: (trade) => {
 			return { fromDate: trade.date, toDate: addDaysToIsoDate(trade.date, windowDays) };

@@ -22,7 +22,7 @@ import {
 	type TransferMatchWindow
 } from 'src/logic/checks/Matching';
 import { createSpiccioliTranslator } from 'src/i18n/Translations';
-import { tradeTotal } from 'src/logic/investments/Trades';
+import { tradeSettlement, tradeTotal } from 'src/logic/investments/Trades';
 import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
 import type { LedgerDocument, Payslip, Trade, Transaction } from 'src/types/LedgerTypes';
 
@@ -267,22 +267,22 @@ describe('trades against transactions', () => {
 		makeAccount({ id: 'account-3', name: 'Conto Arancio', institutionId: 'institution-2' })
 	];
 
-	// 12,5 units at € 105,43 plus € 2,95 of fees, which is the figure the pairing compares against the bank row
+	// 12,5 units at € 105,43 plus € 2,95 of fees. The bank row carries the units alone, the € 2,95 being a `bank fees` row of its own
 	const purchase = makeTrade({ id: 'trade-1', date: '2026-08-06' });
-	const purchaseTotal = tradeTotal(purchase);
+	const purchaseSettlement = tradeSettlement(purchase);
 
 	const settlement = (overrides: Partial<Transaction> = {}): Transaction => {
 		return makeTransaction({
 			id: 'settlement',
 			accountId: 'account-1',
 			date: '2026-08-07',
-			amount: -purchaseTotal,
+			amount: -purchaseSettlement,
 			categoryId: 'securities-purchase',
 			...overrides
 		});
 	};
 
-	it('pairs a purchase with the transaction that is the negation of its total', () => {
+	it('pairs a purchase with the transaction that is the negation of its gross figure', () => {
 		const document = withRecords({
 			institutions,
 			accounts,
@@ -298,20 +298,35 @@ describe('trades against transactions', () => {
 		expect(matching.unmatchedTransactions).toHaveLength(0);
 	});
 
-	it('refuses a transaction of the same sign as the purchase total', () => {
+	it('refuses a transaction of the same sign as the purchase figure', () => {
 		const document = withRecords({
 			institutions,
 			accounts,
 			securities: [ makeSecurity() ],
 			trades: [ purchase ],
-			transactions: [ settlement({ amount: purchaseTotal }) ]
+			transactions: [ settlement({ amount: purchaseSettlement }) ]
 		});
 
 		expect(matchTradesToTransactions(document, 'purchase', 5).unmatchedTrades).toHaveLength(1);
 	});
 
-	it('pairs a sale with a transaction of the same sign as its net proceeds', () => {
-		// The same units, with € 2,95 of fees and € 100,00 of tax taken out of the proceeds rather than added to the cost
+	it('refuses a transaction that carries the commission, the fee being a row of its own', () => {
+		const document = withRecords({
+			institutions,
+			accounts,
+			securities: [ makeSecurity() ],
+			trades: [ purchase ],
+			transactions: [ settlement({ amount: -tradeTotal(purchase) }) ]
+		});
+
+		const matching = matchTradesToTransactions(document, 'purchase', 5);
+
+		expect(matching.unmatchedTrades).toHaveLength(1);
+		expect(matching.unmatchedTransactions).toHaveLength(1);
+	});
+
+	it('pairs a sale with a transaction carrying the tax but not the commission', () => {
+		// The same units, with € 100,00 of tax withheld out of the proceeds and € 2,95 of fees debited separately
 		const sale = makeTrade({ id: 'trade-2', kind: 'sale', date: '2026-08-06', taxes: 10000 });
 
 		const document = withRecords({
@@ -319,7 +334,7 @@ describe('trades against transactions', () => {
 			accounts,
 			securities: [ makeSecurity() ],
 			trades: [ sale ],
-			transactions: [ settlement({ id: 'proceeds', amount: tradeTotal(sale), categoryId: 'securities-sale' }) ]
+			transactions: [ settlement({ id: 'proceeds', amount: tradeSettlement(sale), categoryId: 'securities-sale' }) ]
 		});
 
 		expect(matchTradesToTransactions(document, 'sale', 5).transactionByTrade.get('trade-2')).toBe('proceeds');
@@ -590,7 +605,7 @@ describe('what the Matched column names', () => {
 					id: 'settlement',
 					accountId: 'account-1',
 					date: '2026-08-07',
-					amount: -tradeTotal(trade),
+					amount: -tradeSettlement(trade),
 					categoryId: 'securities-purchase',
 					insertionSeq: 3
 				}),

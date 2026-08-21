@@ -149,12 +149,27 @@ export const tradeTotalWorking = (trade: TradeFigures): WorkingAmount => {
 };
 
 /**
- * The trade's total as an amount, which is what the column shows and what the derived matching compares.
+ * The trade's total as an amount, which is what the column shows and what the cost basis and the realised gain are built on.
  * @param trade The trade, or the figures a form holds.
  * @returns The total, in cents.
  */
 export const tradeTotal = (trade: TradeFigures): Cents => {
 	return narrowFromWorkingScale(tradeTotalWorking(trade), MONEY_SCALES.amount);
+};
+
+/**
+ * What the bank moved to settle the trade: **the total without the commission**, which is what the derived matching compares
+ * against the transaction.
+ * A commission is always its own transaction in a role `bank fees` category, so it is never inside the figure the statement
+ * carries; the tax withheld on a sale is, the broker taking it out of the proceeds before they leave.
+ * @param trade The trade, or the figures a form holds.
+ * @returns The settlement figure, in cents.
+ */
+export const tradeSettlement = (trade: TradeFigures): Cents => {
+	const taxes = widenToWorkingScale(trade.taxes, MONEY_SCALES.amount);
+	const working = trade.kind === 'purchase' ? tradeGrossWorking(trade) : tradeGrossWorking(trade) - taxes;
+
+	return narrowFromWorkingScale(working, MONEY_SCALES.amount);
 };
 
 /**

@@ -214,11 +214,11 @@ const buildSampleLedger = () => {
 				accountId: BROKERAGE_CASH,
 				date: '2026-08-05',
 				description: 'ACQUISTO QUOTE SWDA',
-				amount: -130683,
+				amount: -130388,
 				categoryId: 'securities-purchase',
 				categorySource: 'manual',
 				receiptState: 'na',
-				notes: '',
+				notes: 'The units alone: 12,5 at 104,31. The broker\'s commission is the row below, never inside this one',
 				insertionSeq: 4
 			},
 			{
@@ -256,6 +256,18 @@ const buildSampleLedger = () => {
 				receiptState: 'pending',
 				notes: 'No rule claims this one',
 				insertionSeq: 7
+			},
+			{
+				id: 'transaction-8',
+				accountId: BROKERAGE_CASH,
+				date: '2026-08-05',
+				description: 'COMMISSIONE ORDINE SWDA',
+				amount: -295,
+				categoryId: 'bank-fees',
+				categorySource: 'manual',
+				receiptState: 'na',
+				notes: 'The same 2,95 the trade carries in "fees", recorded once here as the money and once there as the cost',
+				insertionSeq: 8
 			}
 		],
 

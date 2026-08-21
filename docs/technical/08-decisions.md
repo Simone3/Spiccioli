@@ -36,7 +36,7 @@ The fourteen decisions the application was built to, and is still held to. Each 
 | [§2](../functional/specs/02-domain-model.md) type | Fields | Stored as |
 | --- | --- | --- |
 | `amount` | every monetary field — balances, amounts, fees, taxes, prices paid, every figure on a payslip | **cents**, two decimal places |
-| `decimal(6)` | `quantity` | **millionths**, six decimal places. A broker selling fractional shares states one to six, and a quantity truncated to four would put the trade total off the bank's figure and fail checks 6 and 7 ([§11.6](../functional/specs/11-calculations.md#116-derived-matching)) |
+| `decimal(6)` | `quantity` | **millionths**, six decimal places. A broker selling fractional shares states one to six, and a quantity truncated to four would put `qty × price` off the bank's figure and fail checks 6 and 7 ([§11.6](../functional/specs/11-calculations.md#116-derived-matching)) |
 | `decimal(4)` | `unitPrice`, a Price's `value` | **ten-thousandths**, four decimal places |
 | `fraction` | `taxRate`, `exitTaxRate`, `defaultTaxRate` | **ten-thousandths**. [§13](../functional/specs/13-validation.md) enters them as a percentage with at most one decimal, so 26% is `2600` and 12,5% is `1250`, with a digit to spare |
 | `decimal(2)` | `hoursPerDay` | **hundredths** |
