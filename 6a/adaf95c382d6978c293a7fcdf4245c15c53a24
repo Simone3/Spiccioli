@@ -1,0 +1,66 @@
+docs/functional/mockups/09-checks.html
+  s_253b3760169475::t_0ba4002a6aba48 47
+docs/functional/mockups/10-settings.html
+  s_253b3760169475::t_345d614478b4fe 39,65
+docs/functional/specs/05-transactions.md
+  s_253b3760169475::t_37e2e3eafa42ee 15
+docs/functional/specs/09-checks.md
+  s_253b3760169475::t_c0d4ea403233a1 17
+docs/functional/specs/10-settings.md
+  s_253b3760169475::t_2c3110210c6d3f 25
+docs/functional/specs/11-calculations.md
+  s_253b3760169475::t_b48362542da85e 156,182-195
+docs/functional/specs/13-validation.md
+  s_253b3760169475::t_8110b263667423 146
+docs/functional/specs/15-out-of-scope.md
+  s_253b3760169475::t_14fa9ccffa527f 49-50
+docs/functional/why/11-calculations.md
+  s_253b3760169475::t_337876dbde2c24 48-51
+docs/technical/01-architecture.md
+  s_253b3760169475::t_7626fe82863a52 46,111
+docs/technical/02-repository-map.md
+  s_253b3760169475::t_e820e51d196d29 76,87,127
+src/components/settings/SettingsScreen.tsx
+  s_253b3760169475::t_82045d8d68ebdf 13,32,109-114,258-266
+src/i18n/lang/en.ts
+  s_253b3760169475::t_4b3f7180ba97ef 1214-1216,1329,1331-1336,1511,1628
+src/logic/checks/Checks.ts
+  s_253b3760169475::t_a9d35dfe2a6ab6 5,154-156,161,210-212,245-249,384-388,393-395,397-398,406,408-409,413
+src/logic/checks/Matching.ts
+  s_253b3760169475::t_93cec248fcb922 5,139,144-160,162,169,194-204,208-209,230-261,716-780,782-783,785-787,789,792,797,799,802,811,817,823,860,874-875,926
+src/logic/preferences/Preferences.ts
+  s_253b3760169475::t_f21e9991d4964e 4,36-38,57-60,92
+src/logic/salaries/Payslips.ts
+  s_253b3760169475::t_ec9bc317ac3192 19-33,38-39,45
+src/types/PreferencesTypes.ts
+  s_253b3760169475::t_c870c04b1cff63 2,25-27,50-52
+tests/components/SettingsScreen.test.tsx
+  s_253b3760169475::t_eba152cfd32a98 88-108
+tests/logic/Checks.test.ts
+  s_253b3760169475::t_1672e03d2a0ac4 192-215
+tests/logic/Matching.test.ts
+  s_253b3760169475::t_8fa3f3efd2fcd4 15,23,519,524-528,537,539-541,546,554,560,568,570-571,582,591-718
+tests/logic/Preferences.test.ts
+  s_253b3760169475::t_4d1c34bc4bfd55 38-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "6aadaf95c382d6978c293a7fcdf4245c15c53a24",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_253b3760169475": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ab9c761c-a44e-414e-b686-f4824b0439c5",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
