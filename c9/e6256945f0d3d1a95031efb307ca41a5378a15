@@ -1,0 +1,46 @@
+docs/functional/specs/07-investments.md
+  s_75686a38b6541b::t_a036b363c139ca 35,46,76
+docs/functional/specs/09-checks.md
+  s_75686a38b6541b::t_1081adf613498a 18-19
+docs/functional/specs/11-calculations.md
+  s_75686a38b6541b::t_de1b8e76c55904 40,153-154,171,174-177
+docs/functional/why/11-calculations.md
+  s_75686a38b6541b::t_c92f85735361cb 42-44
+docs/technical/08-decisions.md
+  s_75686a38b6541b::t_d3b377412c31ab 39
+scripts/write-sample-ledger.js
+  s_75686a38b6541b::t_36e4d258d2a9aa 217,221,259-270
+src/i18n/lang/en.ts
+  s_75686a38b6541b::t_119a94c0c80397 1614-1616
+src/logic/checks/Checks.ts
+  s_75686a38b6541b::t_0538126714ef13 8,420-421,440-446
+src/logic/checks/Matching.ts
+  s_75686a38b6541b::t_cd8dfc52dfc376 4,492-496,530
+src/logic/investments/Trades.ts
+  s_75686a38b6541b::t_42f895b2aaaf69 152,160-174
+tests/logic/Matching.test.ts
+  s_75686a38b6541b::t_a27903b2b419c9 25,270,272,279,285,301,307,313-329,337,608
+tests/logic/Trades.test.ts
+  s_75686a38b6541b::t_2dbcc1de5dcd0a 12,46-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c9e6256945f0d3d1a95031efb307ca41a5378a15",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_75686a38b6541b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "77008f43-afb4-4c35-b995-f1e9be1f298e",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
