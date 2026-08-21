@@ -17,19 +17,32 @@ import type { Cents, LedgerId, Payslip } from 'src/types/LedgerTypes';
 const MONTH_DIGITS = 2;
 
 /**
+ * Writes one month of one year, which is what a payslip's period is built on and what a contribution period's two ends are
+ * written with ([§11.6]).
+ * @param year The year.
+ * @param month The month, from 1.
+ * @param translator The wording the two are joined with.
+ * @returns The month and the year, in one string.
+ */
+export const formatMonthOfYear = (year: number, month: number, translator: SpiccioliTranslator): string => {
+	return translator.t('payslips.monthOfYear', {
+		month: String(month).padStart(MONTH_DIGITS, '0'),
+		year: String(year)
+	});
+};
+
+/**
  * Writes the period a payslip is for: its month, and the label behind it where it carries one.
  *
  * **This is how a payslip is named wherever it is named away from its own table** — in the *Matched* column of [§5.1] and in
- * everything checks 4 and 5 report — the table itself being scoped to one year and needing no year in the cell.
+ * everything check 4 reports — the table itself being scoped to one year and needing no year in the cell. Check 5 names a
+ * contribution period instead, which may hold several payslips and is written by its months alone.
  * @param payslip The payslip.
  * @param translator The wording the month and the label are joined with.
  * @returns The month and the label, in one string.
  */
 export const formatPayslipPeriod = (payslip: Payslip, translator: SpiccioliTranslator): string => {
-	const month = translator.t('payslips.monthOfYear', {
-		month: String(payslip.month).padStart(MONTH_DIGITS, '0'),
-		year: String(payslip.year)
-	});
+	const month = formatMonthOfYear(payslip.year, payslip.month, translator);
 
 	return payslip.label === null ? month : translator.t('payslips.periodWithLabel', { month, label: payslip.label });
 };

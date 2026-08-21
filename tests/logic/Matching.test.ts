@@ -12,6 +12,7 @@ import {
 import {
 	deriveMatching,
 	describeMatchedTransactions,
+	groupPayslipsIntoPeriods,
 	matchedTradeDates,
 	matchInternalTransfers,
 	matchPayslipsToSalaries,
@@ -19,6 +20,7 @@ import {
 	matchTradesToTransactions,
 	pensionFigureKey,
 	sortPayslipsForMatching,
+	type PensionPeriod,
 	type TransferMatchWindow
 } from 'src/logic/checks/Matching';
 import { createSpiccioliTranslator } from 'src/i18n/Translations';
@@ -514,9 +516,14 @@ describe('payslips against salary transactions', () => {
 	});
 });
 
-describe('pension credits against payslip figures', () => {
+describe('pension credits against the figures of a contribution period', () => {
 	const credit = (id: string, amount: number, date = '2026-08-07', insertionSeq = 1): Transaction => {
 		return makeTransaction({ id, accountId: 'account-1', date, amount, categoryId: 'pension-fund-contribution', insertionSeq });
+	};
+
+	// The key a period is claimed under reads its contract, its year and its first month, so the payslips need not be repeated here
+	const period = (startMonth = 7, year = 2026, contractId = 'contract-1'): PensionPeriod => {
+		return { contractId, year, startMonth, endMonth: startMonth, payslips: [] };
 	};
 
 	it('pairs each of the three figures with its own credit', () => {
@@ -527,16 +534,16 @@ describe('pension credits against payslip figures', () => {
 			transactions: [ credit('employee', 5000), credit('employer', 5000, '2026-08-07', 2), credit('tfr', 20000, '2026-08-07', 3) ]
 		});
 
-		const matching = matchPensionContributions(document);
+		const matching = matchPensionContributions(document, 1);
 
-		expect(matching.transactionByFigure.get(pensionFigureKey('payslip-1', 'employee'))).toBe('employee');
-		expect(matching.transactionByFigure.get(pensionFigureKey('payslip-1', 'employer'))).toBe('employer');
-		expect(matching.transactionByFigure.get(pensionFigureKey('payslip-1', 'severance'))).toBe('tfr');
+		expect(matching.transactionByFigure.get(pensionFigureKey(period(), 'employee'))).toBe('employee');
+		expect(matching.transactionByFigure.get(pensionFigureKey(period(), 'employer'))).toBe('employer');
+		expect(matching.transactionByFigure.get(pensionFigureKey(period(), 'severance'))).toBe('tfr');
 		expect(matching.unmatchedFigures).toHaveLength(0);
 		expect(matching.unmatchedTransactions).toHaveLength(0);
 	});
 
-	it('takes no part for a figure of zero, and does not report it', () => {
+	it('takes no part for a sum of zero, and does not report it', () => {
 		const document = withRecords({
 			accounts: [ makeAccount() ],
 			contracts: [ makeContract() ],
@@ -544,13 +551,13 @@ describe('pension credits against payslip figures', () => {
 			transactions: [ credit('tfr', 20000) ]
 		});
 
-		const matching = matchPensionContributions(document);
+		const matching = matchPensionContributions(document, 1);
 
 		expect(matching.unmatchedFigures).toHaveLength(0);
 		expect(matching.unmatchedTransactions).toHaveLength(0);
 	});
 
-	it('walks employee, then employer, then severance within one payslip', () => {
+	it('walks employee, then employer, then severance within one period', () => {
 		const document = withRecords({
 			accounts: [ makeAccount() ],
 			contracts: [ makeContract() ],
@@ -558,10 +565,10 @@ describe('pension credits against payslip figures', () => {
 			transactions: [ credit('later', 5000, '2026-08-08', 2), credit('earlier', 5000, '2026-08-07', 1) ]
 		});
 
-		const matching = matchPensionContributions(document);
+		const matching = matchPensionContributions(document, 1);
 
-		expect(matching.transactionByFigure.get(pensionFigureKey('payslip-1', 'employee'))).toBe('earlier');
-		expect(matching.transactionByFigure.get(pensionFigureKey('payslip-1', 'employer'))).toBe('later');
+		expect(matching.transactionByFigure.get(pensionFigureKey(period(), 'employee'))).toBe('earlier');
+		expect(matching.transactionByFigure.get(pensionFigureKey(period(), 'employer'))).toBe('later');
 	});
 
 	it('reports a figure with no credit and a credit no figure claimed, each on its own side', () => {
@@ -572,7 +579,7 @@ describe('pension credits against payslip figures', () => {
 			transactions: [ credit('stray', 9999) ]
 		});
 
-		const matching = matchPensionContributions(document);
+		const matching = matchPensionContributions(document, 1);
 
 		expect(matching.unmatchedFigures.map((figure) => {
 			return figure.figure;
@@ -580,6 +587,134 @@ describe('pension credits against payslip figures', () => {
 		expect(matching.unmatchedTransactions.map((transaction) => {
 			return transaction.id;
 		})).toEqual([ 'stray' ]);
+	});
+
+	// The quarter of §11.6: one credit per heading in April, carrying January, February and March together
+	const quarter = (): Payslip[] => {
+		return [ 1, 2, 3 ].map((month) => {
+			return makePayslip({
+				id: `payslip-${month}`,
+				month,
+				employeeContribution: 5000,
+				employerContribution: 4100,
+				severanceContribution: 20000
+			});
+		});
+	};
+
+	it('pairs one quarterly credit per heading with the three months it was paid on', () => {
+		const document = withRecords({
+			accounts: [ makeAccount() ],
+			contracts: [ makeContract() ],
+			payslips: quarter(),
+			transactions: [
+				credit('employee', 15000, '2026-04-07'),
+				credit('employer', 12300, '2026-04-07', 2),
+				credit('tfr', 60000, '2026-04-07', 3)
+			]
+		});
+
+		const matching = matchPensionContributions(document, 3);
+
+		expect(matching.transactionByFigure.get(pensionFigureKey(period(1), 'employee'))).toBe('employee');
+		expect(matching.transactionByFigure.get(pensionFigureKey(period(1), 'employer'))).toBe('employer');
+		expect(matching.transactionByFigure.get(pensionFigureKey(period(1), 'severance'))).toBe('tfr');
+		expect(matching.unmatchedFigures).toHaveLength(0);
+		expect(matching.unmatchedTransactions).toHaveLength(0);
+	});
+
+	it('leaves the same file unmatched on both sides when the period is a month', () => {
+		const document = withRecords({
+			accounts: [ makeAccount() ],
+			contracts: [ makeContract() ],
+			payslips: quarter(),
+			transactions: [ credit('employee', 15000, '2026-04-07') ]
+		});
+
+		const matching = matchPensionContributions(document, 1);
+
+		// Three months of three headings, none of which carries the quarter's own figure
+		expect(matching.unmatchedFigures).toHaveLength(9);
+		expect(matching.unmatchedTransactions).toHaveLength(1);
+	});
+
+	it('reports the whole quarter, once, when its credit never arrived', () => {
+		const document = withRecords({
+			accounts: [ makeAccount() ],
+			contracts: [ makeContract() ],
+			payslips: quarter(),
+			transactions: [ credit('employer', 12300, '2026-04-07'), credit('tfr', 60000, '2026-04-07', 2) ]
+		});
+
+		const matching = matchPensionContributions(document, 3);
+
+		expect(matching.unmatchedFigures).toHaveLength(1);
+		expect(matching.unmatchedFigures[0].figure).toBe('employee');
+		expect(matching.unmatchedFigures[0].amount).toBe(15000);
+		expect(matching.unmatchedFigures[0].period.startMonth).toBe(1);
+		expect(matching.unmatchedFigures[0].period.endMonth).toBe(3);
+	});
+
+	it('opens the window on the period and closes it at the end of the month after it', () => {
+		const payslips = [ 10, 11, 12 ].map((month) => {
+			return makePayslip({ id: `payslip-${month}`, month, employeeContribution: 5000, employerContribution: 0, severanceContribution: 0 });
+		});
+
+		const document = withRecords({
+			accounts: [ makeAccount() ],
+			contracts: [ makeContract() ],
+			payslips,
+			transactions: [ credit('january', 15000, '2027-01-31') ]
+		});
+
+		expect(matchPensionContributions(document, 3).unmatchedFigures).toHaveLength(0);
+
+		const late = withRecords({
+			accounts: [ makeAccount() ],
+			contracts: [ makeContract() ],
+			payslips,
+			transactions: [ credit('february', 15000, '2027-02-01') ]
+		});
+
+		expect(matchPensionContributions(late, 3).unmatchedFigures).toHaveLength(1);
+	});
+
+	it('pays a period on as a whole, a thirteenth month included', () => {
+		const document = withRecords({
+			accounts: [ makeAccount() ],
+			contracts: [ makeContract() ],
+			payslips: [
+				makePayslip({ id: 'december', month: 12, employeeContribution: 5000, employerContribution: 0, severanceContribution: 0 }),
+				makePayslip({ id: 'thirteenth', month: 12, label: '13th', employeeContribution: 2000, employerContribution: 0, severanceContribution: 0 })
+			],
+			transactions: [ credit('together', 7000, '2027-01-07') ]
+		});
+
+		const matching = matchPensionContributions(document, 1);
+
+		expect(matching.transactionByFigure.get(pensionFigureKey(period(12), 'employee'))).toBe('together');
+		expect(matching.unmatchedFigures).toHaveLength(0);
+	});
+
+	it('groups by contract, by year and by block of months anchored to the start of the year', () => {
+		const periods = groupPayslipsIntoPeriods([
+			makePayslip({ id: 'march', month: 3 }),
+			makePayslip({ id: 'april', month: 4 }),
+			makePayslip({ id: 'february', month: 2 }),
+			makePayslip({ id: 'other-contract', month: 2, contractId: 'contract-2' }),
+			makePayslip({ id: 'next-year', year: 2027, month: 2 })
+		], 3);
+
+		expect(periods.map((one) => {
+			return [ one.contractId, one.year, one.startMonth, one.endMonth, one.payslips.map((payslip) => {
+				return payslip.id;
+			}) ];
+		})).toEqual([
+			[ 'contract-1', 2026, 1, 3, [ 'march', 'february' ] ],
+			[ 'contract-1', 2026, 4, 6, [ 'april' ] ],
+			[ 'contract-2', 2026, 1, 3, [ 'other-contract' ] ],
+			[ 'contract-1', 2027, 1, 3, [ 'next-year' ] ]
+		]);
 	});
 });
 

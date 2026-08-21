@@ -85,6 +85,27 @@ describe('the Settings screen', () => {
 		expect(written[0].thousandsSeparator).toBe('none');
 	});
 
+	test('offers the contribution period as a picker over the lengths that divide a year', async() => {
+		const written: Preferences[] = [];
+		await openSettings({
+			setPreferences: (preferences) => {
+				written.push(preferences);
+
+				return Promise.resolve();
+			}
+		});
+
+		const period = screen.getByRole('combobox', { name: 'Pension fund credits' });
+
+		expect(period).toHaveValue('1');
+		expect(screen.getByRole('option', { name: 'Every month' })).toBeInTheDocument();
+		expect(screen.getByRole('option', { name: 'Every 3 months' })).toBeInTheDocument();
+
+		await userEvent.selectOptions(period, '3');
+
+		expect(written[0].pensionContributionMonths).toBe(3);
+	});
+
 	test('refuses a figure outside a preference bounds in place, and applies one inside them', async() => {
 		const written: Preferences[] = [];
 		await openSettings({

@@ -189,6 +189,30 @@ describe('checks 4 and 5 — payslips and their contributions', () => {
 		expect(contributions.sides[0].entries[0].text).toContain('Employee share');
 	});
 
+	it('names the whole contribution period, and counts periods rather than payslips', () => {
+		const results = run({
+			...employed,
+			payslips: [ 1, 2, 3 ].map((month) => {
+				return makePayslip({
+					id: `payslip-${month}`,
+					month,
+					employeeContribution: 5000,
+					employerContribution: 0,
+					severanceContribution: 0
+				});
+			}),
+			transactions: [ makeTransaction({ id: 'stray', date: '2026-04-07', amount: 1, categoryId: 'pension-fund-contribution' }) ]
+		}, { ...DEFAULT_PREFERENCES, pensionContributionMonths: 3 });
+
+		const contributions = check(results, 'pensionContributionsMatch');
+
+		// One quarter, one heading, one claim — three payslips summed into it
+		expect(contributions.reach).toBe('1 contribution');
+		expect(contributions.sides[0].entries[0].text).toContain('01/2026 – 03/2026');
+		expect(contributions.sides[0].entries[0].text).toContain('€ 150,00');
+		expect(contributions.sides[0].entries[0].link).toEqual({ screen: 'payslips', contractId: 'contract-1', year: 2026 });
+	});
+
 	it('passes with nothing to say when every figure is zero', () => {
 		const results = run({
 			...employed,

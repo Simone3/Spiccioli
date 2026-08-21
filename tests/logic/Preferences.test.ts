@@ -35,6 +35,17 @@ describe('parsePreferences', () => {
 		expect(parsePreferences({ decimalSeparator: 'comma', thousandsSeparator: 'none' }).thousandsSeparator).toBe('none');
 	});
 
+	test('takes a contribution period from its closed set and falls back for anything else', () => {
+		expect(DEFAULT_PREFERENCES.pensionContributionMonths).toBe(1);
+		expect(parsePreferences({ pensionContributionMonths: 3 }).pensionContributionMonths).toBe(3);
+		expect(parsePreferences({ pensionContributionMonths: 12 }).pensionContributionMonths).toBe(12);
+
+		// Five months would straddle a year end, and a period is one of the divisors of 12 or nothing
+		expect(parsePreferences({ pensionContributionMonths: 5 }).pensionContributionMonths).toBe(1);
+		expect(parsePreferences({ pensionContributionMonths: 0 }).pensionContributionMonths).toBe(1);
+		expect(parsePreferences({ pensionContributionMonths: '3' }).pensionContributionMonths).toBe(1);
+	});
+
 	test('reads the default tax rate as the fraction it names', () => {
 		expect(DEFAULT_PREFERENCES.defaultTaxRate).toBe(2600);
 		expect(parsePreferences({ defaultTaxRate: 1250 }).defaultTaxRate).toBe(1250);

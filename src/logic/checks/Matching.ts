@@ -2,7 +2,7 @@ import { addDaysToIsoDate, daysBetweenIsoDates, firstDayOfMonth, lastDayOfNextMo
 import { compareNames, formatAccountName, indexInstitutions } from 'src/logic/accounts/Accounts';
 import { categoryIdsWithRole } from 'src/logic/categories/Categories';
 import { sortTrades, tradeSettlement } from 'src/logic/investments/Trades';
-import { formatPayslipPeriod } from 'src/logic/salaries/Payslips';
+import { formatMonthOfYear, formatPayslipPeriod } from 'src/logic/salaries/Payslips';
 import { sortTransactions } from 'src/logic/transactions/Transactions';
 import type { SpiccioliTranslator } from 'src/i18n/Translations';
 import type {
@@ -136,21 +136,37 @@ export interface SalaryMatching {
 	unmatchedTransactions: Transaction[];
 }
 
-// Which of a payslip's three pension figures a claim is about, in the order they are walked in
+// Which of a period's three pension figures a claim is about, in the order they are walked in
 export const PENSION_FIGURES = [ 'employee', 'employer', 'severance' ] as const;
 
 export type PensionFigure = typeof PENSION_FIGURES[number];
 
-/** One non-zero pension figure on one payslip: the thing a credit into the fund is paired against. */
+/**
+ * One contribution period of one contract: the payslips a single credit into the fund is paid on.
+ *
+ * **The months are the calendar's and not the payslips'.** A period runs from `startMonth` to `endMonth` whatever falls inside
+ * it, so a contract that ended in February still holds a period running to March and is still paid on in April.
+ */
+export interface PensionPeriod {
+	contractId: LedgerId;
+	year: number;
+	startMonth: number;
+	endMonth: number;
+
+	// Every payslip of that contract whose month falls in the period, in the walk order of [§11.6]
+	payslips: Payslip[];
+}
+
+/** One non-zero pension figure of one period: the thing a credit into the fund is paired against. */
 export interface PensionClaim {
-	payslip: Payslip;
+	period: PensionPeriod;
 	figure: PensionFigure;
 	amount: Cents;
 }
 
 export interface PensionMatching {
 
-	// Keyed by payslip and figure, a payslip having three of them
+	// Keyed by period and figure, a period having three of them
 	transactionByFigure: Map<string, LedgerId>;
 
 	figureByTransaction: Map<LedgerId, PensionClaim>;
@@ -175,13 +191,22 @@ export interface MatchingOptions {
 }
 
 /**
- * The key one of a payslip's three pension figures is claimed under.
- * @param payslipId The payslip.
+ * The key one contribution period is held under: its contract, its year and the month it opens on.
+ * @param period The period.
+ * @returns The key.
+ */
+export const pensionPeriodKey = (period: PensionPeriod): string => {
+	return `${period.contractId}|${period.year}|${period.startMonth}`;
+};
+
+/**
+ * The key one of a period's three pension figures is claimed under.
+ * @param period The period.
  * @param figure Which of the three.
  * @returns The key.
  */
-export const pensionFigureKey = (payslipId: LedgerId, figure: PensionFigure): string => {
-	return `${payslipId}|${figure}`;
+export const pensionFigureKey = (period: PensionPeriod, figure: PensionFigure): string => {
+	return `${pensionPeriodKey(period)}|${figure}`;
 };
 
 /**
@@ -200,6 +225,38 @@ export const pensionFigureAmount = (payslip: Payslip, figure: PensionFigure): Ce
 		default:
 			return payslip.employeeContribution;
 	}
+};
+
+/**
+ * What a whole contribution period carries under one heading, which is the figure a credit into the fund is compared against.
+ * @param period The period.
+ * @param figure Which of the three.
+ * @returns The sum over the period's payslips, a magnitude of zero or more.
+ */
+export const pensionPeriodAmount = (period: PensionPeriod, figure: PensionFigure): Cents => {
+	return period.payslips.reduce((running, payslip) => {
+		return running + pensionFigureAmount(payslip, figure);
+	}, 0);
+};
+
+/**
+ * Writes the months a contribution period covers, which is how a credit into the fund is named in the *Matched* column of
+ * [§5.1] and in everything check 5 reports.
+ *
+ * **A period of one month reads as that month alone**, exactly as a payslip does, so the monthly case is written the way it
+ * always was. A longer one reads as its two ends.
+ * @param period The period.
+ * @param translator The wording the months are written and joined with.
+ * @returns The period, in one string.
+ */
+export const formatPensionPeriod = (period: PensionPeriod, translator: SpiccioliTranslator): string => {
+	const from = formatMonthOfYear(period.year, period.startMonth, translator);
+
+	if(period.startMonth === period.endMonth) {
+		return from;
+	}
+
+	return translator.t('payslips.periodRange', { from, to: formatMonthOfYear(period.year, period.endMonth, translator) });
 };
 
 /**
@@ -656,28 +713,93 @@ export const matchPayslipsToSalaries = (document: LedgerDocument): SalaryMatchin
 };
 
 /**
- * Pairs each non-zero pension figure on each payslip with the credit into the fund that carried it.
+ * The month a contribution period opens on, periods being anchored to the start of the year.
+ * @param month The month a payslip is for, from 1.
+ * @param months How many months one period is long, which divides 12.
+ * @returns The first month of the period that month falls in.
+ */
+const periodStartMonth = (month: number, months: number): number => {
+	return Math.floor((month - 1) / months) * months + 1;
+};
+
+/**
+ * Groups payslips into the contribution periods the fund pays on: one period per contract, per year, per block of months.
  *
- * **A figure of 0 is not a claim.** It expects no credit, takes no part in the walk and cannot be reported as unmatched: a
- * heading a payslip has nothing under is not a credit that failed to arrive.
+ * **A period holds every payslip of its contract inside it**, a *tredicesima* sharing its month with an ordinary payslip
+ * included: the fund pays on the period as a whole rather than on one payslip at a time.
+ * @param payslips The payslips, already in the walk order of [§11.6].
+ * @param months How many months one period is long.
+ * @returns The periods, in the order of the earliest payslip each one holds.
+ */
+export const groupPayslipsIntoPeriods = (payslips: readonly Payslip[], months: number): PensionPeriod[] => {
+	const periods = new Map<string, PensionPeriod>();
+
+	for(const payslip of payslips) {
+		const startMonth = periodStartMonth(payslip.month, months);
+		const period: PensionPeriod = {
+			contractId: payslip.contractId,
+			year: payslip.year,
+			startMonth,
+			endMonth: startMonth + months - 1,
+			payslips: []
+		};
+
+		const existing = periods.get(pensionPeriodKey(period));
+
+		if(existing) {
+			existing.payslips.push(payslip);
+		}
+		else {
+			period.payslips.push(payslip);
+			periods.set(pensionPeriodKey(period), period);
+		}
+	}
+
+	return [ ...periods.values() ];
+};
+
+/**
+ * The window one contribution period's credit may be dated in: from the period's first day to the end of the month after its
+ * last one. **A period of one month is the payslip window of check 4, to the day.**
+ * @param period The period.
+ * @returns The window.
+ */
+const pensionPeriodWindow = (period: PensionPeriod): { fromDate: IsoDate; toDate: IsoDate } => {
+	return {
+		fromDate: firstDayOfMonth(period.year, period.startMonth),
+		toDate: lastDayOfNextMonth(period.year, period.endMonth)
+	};
+};
+
+/**
+ * Pairs each non-zero pension figure of each contribution period with the credit into the fund that carried it.
  *
- * **The three figures are walked employee, then employer, then severance**, within a payslip walked in the payslip order. Two of
- * them being equal costs nothing: both pair, and the only thing that can be wrong is which of two identical credits the
- * *Matched* column names.
+ * **A period is `pensionContributionMonths` months of one contract's payslips**, anchored to the start of the year, and the
+ * figure a credit is compared against is that heading **summed over the period** ([§11.6]). At the default of one month that is
+ * a single payslip's figure and the pairing is the monthly one it has always been; at three it is a quarterly credit against
+ * January, February and March added together.
+ *
+ * **A sum of 0 is not a claim.** It expects no credit, takes no part in the walk and cannot be reported as unmatched: a heading
+ * a period has nothing under is not a credit that failed to arrive.
+ *
+ * **The three figures are walked employee, then employer, then severance**, within a period walked in the order of the earliest
+ * payslip it holds. Two of them being equal costs nothing: both pair, and the only thing that can be wrong is which of two
+ * identical credits the *Matched* column names.
  * @param document The ledger.
+ * @param months How many months of payslips one credit covers, which is a preference.
  * @returns The pairs, and what is left on either side.
  */
-export const matchPensionContributions = (document: LedgerDocument): PensionMatching => {
+export const matchPensionContributions = (document: LedgerDocument, months: number): PensionMatching => {
 	const payslips = sortPayslipsForMatching(document.payslips, document.contracts);
 	const transactions = transactionsInRole(document, 'pension-contribution');
 	const claims: PensionClaim[] = [];
 
-	for(const payslip of payslips) {
+	for(const period of groupPayslipsIntoPeriods(payslips, months)) {
 		for(const figure of PENSION_FIGURES) {
-			const amount = pensionFigureAmount(payslip, figure);
+			const amount = pensionPeriodAmount(period, figure);
 
 			if(amount !== 0) {
-				claims.push({ payslip, figure, amount });
+				claims.push({ period, figure, amount });
 			}
 		}
 	}
@@ -686,19 +808,19 @@ export const matchPensionContributions = (document: LedgerDocument): PensionMatc
 		claims,
 		candidates: transactions.map(toCandidate),
 		keyOf: (claim) => {
-			return pensionFigureKey(claim.payslip.id, claim.figure);
+			return pensionFigureKey(claim.period, claim.figure);
 		},
 		amountOf: (claim) => {
 			return claim.amount;
 		},
 		windowOf: (claim) => {
-			return payslipWindow(claim.payslip);
+			return pensionPeriodWindow(claim.period);
 		}
 	});
 
 	const figureByTransaction = new Map<LedgerId, PensionClaim>();
 	const claimsByKey = new Map(claims.map((claim) => {
-		return [ pensionFigureKey(claim.payslip.id, claim.figure), claim ];
+		return [ pensionFigureKey(claim.period, claim.figure), claim ];
 	}));
 
 	for(const [ key, transactionId ] of matches) {
@@ -735,7 +857,7 @@ export const deriveMatching = ({ document, preferences }: MatchingOptions): Deri
 		purchases: matchTradesToTransactions(document, 'purchase', preferences.tradeMatchWindowDays),
 		sales: matchTradesToTransactions(document, 'sale', preferences.tradeMatchWindowDays),
 		salaries: matchPayslipsToSalaries(document),
-		pension: matchPensionContributions(document)
+		pension: matchPensionContributions(document, preferences.pensionContributionMonths)
 	};
 };
 
@@ -749,8 +871,8 @@ export interface MatchedNamesOptions {
 
 /**
  * What the *Matched* column of [§5.1] names on each transaction, which is the counterpart of **every** kind of pairing there is:
- * the counterpart account for a paired internal transfer, the security for a trade-matched securities transaction, and the
- * payslip — its month and its label — for a salary payment or a pension credit paired with one.
+ * the counterpart account for a paired internal transfer, the security for a trade-matched securities transaction, the payslip
+ * — its month and its label — for a salary payment, and the contribution period — its months — for a pension credit.
  *
  * A transaction with no entry here is one nothing paired with, and its cell reads an em dash.
  * @param options What was matched, and the wording it is written with.
@@ -801,7 +923,7 @@ export const describeMatchedTransactions = ({ document, matching, translator }: 
 	}
 
 	for(const [ transactionId, claim ] of matching.pension.figureByTransaction) {
-		names.set(transactionId, formatPayslipPeriod(claim.payslip, translator));
+		names.set(transactionId, formatPensionPeriod(claim.period, translator));
 	}
 
 	return names;

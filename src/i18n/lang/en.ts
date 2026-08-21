@@ -1211,6 +1211,9 @@ export const EN_TRANSLATIONS = {
 		// How a payslip is named away from its own table: in the Matched column, and in everything checks 4 and 5 report
 		periodWithLabel: '{month} · {label}',
 
+		// The two ends of a contribution period longer than one month
+		periodRange: '{from} – {to}',
+
 		yearColumns: {
 			year: 'Year',
 			payslipCount: 'Payslips',
@@ -1323,7 +1326,14 @@ export const EN_TRANSLATIONS = {
 		transferMatchWindowDays: 'Transfer match window',
 		transferMatchBackwardDays: 'Receiving leg may precede by',
 		tradeMatchWindowDays: 'Trade match window',
+		pensionContributionMonths: 'Pension fund credits',
 		backupCount: 'Backups kept',
+
+		// How long one contribution period is, written as how often the fund credits
+		pensionContributionPeriods: {
+			one: 'Every month',
+			other: 'Every {count} months'
+		},
 		units: {
 			days: 'days',
 			months: 'months'
@@ -1498,7 +1508,7 @@ export const EN_TRANSLATIONS = {
 			},
 			pensionContributionsMatch: {
 				name: 'Payslip pension contributions match transactions',
-				description: 'Employee share, employer share and TFR, each against its own credit, same window.'
+				description: 'Employee share, employer share and TFR of each contribution period, each against its own credit.'
 			},
 			purchasesMatch: {
 				name: 'Purchase transactions match purchases',
@@ -1615,7 +1625,7 @@ export const EN_TRANSLATIONS = {
 			// Checks 6 and 7 name the figure the bank moved, which is the trade without its commission, and say so
 			tradeSettlement: '{date} · {ticker} · {account} · {amount} without commission',
 			payslip: '{month} · {contract} · {amount}',
-			pensionFigure: '{month} · {contract} · {figure} · {amount}',
+			pensionFigure: '{period} · {contract} · {figure} · {amount}',
 			stalePrice: {
 				one: '{ticker} · {name} · {price} on {date} — {count} day ago',
 				other: '{ticker} · {name} · {price} on {date} — {count} days ago'

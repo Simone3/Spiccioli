@@ -1,5 +1,5 @@
 /**
- * The ten preferences, and the list of recently opened files.
+ * The twelve preferences, and the list of recently opened files.
  *
  * **Neither is in the ledger.** They belong to the installation and live in the platform's own application-data folder, so they
  * survive switching files, apply to every file opened afterwards, and do not travel with a ledger that is copied or sent to
@@ -21,6 +21,9 @@ export type DecimalSeparator = typeof DECIMAL_SEPARATORS[number];
 export const THOUSANDS_SEPARATORS = [ 'dot', 'comma', 'space', 'none' ] as const;
 
 export type ThousandsSeparator = typeof THOUSANDS_SEPARATORS[number];
+
+// The lengths a contribution period may have: the divisors of 12, which are the ones that never straddle a year end
+export const PENSION_CONTRIBUTION_PERIODS = [ 1, 2, 3, 4, 6, 12 ] as const;
 
 export const SEPARATOR_CHARACTERS: Record<DecimalSeparator | ThousandsSeparator, string> = {
 	comma: ',',
@@ -44,6 +47,9 @@ export interface Preferences {
 	// How many days before the sending leg the receiving one may be dated. Zero is the forward-only rule of [§11.6].
 	transferMatchBackwardDays: number;
 	tradeMatchWindowDays: number;
+
+	// How many months of payslips one credit into the pension fund covers. One of PENSION_CONTRIBUTION_PERIODS, and 1 is a fund crediting every month.
+	pensionContributionMonths: number;
 	backupCount: number;
 }
 

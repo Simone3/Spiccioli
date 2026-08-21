@@ -73,7 +73,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/launch/UpgradeDialog.tsx` | Its second panel: a file written by an older version |
 | `components/session/WriteFailurePanel.tsx` `.css` | The blocking message after five failed attempts, which belongs to no screen |
 | `components/session/UnsavedDraftPrompt.tsx` | The other thing that belongs to no screen: what is said when something unwritten is being walked away from, offering discard and stay and no apply |
-| `components/settings/SettingsScreen.tsx` `.css` | The ten preferences, the refusals, and the two read-only paths ([§10](../functional/specs/10-settings.md)) |
+| `components/settings/SettingsScreen.tsx` `.css` | The twelve preferences, the refusals, and the two read-only paths ([§10](../functional/specs/10-settings.md)) |
 | `components/accounts/` | The Accounts screen ([§4](../functional/specs/04-accounts.md)): the two tabs and their tables, the two forms, and `AccountPicker` — **the one account picker in the application**, which every later screen takes for a transaction's, a trade's or a filter's |
 | `components/transactions/` | The Transactions screen ([§5](../functional/specs/05-transactions.md)): the list, the seven filters, and the one form a row is both recorded on and corrected on |
 | `components/import/` | Bulk import ([§5.7](../functional/specs/05-transactions.md#57-bulk-import)): the paste, the three format controls, the account, the outcome, and the preview table that marks every row |
@@ -84,7 +84,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/portfolio/` | The Portfolio screen ([§3](../functional/specs/03-portfolio.md)): the failing-check banner, the headline with the four lines that add to it and their notes, the *gains and costs* card, the breakdown by type with its pie, the net worth line with its two series, and the breakdown by account that totals back to the headline |
 | `contexts/ChecksContext.tsx` | The one place the fourteen checks run and the five pairings are derived: undebounced on opening a file, debounced after every change, superseded by the next ([§9](../functional/specs/09-checks.md)) |
 | `contexts/LedgerContext.tsx` | The ledger in memory, the autosave, the save state, the storage lines |
-| `contexts/PreferencesContext.tsx` | The ten preferences, read once and written as they change, and the formatter they define |
+| `contexts/PreferencesContext.tsx` | The twelve preferences, read once and written as they change, and the formatter they define |
 | `contexts/UnsavedDraftContext.tsx` | The guard every departure goes through, and the draft a screen registers with it ([§1.3](01-architecture.md#13-layers-inside-the-renderer)) |
 | `i18n/Translations.ts` | Turns a language into a translator; the bundle registry |
 | `i18n/TranslationContext.tsx` | The React binding of that translator |
@@ -124,7 +124,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `types/LedgerTypes.ts` | The eleven stored entities and every closed set they take |
 | `types/LedgerIpcTypes.ts` `LedgerIpcChannels.ts` | What crosses the bridge for storage, and the channel names |
 | `types/PriceIpcTypes.ts` `PriceIpcChannels.ts` | What crosses the bridge for a price pass, and the four channel names |
-| `types/PreferencesTypes.ts` | The ten preferences and the recent-file list |
+| `types/PreferencesTypes.ts` | The twelve preferences and the recent-file list |
 | `types/ElectronSquirrelStartup.d.ts` | Types for a dependency that ships none |
 
 ## 2.5 `tests`

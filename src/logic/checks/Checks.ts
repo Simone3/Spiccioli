@@ -2,7 +2,7 @@ import { CHECKS_CONFIG } from 'src/config/AppConfig';
 import { formatAccountName, indexInstitutions, isAccountClosed, sortAccounts } from 'src/logic/accounts/Accounts';
 import { categoryIdsWithRole, indexCategories } from 'src/logic/categories/Categories';
 import { addMonthsToIsoDate, daysBetweenIsoDates } from 'src/logic/checks/CheckDates';
-import { pensionFigureAmount, PENSION_FIGURES, type DerivedMatching, type PensionClaim } from 'src/logic/checks/Matching';
+import { formatPensionPeriod, pensionFigureKey, type DerivedMatching, type PensionClaim, type PensionPeriod } from 'src/logic/checks/Matching';
 import { compareTradesInWalkOrder, walkPositions, type PositionWalk } from 'src/logic/investments/Holdings';
 import { indexLatestPrices, indexSecurities, sortSecurities } from 'src/logic/investments/Securities';
 import { sortTrades, tradeSettlement, tradesOfKind, tradeTotal } from 'src/logic/investments/Trades';
@@ -151,10 +151,14 @@ interface CheckNaming {
 	// A payslip's month, with its label where it has one: the way [§5.1] names one in the *Matched* column
 	monthOf: (payslip: Payslip) => string;
 
+	// The months one contribution period covers, which is what check 5 names in place of a payslip
+	periodOf: (period: PensionPeriod) => string;
+
 	// The one line four checks name a transaction with, and the one three name a trade with. The text is overridable, the link is not.
 	transactionEntry: (transaction: Transaction, text?: string) => CheckEntry;
 	tradeEntry: (trade: Trade, text?: string) => CheckEntry;
 	payslipLink: (payslip: Payslip) => CheckLink;
+	periodLink: (period: PensionPeriod) => CheckLink;
 }
 
 interface CheckContext extends ChecksOptions {
@@ -203,6 +207,9 @@ const buildNaming = (options: ChecksOptions, accounts: ReadonlyMap<LedgerId, Acc
 		monthOf: (payslip) => {
 			return formatPayslipPeriod(payslip, translator);
 		},
+		periodOf: (period) => {
+			return formatPensionPeriod(period, translator);
+		},
 		transactionEntry: (transaction, text) => {
 			return {
 				key: transaction.id,
@@ -235,6 +242,11 @@ const buildNaming = (options: ChecksOptions, accounts: ReadonlyMap<LedgerId, Acc
 		},
 		payslipLink: (payslip) => {
 			return { screen: 'payslips', contractId: payslip.contractId, year: payslip.year };
+		},
+
+		// A period never straddles a year end, so it reaches one year of one contract exactly as a payslip does
+		periodLink: (period) => {
+			return { screen: 'payslips', contractId: period.contractId, year: period.year };
 		}
 	};
 };
@@ -369,22 +381,21 @@ const checkPayslipsMatchSalaries = (context: CheckContext): CheckResult => {
 };
 
 /**
- * Check 5. **A figure of 0 is not a claim**: it expects no credit, takes no part in the walk and cannot be reported here.
+ * Check 5. **A sum of 0 is not a claim**: it expects no credit, takes no part in the walk and cannot be reported here.
+ *
+ * **What the check reaches is contribution periods and not payslips** ([§11.6]): at the default period of one month the two
+ * counts are the same, and at three months a quarter's three headings are three claims however many payslips they were summed
+ * over.
  * @param context What the check reads.
  * @returns The result.
  */
 const checkPensionContributionsMatch = (context: CheckContext): CheckResult => {
-	const { document, matching, translator, formatter } = context;
-	const { transactionEntry, monthOf, payslipLink, contractName } = context.naming;
+	const { matching, translator, formatter } = context;
+	const { transactionEntry, periodOf, periodLink, contractName } = context.naming;
+	const { transactionByFigure, unmatchedFigures, unmatchedTransactions } = matching.pension;
 
-	const figureCount = document.payslips.reduce((running, payslip) => {
-		return running + PENSION_FIGURES.filter((figure) => {
-			return pensionFigureAmount(payslip, figure) !== 0;
-		}).length;
-	}, 0);
-
-	const reach = translator.t('checks.reach.contributions', { count: figureCount });
-	const { unmatchedFigures, unmatchedTransactions } = matching.pension;
+	// Every claim the walk was handed: the ones that paired, and the ones that did not
+	const reach = translator.t('checks.reach.contributions', { count: transactionByFigure.size + unmatchedFigures.length });
 
 	if(unmatchedFigures.length === 0 && unmatchedTransactions.length === 0) {
 		return { id: 'pensionContributionsMatch', passed: true, reach, sides: [] };
@@ -392,14 +403,14 @@ const checkPensionContributionsMatch = (context: CheckContext): CheckResult => {
 
 	const figureEntry = (claim: PensionClaim): CheckEntry => {
 		return {
-			key: `${claim.payslip.id}|${claim.figure}`,
+			key: pensionFigureKey(claim.period, claim.figure),
 			text: translator.t('checks.entries.pensionFigure', {
-				month: monthOf(claim.payslip),
-				contract: contractName(claim.payslip.contractId),
+				period: periodOf(claim.period),
+				contract: contractName(claim.period.contractId),
 				figure: translator.t(`checks.pensionFigures.${claim.figure}`),
 				amount: formatter.amount(claim.amount, true)
 			}),
-			link: payslipLink(claim.payslip)
+			link: periodLink(claim.period)
 		};
 	};
 

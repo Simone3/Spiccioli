@@ -43,7 +43,7 @@ A channel is a request the renderer makes and the main process answers. For even
 src/index.tsx                    mounts React, in StrictMode
   └── TranslationProvider        the translator every component reads wording from (§5)
       └── AppErrorBoundary       catches a render failure so the window is never left empty
-          └── PreferencesProvider  the ten preferences, which are not in the ledger (§10 of the analysis)
+          └── PreferencesProvider  the twelve preferences, which are not in the ledger (§10 of the analysis)
               └── UnsavedDraftProvider  the guard every departure goes through, above the file because closing it is one
                   └── LedgerProvider   the open file: the document, the save state, the storage lines
                       └── ChecksProvider  the fourteen checks and the five pairings, run over whatever file is open (§9)
@@ -108,7 +108,7 @@ A development run keeps its own root so it never touches the real preferences, t
 
 **The ledger is not in this table and never will be.** It lives wherever the user put it, and its backups live beside it in a folder named after it — the file's own name without its extension, plus `-backups`, resolved by `src/main/storage/LedgerBackupNaming.ts` ([§12](../functional/specs/12-storage.md)). That is why the framework's own `RuntimePaths` is not used here: its layout resolves a database folder and a default backup folder inside the user-data folder, and both would be paths nothing ever writes to. See [§4](04-framework.md).
 
-The configuration file holds two things, through `src/main/config/SpiccioliConfigStore.ts`: the ten preferences and the list of recently opened files. Neither is in the ledger, so both survive switching files and neither travels with a ledger that is copied.
+The configuration file holds two things, through `src/main/config/SpiccioliConfigStore.ts`: the twelve preferences and the list of recently opened files. Neither is in the ledger, so both survive switching files and neither travels with a ledger that is copied.
 
 ## 1.7 What is deliberately not here yet
 

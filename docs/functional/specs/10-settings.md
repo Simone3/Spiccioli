@@ -22,6 +22,7 @@ Preferences, and nothing else. Every kind of reference data lives on the screen 
 | transferMatchWindowDays | integer 0 – 31 | 5 | [§11.6](11-calculations.md#116-derived-matching), check 1. How far **after** the sending leg the receiving one may be dated |
 | transferMatchBackwardDays | integer 0 – 31 | 3 | [§11.6](11-calculations.md#116-derived-matching), check 1. How far **before** it the receiving leg may be dated, two banks dating one movement differently; **0 is the forward-only rule** |
 | tradeMatchWindowDays | integer 0 – 31 | 5 | [§11.6](11-calculations.md#116-derived-matching), checks 6 and 7 |
+| pensionContributionMonths | 1 · 2 · 3 · 4 · 6 · 12 | 1 | [§11.6](11-calculations.md#116-derived-matching), check 5. **How many months of payslips one credit into the fund covers.** 1 is a fund crediting every month, 3 one crediting every quarter — against January + February + March added together. The values are the divisors of 12, so a period never straddles a year end ([§13](13-validation.md)) |
 | backupCount | integer 1 – 100 | 10 | [§12](12-storage.md) |
 
 **The three date formats are the three that are unambiguous to write down**, one per order, and the separator inside them is part of the format rather than a choice of its own. **The thousands separator may be none**, which prints `21900,00`; the decimal separator may not be ([§11](11-calculations.md)). The two must differ ([§13](13-validation.md)).

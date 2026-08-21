@@ -10,6 +10,7 @@ import { separatorsCollide } from 'src/logic/preferences/Preferences';
 import {
 	DATE_FORMATS,
 	DECIMAL_SEPARATORS,
+	PENSION_CONTRIBUTION_PERIODS,
 	THOUSANDS_SEPARATORS,
 	type DateFormat,
 	type DecimalSeparator,
@@ -28,7 +29,7 @@ import {
  */
 
 // The preferences this screen carries, which is all of them
-const PREFERENCE_COUNT = 10;
+const PREFERENCE_COUNT = 12;
 
 // Only the field's own floor and ceiling live here; every other rule about a preference is the field's
 const UNBOUNDED = undefined;
@@ -103,6 +104,12 @@ export const SettingsScreen = (): ReactElement => {
 
 	const thousandsSeparatorOptions: readonly SelectOption<ThousandsSeparator>[] = THOUSANDS_SEPARATORS.map((separator) => {
 		return { value: separator, label: t(`settings.separators.${separator}`) };
+	});
+
+	// A closed set rather than a number to type: the lengths that divide a year are the only ones a period may have. The picker
+	// is over strings, a select carrying no other kind of value, so the number is written out here and read back on the way in.
+	const pensionContributionOptions: readonly SelectOption<string>[] = PENSION_CONTRIBUTION_PERIODS.map((months) => {
+		return { value: String(months), label: t('settings.pensionContributionPeriods', { count: months }) };
 	});
 
 	// The two separators must differ, and "none" never collides. A choice that collides is refused with the previous one left in force.
@@ -246,6 +253,15 @@ export const SettingsScreen = (): ReactElement => {
 								suffix={t('settings.units.days')}
 								onChange={(value) => {
 									applyNumber('tradeMatchWindowDays', value);
+								}}/>
+						</SettingsField>
+						<SettingsField label={t('settings.pensionContributionMonths')}>
+							<SelectField
+								value={String(preferences.pensionContributionMonths)}
+								options={pensionContributionOptions}
+								label={t('settings.pensionContributionMonths')}
+								onChange={(value) => {
+									applyNumber('pensionContributionMonths', Number(value));
 								}}/>
 						</SettingsField>
 					</div>
