@@ -1,0 +1,30 @@
+src/components/checks/ChecksScreen.css
+  s_d04198bcd17a66::t_b1b6440b77080c 121-122
+src/components/checks/ChecksScreen.tsx
+  s_d04198bcd17a66::t_477fd62a48fae2 120
+src/i18n/lang/en.ts
+  s_d04198bcd17a66::t_3841ac34901f47 1482-1484,1486-1487,1490-1491
+tests/components/ChecksScreen.test.tsx
+  s_d04198bcd17a66::t_1cca0d1a4521f2 54-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "be50a237d68db2e49575fad3902ad26e481d4562",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d04198bcd17a66": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9a2e7b13-8c87-425b-8307-1f3d7b905436",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
