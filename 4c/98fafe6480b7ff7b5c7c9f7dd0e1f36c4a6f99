@@ -1,0 +1,50 @@
+docs/technical/01-architecture.md
+  s_968f39b03713dd::t_2e9188b089e066 73,97-101
+docs/technical/02-repository-map.md
+  s_968f39b03713dd::t_20b77144de1b11 122
+docs/technical/04-framework.md
+  s_968f39b03713dd::t_459282e49a4ed6 29
+src/config/AppConfig.ts
+  s_968f39b03713dd::t_ca8739f1196ece 111-114
+src/contexts/LedgerContext.tsx
+  s_968f39b03713dd::t_cf7b0af11609f5 4,138-141,165-174,181,198,512,520-526
+src/contexts/UnsavedDraftContext.tsx
+  s_968f39b03713dd::t_6edff83e2830c0 39-44,71,75,79-80
+src/framework/main/storage/RetryingFileWriter.ts
+  s_968f39b03713dd::t_95b3f64a3a7840 17-19,129-130,132-147,149,151-153,155-168
+src/logic/storage/AutosaveScheduler.ts
+  s_968f39b03713dd::t_6dacf34b960306 13-16,25-34,59,84-95
+src/main/Main.ts
+  s_968f39b03713dd::t_0c56fa7cfee27e 155-161,188-193,196-198,206,212-216,221-229
+src/main/storage/LedgerSession.ts
+  s_968f39b03713dd::t_5097179753fa1d 449-458,466-467,485-489
+tests/components/UnwrittenChanges.test.tsx
+  s_968f39b03713dd::t_134c42eddd18c6 7,177-287
+tests/framework/RetryingFileWriter.test.ts
+  s_968f39b03713dd::t_19ba103f5a3a54 151-190
+tests/logic/AutosaveScheduler.test.ts
+  s_968f39b03713dd::t_7414e7839df6c5 49-51,74-76,97-99,128-130,150-152,175-177,211-213,224-280,290-292
+tests/main/LedgerSession.test.ts
+  s_968f39b03713dd::t_340fe0fdc3d315 273-306
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4c98fafe6480b7ff7b5c7c9f7dd0e1f36c4a6f99",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_968f39b03713dd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a9b7a758-d6fe-4e12-a78e-8f5e8a971067",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
