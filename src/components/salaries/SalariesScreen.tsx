@@ -12,10 +12,11 @@ import { PayslipForm, type PayslipFormValues } from 'src/components/salaries/Pay
 import { formatPayslipMonth, PayslipsTable } from 'src/components/salaries/PayslipsTable';
 import { SalaryCharts } from 'src/components/salaries/SalaryCharts';
 import { WorkingDaysForm } from 'src/components/salaries/WorkingDaysForm';
-import { useSalariesHandoff } from 'src/components/shell/RecordLinks';
+import { useSalariesHandoff } from 'src/components/shell/ScreenHandoff';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter } from 'src/contexts/PreferencesContext';
+import { useRemembered } from 'src/contexts/ScreenMemoryContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { createLedgerId } from 'src/logic/ledger/LedgerDocument';
@@ -60,9 +61,10 @@ export const SalariesScreen = (): ReactElement => {
 	const formatter = useFormatter();
 	const { document, updateDocument } = useLedger();
 
-	const [ tab, setTab ] = useState<SalariesTab>('payslips');
-	const [ chosenContractId, setChosenContractId ] = useState<LedgerId | undefined>(undefined);
-	const [ chosenYear, setChosenYear ] = useState<number | undefined>(undefined);
+	// The tab, the contract the screen is scoped to and the year selected under it are what it is found showing ([§12.2])
+	const [ tab, setTab ] = useRemembered<SalariesTab>('salaries', 'tab', 'payslips');
+	const [ chosenContractId, setChosenContractId ] = useRemembered<LedgerId | undefined>('salaries', 'contract', undefined);
+	const [ chosenYear, setChosenYear ] = useRemembered<number | undefined>('salaries', 'year', undefined);
 	const [ contractDraft, setContractDraft ] = useState<ContractDraft | undefined>(undefined);
 	const [ payslipDraft, setPayslipDraft ] = useState<PayslipDraft | undefined>(undefined);
 	const [ contractToDelete, setContractToDelete ] = useState<Contract | undefined>(undefined);
@@ -83,7 +85,7 @@ export const SalariesScreen = (): ReactElement => {
 		setTab('payslips');
 		setChosenContractId(handoff.contractId);
 		setChosenYear(handoff.year);
-	}, [ handoff ]);
+	}, [ handoff, setChosenContractId, setChosenYear, setTab ]);
 
 	const contracts = useMemo(() => {
 		return sortContracts(document?.contracts ?? []);
@@ -109,7 +111,8 @@ export const SalariesScreen = (): ReactElement => {
 			[];
 	}, [ document, selectedContract, today ]);
 
-	// A row of the per-year table is always selected, and on arriving it is the contract's last year
+	// A row of the per-year table is always selected: on first arriving it is the contract's last year, and on coming back the
+	// row that was selected when the screen was left, a year the contract no longer covers falling back to the last one again
 	const isChosenYearCovered = years.some((row) => {
 		return row.year === chosenYear;
 	});

@@ -9,6 +9,7 @@ import { SpiccioliApp } from 'src/components/SpiccioliApp';
 import { ChecksProvider } from 'src/contexts/ChecksContext';
 import { LedgerProvider } from 'src/contexts/LedgerContext';
 import { PreferencesProvider } from 'src/contexts/PreferencesContext';
+import { ScreenMemoryProvider } from 'src/contexts/ScreenMemoryContext';
 import { UnsavedDraftProvider } from 'src/contexts/UnsavedDraftContext';
 import { TranslationProvider } from 'src/i18n/TranslationContext';
 
@@ -24,7 +25,9 @@ root.render(
 						<LedgerProvider>
 							<ChecksProvider>
 								<HashRouter>
-									<SpiccioliApp/>
+									<ScreenMemoryProvider>
+										<SpiccioliApp/>
+									</ScreenMemoryProvider>
 								</HashRouter>
 							</ChecksProvider>
 						</LedgerProvider>

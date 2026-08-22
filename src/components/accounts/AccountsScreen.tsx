@@ -10,6 +10,7 @@ import { EmptyState } from 'src/components/common/EmptyState';
 import { TabBar } from 'src/components/common/TabBar';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useLedger } from 'src/contexts/LedgerContext';
+import { useRemembered } from 'src/contexts/ScreenMemoryContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import {
 	countAccountsPerInstitution,
@@ -56,7 +57,9 @@ export const AccountsScreen = (): ReactElement => {
 	const translator = useTranslator();
 	const { t, formatList } = translator;
 	const { document, updateDocument } = useLedger();
-	const [ tab, setTab ] = useState<AccountsScreenTab>('accounts');
+
+	// Which tab is the one thing this screen is found showing when it is come back to ([§12.2]): it has no filter and no paging
+	const [ tab, setTab ] = useRemembered<AccountsScreenTab>('accounts', 'tab', 'accounts');
 	const [ accountDraft, setAccountDraft ] = useState<AccountDraft | undefined>(undefined);
 	const [ institutionDraft, setInstitutionDraft ] = useState<InstitutionDraft | undefined>(undefined);
 	const [ accountToDelete, setAccountToDelete ] = useState<Account | undefined>(undefined);

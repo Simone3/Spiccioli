@@ -15,13 +15,17 @@ import { StorageNotices } from 'src/components/shell/StorageNotices';
 import { TransactionsScreen } from 'src/components/transactions/TransactionsScreen';
 import { useChecks } from 'src/contexts/ChecksContext';
 import { useLedger } from 'src/contexts/LedgerContext';
+import { useScreenMemory } from 'src/contexts/ScreenMemoryContext';
 
 /**
  * What an open file looks like: the sidebar, and one of the screens beside it.
  *
  * **An opened file lands on Portfolio, with no filter set anywhere.** Which screen was last looked at, which filters were on it
  * and which row was selected are not remembered — not between files and not between sessions — so opening one sends the shell
- * back to Portfolio however it was reached.
+ * back to Portfolio however it was reached and drops what every screen was showing with it.
+ *
+ * **Within one open file they are remembered**, which is what `ScreenMemoryContext` holds and this is the one place that empties:
+ * the memory describes the open file, so it ends where that file does.
  *
  * The routing is "react-router" in declarative mode and nothing more: the router is installed once at the root, over a hash
  * history because a packaged run loads the built page over "file://".
@@ -34,6 +38,7 @@ import { useLedger } from 'src/contexts/LedgerContext';
 export const AppShell = (): ReactElement => {
 	const { filePath } = useLedger();
 	const { failingCount } = useChecks();
+	const { forgetEverything } = useScreenMemory();
 	const navigate = useNavigate();
 
 	// Which file the shell last sent to Portfolio. The router hands back a new "navigate" on every move, so without this the
@@ -46,8 +51,9 @@ export const AppShell = (): ReactElement => {
 		}
 
 		landedFilePathRef.current = filePath;
+		forgetEverything();
 		void navigate(APP_ROUTES.portfolio, { replace: true });
-	}, [ filePath, navigate ]);
+	}, [ filePath, forgetEverything, navigate ]);
 
 	return (
 		<div className='app-shell'>

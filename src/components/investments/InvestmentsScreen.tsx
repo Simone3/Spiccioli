@@ -16,11 +16,12 @@ import { TradeForm, type TradeFormValues } from 'src/components/investments/Trad
 import { TradesTable } from 'src/components/investments/TradesTable';
 import { UpdatePricesDialog } from 'src/components/investments/UpdatePricesDialog';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
-import { useInvestmentsHandoff } from 'src/components/shell/RecordLinks';
+import { useInvestmentsHandoff } from 'src/components/shell/ScreenHandoff';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useChecks } from 'src/contexts/ChecksContext';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter, usePreferences } from 'src/contexts/PreferencesContext';
+import { useRemembered } from 'src/contexts/ScreenMemoryContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { indexInstitutions, isCashAccountType } from 'src/logic/accounts/Accounts';
@@ -101,11 +102,12 @@ export const InvestmentsScreen = (): ReactElement => {
 	// The five pairings, derived by the checks run, of which this screen reads the two that name a trade's bank transaction
 	const { matching: pairings } = useChecks();
 
-	const [ tab, setTab ] = useState<InvestmentsTab>('holdings');
-	const [ purchaseFilters, setPurchaseFilters ] = useState<TradeFilters>(NO_TRADE_FILTERS);
-	const [ saleFilters, setSaleFilters ] = useState<TradeFilters>(NO_TRADE_FILTERS);
-	const [ selectedHoldingKey, setSelectedHoldingKey ] = useState<string | undefined>(undefined);
-	const [ selectedSecurityId, setSelectedSecurityId ] = useState<LedgerId | undefined>(undefined);
+	// The tab, the two filter sets and the two selections are what the screen is found showing when it is come back to ([§12.2])
+	const [ tab, setTab ] = useRemembered<InvestmentsTab>('investments', 'tab', 'holdings');
+	const [ purchaseFilters, setPurchaseFilters ] = useRemembered('investments', 'purchaseFilters', NO_TRADE_FILTERS);
+	const [ saleFilters, setSaleFilters ] = useRemembered('investments', 'saleFilters', NO_TRADE_FILTERS);
+	const [ selectedHoldingKey, setSelectedHoldingKey ] = useRemembered<string | undefined>('investments', 'holding', undefined);
+	const [ selectedSecurityId, setSelectedSecurityId ] = useRemembered<LedgerId | undefined>('investments', 'security', undefined);
 	const [ securityDraft, setSecurityDraft ] = useState<SecurityDraft | undefined>(undefined);
 	const [ tradeDraft, setTradeDraft ] = useState<TradeDraft | undefined>(undefined);
 	const [ securityToDelete, setSecurityToDelete ] = useState<Security | undefined>(undefined);
@@ -117,7 +119,8 @@ export const InvestmentsScreen = (): ReactElement => {
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
 
 	// A check entry arrives with the tab its record lives on and the filters that select it, and changes nothing else about
-	// the screen: the same tables, the same orderings, every control free to be changed or cleared
+	// the screen: the same tables, the same orderings, every control free to be changed or cleared. What the screen was left
+	// showing was forgotten before it arrived, so what is set below is the whole of what is set.
 	const handoff = useInvestmentsHandoff();
 
 	useEffect(() => {
@@ -146,7 +149,7 @@ export const InvestmentsScreen = (): ReactElement => {
 		else {
 			setSaleFilters(handedFilters);
 		}
-	}, [ handoff ]);
+	}, [ handoff, setPurchaseFilters, setSaleFilters, setSelectedSecurityId, setTab ]);
 
 	const trades = useMemo(() => {
 		return document?.trades ?? [];

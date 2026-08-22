@@ -7,7 +7,7 @@ import { SelectField, type SelectOption } from 'src/components/common/SelectFiel
 import { ImportPreviewTable } from 'src/components/import/ImportPreviewTable';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
-import { useHandOverToTransactions } from 'src/components/shell/TransactionHandoff';
+import { useHandOverToTransactions } from 'src/components/shell/ScreenHandoff';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter, usePreferences } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';

@@ -1,6 +1,6 @@
 import 'src/components/checks/ChecksScreen.css';
 import type { ReactElement } from 'react';
-import { useFollowCheckLink } from 'src/components/shell/RecordLinks';
+import { useFollowCheckLink } from 'src/components/shell/ScreenHandoff';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useChecks } from 'src/contexts/ChecksContext';
 import { useTranslator } from 'src/i18n/TranslationContext';

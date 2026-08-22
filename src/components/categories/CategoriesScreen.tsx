@@ -12,8 +12,9 @@ import { FilterBar, FilterBarFilter } from 'src/components/common/FilterBar';
 import { SelectField, type SelectOption } from 'src/components/common/SelectField';
 import { TabBar } from 'src/components/common/TabBar';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
-import { useHandOverToTransactions } from 'src/components/shell/TransactionHandoff';
+import { useHandOverToTransactions } from 'src/components/shell/ScreenHandoff';
 import { useLedger } from 'src/contexts/LedgerContext';
+import { useRemembered } from 'src/contexts/ScreenMemoryContext';
 import { useUnsavedDraft, useUnsavedDraftGuard } from 'src/contexts/UnsavedDraftContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { useTranslator } from 'src/i18n/TranslationContext';
@@ -72,8 +73,13 @@ export const CategoriesScreen = (): ReactElement => {
 	const { requestDeparture } = useUnsavedDraftGuard();
 	const handOverToTransactions = useHandOverToTransactions();
 
-	const [ tab, setTab ] = useState<CategoriesScreenTab>('report');
-	const [ reportFilters, setReportFilters ] = useState<CategoryReportFilters>({ years: 'last-5', accountId: undefined });
+	// The tab and the report's two filters are what the screen is found showing when it is come back to ([§12.2]). The rule
+	// draft below is not: leaving the screen with one pending is what the unsaved-draft prompt asks about, and its answer is discard
+	const [ tab, setTab ] = useRemembered<CategoriesScreenTab>('categories', 'tab', 'report');
+	const [ reportFilters, setReportFilters ] = useRemembered<CategoryReportFilters>('categories', 'reportFilters', {
+		years: 'last-5',
+		accountId: undefined
+	});
 	const [ ruleFormDraft, setRuleFormDraft ] = useState<RuleFormDraft | undefined>(undefined);
 	const [ isApplying, setIsApplying ] = useState(false);
 

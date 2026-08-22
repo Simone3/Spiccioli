@@ -6,13 +6,14 @@ import { EmptyState } from 'src/components/common/EmptyState';
 import { Pager } from 'src/components/common/Pager';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
-import { useTransactionHandoff } from 'src/components/shell/TransactionHandoff';
+import { useTransactionHandoff } from 'src/components/shell/ScreenHandoff';
 import { TransactionFiltersBar } from 'src/components/transactions/TransactionFilters';
 import { TransactionForm, type TransactionFormValues } from 'src/components/transactions/TransactionForm';
 import { TransactionsTable } from 'src/components/transactions/TransactionsTable';
 import { useChecks } from 'src/contexts/ChecksContext';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter } from 'src/contexts/PreferencesContext';
+import { useRemembered } from 'src/contexts/ScreenMemoryContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { indexInstitutions } from 'src/logic/accounts/Accounts';
 import { indexCategories } from 'src/logic/categories/Categories';
@@ -45,7 +46,10 @@ import type { Account, LedgerId, Transaction } from 'src/types/LedgerTypes';
  * or given a new description carries whatever the rule list produces, and a category set by hand is never touched by any of it.
  *
  * **A selection survives paging and nothing else.** Changing a filter, correcting a row, duplicating, deleting and the bulk
- * delete itself all clear it.
+ * delete itself all clear it, and leaving the screen is one of the things that does.
+ *
+ * **The filters and the page are what the screen is found showing when it is come back to** ([§12.2]): they are remembered for
+ * as long as the file is open, and a hand-over forgets them before it arrives, which is what makes an arrival a fresh one.
  */
 
 // The record a form is open on. An undefined record is one being created; an undefined draft is a form that is not open.
@@ -72,10 +76,10 @@ export const TransactionsScreen = (): ReactElement => {
 	const { matching: pairings } = useChecks();
 	const handoff = useTransactionHandoff();
 
-	// However the screen is reached, it is the same screen: a finished import sets the filters where the user would have set them
-	const [ filters, setFilters ] = useState<TransactionFilters>(() => {
-		return { ...NO_TRANSACTION_FILTERS, ...handoff };
-	});
+	// However the screen is reached, it is the same screen: a finished import sets the filters where the user would have set them,
+	// and a screen handed nothing at all opens on the filters it was left showing
+	const handedFilters: TransactionFilters = { ...NO_TRANSACTION_FILTERS, ...handoff };
+	const [ filters, setFilters ] = useRemembered('transactions', 'filters', handedFilters);
 	const [ selection, setSelection ] = useState<ReadonlySet<LedgerId>>(new Set<LedgerId>());
 	const [ rangeAnchorId, setRangeAnchorId ] = useState<LedgerId | undefined>(undefined);
 	const [ transactionDraft, setTransactionDraft ] = useState<TransactionDraft | undefined>(undefined);
@@ -98,8 +102,8 @@ export const TransactionsScreen = (): ReactElement => {
 		return filterTransactions(ordered, filters);
 	}, [ filters, ordered ]);
 
-	// The first page of what the filters match, which is where the screen opens however it was reached
-	const [ requestedPage, setRequestedPage ] = useState(FIRST_TRANSACTION_PAGE);
+	// The first page of what the filters match, which is where a screen opened for the first time and an arrival both start
+	const [ requestedPage, setRequestedPage ] = useRemembered('transactions', 'page', FIRST_TRANSACTION_PAGE);
 
 	const accounts = useMemo((): ReadonlyMap<LedgerId, Account> => {
 		return new Map((document?.accounts ?? []).map((account) => {

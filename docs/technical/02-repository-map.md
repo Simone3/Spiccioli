@@ -61,14 +61,13 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/common/AppErrorBoundary.tsx` `.css` | The crash screen the renderer draws over itself, and the report it sends to the log |
 | `components/common/` | The kit every screen is made of, one `.tsx` and one `.css` per control: `AppButton` (and the link that looks like one), `DecimalField` with the `NumericFields` it is used as, `TextField`, `DateField`, `SelectField`, `DataTable` — with the totals row a column opts into by carrying a `total`, so a total sits under the column it totals — `RowMenu`, `TabBar`, `FormDialog` with the `FormField` rows it holds and the `FormSection` heading that names a run of them, `ConfirmDialog`, `FilterBar`, `EmptyState`, `Chip`, `Pager` — the five controls a paginated table is walked with, which the transactions list and a price history share — `HintNote` — the note a figure carries, which is a real control so the keyboard reaches it — and `LineChart` with `PieChart`, **the only two files that import the charting library**, with `ChartAxisFormat` beside them for the one thing a chart's value axis writes that the charts themselves know nothing about |
 | `components/shell/AppRoutes.ts` | The nine paths and the eight sidebar entries, written down once |
-| `components/shell/AppShell.tsx` `.css` | The sidebar and the routed screen beside it, and the return to Portfolio when the open file changes |
+| `components/shell/AppShell.tsx` `.css` | The sidebar and the routed screen beside it, and the return to Portfolio — with every screen's memory emptied — when the open file changes |
 | `components/shell/Sidebar.tsx` `.css` | The eight screens, the failing-check badge and the save state ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)) |
 | `components/shell/ScreenLayout.tsx` `.css` | The shape every screen has — a heading, what the screen says about what it is showing, the controls beside it — and nothing of any screen's own |
 | `components/shell/StorageNotices.tsx` `.css` | The three lines the file can put on whichever screen the user is on |
 | `components/shell/TitleBar.tsx` `.css` | The row drawn where the window has no title bar of its own: the menu bar, and the open file's name |
 | `components/shell/MenuBar.tsx` `.css` | That menu bar itself — the pointer, the keyboard, and the one submenu of a submenu the menu has |
-| `components/shell/TransactionHandoff.ts` | How one screen hands its filters to Transactions, over the router's own location state ([§5.2](../functional/specs/05-transactions.md#52-ordering-and-paging)) |
-| `components/shell/RecordLinks.ts` | The same thing for Investments and Salaries, and the follow of a check entry to the record it names ([§9](../functional/specs/09-checks.md)) |
+| `components/shell/ScreenHandoff.ts` | Every hand-over there is, over the router's own location state: the filters one screen hands to Transactions, Investments or Salaries, and the follow of a check entry to the record it names ([§5.2](../functional/specs/05-transactions.md#52-ordering-and-paging), [§9](../functional/specs/09-checks.md)). **It is also the one place a screen is started over before it is arrived at** ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)) |
 | `components/launch/LaunchScreen.tsx` `.css` | The screen the application always opens with ([§12.1](../functional/specs/12-storage.md#121-the-launch-screen)) |
 | `components/launch/UpgradeDialog.tsx` | Its second panel: a file written by an older version |
 | `components/session/WriteFailurePanel.tsx` `.css` | The blocking message after five failed attempts, which belongs to no screen |
@@ -85,6 +84,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `contexts/ChecksContext.tsx` | The one place the fourteen checks run and the five pairings are derived: undebounced on opening a file, debounced after every change, superseded by the next ([§9](../functional/specs/09-checks.md)) |
 | `contexts/LedgerContext.tsx` | The ledger in memory, the autosave, the save state, the storage lines |
 | `contexts/PreferencesContext.tsx` | The thirteen preferences, read once and written as they change, and the formatter they define |
+| `contexts/ScreenMemoryContext.tsx` | What each screen is found showing when it is come back to, and the `useRemembered` a screen holds a field in ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)) |
 | `contexts/UnsavedDraftContext.tsx` | The guard every departure goes through, and the draft a screen registers with it ([§1.3](01-architecture.md#13-layers-inside-the-renderer)) |
 | `i18n/Translations.ts` | Turns a language into a translator; the bundle registry |
 | `i18n/TranslationContext.tsx` | The React binding of that translator |

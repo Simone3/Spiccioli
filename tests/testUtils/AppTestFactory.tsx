@@ -9,6 +9,7 @@ import type { LedgerDocument } from 'src/types/LedgerTypes';
 import { ChecksProvider } from 'src/contexts/ChecksContext';
 import { LedgerProvider } from 'src/contexts/LedgerContext';
 import { PreferencesProvider } from 'src/contexts/PreferencesContext';
+import { ScreenMemoryProvider } from 'src/contexts/ScreenMemoryContext';
 import { UnsavedDraftProvider } from 'src/contexts/UnsavedDraftContext';
 import { TranslationProvider } from 'src/i18n/TranslationContext';
 import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
@@ -193,7 +194,9 @@ const AppTestProviders = ({ children }: { children: ReactNode }): ReactElement =
 				<UnsavedDraftProvider>
 					<LedgerProvider>
 						<ChecksProvider>
-							<MemoryRouter>{children}</MemoryRouter>
+							<MemoryRouter>
+								<ScreenMemoryProvider>{children}</ScreenMemoryProvider>
+							</MemoryRouter>
 						</ChecksProvider>
 					</LedgerProvider>
 				</UnsavedDraftProvider>

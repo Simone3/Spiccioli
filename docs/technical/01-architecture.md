@@ -48,7 +48,8 @@ src/index.tsx                    mounts React, in StrictMode
                   └── LedgerProvider   the open file: the document, the save state, the storage lines
                       └── ChecksProvider  the fourteen checks and the five pairings, run over whatever file is open (§9)
                           └── HashRouter   the one router, installed once, over a hash history
-                              └── SpiccioliApp the launch screen, or the shell around one of the screens
+                              └── ScreenMemoryProvider what each screen is found showing while the file stays open (§12.2)
+                                  └── SpiccioliApp the launch screen, or the shell around one of the screens
 ```
 
 `SpiccioliApp` puts `TitleBar` above both of its states, and on most platforms it draws nothing at all: the main process answers with no menu, and the window keeps the title bar and the menu bar the operating system gave it. Where it does draw — Windows, outside a development run — the row is the menu bar and the window title both, so the launch screen needs it as much as an open file does. The file's name is read from `LedgerProvider` rather than from the window, because `setTitle` in the main process is invisible to the page.
@@ -67,7 +68,11 @@ The failure goes to the operational log over `window.spiccioliDiagnostics`, beca
 
 `UnsavedDraftProvider` sits **above** `LedgerProvider`, because two of the three departures it guards are the file's: **the rule list of [§6.2](../functional/specs/06-categories.md#62-rules) is the one thing on screen that is not in the file**, so leaving the screen, closing the file and quitting all ask first, and each offers discard and stay and nothing else. A screen holding a draft registers it, the sidebar routes its links through the guard because the router is declarative and has no blocker of its own, and a quit that is stayed is called off in the main process over `cancelClose` — the only answer to *prepare for close* that is not a close.
 
-**The router is installed once, at the root, and the launch screen is not a route.** `SpiccioliApp` is still the two states — no file, or one open — and the routes live inside the shell, so a file that is not open has no screen to be on. `AppShell` sends the shell back to Portfolio whenever the open file changes, because which screen was last looked at is not remembered ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)).
+**The router is installed once, at the root, and the launch screen is not a route.** `SpiccioliApp` is still the two states — no file, or one open — and the routes live inside the shell, so a file that is not open has no screen to be on. `AppShell` sends the shell back to Portfolio whenever the open file changes, because which screen was last looked at is not remembered between files ([§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open)).
+
+`ScreenMemoryProvider` sits **below** the router and holds what each screen is found showing while one file stays open — the tab, the filters and the row selected, and nothing a screen was in the middle of doing. **A screen keeps its own state and this is only where it survives being unmounted**: `useRemembered` is `useState` with a read of the memory at mount and a write of it after every change, so a screen the router has taken down is rebuilt showing what it showed. **It is a ref and never state**, because nothing renders from it — a write of it must not redraw the screen that made it.
+
+**Two things empty it, and they are the two the specification names.** `AppShell` empties the whole of it in the same effect that lands a newly opened file on Portfolio, the memory describing the open file and ending where it does; `ScreenHandoff` empties one screen's before navigating to it, which is what makes an arrival from a report cell, a finished import or a check entry a fresh one. **Both hand-overs were merged into that one module for exactly this reason** — forgetting and navigating are one action, and a second module that navigated with location state of its own would eventually forget to forget.
 
 ## 1.4 What the main process does at startup
 
