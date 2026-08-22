@@ -1,0 +1,66 @@
+docs/functional/specs/05-transactions.md
+  s_bb7f1fed41d7f1::t_b0b2586731a1d1 25,28,42
+docs/functional/specs/06-categories.md
+  s_bb7f1fed41d7f1::t_dd3557307d521d 33
+docs/functional/specs/08-salaries.md
+  s_bb7f1fed41d7f1::t_46882c6afb3fb2 26
+docs/functional/specs/12-storage.md
+  s_bb7f1fed41d7f1::t_7f964f5eecb617 68-70
+docs/functional/why/12-storage.md
+  s_bb7f1fed41d7f1::t_006d053a81d7ad 31-34
+CLAUDE.md
+  s_bb7f1fed41d7f1::t_35c1d15af44934 75-76
+docs/technical/01-architecture.md
+  s_bb7f1fed41d7f1::t_59227c4b7524fc 51-52,71-75
+docs/technical/02-repository-map.md
+  s_bb7f1fed41d7f1::t_d283a341cb4f95 64,70,87
+docs/technical/08-decisions-why.md
+  s_bb7f1fed41d7f1::t_dd367dd6c462ee 21
+src/components/accounts/AccountsScreen.tsx
+  s_bb7f1fed41d7f1::t_3a2f8e93eafc78 13,60-62
+src/components/categories/CategoriesScreen.tsx
+  s_bb7f1fed41d7f1::t_7fc5f180565a31 15,17,76-82
+src/components/checks/ChecksScreen.tsx
+  s_bb7f1fed41d7f1::t_0311ee1b035987 3
+src/components/import/BulkImportScreen.tsx
+  s_bb7f1fed41d7f1::t_cb6bdb22b087f0 10
+src/components/investments/InvestmentsScreen.tsx
+  s_bb7f1fed41d7f1::t_28cad52cee90da 19,24,105-110,122-123,152
+src/components/salaries/SalariesScreen.tsx
+  s_bb7f1fed41d7f1::t_05ad27c3507b81 15,19,64-67,88,114-115
+src/components/shell/AppShell.tsx
+  s_bb7f1fed41d7f1::t_c8dc8133bb6ce1 18,25-28,41,54,56
+src/components/shell/ScreenHandoff.ts
+  s_bb7f1fed41d7f1::t_277365f43d481e 4,9,11-23,25-26,29-39,62-72,75,85,93-121,131-134,138-139,141-142,146,151-155,159-165,169-172,176,181,187,189
+src/components/transactions/TransactionsScreen.tsx
+  s_bb7f1fed41d7f1::t_8f1a9976bbe129 9,16,49-52,79-82,105-106
+src/contexts/ScreenMemoryContext.tsx
+  s_bb7f1fed41d7f1::t_1366b05b455e2f 1-150
+src/index.tsx
+  s_bb7f1fed41d7f1::t_f461ebbd75ae78 12,28-30
+tests/components/ScreenMemory.test.tsx
+  s_bb7f1fed41d7f1::t_a41348da82cddd 1-171
+tests/testUtils/AppTestFactory.tsx
+  s_bb7f1fed41d7f1::t_7467f8a36bdef1 12,197-199
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "474c86ca4ff5109b26cdea6c02929976435e1565",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_bb7f1fed41d7f1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4d9c805-2533-4788-8129-997c4c2e2624",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
