@@ -1,7 +1,6 @@
 
 .settings-screen-scope {
 	margin: 0;
-	max-width: 80ch;
 	font-size: 13px;
 	line-height: 1.6;
 	color: var(--colors-text-secondary);
