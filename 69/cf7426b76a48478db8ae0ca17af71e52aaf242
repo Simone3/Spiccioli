@@ -1,0 +1,58 @@
+src/config/AppConfig.ts
+  s_553821f388648a::t_56b85bebd0c067 81-85
+src/framework/i18n/Translator.ts
+  s_553821f388648a::t_fd146e90b0c2a2 31,137-144,155
+src/framework/types/TranslationTypes.ts
+  s_553821f388648a::t_f9d78a09668c14 42-44
+CLAUDE.md
+  s_553821f388648a::t_21d3e9e5541b68 57
+docs/technical/05-text-and-languages.md
+  s_553821f388648a::t_1e1cb68ac736d2 36-37
+docs/technical/08-decisions.md
+  s_553821f388648a::t_4bd4b66f975d3a 93
+docs/technical/09-file-format.md
+  s_553821f388648a::t_0acca4da90e40b 224-225
+src/components/launch/LaunchScreen.tsx
+  s_553821f388648a::t_643fd0539ff2b9 60
+src/contexts/LedgerContext.tsx
+  s_553821f388648a::t_5051306fd576b8 7,172,284
+src/i18n/lang/en.ts
+  s_553821f388648a::t_63faf70569473b 1442-1444,1447-1462,1476-1490,1493-1496
+src/logic/ledger/LedgerFields.ts
+  s_553821f388648a::t_70476c87368e3d 1,19-22,27-45,55,62,68,83,93,107,121,139,143,176,205
+src/logic/ledger/LedgerReader.ts
+  s_553821f388648a::t_ba5c477e1bd506 18,127-163,170,297,326,335,337-344,382,385,389,392-394,397-400,403-406,409-415,418,421,427,478,484
+src/logic/ledger/LedgerRefusal.ts
+  s_553821f388648a::t_cdb0f3a6e0471c 1-2,9-15,65-69,76-79,85-117
+src/logic/ledger/LedgerRefusalMessage.ts
+  s_553821f388648a::t_d11a390c008784 2,7,9-15,47-60,62-79,83-85,88-89,91-98,100-118,121-124,126-131
+src/types/LedgerIpcTypes.ts
+  s_553821f388648a::t_bd1d8b78e4bd61 1,46-49
+tests/framework/Translator.test.ts
+  s_553821f388648a::t_d9dcb3027fff46 63-72
+tests/logic/LedgerReader.test.ts
+  s_553821f388648a::t_18aa46a5a7ca04 1,7,135,145,226-273,275,281-283,285-295,307
+tests/testUtils/TranslationTestFactory.tsx
+  s_553821f388648a::t_3086c0b5f2d388 5-6,17-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "69cf7426b76a48478db8ae0ca17af71e52aaf242",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_553821f388648a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01bae1f1-4efa-4a09-a773-7c3d4736bf07",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
