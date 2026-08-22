@@ -40,6 +40,21 @@ const BACKUP_COUNT_MINIMUM = 1;
 
 const BACKUP_COUNT_MAXIMUM = 100;
 
+interface SettingsGroupProps {
+	title: string;
+	children: ReactNode;
+}
+
+// A group is what it is called in the gutter and its rows beside it, all three sharing the one panel the screen is
+const SettingsGroup = ({ title, children }: SettingsGroupProps): ReactElement => {
+	return (
+		<section className='settings-screen-group'>
+			<h2 className='settings-screen-group-title'>{title}</h2>
+			<div className='settings-screen-rows'>{children}</div>
+		</section>
+	);
+};
+
 interface SettingsFieldProps {
 	label: string;
 	children: ReactNode;
@@ -47,10 +62,10 @@ interface SettingsFieldProps {
 
 const SettingsField = ({ label, children }: SettingsFieldProps): ReactElement => {
 	return (
-		<>
+		<div className='settings-screen-row'>
 			<span className='settings-screen-field-label'>{label}</span>
 			{children}
-		</>
+		</div>
 	);
 };
 
@@ -141,149 +156,138 @@ export const SettingsScreen = (): ReactElement => {
 				<strong>{t('settings.scopeTitle')}</strong> {t('settings.scopeExplanation')}
 			</p>
 
-			<div className='settings-screen-cards'>
-				<section className='settings-screen-card'>
-					<h2 className='settings-screen-card-title'>{t('settings.formats')}</h2>
-					<div className='settings-screen-fields'>
-						<SettingsField label={t('settings.dateFormat')}>
-							<SelectField
-								value={preferences.dateFormat}
-								options={dateFormatOptions}
-								label={t('settings.dateFormat')}
-								onChange={(value) => {
-									apply('dateFormat', value);
-								}}/>
-						</SettingsField>
-						<SettingsField label={t('settings.decimalSeparator')}>
-							<SelectField
-								value={preferences.decimalSeparator}
-								options={decimalSeparatorOptions}
-								label={t('settings.decimalSeparator')}
-								refusal={separatorRefusal === 'decimal' ? t('settings.separatorsMustDiffer') : undefined}
-								onChange={changeDecimalSeparator}/>
-						</SettingsField>
-						<SettingsField label={t('settings.thousandsSeparator')}>
-							<SelectField
-								value={preferences.thousandsSeparator}
-								options={thousandsSeparatorOptions}
-								label={t('settings.thousandsSeparator')}
-								refusal={separatorRefusal === 'thousands' ? t('settings.separatorsMustDiffer') : undefined}
-								onChange={changeThousandsSeparator}/>
-						</SettingsField>
-					</div>
-				</section>
+			<div className='settings-screen-sheet'>
+				<SettingsGroup title={t('settings.formats')}>
+					<SettingsField label={t('settings.dateFormat')}>
+						<SelectField
+							value={preferences.dateFormat}
+							options={dateFormatOptions}
+							label={t('settings.dateFormat')}
+							onChange={(value) => {
+								apply('dateFormat', value);
+							}}/>
+					</SettingsField>
+					<SettingsField label={t('settings.decimalSeparator')}>
+						<SelectField
+							value={preferences.decimalSeparator}
+							options={decimalSeparatorOptions}
+							label={t('settings.decimalSeparator')}
+							refusal={separatorRefusal === 'decimal' ? t('settings.separatorsMustDiffer') : undefined}
+							onChange={changeDecimalSeparator}/>
+					</SettingsField>
+					<SettingsField label={t('settings.thousandsSeparator')}>
+						<SelectField
+							value={preferences.thousandsSeparator}
+							options={thousandsSeparatorOptions}
+							label={t('settings.thousandsSeparator')}
+							refusal={separatorRefusal === 'thousands' ? t('settings.separatorsMustDiffer') : undefined}
+							onChange={changeThousandsSeparator}/>
+					</SettingsField>
+				</SettingsGroup>
 
-				<section className='settings-screen-card'>
-					<h2 className='settings-screen-card-title'>{t('settings.thresholds')}</h2>
-					<div className='settings-screen-fields'>
-						<SettingsField label={t('settings.defaultTaxRate')}>
-							<PercentageField
-								value={preferences.defaultTaxRate}
-								label={t('settings.defaultTaxRate')}
-								required
-								onChange={(value) => {
-									applyNumber('defaultTaxRate', value);
-								}}/>
-						</SettingsField>
-						<SettingsField label={t('settings.priceStalenessDays')}>
-							<IntegerField
-								value={preferences.priceStalenessDays}
-								label={t('settings.priceStalenessDays')}
-								minimum={1}
-								maximum={UNBOUNDED}
-								required
-								suffix={t('settings.units.days')}
-								onChange={(value) => {
-									applyNumber('priceStalenessDays', value);
-								}}/>
-						</SettingsField>
-						<SettingsField label={t('settings.pensionRevaluationMonths')}>
-							<IntegerField
-								value={preferences.pensionRevaluationMonths}
-								label={t('settings.pensionRevaluationMonths')}
-								minimum={1}
-								required
-								suffix={t('settings.units.months')}
-								onChange={(value) => {
-									applyNumber('pensionRevaluationMonths', value);
-								}}/>
-						</SettingsField>
-						<SettingsField label={t('settings.receiptPendingMonths')}>
-							<IntegerField
-								value={preferences.receiptPendingMonths}
-								label={t('settings.receiptPendingMonths')}
-								minimum={1}
-								required
-								suffix={t('settings.units.months')}
-								onChange={(value) => {
-									applyNumber('receiptPendingMonths', value);
-								}}/>
-						</SettingsField>
-						<SettingsField label={t('settings.transferMatchWindowDays')}>
-							<IntegerField
-								value={preferences.transferMatchWindowDays}
-								label={t('settings.transferMatchWindowDays')}
-								minimum={0}
-								maximum={MATCH_WINDOW_MAXIMUM_DAYS}
-								required
-								suffix={t('settings.units.days')}
-								onChange={(value) => {
-									applyNumber('transferMatchWindowDays', value);
-								}}/>
-						</SettingsField>
-						<SettingsField label={t('settings.transferMatchBackwardDays')}>
-							<IntegerField
-								value={preferences.transferMatchBackwardDays}
-								label={t('settings.transferMatchBackwardDays')}
-								minimum={0}
-								maximum={MATCH_WINDOW_MAXIMUM_DAYS}
-								required
-								suffix={t('settings.units.days')}
-								onChange={(value) => {
-									applyNumber('transferMatchBackwardDays', value);
-								}}/>
-						</SettingsField>
-						<SettingsField label={t('settings.tradeMatchWindowDays')}>
-							<IntegerField
-								value={preferences.tradeMatchWindowDays}
-								label={t('settings.tradeMatchWindowDays')}
-								minimum={0}
-								maximum={MATCH_WINDOW_MAXIMUM_DAYS}
-								required
-								suffix={t('settings.units.days')}
-								onChange={(value) => {
-									applyNumber('tradeMatchWindowDays', value);
-								}}/>
-						</SettingsField>
-						<SettingsField label={t('settings.pensionContributionMonths')}>
-							<SelectField
-								value={String(preferences.pensionContributionMonths)}
-								options={pensionContributionOptions}
-								label={t('settings.pensionContributionMonths')}
-								onChange={(value) => {
-									applyNumber('pensionContributionMonths', Number(value));
-								}}/>
-						</SettingsField>
-					</div>
-				</section>
+				<SettingsGroup title={t('settings.thresholds')}>
+					<SettingsField label={t('settings.defaultTaxRate')}>
+						<PercentageField
+							value={preferences.defaultTaxRate}
+							label={t('settings.defaultTaxRate')}
+							required
+							onChange={(value) => {
+								applyNumber('defaultTaxRate', value);
+							}}/>
+					</SettingsField>
+					<SettingsField label={t('settings.priceStalenessDays')}>
+						<IntegerField
+							value={preferences.priceStalenessDays}
+							label={t('settings.priceStalenessDays')}
+							minimum={1}
+							maximum={UNBOUNDED}
+							required
+							suffix={t('settings.units.days')}
+							onChange={(value) => {
+								applyNumber('priceStalenessDays', value);
+							}}/>
+					</SettingsField>
+					<SettingsField label={t('settings.pensionRevaluationMonths')}>
+						<IntegerField
+							value={preferences.pensionRevaluationMonths}
+							label={t('settings.pensionRevaluationMonths')}
+							minimum={1}
+							required
+							suffix={t('settings.units.months')}
+							onChange={(value) => {
+								applyNumber('pensionRevaluationMonths', value);
+							}}/>
+					</SettingsField>
+					<SettingsField label={t('settings.receiptPendingMonths')}>
+						<IntegerField
+							value={preferences.receiptPendingMonths}
+							label={t('settings.receiptPendingMonths')}
+							minimum={1}
+							required
+							suffix={t('settings.units.months')}
+							onChange={(value) => {
+								applyNumber('receiptPendingMonths', value);
+							}}/>
+					</SettingsField>
+					<SettingsField label={t('settings.transferMatchWindowDays')}>
+						<IntegerField
+							value={preferences.transferMatchWindowDays}
+							label={t('settings.transferMatchWindowDays')}
+							minimum={0}
+							maximum={MATCH_WINDOW_MAXIMUM_DAYS}
+							required
+							suffix={t('settings.units.days')}
+							onChange={(value) => {
+								applyNumber('transferMatchWindowDays', value);
+							}}/>
+					</SettingsField>
+					<SettingsField label={t('settings.transferMatchBackwardDays')}>
+						<IntegerField
+							value={preferences.transferMatchBackwardDays}
+							label={t('settings.transferMatchBackwardDays')}
+							minimum={0}
+							maximum={MATCH_WINDOW_MAXIMUM_DAYS}
+							required
+							suffix={t('settings.units.days')}
+							onChange={(value) => {
+								applyNumber('transferMatchBackwardDays', value);
+							}}/>
+					</SettingsField>
+					<SettingsField label={t('settings.tradeMatchWindowDays')}>
+						<IntegerField
+							value={preferences.tradeMatchWindowDays}
+							label={t('settings.tradeMatchWindowDays')}
+							minimum={0}
+							maximum={MATCH_WINDOW_MAXIMUM_DAYS}
+							required
+							suffix={t('settings.units.days')}
+							onChange={(value) => {
+								applyNumber('tradeMatchWindowDays', value);
+							}}/>
+					</SettingsField>
+					<SettingsField label={t('settings.pensionContributionMonths')}>
+						<SelectField
+							value={String(preferences.pensionContributionMonths)}
+							options={pensionContributionOptions}
+							label={t('settings.pensionContributionMonths')}
+							onChange={(value) => {
+								applyNumber('pensionContributionMonths', Number(value));
+							}}/>
+					</SettingsField>
+				</SettingsGroup>
 
-				<section className='settings-screen-card'>
-					<h2 className='settings-screen-card-title'>{t('settings.file')}</h2>
-					<div className='settings-screen-fields'>
-						<SettingsField label={t('settings.backupCount')}>
-							<IntegerField
-								value={preferences.backupCount}
-								label={t('settings.backupCount')}
-								minimum={BACKUP_COUNT_MINIMUM}
-								maximum={BACKUP_COUNT_MAXIMUM}
-								required
-								onChange={(value) => {
-									applyNumber('backupCount', value);
-								}}/>
-						</SettingsField>
-					</div>
-
-					<hr className='settings-screen-separator'/>
+				<SettingsGroup title={t('settings.file')}>
+					<SettingsField label={t('settings.backupCount')}>
+						<IntegerField
+							value={preferences.backupCount}
+							label={t('settings.backupCount')}
+							minimum={BACKUP_COUNT_MINIMUM}
+							maximum={BACKUP_COUNT_MAXIMUM}
+							required
+							onChange={(value) => {
+								applyNumber('backupCount', value);
+							}}/>
+					</SettingsField>
 
 					<dl className='settings-screen-paths'>
 						<div className='settings-screen-path'>
@@ -295,7 +299,7 @@ export const SettingsScreen = (): ReactElement => {
 							<dd>{backupDirectory ?? t('settings.pathUnknown')}</dd>
 						</div>
 					</dl>
-				</section>
+				</SettingsGroup>
 			</div>
 		</ScreenLayout>
 	);

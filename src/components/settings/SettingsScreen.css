@@ -11,26 +11,43 @@
 	font-weight: 700;
 }
 
-.settings-screen-cards {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-	gap: 16px;
-	align-items: start;
-}
-
-.settings-screen-card {
-	padding: 16px 18px;
+/* One panel for the whole screen rather than a box per group: three boxes holding three, eight and one row can never be the
+   same height, and each one measuring its own field column is what stops the controls from lining up with each other.
+   It stops growing where a row would put a stretch of nothing between what a preference is called and the control holding it. */
+.settings-screen-sheet {
+	max-width: 1000px;
+	padding: 4px 20px;
 	background-color: var(--colors-background-secondary);
 	border: 1px solid var(--colors-border-subtle);
 	border-radius: 10px;
-	display: flex;
-	flex-direction: column;
-	gap: 14px;
 	min-width: 0;
 }
 
-.settings-screen-card-title {
+/* What a group is called sits in the gutter beside its rows, so the width a wide window gives goes to the label column
+   instead of stretching a picker across a third of the screen. */
+.settings-screen-group {
+	display: grid;
+	grid-template-columns: 190px minmax(0, 1fr);
+	gap: 24px;
+	padding: 18px 0;
+}
+
+.settings-screen-group + .settings-screen-group {
+	border-top: 1px solid var(--colors-border-subtle);
+}
+
+/* The gutter, the rows and the control column want about 580px of screen, which a window narrower than this no longer has.
+   It folds later than the 1100px the two-column screens use: one fixed column beside the rows fits where two halves do not. */
+@media (width <= 900px) {
+	.settings-screen-group {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 12px;
+	}
+}
+
+.settings-screen-group-title {
 	margin: 0;
+	padding-top: 8px;
 	font-family: var(--font-family-mono);
 	font-size: 10.5px;
 	font-weight: 400;
@@ -39,29 +56,42 @@
 	color: var(--colors-text-faint);
 }
 
-.settings-screen-fields {
+@media (width <= 900px) {
+	.settings-screen-group-title {
+		padding-top: 0;
+	}
+}
+
+.settings-screen-rows {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+/* Every control on the screen stands on the same column, top to bottom, which is the one edge the eye follows down the page */
+.settings-screen-row {
 	display: grid;
-	grid-template-columns: 1fr minmax(0, 150px);
-	gap: 10px 14px;
-	align-items: start;
+	grid-template-columns: minmax(0, 1fr) 168px;
+	gap: 16px;
+	align-items: center;
+	min-height: 40px;
+	padding: 7px 0;
+}
+
+.settings-screen-row + .settings-screen-row {
+	border-top: 1px solid var(--colors-border-subtle);
 }
 
 .settings-screen-field-label {
-	padding-top: 7px;
 	font-size: 13px;
 	color: var(--colors-text-secondary);
-}
-
-.settings-screen-separator {
-	border: none;
-	border-top: 1px solid var(--colors-border-subtle);
-	margin: 0;
 }
 
 .settings-screen-paths {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 12px;
+	padding-top: 6px;
 }
 
 .settings-screen-path {
