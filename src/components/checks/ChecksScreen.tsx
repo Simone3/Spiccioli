@@ -117,9 +117,7 @@ export const ChecksScreen = (): ReactElement => {
 					{renderDescription(check)}
 					{check.sides.map(renderSide)}
 				</div>
-				<span className={check.passed ? 'checks-screen-reach' : 'checks-screen-reach checks-screen-reach-failed'}>
-					{check.reach}
-				</span>
+				<span className='checks-screen-reach'>{check.reach}</span>
 			</div>
 		);
 	};

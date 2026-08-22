@@ -51,7 +51,10 @@ describe('the Checks screen', () => {
 		// One failing check over two uncategorised rows: the badge counts the checks, never the records they name between them
 		expect(screen.getByRole('link', { name: /^Checks/ })).toHaveTextContent('Checks1');
 		expect(screen.getByRole('button', { name: /ADDEBITO DIVERSI/ })).toBeInTheDocument();
-		expect(screen.getByText('2 records')).toBeInTheDocument();
+		expect(screen.getByText('2 failing records')).toBeInTheDocument();
+
+		// The reach is what the check examined and never what it found, so it is stated the same way as on a check that passed
+		expect(screen.getByText('2 transactions')).toHaveClass('checks-screen-reach', { exact: true });
 	});
 
 	test('states a threshold in the reading the preferences give it, and follows it to Settings', async() => {

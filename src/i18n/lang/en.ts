@@ -1479,13 +1479,16 @@ export const EN_TRANSLATIONS = {
 		allPassing: '{total} checks · all passing',
 		passed: 'Passed',
 		failed: 'Failed',
+
+		// How many records a side found, which is the figure that says how bad the failure is: it names them as failing, so that
+		// it is never read as the reach beside it and the reach is never read as it
 		showingSome: {
-			one: 'showing {shown} of {count}',
-			other: 'showing {shown} of {count}'
+			one: 'showing {shown} of {count} failing records',
+			other: 'showing {shown} of {count} failing records'
 		},
 		showingAll: {
-			one: '{count} record',
-			other: '{count} records'
+			one: '{count} failing record',
+			other: '{count} failing records'
 		},
 
 		// What each of the fourteen is called, and the sentence under it saying what it looks for. A sentence that states a
