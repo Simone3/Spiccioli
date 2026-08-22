@@ -1,0 +1,48 @@
+CLAUDE.md
+  s_553821f388648a::t_d3ff0b3c9d8006 79
+docs/technical/01-architecture.md
+  s_553821f388648a::t_0539a9740d0b44 44-46,56,64-65
+docs/technical/05-text-and-languages.md
+  s_553821f388648a::t_f014b7070bb6a6 36
+src/components/common/AppErrorBoundary.tsx
+  s_553821f388648a::t_20513fb2b5dbe5 4-5,11-14,19-21
+src/framework/i18n/Translator.ts
+  s_553821f388648a::t_bf0042fc2f5903 17-21,88-89,91,97-98,129
+src/framework/renderer/TranslationContext.tsx
+  s_553821f388648a::t_1ff14bc23955c8 14-16,20-27,29,46,49-50,53,57
+src/i18n/TranslationContext.tsx
+  s_553821f388648a::t_2650231d2b1b69 1-2,11-15,17,20-40
+src/i18n/Translations.ts
+  s_553821f388648a::t_315a9a99d273bd 47-49,52,58
+src/index.tsx
+  s_553821f388648a::t_11f3917a16478f 20-22,32-34
+tests/components/ChecksScreen.test.tsx
+  s_553821f388648a::t_a0fa270eb7a288 60-72
+tests/framework/Translator.test.ts
+  s_553821f388648a::t_87aae8c73a0804 55-68
+tests/testUtils/AppTestFactory.tsx
+  s_553821f388648a::t_8d6f04606e5055 165-166,169-170,178-179
+tests/testUtils/TranslationTestFactory.tsx
+  s_553821f388648a::t_5947aefc6460fd 2-3,10-19,24,27-34,45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "159dc20ac8dbdb3a7994e02bb8c700ab84bdf87b",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_553821f388648a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01bae1f1-4efa-4a09-a773-7c3d4736bf07",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
