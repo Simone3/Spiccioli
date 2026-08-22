@@ -49,6 +49,20 @@ export type LedgerOpenFailure = {
 	refusal: LedgerRefusal;
 };
 
+/**
+ * What is in front of the user when a close found changes that never reached the file.
+ *
+ * The session cannot simply end there — everything in it is in memory and nothing else has a copy — and it cannot simply refuse
+ * to end either, since the way out may well be to give the changes up. So the departure waits here, and the two answers are the
+ * only two there are: give them up and go, or keep them and stay.
+ */
+export interface UnwrittenChangesPrompt {
+	filePath: string;
+
+	// What the system said about the last attempt, which is the only thing anybody can act on
+	message: string;
+}
+
 export interface LedgerUpgradePrompt {
 	filePath: string;
 	rawDocument: unknown;
@@ -67,7 +81,11 @@ export interface LedgerContextValue {
 	upgradePrompt: LedgerUpgradePrompt | undefined;
 	externalModification: LedgerExternalModificationEvent | undefined;
 	closingBackupFailureMessage: string | undefined;
+	unwrittenChangesPrompt: UnwrittenChangesPrompt | undefined;
 	isBusy: boolean;
+
+	// Whether a write is running right now, which is what keeps the blocking message's *Retry* from starting a second one
+	isSaving: boolean;
 
 	openWithDialog: () => Promise<void>;
 	openPath: (filePath: string) => Promise<void>;
@@ -77,6 +95,11 @@ export interface LedgerContextValue {
 	dismissOpenFailure: () => void;
 	dismissExternalModification: () => void;
 	dismissClosingBackupFailure: () => void;
+
+	// The two answers to a close that found changes the file never took
+	discardUnwrittenChanges: () => Promise<void>;
+	keepUnwrittenChanges: () => void;
+
 	retrySave: () => Promise<void>;
 	updateDocument: (updater: (document: LedgerDocument) => LedgerDocument) => void;
 }
@@ -105,13 +128,24 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 	const [ upgradePrompt, setUpgradePrompt ] = useState<LedgerUpgradePrompt | undefined>();
 	const [ externalModification, setExternalModification ] = useState<LedgerExternalModificationEvent | undefined>();
 	const [ closingBackupFailureMessage, setClosingBackupFailureMessage ] = useState<string | undefined>();
+	const [ unwrittenChangesPrompt, setUnwrittenChangesPrompt ] = useState<UnwrittenChangesPrompt | undefined>();
 	const [ isBusy, setIsBusy ] = useState(false);
+	const [ isSaving, setIsSaving ] = useState(false);
 
 	// The document as the autosave and the retry see it, which has to be the newest one rather than the one this render closed over
 	const documentRef = useRef<LedgerDocument | undefined>(undefined);
 	const schedulerRef = useRef<AutosaveScheduler | undefined>(undefined);
 
+	// The last write that failed, or undefined once one has succeeded. **This is how a close knows whether the file has
+	// everything**: a failed write leaves nothing pending — the contents were taken out of the queue before they were attempted
+	// — so the queue being empty is not the same as the file being written, and only this says which.
+	const lastWriteFailureRef = useRef<{ filePath: string; message: string } | undefined>(undefined);
+
+	// The departure the unwritten-changes prompt is up for, kept until the user answers it
+	const pendingCloseRef = useRef<{ door: LedgerCloseDoor; proceed?: () => Promise<void> } | undefined>(undefined);
+
 	const applyWriteResult = useCallback((result: LedgerWriteResult): void => {
+		lastWriteFailureRef.current = result.ok ? undefined : { filePath: result.filePath, message: result.message };
 		setSaveState(result.ok ?
 			{ state: 'saved', savedAt: result.savedAt } :
 			{ state: 'failed', filePath: result.filePath, message: result.message });
@@ -136,14 +170,16 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 		setUpgradePrompt(undefined);
 	}, []);
 
-	// Whatever ends the session — a menu action, the window closing, a quit — comes through here, so that the file is never left
-	// with a write still waiting and the closing copy is taken with everything already on disk
-	const endSession = useCallback(async(door: LedgerCloseDoor): Promise<LedgerBackupResult> => {
-		await schedulerRef.current?.flush();
+	// A door the main process is holding open for an answer, as opposed to one this window opened for itself
+	const isShutdownDoor = (door: LedgerCloseDoor): boolean => {
+		return door === 'quit' || door === 'window-closed';
+	};
 
+	const closeSessionNow = useCallback(async(door: LedgerCloseDoor): Promise<LedgerBackupResult> => {
 		const backup = await window.spiccioliLedger.closeSession({ door });
 
 		documentRef.current = undefined;
+		lastWriteFailureRef.current = undefined;
 		setDocument(undefined);
 		setFilePath(undefined);
 		setSaveState({ state: 'idle' });
@@ -152,6 +188,39 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 
 		return backup;
 	}, []);
+
+	/**
+	 * Whatever ends the session — a menu action, the window closing, a quit — comes through here, so that the file is never left
+	 * with a write still waiting and the closing copy is taken with everything already on disk.
+	 *
+	 * **A close that cannot write is not a close.** Everything in the session is in memory and the file is the only place it can
+	 * go, so a flush that ends with the file still not holding the changes stops here and asks, rather than dropping the model on
+	 * the floor with the failure it was reporting a moment ago wiped off the screen with it.
+	 * @param door Which of the four doors the session is leaving by.
+	 * @param proceed What the departure was going to do next, replayed if the changes are given up.
+	 * @returns Whether the session actually closed.
+	 */
+	const endSession = useCallback(async(door: LedgerCloseDoor, proceed?: () => Promise<void>): Promise<boolean> => {
+		await schedulerRef.current?.flush();
+
+		const failure = lastWriteFailureRef.current;
+
+		if(failure) {
+			pendingCloseRef.current = { door, proceed };
+			setUnwrittenChangesPrompt({ filePath: failure.filePath, message: failure.message });
+
+			// The main process is counting, and a person reading a dialog is slower than anything it is counting for
+			if(isShutdownDoor(door)) {
+				void window.spiccioliLedger.pauseClose();
+			}
+
+			return false;
+		}
+
+		await closeSessionNow(door);
+
+		return true;
+	}, [ closeSessionNow ]);
 
 	// Reading, parsing and either opening the file or saying what was not understood about it. Every way into a file lands here.
 	const readAndOpen = useCallback(async(pathToOpen: string): Promise<void> => {
@@ -200,8 +269,9 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 		setIsBusy(true);
 
 		try {
-			if(documentRef.current) {
-				await endSession(door);
+			// A close the user has still to answer for leaves the file open and the departure waiting on the prompt
+			if(documentRef.current && !await endSession(door, action)) {
+				return;
 			}
 
 			await action();
@@ -210,6 +280,45 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 			setIsBusy(false);
 		}
 	}, [ endSession ]);
+
+	// Giving the changes up is the only way the file closes with them still unwritten, and it is the user who says so
+	const discardUnwrittenChanges = useCallback(async(): Promise<void> => {
+		const pending = pendingCloseRef.current;
+
+		if(!pending) {
+			return;
+		}
+
+		pendingCloseRef.current = undefined;
+		setUnwrittenChangesPrompt(undefined);
+		setIsBusy(true);
+
+		try {
+			await closeSessionNow(pending.door);
+			await pending.proceed?.();
+		}
+		finally {
+			setIsBusy(false);
+		}
+
+		// The main process is still holding the door: the session is closed now, and its own poll is what lets it through
+	}, [ closeSessionNow ]);
+
+	// Staying keeps the session exactly as it was, with the write-failure message still saying what stopped it
+	const keepUnwrittenChanges = useCallback((): void => {
+		const pending = pendingCloseRef.current;
+
+		if(!pending) {
+			return;
+		}
+
+		pendingCloseRef.current = undefined;
+		setUnwrittenChangesPrompt(undefined);
+
+		if(isShutdownDoor(pending.door)) {
+			void window.spiccioliLedger.cancelClose();
+		}
+	}, []);
 
 	const openPath = useCallback((pathToOpen: string): Promise<void> => {
 		return withSessionClosed('open-file', () => {
@@ -321,7 +430,9 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 		schedulerRef.current?.schedule(writeLedgerDocument(next));
 	}, []);
 
-	// The blocking message's own Retry runs the same write again, and succeeding puts the session back exactly where it was
+	// The blocking message's own Retry runs the same write again, and succeeding puts the session back exactly where it was.
+	// **It goes through the scheduler like every other write**: a save of its own would be a second writer on one file, and two
+	// of those fill the same temporary file and rename a splice of both onto the ledger.
 	const retrySave = useCallback(async(): Promise<void> => {
 		const current = documentRef.current;
 
@@ -329,8 +440,15 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 			return;
 		}
 
-		applyWriteResult(await window.spiccioliLedger.save(writeLedgerDocument(current)));
-	}, [ applyWriteResult ]);
+		setIsSaving(true);
+
+		try {
+			await schedulerRef.current?.saveNow(writeLedgerDocument(current));
+		}
+		finally {
+			setIsSaving(false);
+		}
+	}, []);
 
 	useEffect(() => {
 		const unsubscribeAttempt = window.spiccioliLedger.onWriteAttemptFailed((event) => {
@@ -371,7 +489,8 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 		});
 
 		// A quit or a closed window is a close like any other: everything pending is written, and the closing copy is taken.
-		// Staying is the one answer that is not a close, and the main process has to be told so it can call the quit off.
+		// Staying is the one answer that is not a close, and the main process has to be told so it can call the quit off — which
+		// is true of the draft guard here and of the unwritten-changes prompt "endSession" raises for itself.
 		const unsubscribeClose = window.spiccioliLedger.onPrepareForClose((door) => {
 			requestDeparture(
 				() => {
@@ -398,7 +517,9 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 			upgradePrompt,
 			externalModification,
 			closingBackupFailureMessage,
+			unwrittenChangesPrompt,
 			isBusy,
+			isSaving,
 			openWithDialog,
 			openPath,
 			createWithDialog,
@@ -415,6 +536,8 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 			dismissClosingBackupFailure: () => {
 				setClosingBackupFailureMessage(undefined);
 			},
+			discardUnwrittenChanges,
+			keepUnwrittenChanges,
 			retrySave,
 			updateDocument
 		};
@@ -422,15 +545,19 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 		closingBackupFailureMessage,
 		confirmUpgrade,
 		createWithDialog,
+		discardUnwrittenChanges,
 		document,
 		externalModification,
 		filePath,
 		isBusy,
+		isSaving,
+		keepUnwrittenChanges,
 		openFailure,
 		openPath,
 		openWithDialog,
 		retrySave,
 		saveState,
+		unwrittenChangesPrompt,
 		updateDocument,
 		upgradePrompt
 	]);

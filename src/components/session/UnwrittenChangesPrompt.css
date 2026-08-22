@@ -1,0 +1,24 @@
+.unwritten-changes-message {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--colors-text-secondary);
+}
+
+.unwritten-changes-message + .unwritten-changes-message {
+	margin-top: 12px;
+}
+
+/* What the system said, which is the one part of this the user can act on */
+.unwritten-changes-reason {
+	margin: 12px 0 0;
+	padding: 10px 12px;
+	font-family: var(--font-family-mono);
+	font-size: 12px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+	border: 1px solid var(--colors-danger-border);
+	border-radius: 6px;
+	background-color: var(--colors-danger-background-muted);
+	color: var(--colors-danger-text);
+}

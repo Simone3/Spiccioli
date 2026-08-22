@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import type { BrowserWindow, Dialog, IpcMain } from 'electron';
 import { LEDGER_FILE_CONFIG } from 'src/config/AppConfig';
@@ -25,7 +26,7 @@ import type { Preferences } from 'src/types/PreferencesTypes';
 
 type LedgerIpcMain = Pick<IpcMain, 'handle'>;
 
-type LedgerDialog = Pick<Dialog, 'showOpenDialog' | 'showSaveDialog'>;
+type LedgerDialog = Pick<Dialog, 'showOpenDialog' | 'showSaveDialog' | 'showMessageBox'>;
 
 export interface RegisterLedgerIpcHandlersOptions {
 	ipcMain: LedgerIpcMain;
@@ -42,6 +43,13 @@ export interface RegisterLedgerIpcHandlersOptions {
 
 	// Called when the renderer answers a shutdown with a refusal, which is the user choosing to stay with something unwritten
 	onCloseCancelled: () => void;
+
+	// Called when the renderer cannot answer a shutdown yet, because it is asking the user what to do about changes that never
+	// reached the file. The close is still on; only the wait is held off.
+	onClosePaused: () => void;
+
+	// Whether a file is already at a path. Injected so that the overwrite check is testable without a filesystem.
+	fileExists?: (filePath: string) => boolean;
 
 	// Called once the preferences have been written, so that the ones the main process acts on rather than reads follow a change
 	// immediately: the level the log is kept at is the only one of them so far
@@ -64,7 +72,9 @@ export const registerLedgerIpcHandlers = ({
 	getWindow,
 	onOpenFileChanged,
 	onCloseCancelled,
-	onPreferencesChanged
+	onClosePaused,
+	onPreferencesChanged,
+	fileExists = existsSync
 }: RegisterLedgerIpcHandlersOptions): void => {
 	const fileFilters = [ {
 		name: translator.t('storage.fileTypeName'),
@@ -90,6 +100,31 @@ export const registerLedgerIpcHandlers = ({
 		};
 	});
 
+	/**
+	 * Asks the save dialog's own question about a file the save dialog never saw.
+	 *
+	 * The dialog checks for an existing file under the name that was typed, and the extension goes on **after** it has answered
+	 * — so typing "finances" beside a "finances.spiccioli" gets no warning from anybody, and what is created there lands on a
+	 * ledger the user still has. This is that warning, asked only where the dialog could not have asked it.
+	 * @param filePath The path the extension has already been put back on.
+	 * @returns Whether the file may be created there.
+	 */
+	const confirmOverwrite = async(filePath: string): Promise<boolean> => {
+		const window = getWindow();
+		const options = {
+			type: 'warning' as const,
+			buttons: [ translator.t('storage.overwriteReplace'), translator.t('storage.overwriteCancel') ],
+			defaultId: 1,
+			cancelId: 1,
+			title: translator.t('storage.overwriteTitle'),
+			message: translator.t('storage.overwriteMessage', { name: path.basename(filePath) }),
+			detail: translator.t('storage.overwriteDetail')
+		};
+		const answer = await (window ? dialog.showMessageBox(window, options) : dialog.showMessageBox(options));
+
+		return answer.response === 0;
+	};
+
 	ipcMain.handle(SPICCIOLI_LEDGER_IPC_CHANNELS.chooseFileToCreate, async(): Promise<ChooseLedgerFileResult> => {
 		const window = getWindow();
 		const options = {
@@ -103,9 +138,17 @@ export const registerLedgerIpcHandlers = ({
 			return { cancelled: true };
 		}
 
+		const filePath = withLedgerExtension(result.filePath);
+
+		// Only where the name changed: everywhere else the dialog has already asked, and asking twice for one file is worse
+		// than not asking at all
+		if(filePath !== result.filePath && fileExists(filePath) && !await confirmOverwrite(filePath)) {
+			return { cancelled: true };
+		}
+
 		return {
 			cancelled: false,
-			filePath: withLedgerExtension(result.filePath)
+			filePath
 		};
 	});
 
@@ -156,6 +199,10 @@ export const registerLedgerIpcHandlers = ({
 
 	ipcMain.handle(SPICCIOLI_LEDGER_IPC_CHANNELS.cancelClose, () => {
 		onCloseCancelled();
+	});
+
+	ipcMain.handle(SPICCIOLI_LEDGER_IPC_CHANNELS.pauseClose, () => {
+		onClosePaused();
 	});
 
 	ipcMain.handle(SPICCIOLI_LEDGER_IPC_CHANNELS.getBackupDirectory, () => {

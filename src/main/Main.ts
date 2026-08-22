@@ -47,7 +47,11 @@ let fatalErrorTranslator: SpiccioliTranslator | undefined;
 let isShuttingDown = false;
 
 // What the wait is made of, kept so that a renderer holding something unwritten can call the whole shutdown off
-let shutdownTimers: { quitAnyway: ReturnType<typeof setTimeout>; waitForRenderer: ReturnType<typeof setInterval> } | undefined;
+let shutdownPoll: ReturnType<typeof setInterval> | undefined;
+
+// Set while the renderer is asking the user what to do about changes that never reached the file. The close is still on and the
+// poll is still running; what stops is the clock that would otherwise give up on a renderer that is only waiting on a person.
+let isShutdownPaused = false;
 
 /**
  * Tells the user about a failure that reached the top of the main process.
@@ -132,36 +136,76 @@ const installApplicationMenu = (translator: SpiccioliTranslator, configStore: Sp
 	sendToRenderer(SPICCIOLI_APP_MENU_IPC_EVENTS.menuBarChanged, drawnMenuBar);
 };
 
+const clearShutdownWait = (): void => {
+	if(shutdownPoll) {
+		clearInterval(shutdownPoll);
+		shutdownPoll = undefined;
+	}
+
+	isShutdownPaused = false;
+};
+
 /**
- * Asks the renderer to finish what it is doing and close the session, then lets the quit through.
- * The wait is bounded: a renderer that cannot answer must not be able to stop the application from exiting, and what would be
- * lost by quitting anyway is a copy of a file that is already safely on disk.
+ * Asks the renderer to finish what it is doing and close the session, then lets the close it was asked for through.
+ *
+ * **The wait is bounded on being idle rather than on the whole close**, and that distinction is the whole of it. A renderer
+ * that cannot answer must not be able to stop the application from exiting; a renderer that is *writing* is answering, and a
+ * write has five attempts and a timeout each — far more than the seconds an unresponsive one is given. Cutting that off at the
+ * idle bound would throw away the very changes the close exists to finish writing. So the clock runs only while nothing is
+ * moving, and a second bound covers the whole thing so that no state can hold the application open forever.
  * @param session The open session, which is what knows when there is nothing left to write.
  * @param door Which of the four doors the session is leaving by.
+ * @param finish What the close was: letting the quit through, or letting the window go.
  */
-const beginShutdown = (session: LedgerSession, door: LedgerCloseDoor): void => {
+const beginShutdown = (session: LedgerSession, door: LedgerCloseDoor, finish: () => void): void => {
 	isShuttingDown = true;
+	isShutdownPaused = false;
 	sendToRenderer(SPICCIOLI_LEDGER_IPC_EVENTS.prepareForClose, door);
 
-	const quitAnyway = setTimeout(() => {
-		appLogger.warn('The renderer did not finish closing in time, quitting anyway', {
+	const startedAt = Date.now();
+
+	// When the close last did something. A write in flight keeps moving it, so the idle bound below is a bound on a renderer
+	// that has stopped rather than on one that is still working.
+	let progressedAt = startedAt;
+
+	const giveUp = (reason: 'timed-out' | 'took-too-long'): void => {
+		appLogger.warn('The renderer did not finish closing in time, closing anyway', {
 			type: 'ledger.closed',
 			door,
-			reason: 'timed-out'
+			reason
 		});
-		app.quit();
-	}, SHUTDOWN_CONFIG.prepareForCloseTimeoutMs);
+		clearShutdownWait();
+		isShuttingDown = false;
+		finish();
+	};
 
 	// The renderer answers by closing the session, and the session is what knows when there is nothing left to write
-	const waitForRenderer = setInterval(() => {
+	shutdownPoll = setInterval(() => {
 		if(session.getOpenFilePath() === undefined) {
-			clearInterval(waitForRenderer);
-			clearTimeout(quitAnyway);
-			app.quit();
+			clearShutdownWait();
+			isShuttingDown = false;
+			finish();
+
+			return;
+		}
+
+		// Waiting on a person is not being idle, and neither is a write that is still going
+		if(isShutdownPaused || session.isWriting()) {
+			progressedAt = Date.now();
+
+			return;
+		}
+
+		if(Date.now() - progressedAt >= SHUTDOWN_CONFIG.idleTimeoutMs) {
+			giveUp('timed-out');
+
+			return;
+		}
+
+		if(Date.now() - startedAt >= SHUTDOWN_CONFIG.maximumWaitMs) {
+			giveUp('took-too-long');
 		}
 	}, SHUTDOWN_CONFIG.pollIntervalMs);
-
-	shutdownTimers = { quitAnyway, waitForRenderer };
 };
 
 /**
@@ -169,13 +213,17 @@ const beginShutdown = (session: LedgerSession, door: LedgerCloseDoor): void => {
  * stay with it rather than lose it. The quit that was asked for is abandoned and asking for one again starts it over.
  */
 const cancelShutdown = (): void => {
-	if(shutdownTimers) {
-		clearTimeout(shutdownTimers.quitAnyway);
-		clearInterval(shutdownTimers.waitForRenderer);
-		shutdownTimers = undefined;
-	}
-
+	clearShutdownWait();
 	isShuttingDown = false;
+};
+
+/**
+ * Holds the wait off while the renderer asks the user what to do about changes that never reached the file.
+ * The close is still the one that was asked for and still finishes on its own the moment the session closes — this only stops
+ * the application from giving up on a renderer that is doing exactly what it should be doing.
+ */
+const pauseShutdown = (): void => {
+	isShutdownPaused = true;
 };
 
 // The window options that put the menu bar inside the page instead of above it. Hiding the operating system's title bar is what
@@ -193,7 +241,7 @@ const buildDrawnTitleBarWindowOptions = (): Pick<BrowserWindowConstructorOptions
 };
 
 // What the window loads, resolved once at startup so that every window of this run loads the same page
-const createWindow = (loadTarget: WindowLoadTarget, translator: SpiccioliTranslator): void => {
+const createWindow = (loadTarget: WindowLoadTarget, translator: SpiccioliTranslator, session: LedgerSession): void => {
 	const win = new BrowserWindow({
 		width: WINDOW_CONFIG.widthPixels,
 		height: WINDOW_CONFIG.heightPixels,
@@ -234,6 +282,21 @@ const createWindow = (loadTarget: WindowLoadTarget, translator: SpiccioliTransla
 	});
 
 	mainWindow = win;
+
+	// **Closing the window is a close of the session, and the renderer is the side that performs it** — so the window cannot be
+	// allowed to go first. A destroyed window takes the renderer with it, and with it the model, the debounced write nobody has
+	// asked for yet and the closing copy that is supposed to be taken here. The close is refused once, the renderer is asked to
+	// finish, and the window goes when the session has actually closed.
+	win.on('close', (event) => {
+		if(isShuttingDown || session.getOpenFilePath() === undefined) {
+			return;
+		}
+
+		event.preventDefault();
+		beginShutdown(session, 'window-closed', () => {
+			win.destroy();
+		});
+	});
 
 	win.on('closed', () => {
 		if(mainWindow === win) {
@@ -394,6 +457,7 @@ const startApplication = (): void => {
 				installApplicationMenu(translator, configStore, isDevelopment);
 			},
 			onCloseCancelled: cancelShutdown,
+			onClosePaused: pauseShutdown,
 
 			// A preference applies the moment it is changed, and the log level is no exception: the next entry is written under the
 			// level that was just chosen rather than under the one this run started at
@@ -403,20 +467,23 @@ const startApplication = (): void => {
 		});
 
 		installApplicationMenu(translator, configStore, isDevelopment);
-		createWindow(loadTarget, translator);
+		createWindow(loadTarget, translator, session);
 
-		// Closing the window is a close of the session on every platform, and on some of them it is not a quit. Either way the
-		// renderer is asked to finish first, so the closing copy is taken with everything already written.
+		// A quit is a close of the session, and the renderer is asked to finish first so that the closing copy is taken with
+		// everything already written. Closing the window is the same event by another door and is handled on the window itself,
+		// because that one has to be stopped before the renderer is destroyed.
 		app.on('before-quit', (event) => {
 			if(!isShuttingDown && session.getOpenFilePath() !== undefined) {
 				event.preventDefault();
-				beginShutdown(session, 'quit');
+				beginShutdown(session, 'quit', () => {
+					app.quit();
+				});
 			}
 		});
 
 		app.on('activate', () => {
 			if(BrowserWindow.getAllWindows().length === 0) {
-				createWindow(loadTarget, translator);
+				createWindow(loadTarget, translator, session);
 			}
 		});
 	});

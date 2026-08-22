@@ -148,6 +148,58 @@ describe('the autosave', () => {
 		expect(results).toEqual([ 'saved first', 'saved second' ]);
 	});
 
+	/**
+	 * The blocking write-failure message's own *Retry* is this, and it has to be: a save of its own would be a second writer on
+	 * one file, and the two of them fill the same temporary file and rename a splice of both onto the ledger.
+	 */
+	test('saving now waits for the write in flight instead of starting a second one', async() => {
+		const { save, written, settleNext } = makeControllableSave();
+		const scheduler = createAutosaveScheduler<string>({
+			debounceMs: DEBOUNCE_MS,
+			save,
+			onResult: () => {
+				return undefined;
+			}
+		});
+
+		scheduler.schedule('first');
+		await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
+
+		expect(written).toEqual([ 'first' ]);
+
+		const retried = scheduler.saveNow('retried');
+
+		// Nothing new goes out while the first one is still running
+		expect(written).toEqual([ 'first' ]);
+
+		settleNext();
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(written).toEqual([ 'first', 'retried' ]);
+
+		settleNext();
+		await retried;
+	});
+
+	test('saving now with nothing in flight writes straight away', async() => {
+		const written: string[] = [];
+		const scheduler = createAutosaveScheduler<void>({
+			debounceMs: DEBOUNCE_MS,
+			save: (contents) => {
+				written.push(contents);
+
+				return Promise.resolve();
+			},
+			onResult: () => {
+				return undefined;
+			}
+		});
+
+		await scheduler.saveNow('retried');
+
+		expect(written).toEqual([ 'retried' ]);
+	});
+
 	test('flushing with nothing waiting writes nothing', async() => {
 		const written: string[] = [];
 		const scheduler = createAutosaveScheduler<void>({

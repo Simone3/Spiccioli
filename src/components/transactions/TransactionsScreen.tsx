@@ -33,7 +33,7 @@ import {
 	transactionPageCount,
 	type TransactionFilters
 } from 'src/logic/transactions/Transactions';
-import type { Account, LedgerId, Transaction } from 'src/types/LedgerTypes';
+import type { Account, LedgerDocument, LedgerId, Transaction } from 'src/types/LedgerTypes';
 
 /**
  * Transactions: the whole history in one order, seven filters over it, and one form that both records a row and corrects one.
@@ -88,10 +88,6 @@ export const TransactionsScreen = (): ReactElement => {
 
 	const transactions = useMemo(() => {
 		return document?.transactions ?? [];
-	}, [ document ]);
-
-	const rules = useMemo(() => {
-		return document?.rules ?? [];
 	}, [ document ]);
 
 	const ordered = useMemo(() => {
@@ -188,13 +184,31 @@ export const TransactionsScreen = (): ReactElement => {
 		setRangeAnchorId(undefined);
 	};
 
-	// A row the screen has just written is followed to wherever the ordering put it
-	const writeAndFollow = (created: Transaction): void => {
+	/**
+	 * Writes one row and follows it to wherever the ordering put it.
+	 *
+	 * **The row is built inside the update and not before it.** Its insertion sequence and the category the rules give it are
+	 * both read off the file it is being written into, and the file this render is showing is not necessarily that one — a row
+	 * built against a stale document takes a sequence another row already has, and the ordering between the two of them stops
+	 * being the order they arrived in.
+	 * @param create Builds the row against the file it is going into.
+	 * @returns The row that was written.
+	 */
+	const writeAndFollow = (create: (current: LedgerDocument) => Transaction): Transaction | undefined => {
+		let created: Transaction | undefined;
+
 		updateDocument((current) => {
+			created = create(current);
+
 			return { ...current, transactions: [ ...current.transactions, created ] };
 		});
-		setRequestedPage(pageHoldingTransaction(filterTransactions(sortTransactionsNewestFirst([ ...transactions, created ]), filters), created.id));
-		clearSelection();
+
+		if(created) {
+			setRequestedPage(pageHoldingTransaction(filterTransactions(sortTransactionsNewestFirst([ ...transactions, created ]), filters), created.id));
+			clearSelection();
+		}
+
+		return created;
 	};
 
 	// Every write from this screen goes through the pass, which is what keeps an automatic row's category the one the rules produce
@@ -216,11 +230,13 @@ export const TransactionsScreen = (): ReactElement => {
 			return;
 		}
 
-		writeAndFollow(categoriseTransaction({
-			id: createLedgerId(),
-			...values,
-			insertionSeq: nextInsertionSeq(transactions)
-		}, rules));
+		writeAndFollow((current) => {
+			return categoriseTransaction({
+				id: createLedgerId(),
+				...values,
+				insertionSeq: nextInsertionSeq(current.transactions)
+			}, current.rules);
+		});
 
 		if(!addAnother) {
 			setTransactionDraft(undefined);
@@ -229,10 +245,13 @@ export const TransactionsScreen = (): ReactElement => {
 
 	// The copy is written where the ordering puts it and then opened, a duplicate being for the recurring row that differs in one field
 	const duplicate = (transaction: Transaction): void => {
-		const copy = duplicateTransaction({ transaction, transactions, rules });
+		const copy = writeAndFollow((current) => {
+			return duplicateTransaction({ transaction, transactions: current.transactions, rules: current.rules });
+		});
 
-		writeAndFollow(copy);
-		setTransactionDraft({ transaction: copy });
+		if(copy) {
+			setTransactionDraft({ transaction: copy });
+		}
 	};
 
 	const deleteTransactions = (going: readonly Transaction[]): void => {

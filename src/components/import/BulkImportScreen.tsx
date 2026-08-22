@@ -29,7 +29,7 @@ import {
 	type DecimalSeparator,
 	type ThousandsSeparator
 } from 'src/types/PreferencesTypes';
-import { CASH_ACCOUNT_TYPES, type LedgerId } from 'src/types/LedgerTypes';
+import { CASH_ACCOUNT_TYPES, type LedgerId, type Transaction } from 'src/types/LedgerTypes';
 
 /**
  * Bulk import: one screen, one job, and the only text the application parses.
@@ -147,22 +147,28 @@ export const BulkImportScreen = (): ReactElement => {
 		setSelection(next);
 	};
 
-	// Nothing is written until here, and what is written is the ticked rows in the order they were pasted
+	// Nothing is written until here, and what is written is the ticked rows in the order they were pasted.
+	// **The rows are built inside the update**: they take consecutive insertion sequences counted from the file they are going
+	// into, and counting them off the file this render is showing would hand the paste sequences another row already holds.
 	const runImport = (): void => {
-		if(accountId === undefined) {
+		if(accountId === undefined || selection.size === 0) {
 			return;
 		}
 
-		const imported = buildImportedTransactions({ rows, selection, accountId, transactions, rules: document?.rules ?? [] });
+		let imported: readonly Transaction[] = [];
+
+		updateDocument((current) => {
+			imported = buildImportedTransactions({ rows, selection, accountId, transactions: current.transactions, rules: current.rules });
+
+			return { ...current, transactions: [ ...current.transactions, ...imported ] };
+		});
+
 		const period = importedPeriod(imported);
 
 		if(!period) {
 			return;
 		}
 
-		updateDocument((current) => {
-			return { ...current, transactions: [ ...current.transactions, ...imported ] };
-		});
 		handOverToTransactions({ accountId, fromDate: period.fromDate, toDate: period.toDate });
 	};
 

@@ -15,7 +15,7 @@ import { getDirectory, getFileName } from 'src/logic/format/FilePathDisplay';
  */
 export const WriteFailurePanel = (): ReactElement => {
 	const { t } = useTranslator();
-	const { saveState, retrySave, isBusy } = useLedger();
+	const { saveState, retrySave, isBusy, isSaving } = useLedger();
 
 	if(saveState.state !== 'failed') {
 		return <></>;
@@ -43,7 +43,7 @@ export const WriteFailurePanel = (): ReactElement => {
 				<div className='write-failure-actions'>
 					<AppButton
 						variant='primary'
-						disabled={isBusy}
+						disabled={isBusy || isSaving}
 						onClick={() => {
 							void retrySave();
 						}}>

@@ -41,7 +41,7 @@ Every non-generated file in the repository and what it is for. Generated folders
 | `prices/PriceQuoteReview.ts` | The four refusals of [§7.6](../functional/specs/07-investments.md#76-prices), applied before the user ever sees a figure — the currency to a whole response, the date and the value to each day of it |
 | `prices/PricePass.ts` | One pass, end to end: one paced request per listing over the window it carries, each failing on its own, the answers it reports as it goes, the flag that abandons it, and the three log entries D14 fixes — the outcome of a listing, not the wire under it |
 | `preload/Preload.ts` | The context bridge: what the renderer is allowed to call |
-| `storage/LedgerSession.ts` | The one open ledger: which file, where its copies live, what its bytes hashed to, whether anything was written — and every storage entry in the log |
+| `storage/LedgerSession.ts` | The one open ledger: which file, where its copies live, what its bytes hashed to, whether anything was written — and every storage entry in the log. **Every path that touches the file's bytes is serialized here**, so that two writes can never overlap |
 | `storage/LedgerBackupNaming.ts` | Where a ledger's copies live, what one is called, and how to recognise one |
 | `window/WindowLoadTarget.ts` | Whether the window loads the built file or the development server, and the refusal of the latter in a packaged run |
 
@@ -72,6 +72,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `components/launch/UpgradeDialog.tsx` | Its second panel: a file written by an older version |
 | `components/session/WriteFailurePanel.tsx` `.css` | The blocking message after five failed attempts, which belongs to no screen |
 | `components/session/UnsavedDraftPrompt.tsx` | The other thing that belongs to no screen: what is said when something unwritten is being walked away from, offering discard and stay and no apply |
+| `components/session/UnwrittenChangesPrompt.tsx` `.css` | The third: what a close asks when the file never took the changes the session is ending with ([§12](../functional/specs/12-storage.md)) |
 | `components/settings/SettingsScreen.tsx` `.css` | The thirteen preferences, the refusals, and the three read-only paths — the ledger's, its backups', and the log folder ([§10](../functional/specs/10-settings.md)) |
 | `components/accounts/` | The Accounts screen ([§4](../functional/specs/04-accounts.md)): the two tabs and their tables, the two forms, and `AccountPicker` — **the one account picker in the application**, which every later screen takes for a transaction's, a trade's or a filter's |
 | `components/transactions/` | The Transactions screen ([§5](../functional/specs/05-transactions.md)): the list, the seven filters, and the one form a row is both recorded on and corrected on |
@@ -118,7 +119,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `logic/ledger/` | The document: its version, its seed, its reader, its writer, its refusals and its upgrade ([§9](09-file-format.md)) |
 | `logic/money/Money.ts` | The scales, the one division rule and the roundings |
 | `logic/preferences/Preferences.ts` | The defaults, the reading of whatever the configuration file holds, and the rule that the two separators must differ — which Settings and the import's own controls both apply |
-| `logic/storage/AutosaveScheduler.ts` | The debounce, and the rule that two writes never overlap |
+| `logic/storage/AutosaveScheduler.ts` | The debounce, and the rule that two writes never overlap. **Every write of the open file goes through it**, the blocking failure message's own *Retry* included |
 | `types/AppInfoTypes.ts` `AppInfoIpcChannels.ts` | The shape and the channel names of the app-info request |
 | `types/AppMenuTypes.ts` `AppMenuIpcChannels.ts` | The drawn menu's description, its closed set of commands, and the channel names |
 | `types/LedgerTypes.ts` | The eleven stored entities and every closed set they take |

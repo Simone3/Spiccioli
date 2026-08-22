@@ -148,6 +148,9 @@ export const stubLedgerBridge = (overrides: Partial<SpiccioliLedgerApi> = {}): S
 		cancelClose: () => {
 			return Promise.resolve();
 		},
+		pauseClose: () => {
+			return Promise.resolve();
+		},
 		getBackupDirectory: () => {
 			return Promise.resolve('/Documents/finances-backups');
 		},

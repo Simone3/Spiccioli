@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { makeTranslator } from '../testUtils';
@@ -183,7 +183,49 @@ describe('saving', () => {
 		await session.createFile({ filePath: ledgerPath, contents: 'first', schemaVersion: 1 });
 		await session.save('second');
 
-		expect(existsSync(`${ledgerPath}${LEDGER_FILE_CONFIG.temporaryFileSuffix}`)).toBe(false);
+		expect(readdirSync(path.dirname(ledgerPath)).filter((fileName) => {
+			return fileName.includes(LEDGER_FILE_CONFIG.temporaryFileSuffix);
+		})).toEqual([]);
+	});
+
+	/**
+	 * Two writes of one file must never overlap.
+	 *
+	 * Both of them fill the same temporary file, and two writers filling one file interleave their bytes in it — the rename then
+	 * puts a splice of the two onto the ledger, which parses as neither and can only be refused on the next open. The contents
+	 * here are large enough that an unserialized pair really does interleave rather than happening to finish in one write each.
+	 */
+	test('never lets two writes of the same file overlap', async() => {
+		const { session, ledgerPath } = makeSession();
+		await session.createFile({ filePath: ledgerPath, contents: 'first', schemaVersion: 1 });
+
+		const first = `{"schemaVersion":1,"marker":"${'A'.repeat(4_000_000)}"}`;
+		const second = `{"schemaVersion":1,"marker":"${'B'.repeat(6_000_000)}"}`;
+
+		// Not awaited in turn: this is the renderer with an autosave and the failure panel's own Retry both outstanding
+		const outcomes = await Promise.all([ session.save(first), session.save(second) ]);
+
+		expect(outcomes.map((outcome) => {
+			return outcome.ok;
+		})).toEqual([ true, true ]);
+
+		// The last one asked for, whole. Not a mixture of the two, and not one of them at the other's length.
+		expect(readFileSync(ledgerPath, 'utf8')).toBe(second);
+	});
+
+	test('is writing while a write is in flight, which is what a close waits on', async() => {
+		const { session, ledgerPath } = makeSession();
+		await session.createFile({ filePath: ledgerPath, contents: 'first', schemaVersion: 1 });
+
+		expect(session.isWriting()).toBe(false);
+
+		const writing = session.save('second');
+
+		expect(session.isWriting()).toBe(true);
+
+		await writing;
+
+		expect(session.isWriting()).toBe(false);
 	});
 });
 
@@ -322,5 +364,42 @@ describe('the upgrade', () => {
 		const { session } = makeSession();
 
 		expect((await session.writePreUpgradeBackup()).written).toBe(false);
+	});
+
+	/**
+	 * The file that was read is what the pre-upgrade copy is taken from and what the upgrade is applied to, so a write that
+	 * failed has to leave it exactly where it was. Letting it go would leave the dialog's own *Retry* with nothing to copy and
+	 * nothing to upgrade, and no way out of the upgrade at all short of restarting.
+	 */
+	test('can be run again after a write that failed', async() => {
+		const { session, ledgerPath } = makeSession();
+		writeFileSync(ledgerPath, 'the old shape', 'utf8');
+		await session.readFile(ledgerPath);
+		await session.writePreUpgradeBackup();
+
+		// Something a rename cannot land on, so the write fails where the copy already succeeded
+		rmSync(ledgerPath);
+		mkdirSync(ledgerPath);
+
+		const request = {
+			contents: 'the new shape',
+			fromSchemaVersion: 1,
+			toSchemaVersion: 2,
+			transactionsRecategorised: 0,
+			rulesRepointed: 0,
+			rulesDeleted: 0,
+			categoriesRetired: 0
+		};
+
+		expect((await session.completeUpgrade(request)).ok).toBe(false);
+		expect(session.getOpenFilePath()).toBeUndefined();
+
+		rmSync(ledgerPath, { recursive: true });
+
+		// The retry is the whole dialog again: the copy first, and then the upgrade
+		expect((await session.writePreUpgradeBackup()).written).toBe(true);
+		expect((await session.completeUpgrade(request)).ok).toBe(true);
+		expect(readFileSync(ledgerPath, 'utf8')).toBe('the new shape');
+		expect(session.getOpenFilePath()).toBe(ledgerPath);
 	});
 });

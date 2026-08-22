@@ -1,10 +1,10 @@
-import { LEDGER_FILE_CONFIG, STORAGE_CONFIG } from 'src/config/AppConfig';
+import { STORAGE_CONFIG } from 'src/config/AppConfig';
 import { writeBackupCopy } from 'src/framework/main/storage/FileBackupRotation';
 import { createRetryingFileWriter, type RetryingFileWriter } from 'src/framework/main/storage/RetryingFileWriter';
 import { readWholeFile } from 'src/framework/main/storage/WholeFileStorage';
 import { appLogger } from 'src/framework/main/logging/AppLogger';
 import { getErrorMessage } from 'src/framework/utils/ErrorUtils';
-import { resolveLedgerBackupNaming, resolveLedgerTemporaryFilePath, type LedgerBackupKind } from 'src/main/storage/LedgerBackupNaming';
+import { LEDGER_TEMPORARY_FILE_SUFFIX, resolveLedgerBackupNaming, resolveLedgerTemporaryFilePath, type LedgerBackupKind } from 'src/main/storage/LedgerBackupNaming';
 import type { SpiccioliTranslator } from 'src/i18n/Translations';
 import type {
 	AcceptLedgerFileRequest,
@@ -49,6 +49,10 @@ export interface CreateLedgerSessionOptions {
 export interface LedgerSession {
 	getOpenFilePath: () => string | undefined;
 
+	// Whether bytes are moving right now. A close that is waiting on this is waiting on progress rather than on a renderer that
+	// cannot answer, which is what tells a shutdown to go on waiting.
+	isWriting: () => boolean;
+
 	// Where the open ledger's copies live, which Settings states as a read-only fact about the session
 	getBackupDirectory: () => string | undefined;
 
@@ -88,6 +92,39 @@ export const createLedgerSession = ({
 	let hasWrittenDuringSession = false;
 
 	/**
+	 * Everything that touches the ledger's bytes, one at a time and in the order it was asked for.
+	 *
+	 * **Two writes of one file must never overlap**, and the renderer's own ordering is not enough to guarantee it: every path
+	 * below is an IPC handler, and the renderer can have more than one of them outstanding — the blocking write-failure panel's
+	 * *Retry* beside an autosave being the case that reaches it. Overlapping writes fill the same temporary file, and what the
+	 * rename then puts on the ledger is neither of them.
+	 *
+	 * The close is in the queue too, because it re-reads the file to copy it: a backup taken over a write in progress would be a
+	 * copy of neither version.
+	 */
+	let writeQueue: Promise<void> = Promise.resolve();
+
+	// How many callers are waiting on that queue, which is what "isWriting" answers
+	let queuedOperations = 0;
+
+	const serialize = <TResult>(operation: () => Promise<TResult>): Promise<TResult> => {
+		queuedOperations += 1;
+
+		const result = writeQueue.then(operation);
+
+		// The queue itself never rejects: a failure belongs to the caller that asked for it and must not stop what is behind it
+		writeQueue = result.then(() => {
+			return undefined;
+		}, () => {
+			return undefined;
+		});
+
+		return result.finally(() => {
+			queuedOperations -= 1;
+		});
+	};
+
+	/**
 	 * Writes one copy into the ledger's own backup folder and rotates the oldest out.
 	 * A copy that cannot be written never stops the session and is never silent: it comes back as a failure with the reason,
 	 * and every caller has somewhere to say it.
@@ -107,7 +144,7 @@ export const createLedgerSession = ({
 				contents,
 				retainedCount: readBackupCount(),
 				isBackupFileName: naming.isBackupFileName,
-				temporaryFileSuffix: LEDGER_FILE_CONFIG.temporaryFileSuffix
+				temporaryFileSuffix: LEDGER_TEMPORARY_FILE_SUFFIX
 			});
 
 			appLogger.info('Ledger backup copy written', {
@@ -379,13 +416,21 @@ export const createLedgerSession = ({
 		}
 
 		openPendingFile(upgraded.filePath);
-		pendingFile = undefined;
 
 		const result = await writeThrough(upgraded.filePath, request.contents);
 
+		// The file read is what the pre-upgrade copy is taken from, so it is held until the upgraded bytes are actually on disk:
+		// letting it go on a write that failed would leave the dialog's own *Retry* with nothing to copy and nothing to upgrade,
+		// and no way out of the upgrade but restarting. Nothing was written, so nothing is open either.
 		if(!result.ok) {
+			openFilePath = undefined;
+			writer = undefined;
+			hasWrittenDuringSession = false;
+
 			return result;
 		}
+
+		pendingFile = undefined;
 
 		appLogger.info('Ledger upgraded', {
 			type: 'ledger.upgraded',
@@ -441,9 +486,13 @@ export const createLedgerSession = ({
 		return backup;
 	};
 
+	// Reading a file is not one of these: it is about a file that is not the open one yet, and it puts no bytes anywhere
 	return {
 		getOpenFilePath: () => {
 			return openFilePath;
+		},
+		isWriting: () => {
+			return queuedOperations > 0;
 		},
 		getBackupDirectory: () => {
 			return openFilePath === undefined ? undefined : resolveLedgerBackupNaming(openFilePath).backupDirectory;
@@ -451,10 +500,28 @@ export const createLedgerSession = ({
 		readFile,
 		acceptFile,
 		rejectFile,
-		createFile,
-		save,
-		writePreUpgradeBackup,
-		completeUpgrade,
-		closeSession
+		createFile: (request) => {
+			return serialize(() => {
+				return createFile(request);
+			});
+		},
+		save: (contents) => {
+			return serialize(() => {
+				return save(contents);
+			});
+		},
+		writePreUpgradeBackup: () => {
+			return serialize(writePreUpgradeBackup);
+		},
+		completeUpgrade: (request) => {
+			return serialize(() => {
+				return completeUpgrade(request);
+			});
+		},
+		closeSession: (door) => {
+			return serialize(() => {
+				return closeSession(door);
+			});
+		}
 	};
 };

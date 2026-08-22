@@ -73,10 +73,24 @@ export const resolveLedgerBackupNaming = (ledgerFilePath: string): LedgerBackupN
 };
 
 /**
+ * What an atomic write's temporary file is called: the file it is about, plus this.
+ *
+ * **It names the process that is writing**, and that is not decoration. The temporary file is the one thing two writers of the
+ * same ledger would otherwise share, and two of them filling one temporary file interleave their bytes in it — the rename then
+ * puts the splice on the ledger, where the reader can only refuse it. Writes inside one process are serialized by the session,
+ * but Spiccioli is allowed to run twice ([§1.7](../../../docs/technical/01-architecture.md)) and two processes cannot be, so
+ * the name is what keeps them apart. A name that carries a process id can only ever be written by one of them.
+ *
+ * It is per process rather than per write so that a run that is killed mid-write leaves at most one of these behind rather than
+ * one for every write it never finished.
+ */
+export const LEDGER_TEMPORARY_FILE_SUFFIX = `${LEDGER_FILE_CONFIG.temporaryFileSuffix}-${process.pid}`;
+
+/**
  * Works out where a ledger's atomic write puts its temporary file, which has to be in the ledger's own directory.
  * @param ledgerFilePath The ledger.
  * @returns The temporary file's path.
  */
 export const resolveLedgerTemporaryFilePath = (ledgerFilePath: string): string => {
-	return `${ledgerFilePath}${LEDGER_FILE_CONFIG.temporaryFileSuffix}`;
+	return `${ledgerFilePath}${LEDGER_TEMPORARY_FILE_SUFFIX}`;
 };

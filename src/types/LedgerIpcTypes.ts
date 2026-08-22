@@ -140,6 +140,12 @@ export interface SpiccioliLedgerApi {
 	// to stay with it. The quit that was asked for is abandoned, and asking again starts it over.
 	cancelClose: () => Promise<void>;
 
+	// The third answer, which is not yet either of the other two: the close cannot go on until the user has answered for changes
+	// that never reached the file, so the wait stops running out while they do. The close is still the one that was asked for and
+	// still finishes on its own once the session closes — this only says that a renderer waiting on a person is not a renderer
+	// that has stopped answering.
+	pauseClose: () => Promise<void>;
+
 	// Where the open ledger's copies live. Derived from the ledger and never chosen, so the main process is what answers it.
 	getBackupDirectory: () => Promise<string | undefined>;
 

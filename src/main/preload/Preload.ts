@@ -65,6 +65,9 @@ const spiccioliLedger: SpiccioliLedgerApi = {
 	cancelClose: () => {
 		return ipcRenderer.invoke(SPICCIOLI_LEDGER_IPC_CHANNELS.cancelClose);
 	},
+	pauseClose: () => {
+		return ipcRenderer.invoke(SPICCIOLI_LEDGER_IPC_CHANNELS.pauseClose);
+	},
 	getBackupDirectory: () => {
 		return ipcRenderer.invoke(SPICCIOLI_LEDGER_IPC_CHANNELS.getBackupDirectory);
 	},

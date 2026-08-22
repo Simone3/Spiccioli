@@ -1318,6 +1318,16 @@ export const EN_TRANSLATIONS = {
 		stay: 'Stay'
 	},
 
+	// What a close says when the file never took the changes the session is ending with. It is the write failure again, at the one
+	// moment where carrying on in memory is not on offer, so it states the file, what the system said and what closing costs.
+	unwrittenChanges: {
+		title: 'Your last changes have not been saved',
+		message: '{name} could not be written, so the most recent changes are still only in memory.',
+		consequence: 'Closing now throws those changes away. Staying keeps them, and the file can be written once whatever stopped it has been put right.',
+		discard: 'Discard changes and close',
+		stay: 'Stay'
+	},
+
 	// The preferences, which belong to the installation and not to the open file
 	settings: {
 		preferenceCount: {
@@ -1471,7 +1481,15 @@ export const EN_TRANSLATIONS = {
 		newDialogTitle: 'Where should the new ledger go?',
 		newFileDefaultName: 'finances',
 		writeTimedOut: 'The write did not finish within {seconds} seconds.',
-		noFileOpen: 'No ledger file is open.'
+		noFileOpen: 'No ledger file is open.',
+
+		// The save dialog checks for an existing file under the name that was typed, and the extension goes on afterwards — so
+		// this is the overwrite warning it could not give, asked only where the name it checked was not the name being written
+		overwriteTitle: 'Replace this ledger?',
+		overwriteMessage: '{name} already exists.',
+		overwriteDetail: 'Creating a new ledger there replaces the one that is there now, and everything in it. Its backups are not touched.',
+		overwriteReplace: 'Replace',
+		overwriteCancel: 'Cancel'
 	},
 
 	// What the reader did not understand about a file, stated on the launch screen with the other files still openable. A refusal

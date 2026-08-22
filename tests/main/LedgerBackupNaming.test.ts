@@ -75,4 +75,16 @@ describe('the temporary file', () => {
 	test('sits in the ledger\'s own directory, so the rename stays inside one filesystem', () => {
 		expect(path.dirname(resolveLedgerTemporaryFilePath(LEDGER_PATH))).toBe(path.dirname(LEDGER_PATH));
 	});
+
+	// Two Spiccioli runs are allowed on one ledger, and the temporary file is the one thing they would otherwise both fill:
+	// two writers in one of those interleave their bytes, and the rename puts the splice on the ledger
+	test('names the process writing it, so two runs cannot fill the same one', () => {
+		expect(path.basename(resolveLedgerTemporaryFilePath(LEDGER_PATH))).toBe(`finances.spiccioli.saving-${process.pid}`);
+	});
+
+	test('is not a name the rotation would mistake for one of its copies', () => {
+		const naming = resolveLedgerBackupNaming(LEDGER_PATH);
+
+		expect(naming.isBackupFileName(path.basename(resolveLedgerTemporaryFilePath(LEDGER_PATH)))).toBe(false);
+	});
 });

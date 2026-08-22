@@ -72,7 +72,8 @@ export const LEDGER_FILE_CONFIG = {
 	backupDirectorySuffix: '-backups',
 
 	// The temporary file an atomic write renames over the ledger. It is written in the ledger's own directory, so that the rename
-	// stays inside one filesystem and is therefore atomic.
+	// stays inside one filesystem and is therefore atomic. The writing process's id is appended to it by
+	// "src/main/storage/LedgerBackupNaming.ts", so that two Spiccioli runs on one ledger can never fill the same one.
 	temporaryFileSuffix: '.saving',
 
 	// What a copy's name says about which of the three moments produced it. A closing copy carries no suffix at all.
@@ -93,10 +94,24 @@ export const STORAGE_CONFIG = {
 	writeTimeoutMs: 10000
 } as const;
 
+// The longest a single write can take before it has run out of attempts: every one of them running to its timeout, with every
+// gap between two of them waited out. Nothing that bounds a write may be shorter than this, or it would cut off the very
+// retries the storage specification promises.
+const MAXIMUM_WRITE_DURATION_MS = STORAGE_CONFIG.maximumWriteAttempts * STORAGE_CONFIG.writeTimeoutMs +
+	(STORAGE_CONFIG.maximumWriteAttempts - 1) * STORAGE_CONFIG.writeRetryDelayMs;
+
 // A quit asks the renderer to finish saving and close the session first. The wait is bounded, because a renderer that cannot
-// answer must not be able to stop the application from exiting.
+// answer must not be able to stop the application from exiting — but a renderer that is *writing* is not one that cannot
+// answer, so the bound below is a bound on being idle rather than on the whole close.
 export const SHUTDOWN_CONFIG = {
-	prepareForCloseTimeoutMs: 8000,
+
+	// How long the close may make no progress at all before the application stops waiting for it
+	idleTimeoutMs: 8000,
+
+	// How long the close may take even while it is making progress. It clears the whole retry budget, so a write that is
+	// genuinely still going is never cut off, and a session that would take longer than this has already lost.
+	maximumWaitMs: MAXIMUM_WRITE_DURATION_MS + 8000,
+
 	pollIntervalMs: 50
 } as const;
 
