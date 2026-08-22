@@ -4,11 +4,11 @@ import { useUnsavedDraftGuard } from 'src/contexts/UnsavedDraftContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { createSeededLedgerDocument, LEDGER_SCHEMA_VERSION } from 'src/logic/ledger/LedgerDocument';
 import { readLedgerDocument } from 'src/logic/ledger/LedgerReader';
+import { redactLedgerRefusal, type LedgerRefusal } from 'src/logic/ledger/LedgerRefusal';
 import { upgradeLedgerDocument, type LedgerUpgradeCounts } from 'src/logic/ledger/LedgerUpgrade';
 import { writeLedgerDocument } from 'src/logic/ledger/LedgerWriter';
 import { createAutosaveScheduler, type AutosaveScheduler } from 'src/logic/storage/AutosaveScheduler';
 import { LEDGER_ENTITY_KEYS, type LedgerDocument, type LedgerEntityKey } from 'src/types/LedgerTypes';
-import type { LedgerRefusal } from 'src/logic/ledger/LedgerRefusal';
 import type { LedgerBackupResult, LedgerCloseDoor, LedgerExternalModificationEvent, LedgerWriteResult } from 'src/types/LedgerIpcTypes';
 
 /**
@@ -169,7 +169,7 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 
 		if(result.outcome === 'refused') {
 			setOpenFailure({ kind: 'refused', filePath: read.filePath, refusal: result.refusal });
-			await window.spiccioliLedger.rejectFile({ filePath: read.filePath, refusal: result.refusal });
+			await window.spiccioliLedger.rejectFile({ filePath: read.filePath, refusal: redactLedgerRefusal(result.refusal) });
 
 			return;
 		}
@@ -281,7 +281,7 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 			if(result.outcome === 'refused') {
 				setUpgradePrompt(undefined);
 				setOpenFailure({ kind: 'refused', filePath: prompt.filePath, refusal: result.refusal });
-				await window.spiccioliLedger.rejectFile({ filePath: prompt.filePath, refusal: result.refusal });
+				await window.spiccioliLedger.rejectFile({ filePath: prompt.filePath, refusal: redactLedgerRefusal(result.refusal) });
 
 				return;
 			}

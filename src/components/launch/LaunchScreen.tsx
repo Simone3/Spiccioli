@@ -57,7 +57,7 @@ export const LaunchScreen = (): ReactElement => {
 			return '';
 		}
 
-		return openFailure.kind === 'unreadable' ? openFailure.message : describeLedgerRefusal(openFailure.refusal, translator);
+		return openFailure.kind === 'unreadable' ? openFailure.message : describeLedgerRefusal(openFailure.refusal, translator, formatter);
 	};
 
 	if(upgradePrompt) {

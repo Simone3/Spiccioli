@@ -1,4 +1,4 @@
-import type { LedgerRefusal } from 'src/logic/ledger/LedgerRefusal';
+import type { LoggableLedgerRefusal } from 'src/logic/ledger/LedgerRefusal';
 import type { LedgerEntityKey } from 'src/types/LedgerTypes';
 import type { Preferences, RecentLedgerFile } from 'src/types/PreferencesTypes';
 
@@ -43,7 +43,10 @@ export interface AcceptLedgerFileRequest {
 
 export interface RejectLedgerFileRequest {
 	filePath: string;
-	refusal: LedgerRefusal;
+
+	// Without the value it was raised on: what crosses to the main process is what the log may carry, so nothing else can end
+	// up written to disk beside it
+	refusal: LoggableLedgerRefusal;
 }
 
 export interface CreateLedgerFileRequest {

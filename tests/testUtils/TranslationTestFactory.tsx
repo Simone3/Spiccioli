@@ -2,6 +2,8 @@ import { render, type RenderOptions, type RenderResult } from '@testing-library/
 import type { ReactElement } from 'react';
 import { TranslationProvider } from 'src/i18n/TranslationContext';
 import { createSpiccioliTranslator, type SpiccioliTranslator } from 'src/i18n/Translations';
+import { createFormatter, type Formatter } from 'src/logic/format/Formatter';
+import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
 
 /**
  * A translator in the language the assertions are written in.
@@ -10,6 +12,14 @@ import { createSpiccioliTranslator, type SpiccioliTranslator } from 'src/i18n/Tr
  */
 export const makeTranslator = (): SpiccioliTranslator => {
 	return createSpiccioliTranslator('en');
+};
+
+/**
+ * A formatter on the preferences a fresh installation runs with, which write a thousand as "1.000" and a cent as ",50".
+ * @returns The formatter.
+ */
+export const makeFormatter = (): Formatter => {
+	return createFormatter(DEFAULT_PREFERENCES);
 };
 
 /**

@@ -90,7 +90,7 @@ Four libraries, and they are the whole of what v1 added to the five runtime depe
 | Entry | `type` | Level | Carries |
 | --- | --- | --- | --- |
 | A file opened | `ledger.open` | `info` | The path, the `schemaVersion` read, the size in bytes, the record count per entity, and how long parsing and validating took |
-| A file refused | `ledger.refused` | `warn` | The path, the `schemaVersion` found, and **what was not understood** (D4) — the reason and the key, category, role or enum name it was raised on, **never the value**, which on a rejected figure is an amount |
+| A file refused | `ledger.refused` | `warn` | The path, the `schemaVersion` found, and **what was not understood** (D4) — the reason, the entity, the position, the record's own id, and the key, category, role or enum name it was raised on, **never the value**, which on a rejected figure is an amount. The renderer sends `redactLedgerRefusal` of the refusal and never the refusal itself, so the value the user is shown cannot reach here |
 | A file created | `ledger.created` | `info` | The path and the `schemaVersion` written |
 | A file upgraded | `ledger.upgraded` | `info` | From which version to which, the name of the pre-upgrade copy, and the counts the dialog showed — rows recategorised, rules repointed or deleted, categories retired. **`error` when the pre-upgrade copy failed and stopped the upgrade**, with what the system said |
 | A session closed | `ledger.closed` | `info` | Which of the four doors of [§12](../functional/specs/12-storage.md) it left by, whether anything changed, and so whether a copy was taken |

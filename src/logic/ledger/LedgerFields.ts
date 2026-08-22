@@ -1,4 +1,4 @@
-import { refuseLedger } from 'src/logic/ledger/LedgerRefusal';
+import { describeRefusedValue, refuseLedger, type LedgerRefusalReason } from 'src/logic/ledger/LedgerRefusal';
 import type { IsoDate, LedgerId } from 'src/types/LedgerTypes';
 
 /**
@@ -16,9 +16,32 @@ export interface LedgerFieldContext {
 
 	// Counting from 1, so that a refusal reads as a position in the file rather than an array offset
 	position: number;
+
+	// The record's own id, read off the raw record before any of it is validated, so that a refusal can name the row rather than
+	// only count to it. Undefined when the record has no readable id, which is itself something the reader is about to refuse.
+	recordId?: string;
 }
 
 const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+// Every refusal raised on a field says the same things about where it was raised, and quotes back what the file held there
+const refuseField: (context: LedgerFieldContext, reason: LedgerRefusalReason, field: string, value: unknown, enumName?: string) => never = (
+	context,
+	reason,
+	field,
+	value,
+	enumName
+) => {
+	refuseLedger({
+		reason,
+		entity: context.entity,
+		position: context.position,
+		recordId: context.recordId,
+		field,
+		enumName,
+		value: describeRefusedValue(value)
+	});
+};
 
 /**
  * Reads one record, and refuses it for holding a key this version does not know or for lacking one it requires.
@@ -29,20 +52,20 @@ const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
  */
 export const readLedgerRecord = (value: unknown, allowedKeys: readonly string[], context: LedgerFieldContext): Record<string, unknown> => {
 	if(typeof value !== 'object' || value === null || Array.isArray(value)) {
-		refuseLedger({ reason: 'wrong-type', entity: context.entity, position: context.position });
+		refuseLedger({ reason: 'wrong-type', entity: context.entity, position: context.position, value: describeRefusedValue(value) });
 	}
 
 	const record = value as Record<string, unknown>;
 
 	Object.keys(record).forEach((key) => {
 		if(!allowedKeys.includes(key)) {
-			refuseLedger({ reason: 'unknown-key', entity: context.entity, position: context.position, field: key });
+			refuseLedger({ reason: 'unknown-key', entity: context.entity, position: context.position, recordId: context.recordId, field: key });
 		}
 	});
 
 	allowedKeys.forEach((key) => {
 		if(!(key in record)) {
-			refuseLedger({ reason: 'missing-key', entity: context.entity, position: context.position, field: key });
+			refuseLedger({ reason: 'missing-key', entity: context.entity, position: context.position, recordId: context.recordId, field: key });
 		}
 	});
 
@@ -57,7 +80,7 @@ export const readLedgerRecord = (value: unknown, allowedKeys: readonly string[],
  */
 export const readLedgerArray = (value: unknown, entity: string): unknown[] => {
 	if(!Array.isArray(value)) {
-		refuseLedger({ reason: 'wrong-type', entity, field: entity });
+		refuseLedger({ reason: 'wrong-type', entity, field: entity, value: describeRefusedValue(value) });
 	}
 
 	return value;
@@ -67,7 +90,7 @@ export const readText = (record: Record<string, unknown>, field: string, context
 	const value = record[field];
 
 	if(typeof value !== 'string') {
-		refuseLedger({ reason: 'wrong-type', entity: context.entity, position: context.position, field });
+		refuseField(context, 'wrong-type', field, value);
 	}
 
 	return value;
@@ -81,7 +104,7 @@ export const readIdentifier = (record: Record<string, unknown>, field: string, c
 	const value = readText(record, field, context);
 
 	if(!value) {
-		refuseLedger({ reason: 'wrong-type', entity: context.entity, position: context.position, field });
+		refuseField(context, 'wrong-type', field, value);
 	}
 
 	return value;
@@ -95,7 +118,7 @@ export const readBoolean = (record: Record<string, unknown>, field: string, cont
 	const value = record[field];
 
 	if(typeof value !== 'boolean') {
-		refuseLedger({ reason: 'wrong-type', entity: context.entity, position: context.position, field });
+		refuseField(context, 'wrong-type', field, value);
 	}
 
 	return value;
@@ -113,11 +136,11 @@ export const readInteger = (record: Record<string, unknown>, field: string, cont
 	const value = record[field];
 
 	if(typeof value !== 'number') {
-		refuseLedger({ reason: 'wrong-type', entity: context.entity, position: context.position, field });
+		refuseField(context, 'wrong-type', field, value);
 	}
 
 	if(!Number.isSafeInteger(value)) {
-		refuseLedger({ reason: 'non-integer-figure', entity: context.entity, position: context.position, field });
+		refuseField(context, 'non-integer-figure', field, value);
 	}
 
 	return value;
@@ -150,7 +173,7 @@ export const readDate = (record: Record<string, unknown>, field: string, context
 	const value = readText(record, field, context);
 
 	if(!isIsoDate(value)) {
-		refuseLedger({ reason: 'malformed-date', entity: context.entity, position: context.position, field });
+		refuseField(context, 'malformed-date', field, value);
 	}
 
 	return value;
@@ -179,7 +202,7 @@ export const readEnum = <TValue extends string>(
 	const value = readText(record, field, context);
 
 	if(!allowedValues.includes(value as TValue)) {
-		refuseLedger({ reason: 'unknown-enum-value', entity: context.entity, position: context.position, field, enumName });
+		refuseField(context, 'unknown-enum-value', field, value, enumName);
 	}
 
 	return value as TValue;

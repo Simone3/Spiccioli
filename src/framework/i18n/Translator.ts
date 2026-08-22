@@ -28,6 +28,7 @@ const LIST_FORMAT: Intl.ListFormatOptions = {
 // Building an Intl object costs far more than using one, and these format once per rendered string, so they are memoized by locale.
 // Nothing can observe the difference, because every one of them is immutable and depends on the locale alone.
 const pluralRulesCache = new Map<string, Intl.PluralRules>();
+const ordinalRulesCache = new Map<string, Intl.PluralRules>();
 const listFormatCache = new Map<string, Intl.ListFormat>();
 const numberFormatCache = new Map<string, Intl.NumberFormat>();
 
@@ -133,6 +134,14 @@ export const createTranslator = <TTranslations extends TranslationTree>({
 		return interpolate(typeof leaf === 'string' ? leaf : selectPluralForm(leaf, parameters), parameters);
 	};
 
+	// Which suffix a position takes is not which form a count takes — English writes "one item" but "1st", "2nd" and "21st" — so
+	// a bundle spells the suffixes out and this is what picks between them
+	const selectOrdinal = (position: number): Intl.LDMLPluralRule => {
+		return getFromCache(ordinalRulesCache, locale, () => {
+			return new Intl.PluralRules(locale, { type: 'ordinal' });
+		}).select(position);
+	};
+
 	const formatList = (values: string[]): string => {
 		return getFromCache(listFormatCache, locale, () => {
 			return new Intl.ListFormat(locale, LIST_FORMAT);
@@ -143,6 +152,7 @@ export const createTranslator = <TTranslations extends TranslationTree>({
 		language,
 		locale,
 		t,
+		selectOrdinal,
 		formatList
 	};
 };

@@ -1439,11 +1439,27 @@ export const EN_TRANSLATIONS = {
 		noFileOpen: 'No ledger file is open.'
 	},
 
-	// What the reader did not understand about a file, stated on the launch screen with the other files still openable.
-	// None of these ever prints a value: the figure a refusal was raised on is an amount and the text is a description.
+	// What the reader did not understand about a file, stated on the launch screen with the other files still openable. A refusal
+	// says where it was raised down to the record's own id and quotes back what the file held there, so that the row can be found
+	// by searching for it. That quoted value is shown here and never written to the log, where an amount may not appear.
 	refusal: {
 		locationFile: 'the file',
-		locationRow: '{entity}, row {position}',
+
+		// The whole array of an entity, which is what a refusal on the shape of the list itself is raised on
+		locationList: 'the {entity} list',
+
+		// A position counts records of that entity and never lines of the file: the 2.857th transaction is not line 2.857
+		locationRecord: 'the {position} {entity}',
+		locationRecordWithId: 'the {position} {entity}, id “{recordId}”',
+
+		// English writes a position as 1st, 2nd, 3rd, 4th, and which of the four a number takes is the language's own rule
+		ordinalOne: '{position}st',
+		ordinalTwo: '{position}nd',
+		ordinalFew: '{position}rd',
+		ordinalOther: '{position}th',
+
+		// Follows the sentence below whenever there was a value to quote, which is what turns a refusal into something findable
+		foundValue: 'The value found is “{value}”.',
 		entity: {
 			institutions: 'institutions',
 			accounts: 'accounts',
@@ -1457,12 +1473,27 @@ export const EN_TRANSLATIONS = {
 			categories: 'categories',
 			rules: 'rules'
 		},
+
+		// The same eleven, one at a time, because a refusal is raised on one record and not on the entity
+		entitySingular: {
+			institutions: 'institution',
+			accounts: 'account',
+			securities: 'security',
+			prices: 'price',
+			transactions: 'transaction',
+			trades: 'trade',
+			contracts: 'contract',
+			contractYears: 'contract year',
+			payslips: 'payslip',
+			categories: 'category',
+			rules: 'rule'
+		},
 		reason: {
 			malformedJson: 'The file is not valid JSON, so none of it could be read.',
-			wrongType: 'In {location}, “{field}” holds something of a kind this version does not expect.',
-			unknownKey: 'In {location}, the file carries a key this version has never heard of: “{field}”.',
-			missingKey: 'In {location}, the file is missing a key this version requires: “{field}”.',
-			unknownEnumValue: 'In {location}, “{field}” holds a value that is not one of the {enumName} this version knows.',
+			wrongType: 'In {location}, “{field}” is of a kind this version does not expect.',
+			unknownKey: 'In {location}, there is a key this version has never heard of: “{field}”.',
+			missingKey: 'In {location}, a key this version requires is missing: “{field}”.',
+			unknownEnumValue: 'In {location}, “{field}” is not one of the {enumName} this version knows.',
 			unknownCategory: 'In {location}, the file holds a category this version does not know.',
 			nonIntegerFigure: 'In {location}, “{field}” is not a whole number in the minor units that field is stored in.',
 			malformedDate: 'In {location}, “{field}” is not a day written as YYYY-MM-DD.',

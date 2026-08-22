@@ -221,6 +221,8 @@ Every field of every entity, in the order the application writes them. `→` mar
 
 Anything on this list is refused with a statement of what was not understood, and the file is not opened. **There is no read-only mode and nothing is ever ignored.**
 
+**The statement says where, what, and which value.** It names the entity, the record's own id — the pair for the two entities keyed by one — the position counted in records of that entity rather than in lines of the file, the field, and the value the file held there, so that the record can be found by searching for it: *In the 2.857th transaction, id “t-2857”, “date” is not a day written as YYYY-MM-DD. The value found is “2026-13-05”.* The position is written with the separators of [§10](../functional/specs/10-settings.md), like every other figure on screen. **The value is the one part that is never written to the log** ([§8.4](08-decisions.md#84-what-d14-logs)) — on a figure it is an amount and on a text it is a description — so the main process is sent `redactLedgerRefusal` of the refusal and never the refusal itself.
+
 | | Refused because |
 | --- | --- |
 | Bytes that are not JSON | |

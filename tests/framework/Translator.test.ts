@@ -60,6 +60,16 @@ describe('Translator', () => {
 		expect(translator.t('tasks', { count: 7 })).toBe('7 tasks');
 	});
 
+	// "1st" and "21st" but "2nd", which is not how the same numbers behave as counts: one is the ordinal rule and the other the
+	// cardinal one, and only the first is what a position is written by
+	test('picks the ordinal category of a position, which is not its category as a count', () => {
+		const translator = createEnglishTranslator();
+
+		expect([ 1, 2, 3, 4, 11, 21, 2857 ].map((position) => {
+			return translator.selectOrdinal(position);
+		})).toEqual([ 'one', 'two', 'few', 'other', 'other', 'one', 'other' ]);
+	});
+
 	// A count of 1 is "one" in English and a count of 2 is not "few", so a hand-written rule would get this wrong for both
 	test('picks the plural category the language actually has, not the English one', () => {
 		const polish = createTranslator({

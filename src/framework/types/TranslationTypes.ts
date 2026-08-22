@@ -39,6 +39,9 @@ export interface Translator<TTranslations> {
 	// Returns the wording for a key, with "{name}" placeholders replaced and the plural category picked from "count"
 	t: (key: TranslationKey<TTranslations>, parameters?: TranslationParameters) => string;
 
+	// The category a position falls into as an ordinal, which is what a bundle writing "1st", "2nd" and "3rd" picks its wording by
+	selectOrdinal: (position: number) => Intl.LDMLPluralRule;
+
 	// Joins already translated fragments the way the locale joins a plain enumeration
 	formatList: (values: string[]) => string;
 }

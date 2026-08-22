@@ -15,7 +15,7 @@ import {
 	readText,
 	type LedgerFieldContext
 } from 'src/logic/ledger/LedgerFields';
-import { isLedgerRefusalError, refuseLedger, type LedgerRefusal } from 'src/logic/ledger/LedgerRefusal';
+import { describeRefusedValue, isLedgerRefusalError, refuseLedger, type LedgerRefusal } from 'src/logic/ledger/LedgerRefusal';
 import { SEEDED_CATEGORY_IDS } from 'src/logic/ledger/SeededCategories';
 import {
 	ACCOUNT_TYPES,
@@ -124,14 +124,50 @@ const ENTITY_KEYS: Record<string, readonly string[]> = {
 	rules: RULE_KEYS
 };
 
-// Reads every record of one entity, giving each its position in the file so that a refusal can point at the row it was raised on
+// What names one record of an entity. Everything is keyed by an id except the two keyed by a pair, and those two are named by
+// the pair, so that a refusal on one of them can be found in the file as readily as a refusal on any other.
+const IDENTITY_KEYS: Record<string, readonly string[]> = {
+	prices: [ 'securityId', 'date' ],
+	contractYears: [ 'contractId', 'year' ]
+};
+
+const DEFAULT_IDENTITY_KEYS: readonly string[] = [ 'id' ];
+
+// Joins a composite key into the one string a refusal names the record by, which is also what tells two records apart below
+const joinIdentity = (parts: readonly (string | number)[]): string => {
+	return parts.join(' + ');
+};
+
+// The record's own id, read off the raw record before anything about it has been validated: a refusal is worth far more for
+// naming the row than for counting to it, and by the time a field is refused there is no validated record left to ask.
+const readIdentity = (rawRecord: unknown, entity: string): string | undefined => {
+	if(typeof rawRecord !== 'object' || rawRecord === null || Array.isArray(rawRecord)) {
+		return undefined;
+	}
+
+	const record = rawRecord as Record<string, unknown>;
+	const parts = (IDENTITY_KEYS[entity] ?? DEFAULT_IDENTITY_KEYS).map((key) => {
+		return record[key];
+	});
+
+	if(!parts.every((part): part is string | number => {
+		return typeof part === 'string' || typeof part === 'number';
+	})) {
+		return undefined;
+	}
+
+	return joinIdentity(parts);
+};
+
+// Reads every record of one entity, giving each its position in the file and its own id so that a refusal can point at the row
+// it was raised on
 const readEntity = <TRecord>(
 	rawDocument: Record<string, unknown>,
 	entity: string,
 	readRecord: (record: Record<string, unknown>, context: LedgerFieldContext) => TRecord
 ): TRecord[] => {
 	return readLedgerArray(rawDocument[entity], entity).map((rawRecord, index) => {
-		const context: LedgerFieldContext = { entity, position: index + 1 };
+		const context: LedgerFieldContext = { entity, position: index + 1, recordId: readIdentity(rawRecord, entity) };
 
 		return readRecord(readLedgerRecord(rawRecord, ENTITY_KEYS[entity], context), context);
 	});
@@ -258,7 +294,7 @@ const readCategory = (record: Record<string, unknown>, context: LedgerFieldConte
 	const id = readIdentifier(record, 'id', context);
 
 	if(!SEEDED_CATEGORY_IDS.has(id)) {
-		refuseLedger({ reason: 'unknown-category', entity: context.entity, position: context.position, field: 'id' });
+		refuseLedger({ reason: 'unknown-category', entity: context.entity, position: context.position, recordId: id, field: 'id' });
 	}
 
 	return {
@@ -287,7 +323,7 @@ const collectIdentities = (entity: string, keys: readonly string[]): Set<string>
 
 	keys.forEach((key, index) => {
 		if(identities.has(key)) {
-			refuseLedger({ reason: 'duplicate-key', entity, position: index + 1 });
+			refuseLedger({ reason: 'duplicate-key', entity, position: index + 1, recordId: key });
 		}
 
 		identities.add(key);
@@ -296,9 +332,16 @@ const collectIdentities = (entity: string, keys: readonly string[]): Set<string>
 	return identities;
 };
 
-const requireReference = (identities: ReadonlySet<LedgerId>, reference: LedgerId | null, entity: string, position: number, field: string): void => {
+const requireReference = (identities: ReadonlySet<LedgerId>, reference: LedgerId | null, context: LedgerFieldContext, field: string): void => {
 	if(reference !== null && !identities.has(reference)) {
-		refuseLedger({ reason: 'dangling-reference', entity, position, field });
+		refuseLedger({
+			reason: 'dangling-reference',
+			entity: context.entity,
+			position: context.position,
+			recordId: context.recordId,
+			field,
+			value: describeRefusedValue(reference)
+		});
 	}
 };
 
@@ -336,40 +379,52 @@ const validateReferences = (document: LedgerDocument): void => {
 
 	// The two entities keyed by something other than an id: one price per security per day, and one record per contract and year
 	collectIdentities('prices', document.prices.map((price) => {
-		return `${price.securityId}|${price.date}`;
+		return joinIdentity([ price.securityId, price.date ]);
 	}));
 	collectIdentities('contractYears', document.contractYears.map((contractYear) => {
-		return `${contractYear.contractId}|${contractYear.year}`;
+		return joinIdentity([ contractYear.contractId, contractYear.year ]);
 	}));
 
 	document.accounts.forEach((account, index) => {
-		requireReference(institutionIds, account.institutionId, 'accounts', index + 1, 'institutionId');
+		requireReference(institutionIds, account.institutionId, { entity: 'accounts', position: index + 1, recordId: account.id }, 'institutionId');
 	});
 	document.prices.forEach((price, index) => {
-		requireReference(securityIds, price.securityId, 'prices', index + 1, 'securityId');
+		const context: LedgerFieldContext = { entity: 'prices', position: index + 1, recordId: joinIdentity([ price.securityId, price.date ]) };
+
+		requireReference(securityIds, price.securityId, context, 'securityId');
 	});
 	document.transactions.forEach((transaction, index) => {
-		requireReference(accountIds, transaction.accountId, 'transactions', index + 1, 'accountId');
-		requireReference(categoryIds, transaction.categoryId, 'transactions', index + 1, 'categoryId');
+		const context: LedgerFieldContext = { entity: 'transactions', position: index + 1, recordId: transaction.id };
+
+		requireReference(accountIds, transaction.accountId, context, 'accountId');
+		requireReference(categoryIds, transaction.categoryId, context, 'categoryId');
 	});
 	document.trades.forEach((trade, index) => {
-		requireReference(securityIds, trade.securityId, 'trades', index + 1, 'securityId');
-		requireReference(accountIds, trade.accountId, 'trades', index + 1, 'accountId');
+		const context: LedgerFieldContext = { entity: 'trades', position: index + 1, recordId: trade.id };
+
+		requireReference(securityIds, trade.securityId, context, 'securityId');
+		requireReference(accountIds, trade.accountId, context, 'accountId');
 	});
 	document.contractYears.forEach((contractYear, index) => {
-		requireReference(contractIds, contractYear.contractId, 'contractYears', index + 1, 'contractId');
+		const context: LedgerFieldContext = {
+			entity: 'contractYears',
+			position: index + 1,
+			recordId: joinIdentity([ contractYear.contractId, contractYear.year ])
+		};
+
+		requireReference(contractIds, contractYear.contractId, context, 'contractId');
 	});
 	document.payslips.forEach((payslip, index) => {
-		requireReference(contractIds, payslip.contractId, 'payslips', index + 1, 'contractId');
+		requireReference(contractIds, payslip.contractId, { entity: 'payslips', position: index + 1, recordId: payslip.id }, 'contractId');
 	});
 	document.rules.forEach((rule, index) => {
-		requireReference(categoryIds, rule.categoryId, 'rules', index + 1, 'categoryId');
+		requireReference(categoryIds, rule.categoryId, { entity: 'rules', position: index + 1, recordId: rule.id }, 'categoryId');
 	});
 };
 
 const readDocumentShell = (rawDocument: unknown): Record<string, unknown> => {
 	if(typeof rawDocument !== 'object' || rawDocument === null || Array.isArray(rawDocument)) {
-		refuseLedger({ reason: 'wrong-type' });
+		refuseLedger({ reason: 'wrong-type', value: describeRefusedValue(rawDocument) });
 	}
 
 	const record = rawDocument as Record<string, unknown>;
@@ -420,13 +475,13 @@ export const validateLedgerDocument = (rawDocument: unknown): LedgerDocument => 
 // The version is read before anything else, because it is what decides whether the rest of the file is a shape this build knows
 const readSchemaVersion = (rawDocument: unknown): number => {
 	if(typeof rawDocument !== 'object' || rawDocument === null || Array.isArray(rawDocument)) {
-		refuseLedger({ reason: 'wrong-type' });
+		refuseLedger({ reason: 'wrong-type', value: describeRefusedValue(rawDocument) });
 	}
 
 	const version = (rawDocument as Record<string, unknown>).schemaVersion;
 
 	if(typeof version !== 'number' || !Number.isSafeInteger(version) || version < 1) {
-		refuseLedger({ reason: 'wrong-type', field: 'schemaVersion' });
+		refuseLedger({ reason: 'wrong-type', field: 'schemaVersion', value: describeRefusedValue(version) });
 	}
 
 	return version;

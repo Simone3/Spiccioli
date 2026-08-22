@@ -78,7 +78,11 @@ export const LEDGER_FILE_CONFIG = {
 	// What a copy's name says about which of the three moments produced it. A closing copy carries no suffix at all.
 	closeBackupSuffix: '',
 	externalBackupSuffix: '-external',
-	preUpgradeBackupSuffix: '-pre-upgrade'
+	preUpgradeBackupSuffix: '-pre-upgrade',
+
+	// How much of a value a refusal quotes back on screen. Long enough to recognise what is in the file, short enough that a
+	// whole record pasted into one field cannot push the rest of the sentence off the panel.
+	refusedValueLengthLimit: 60
 } as const;
 
 // The three figures autosave runs on, and the timeout a single write is given

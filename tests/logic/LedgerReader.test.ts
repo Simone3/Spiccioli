@@ -1,10 +1,10 @@
-import { makeFullDocument, makeRawDocument, makeSeededDocument, makeTranslator } from '../testUtils';
+import { makeFormatter, makeFullDocument, makeRawDocument, makeSeededDocument, makeTranslator } from '../testUtils';
 import { LEDGER_SCHEMA_VERSION } from 'src/logic/ledger/LedgerDocument';
 import { readLedgerDocument } from 'src/logic/ledger/LedgerReader';
 import { describeLedgerRefusal } from 'src/logic/ledger/LedgerRefusalMessage';
 import { writeLedgerDocument } from 'src/logic/ledger/LedgerWriter';
 import { SEEDED_CATEGORIES } from 'src/logic/ledger/SeededCategories';
-import type { LedgerRefusalReason } from 'src/logic/ledger/LedgerRefusal';
+import { redactLedgerRefusal, type LedgerRefusalReason } from 'src/logic/ledger/LedgerRefusal';
 
 const readRaw = (raw: unknown): ReturnType<typeof readLedgerDocument> => {
 	return readLedgerDocument(JSON.stringify(raw));
@@ -132,7 +132,7 @@ describe('what is not understood', () => {
 		}), 'missing-key', 'notes');
 	});
 
-	test('refuses a value outside a closed set, naming the set and never the value', () => {
+	test('refuses a value outside a closed set, naming the set and the value it found', () => {
 		const result = readRaw(makeRawDocument((raw) => {
 			(raw.accounts as Record<string, unknown>[])[0].type = 'savings-account';
 		}));
@@ -142,7 +142,7 @@ describe('what is not understood', () => {
 		if(result.outcome === 'refused') {
 			expect(result.refusal.reason).toBe('unknown-enum-value');
 			expect(result.refusal.enumName).toBe('AccountType');
-			expect(JSON.stringify(result.refusal)).not.toContain('savings-account');
+			expect(result.refusal.value).toBe('savings-account');
 		}
 	});
 
@@ -223,19 +223,76 @@ describe('what is not understood', () => {
 });
 
 describe('what a refusal says', () => {
-	test('names the entity, the row and the key, and prints no value', () => {
-		const result = readRaw(makeRawDocument((raw) => {
-			(raw.transactions as Record<string, unknown>[])[0].amount = -42.5;
+	// A file big enough for the position to be worth reading, which is the case the wording has to get right: it counts
+	// transactions and not lines, and it is grouped the way the preferences group a figure
+	const withTransactions = (count: number, mutate: (transactions: Record<string, unknown>[]) => void): Record<string, unknown> => {
+		return makeRawDocument((raw) => {
+			const transactions = raw.transactions as Record<string, unknown>[];
+
+			while(transactions.length < count) {
+				transactions.push({ ...transactions[0], id: `transaction-${transactions.length + 1}`, insertionSeq: transactions.length + 1 });
+			}
+
+			mutate(transactions);
+		});
+	};
+
+	test('names the record by its position, by its own id, and by the value the file holds there', () => {
+		const result = readRaw(withTransactions(2857, (transactions) => {
+			transactions[2856].amount = -42.5;
 		}));
 
 		expect(result.outcome).toBe('refused');
 
 		if(result.outcome === 'refused') {
-			const message = describeLedgerRefusal(result.refusal, makeTranslator());
+			const message = describeLedgerRefusal(result.refusal, makeTranslator(), makeFormatter());
 
-			expect(message).toContain('transactions, row 1');
-			expect(message).toContain('amount');
-			expect(message).not.toContain('42');
+			expect(message).toContain('the 2.857th transaction');
+			expect(message).toContain('id “transaction-2857”');
+			expect(message).toContain('“amount”');
+			expect(message).toContain('The value found is “-42.5”');
+		}
+	});
+
+	test('writes a position as the ordinal it is', () => {
+		const positions = [ 1, 2, 3, 11, 21 ].map((position) => {
+			const result = readRaw(withTransactions(position, (transactions) => {
+				transactions[position - 1].date = '08/08/2026';
+			}));
+
+			return result.outcome === 'refused' ? describeLedgerRefusal(result.refusal, makeTranslator(), makeFormatter()) : '';
+		});
+
+		expect(positions[0]).toContain('the 1st transaction');
+		expect(positions[1]).toContain('the 2nd transaction');
+		expect(positions[2]).toContain('the 3rd transaction');
+		expect(positions[3]).toContain('the 11th transaction');
+		expect(positions[4]).toContain('the 21st transaction');
+	});
+
+	test('names the pair a price is keyed by, since it has no id of its own', () => {
+		const result = readRaw(makeRawDocument((raw) => {
+			(raw.prices as Record<string, unknown>[])[0].value = 12.5;
+		}));
+
+		expect(result.outcome).toBe('refused');
+
+		if(result.outcome === 'refused') {
+			expect(describeLedgerRefusal(result.refusal, makeTranslator(), makeFormatter())).toContain('id “security-1 + 2026-08-08”');
+		}
+	});
+
+	test('keeps the value out of what is written to the log, where an amount may not appear', () => {
+		const result = readRaw(makeRawDocument((raw) => {
+			(raw.transactions as Record<string, unknown>[])[0].description = 4250;
+		}));
+
+		expect(result.outcome).toBe('refused');
+
+		if(result.outcome === 'refused') {
+			expect(result.refusal.value).toBe('4250');
+			expect(JSON.stringify(redactLedgerRefusal(result.refusal))).not.toContain('4250');
+			expect(redactLedgerRefusal(result.refusal).recordId).toBe('transaction-1');
 		}
 	});
 
@@ -247,7 +304,7 @@ describe('what a refusal says', () => {
 		expect(result.outcome).toBe('refused');
 
 		if(result.outcome === 'refused') {
-			expect(describeLedgerRefusal(result.refusal, makeTranslator())).toContain(String(LEDGER_SCHEMA_VERSION + 3));
+			expect(describeLedgerRefusal(result.refusal, makeTranslator(), makeFormatter())).toContain(String(LEDGER_SCHEMA_VERSION + 3));
 		}
 	});
 });
