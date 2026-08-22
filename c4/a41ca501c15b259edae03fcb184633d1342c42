@@ -1,0 +1,40 @@
+src/components/checks/ChecksScreen.css
+  s_6b3bbd805157ac::t_41e9480fda4726 53-71
+src/components/checks/ChecksScreen.tsx
+  s_6b3bbd805157ac::t_46eb3deaef9a77 77-105,117
+src/components/shell/RecordLinks.ts
+  s_6b3bbd805157ac::t_972526c0298bb7 73-74,111-115
+src/i18n/lang/en.ts
+  s_6b3bbd805157ac::t_870b3a58f5a8af 1491-1492,1496,1500,1504,1508,1512,1516,1520,1524,1528,1532,1536,1540,1544,1548,1552-1599
+docs/technical/02-repository-map.md
+  s_6b3bbd805157ac::t_7db28beaa87cfc 83,98
+docs/technical/05-text-and-languages.md
+  s_6b3bbd805157ac::t_4587f831cf7356 38
+src/logic/checks/Checks.ts
+  s_6b3bbd805157ac::t_bec7a9fae639e8 4,44-48,95-98,101-113,141-143,151-153,209-211,285-435,454,482,531,573,611,650,693,738,789,870,934,968,1039-1041
+tests/components/ChecksScreen.test.tsx
+  s_6b3bbd805157ac::t_646d936a663bfe 57-69
+tests/logic/Checks.test.ts
+  s_6b3bbd805157ac::t_13fa7528882ebd 411-484
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c4a41ca501c15b259edae03fcb184633d1342c42",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6b3bbd805157ac": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "30ffcd2e-86ff-40f2-b198-cabe3c35c725",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
