@@ -148,6 +148,46 @@ describe('external modification', () => {
 		expect(readFileSync(filePath, 'utf8')).toBe('second');
 	});
 
+	/**
+	 * A failing write has five attempts and the file is still modified at every one of them, so reporting it per attempt handed
+	 * the same displaced version over five times. Where the application keeps those copies to a count, four of them would be
+	 * spent pushing four real ones out of the rotation.
+	 */
+	test('hands one displaced version over once, however many attempts the write takes', async() => {
+		const directory = makeTempDirectory();
+		const filePath = path.join(directory, 'document.json');
+		const { writer, modifications, failures } = makeWriter(filePath, {
+			// A directory cannot be renamed onto, so every attempt fails for a reason that has nothing to do with the modification
+			temporaryFilePath: directory
+		});
+
+		writeFileSync(filePath, 'mine', 'utf8');
+		writer.recordHash(hashFileContents('mine'));
+		writeFileSync(filePath, 'something else wrote this', 'utf8');
+
+		const outcome = await writer.write('second');
+
+		expect(outcome.ok).toBe(false);
+		expect(failures).toHaveLength(MAXIMUM_ATTEMPTS);
+		expect(modifications).toHaveLength(1);
+		expect(modifications[0].displacedContents).toBe('something else wrote this');
+	});
+
+	test('hands a second modification over even after one has been reported', async() => {
+		const filePath = path.join(makeTempDirectory(), 'document.json');
+		const { writer, modifications } = makeWriter(filePath);
+
+		await writer.write('first');
+		writeFileSync(filePath, 'the first intrusion', 'utf8');
+		await writer.write('second');
+
+		writeFileSync(filePath, 'the second intrusion', 'utf8');
+		await writer.write('third');
+
+		expect(modifications).toHaveLength(2);
+		expect(modifications[1].displacedContents).toBe('the second intrusion');
+	});
+
 	test('reports a file that was deleted rather than changed, with nothing to displace', async() => {
 		const directory = makeTempDirectory();
 		const filePath = path.join(directory, 'document.json');

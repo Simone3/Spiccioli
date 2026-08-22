@@ -270,6 +270,40 @@ describe('closing', () => {
 		expect(session.getOpenFilePath()).toBeUndefined();
 	});
 
+	/**
+	 * The shutdown in "Main.ts" watches for the file to stop being the open one and lets the process go the moment it does, so
+	 * a close that stopped naming its file before the copy was on disk was telling the quit to go ahead in the middle of taking
+	 * it. Nothing may stop being open until the whole close is done.
+	 */
+	test('goes on naming the open file until the closing copy is actually written', async() => {
+		const { session, ledgerPath, backupDirectory } = makeSession();
+		await session.createFile({ filePath: ledgerPath, contents: 'first', schemaVersion: 1 });
+		await session.save('second');
+
+		const closing = session.closeSession('quit');
+		const seen: { open: string | undefined; backups: string[] }[] = [];
+
+		// What the shutdown poll would have seen, at every point it could have looked
+		for(let tick = 0; tick < 200; tick += 1) {
+			await Promise.resolve();
+
+			seen.push({
+				open: session.getOpenFilePath(),
+				backups: existsSync(backupDirectory) ? readdirSync(backupDirectory) : []
+			});
+		}
+
+		await closing;
+
+		// Not once did it stop naming the file while the folder was still empty. That is the moment the poll would have let the
+		// process go, and the copy would have gone with it.
+		expect(seen.filter((moment) => {
+			return moment.open === undefined && moment.backups.length === 0;
+		})).toEqual([]);
+		expect(readdirSync(backupDirectory)).toHaveLength(1);
+		expect(session.getOpenFilePath()).toBeUndefined();
+	});
+
 	test('writes nothing for a session that only read the file', async() => {
 		const { session, ledgerPath, backupDirectory } = makeSession();
 		writeFileSync(ledgerPath, 'untouched', 'utf8');

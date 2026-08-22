@@ -152,7 +152,13 @@ const clearShutdownWait = (): void => {
  * that cannot answer must not be able to stop the application from exiting; a renderer that is *writing* is answering, and a
  * write has five attempts and a timeout each — far more than the seconds an unresponsive one is given. Cutting that off at the
  * idle bound would throw away the very changes the close exists to finish writing. So the clock runs only while nothing is
- * moving, and a second bound covers the whole thing so that no state can hold the application open forever.
+ * moving, and a second bound covers the whole thing so that no amount of work can hold the application open forever — **it is
+ * asked before anything can report progress**, or a renderer writing forever would never reach it.
+ *
+ * **A close that is waiting on a person is under neither bound.** A pause is the renderer saying it has put a question in front
+ * of the user — what to do about changes the file never took, or about a draft nothing has been written from — and a person is
+ * not a state to be timed out: giving up on one would destroy the very thing it was asked about. It counts only while the
+ * window that asked for it is still there, so a pause cannot outlive the renderer that raised it.
  * @param session The open session, which is what knows when there is nothing left to write.
  * @param door Which of the four doors the session is leaving by.
  * @param finish What the close was: letting the quit through, or letting the window go.
@@ -179,9 +185,17 @@ const beginShutdown = (session: LedgerSession, door: LedgerCloseDoor, finish: ()
 		finish();
 	};
 
+	// A pause only counts while the window that asked for it is still there. Nothing else ever clears it, so a pause left behind
+	// by a window that has gone would hold the application open with nobody left to answer the question it was raised for.
+	const isWaitingOnTheUser = (): boolean => {
+		return isShutdownPaused && mainWindow !== undefined && !mainWindow.isDestroyed();
+	};
+
 	// The renderer answers by closing the session, and the session is what knows when there is nothing left to write
 	shutdownPoll = setInterval(() => {
-		if(session.getOpenFilePath() === undefined) {
+		// **Still writing is not yet closed.** The session stops naming an open file only once the closing copy is on disk, and
+		// both have to be true, or the process would be let go in the middle of taking it.
+		if(session.getOpenFilePath() === undefined && !session.isWriting()) {
 			clearShutdownWait();
 			isShuttingDown = false;
 			finish();
@@ -189,8 +203,23 @@ const beginShutdown = (session: LedgerSession, door: LedgerCloseDoor, finish: ()
 			return;
 		}
 
-		// Waiting on a person is not being idle, and neither is a write that is still going
-		if(isShutdownPaused || session.isWriting()) {
+		if(isWaitingOnTheUser()) {
+			progressedAt = Date.now();
+
+			return;
+		}
+
+		// Asked before progress can be reported, so that it bounds the whole close rather than only the stretches of it that
+		// were going nowhere: a renderer writing without end reports progress at every poll and would never reach a bound below
+		// this one
+		if(Date.now() - startedAt >= SHUTDOWN_CONFIG.maximumWaitMs) {
+			giveUp('took-too-long');
+
+			return;
+		}
+
+		// A write that is still going is not a renderer that has stopped
+		if(session.isWriting()) {
 			progressedAt = Date.now();
 
 			return;
@@ -198,12 +227,6 @@ const beginShutdown = (session: LedgerSession, door: LedgerCloseDoor, finish: ()
 
 		if(Date.now() - progressedAt >= SHUTDOWN_CONFIG.idleTimeoutMs) {
 			giveUp('timed-out');
-
-			return;
-		}
-
-		if(Date.now() - startedAt >= SHUTDOWN_CONFIG.maximumWaitMs) {
-			giveUp('took-too-long');
 		}
 	}, SHUTDOWN_CONFIG.pollIntervalMs);
 };

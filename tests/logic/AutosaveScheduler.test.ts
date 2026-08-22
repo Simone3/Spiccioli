@@ -46,6 +46,9 @@ describe('the autosave', () => {
 
 				return Promise.resolve();
 			},
+			onSaveRejected: (error) => {
+				throw error;
+			},
 			onResult: () => {
 				return undefined;
 			}
@@ -68,6 +71,9 @@ describe('the autosave', () => {
 
 				return Promise.resolve();
 			},
+			onSaveRejected: (error) => {
+				throw error;
+			},
 			onResult: () => {
 				return undefined;
 			}
@@ -88,6 +94,9 @@ describe('the autosave', () => {
 		const scheduler = createAutosaveScheduler<string>({
 			debounceMs: DEBOUNCE_MS,
 			save: controllable.save,
+			onSaveRejected: (error) => {
+				throw error;
+			},
 			onResult: () => {
 				return undefined;
 			}
@@ -116,6 +125,9 @@ describe('the autosave', () => {
 
 				return Promise.resolve();
 			},
+			onSaveRejected: (error) => {
+				throw error;
+			},
 			onResult: () => {
 				return undefined;
 			}
@@ -134,6 +146,9 @@ describe('the autosave', () => {
 			debounceMs: DEBOUNCE_MS,
 			save: (contents) => {
 				return Promise.resolve(`saved ${contents}`);
+			},
+			onSaveRejected: (error) => {
+				throw error;
 			},
 			onResult: (result) => {
 				results.push(result);
@@ -157,6 +172,9 @@ describe('the autosave', () => {
 		const scheduler = createAutosaveScheduler<string>({
 			debounceMs: DEBOUNCE_MS,
 			save,
+			onSaveRejected: (error) => {
+				throw error;
+			},
 			onResult: () => {
 				return undefined;
 			}
@@ -190,6 +208,9 @@ describe('the autosave', () => {
 
 				return Promise.resolve();
 			},
+			onSaveRejected: (error) => {
+				throw error;
+			},
 			onResult: () => {
 				return undefined;
 			}
@@ -200,6 +221,63 @@ describe('the autosave', () => {
 		expect(written).toEqual([ 'retried' ]);
 	});
 
+	/**
+	 * The contents leave the queue before they are attempted, so a save that rejects rather than reporting a failure has taken
+	 * them with it. Nothing would be pending and nothing would have failed, and that is exactly the state a close reads as "the
+	 * file has everything" — so it would end the session over changes that never reached the disk.
+	 */
+	test('reports a save that rejected as a failed write rather than losing it', async() => {
+		const results: string[] = [];
+		const scheduler = createAutosaveScheduler<string>({
+			debounceMs: DEBOUNCE_MS,
+			save: () => {
+				return Promise.reject(new Error('the bridge went away'));
+			},
+			onSaveRejected: (error) => {
+				return `failed: ${(error as Error).message}`;
+			},
+			onResult: (result) => {
+				results.push(result);
+			}
+		});
+
+		scheduler.schedule('unwritten');
+		await scheduler.flush();
+
+		expect(results).toEqual([ 'failed: the bridge went away' ]);
+		expect(scheduler.hasPendingChanges()).toBe(false);
+	});
+
+	test('goes on writing after a save that rejected', async() => {
+		const results: string[] = [];
+		let shouldReject = true;
+		const scheduler = createAutosaveScheduler<string>({
+			debounceMs: DEBOUNCE_MS,
+			save: (contents) => {
+				if(shouldReject) {
+					return Promise.reject(new Error('gone'));
+				}
+
+				return Promise.resolve(`saved ${contents}`);
+			},
+			onSaveRejected: () => {
+				return 'failed';
+			},
+			onResult: (result) => {
+				results.push(result);
+			}
+		});
+
+		scheduler.schedule('first');
+		await scheduler.flush();
+
+		shouldReject = false;
+		scheduler.schedule('second');
+		await scheduler.flush();
+
+		expect(results).toEqual([ 'failed', 'saved second' ]);
+	});
+
 	test('flushing with nothing waiting writes nothing', async() => {
 		const written: string[] = [];
 		const scheduler = createAutosaveScheduler<void>({
@@ -208,6 +286,9 @@ describe('the autosave', () => {
 				written.push(contents);
 
 				return Promise.resolve();
+			},
+			onSaveRejected: (error) => {
+				throw error;
 			},
 			onResult: () => {
 				return undefined;

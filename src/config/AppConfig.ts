@@ -108,8 +108,10 @@ export const SHUTDOWN_CONFIG = {
 	// How long the close may make no progress at all before the application stops waiting for it
 	idleTimeoutMs: 8000,
 
-	// How long the close may take even while it is making progress. It clears the whole retry budget, so a write that is
-	// genuinely still going is never cut off, and a session that would take longer than this has already lost.
+	// How long the close may take even while it is making progress, asked before anything can report any. It clears the whole
+	// retry budget, so a single write is never cut off part way through its attempts, and a session still going after that has
+	// already lost. **Neither bound runs while the renderer is waiting on an answer from the user**: a person reading a dialog
+	// is not a state to be timed out, and giving up on one would destroy the very thing it asked about.
 	maximumWaitMs: MAXIMUM_WRITE_DURATION_MS + 8000,
 
 	pollIntervalMs: 50

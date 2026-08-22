@@ -26,7 +26,7 @@
 | `main/config/JsonConfigStore.ts` | The preferences and the recent-file list, behind `src/main/config/SpiccioliConfigStore.ts`. **Written atomically**, because it reads a file it cannot parse as a first startup — so a truncated write would not be an error but every preference silently gone |
 | `main/logging/AppLogger.ts` | The operational log, as rotated NDJSON |
 | `main/storage/WholeFileStorage.ts` | Reading and writing a whole file, the atomic replace by temp-file-and-rename, and the SHA-256 that recognises one that changed underneath |
-| `main/storage/RetryingFileWriter.ts` | The five spaced attempts, the write timeout, and offering the displaced bytes before overwriting them |
+| `main/storage/RetryingFileWriter.ts` | The five spaced attempts, the write timeout, and offering the displaced bytes before overwriting them — once per write, however many attempts it takes |
 | `main/storage/FileBackupRotation.ts` | A folder of copies kept to a count, oldest out first as they arrive |
 | `preload/IpcBridge.ts` | `subscribeToChannel`, which is how the four main-to-renderer events reach the page |
 | `main/logging/ProcessCrashHandlers.ts` | Uncaught exceptions and unhandled rejections in the main process |

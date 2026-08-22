@@ -10,6 +10,10 @@
  * and a second write starting inside that window would be racing it for the same file. That is why the blocking failure
  * message's *Retry* is `saveNow` and not a save of its own: the one thing it must not do is start a second writer.
  *
+ * **Nothing that leaves the queue goes unaccounted for.** Contents are taken out of it before they are attempted, so a save
+ * that rejects rather than reporting a failure would lose them silently — and a close that reads "nothing pending" as "the file
+ * has everything" would then end the session over them. A rejection is turned into a result and reported like any other.
+ *
  * This holds no React and no Electron: it is handed a function that writes and it decides when to call it.
  */
 
@@ -17,6 +21,16 @@ export interface CreateAutosaveSchedulerOptions<TResult> {
 	debounceMs: number;
 	save: (contents: string) => Promise<TResult>;
 	onResult: (result: TResult) => void;
+
+	/**
+	 * What a save that rejected instead of reporting a failure is taken to have done.
+	 *
+	 * **It exists because the contents leave the queue before they are attempted.** A rejection thrown on from here would take
+	 * them with it and report nothing, and a caller that decides a file is complete by finding nothing pending and nothing
+	 * failed would then close a session over changes that never reached the disk. Every rejection therefore becomes a result
+	 * like any other, and the caller is told this write did not happen.
+	 */
+	onSaveRejected: (error: unknown) => TResult;
 
 	// Injected by the tests, which drive the clock themselves
 	setTimer?: (callback: () => void, delayMs: number) => unknown;
@@ -42,6 +56,7 @@ export const createAutosaveScheduler = <TResult>({
 	debounceMs,
 	save,
 	onResult,
+	onSaveRejected,
 	setTimer = (callback, delayMs) => {
 		return setTimeout(callback, delayMs);
 	},
@@ -66,7 +81,18 @@ export const createAutosaveScheduler = <TResult>({
 			const contents = pendingContents;
 			pendingContents = undefined;
 
-			onResult(await save(contents));
+			// The contents are out of the queue by now, so a rejection escaping here would lose them without a word: nothing
+			// would be pending, nothing would have failed, and the file would be taken for complete. It becomes a result instead.
+			let result: TResult;
+
+			try {
+				result = await save(contents);
+			}
+			catch(error) {
+				result = onSaveRejected(error);
+			}
+
+			onResult(result);
 		}
 	};
 

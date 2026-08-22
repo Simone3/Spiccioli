@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 import { makeSeededDocument, renderWithProviders, stubLedgerBridge, TEST_LEDGER_PATH } from '../testUtils';
 import { SpiccioliApp } from 'src/components/SpiccioliApp';
 import { useLedger } from 'src/contexts/LedgerContext';
+import { useUnsavedDraft } from 'src/contexts/UnsavedDraftContext';
 import { createLedgerId } from 'src/logic/ledger/LedgerDocument';
 import { writeLedgerDocument } from 'src/logic/ledger/LedgerWriter';
 import type { LedgerCloseDoor, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
@@ -171,5 +172,116 @@ describe('a close that found changes the file never took', () => {
 
 		// Nothing was holding a wait, so nothing has to be told the wait can stop
 		expect(harness.pausedCloses.value).toBe(0);
+	});
+});
+
+// A screen holding a draft nothing has been written from, which is what the rule list of §6.2 is
+const DraftHolder = (): ReactElement => {
+	useUnsavedDraft(true, () => {
+		return undefined;
+	});
+
+	return <span>holding a draft</span>;
+};
+
+/**
+ * Opens a ledger that writes perfectly well, with a screen holding an unwritten draft, and a hold of the close the main process
+ * asks for.
+ * @returns What the bridge was asked for while the test ran.
+ */
+const openLedgerHoldingADraft = async(): Promise<CloseHarness> => {
+	const closedDoors: LedgerCloseDoor[] = [];
+	const cancelledCloses = { value: 0 };
+	const pausedCloses = { value: 0 };
+	let listener: ((door: LedgerCloseDoor) => void) | undefined;
+
+	stubLedgerBridge({
+		getRecentFiles: () => {
+			return Promise.resolve([ { filePath: TEST_LEDGER_PATH, lastOpenedAt: SAVED_AT, missing: false } ]);
+		},
+		readFile: () => {
+			return Promise.resolve({
+				outcome: 'read',
+				filePath: TEST_LEDGER_PATH,
+				contents: writeLedgerDocument(makeSeededDocument()),
+				sizeBytes: 100
+			});
+		},
+		closeSession: (request) => {
+			closedDoors.push(request.door);
+
+			return Promise.resolve({ written: false });
+		},
+		cancelClose: () => {
+			cancelledCloses.value += 1;
+
+			return Promise.resolve();
+		},
+		pauseClose: () => {
+			pausedCloses.value += 1;
+
+			return Promise.resolve();
+		},
+		onPrepareForClose: (given) => {
+			listener = given;
+
+			return () => {
+				listener = undefined;
+			};
+		}
+	});
+	renderWithProviders(<><SpiccioliApp/><DraftHolder/></>);
+
+	await userEvent.click(await screen.findByRole('button', { name: /finances\.spiccioli/ }));
+	await screen.findByRole('heading', { name: 'Portfolio', level: 1 });
+
+	return {
+		closedDoors,
+		cancelledCloses,
+		pausedCloses,
+		prepareForClose: (door) => {
+			listener?.(door);
+		}
+	};
+};
+
+/**
+ * The other question a close can raise, and it is raised before the file is even reached: the draft guard.
+ *
+ * **The main process counts this wait exactly as it counts the other one.** A quit or a closed window is held open while the
+ * renderer answers, and a renderer putting a question to a person is not one that has stopped answering — so the wait has to be
+ * told, or the close gives up on a dialog nobody has had time to read and destroys the very draft it asked about.
+ */
+describe('a close that found a draft nothing has been written from', () => {
+	test('holds the shutdown wait off while the question is up', async() => {
+		const harness = await openLedgerHoldingADraft();
+
+		harness.prepareForClose('window-closed');
+
+		expect(await screen.findByRole('dialog')).toBeInTheDocument();
+		expect(harness.pausedCloses.value).toBe(1);
+		expect(harness.closedDoors).toEqual([]);
+		expect(harness.cancelledCloses.value).toBe(0);
+	});
+
+	test('staying calls the close off', async() => {
+		const harness = await openLedgerHoldingADraft();
+
+		harness.prepareForClose('quit');
+		await userEvent.click(await screen.findByRole('button', { name: 'Stay' }));
+
+		expect(harness.cancelledCloses.value).toBe(1);
+		expect(harness.closedDoors).toEqual([]);
+	});
+
+	test('discarding the draft lets the close through', async() => {
+		const harness = await openLedgerHoldingADraft();
+
+		harness.prepareForClose('quit');
+		await userEvent.click(await screen.findByRole('button', { name: 'Discard changes' }));
+
+		await waitFor(() => {
+			expect(harness.closedDoors).toEqual([ 'quit' ]);
+		});
 	});
 });

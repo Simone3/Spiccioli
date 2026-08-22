@@ -119,7 +119,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `logic/ledger/` | The document: its version, its seed, its reader, its writer, its refusals and its upgrade ([§9](09-file-format.md)) |
 | `logic/money/Money.ts` | The scales, the one division rule and the roundings |
 | `logic/preferences/Preferences.ts` | The defaults, the reading of whatever the configuration file holds, and the rule that the two separators must differ — which Settings and the import's own controls both apply |
-| `logic/storage/AutosaveScheduler.ts` | The debounce, and the rule that two writes never overlap. **Every write of the open file goes through it**, the blocking failure message's own *Retry* included |
+| `logic/storage/AutosaveScheduler.ts` | The debounce, and the rule that two writes never overlap. **Every write of the open file goes through it**, the blocking failure message's own *Retry* included, and nothing that leaves its queue goes unreported — a save that rejects becomes a failed write rather than vanishing |
 | `types/AppInfoTypes.ts` `AppInfoIpcChannels.ts` | The shape and the channel names of the app-info request |
 | `types/AppMenuTypes.ts` `AppMenuIpcChannels.ts` | The drawn menu's description, its closed set of commands, and the channel names |
 | `types/LedgerTypes.ts` | The eleven stored entities and every closed set they take |

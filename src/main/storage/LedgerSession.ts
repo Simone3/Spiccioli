@@ -446,18 +446,25 @@ export const createLedgerSession = ({
 		return result;
 	};
 
+	// Whatever is left of the session once the file has stopped being the open one. It is the last thing a close does, and
+	// deliberately so: a shutdown reads "no file open" as "the close is done", and this session is not done until the copy it
+	// exists to take is on disk.
+	const forgetOpenFile = (): void => {
+		openFilePath = undefined;
+		writer = undefined;
+		pendingFile = undefined;
+		hasWrittenDuringSession = false;
+	};
+
 	// However the open file stops being the open file, that is a close: quit, the window closing, and leaving this file for a
 	// new one or another one all arrive here
 	const closeSession = async(door: LedgerCloseDoor): Promise<LedgerBackupResult> => {
 		const filePath = openFilePath;
 		const changed = hasWrittenDuringSession;
 
-		openFilePath = undefined;
-		writer = undefined;
-		pendingFile = undefined;
-		hasWrittenDuringSession = false;
-
 		if(!filePath) {
+			forgetOpenFile();
+
 			return { written: false };
 		}
 
@@ -474,6 +481,11 @@ export const createLedgerSession = ({
 				};
 			}
 		}
+
+		// **Here and not at the top.** The quit that asked for this close is watching for the file to stop being the open one,
+		// and it lets the process go the moment it does — so clearing this before the copy had been written was telling it to go
+		// while the copy was still being written, and what it left behind was a half-taken backup and a temporary file.
+		forgetOpenFile();
 
 		appLogger.info('Ledger session closed', {
 			type: 'ledger.closed',

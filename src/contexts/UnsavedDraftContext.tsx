@@ -36,8 +36,12 @@ export interface UnsavedDraftContextValue {
 	// Called by the screen that holds one, with undefined once it holds none
 	registerUnsavedDraft: (draft: UnsavedDraft | undefined) => void;
 
-	// The one way anything leaves: it runs straight away where nothing is pending, and raises the prompt where something is
-	requestDeparture: (proceed: () => void, onStay?: () => void) => void;
+	/**
+	 * The one way anything leaves: it runs straight away where nothing is pending, and raises the prompt where something is.
+	 * @returns Whether the departure went through. False means the prompt is up and a person is being waited on, which a caller
+	 * whose departure is being timed elsewhere — a quit the main process is counting — has to know about.
+	 */
+	requestDeparture: (proceed: () => void, onStay?: () => void) => boolean;
 
 	// The departure the prompt is up for, and the two ways out of it
 	pendingDeparture: boolean;
@@ -64,14 +68,16 @@ export const UnsavedDraftProvider = ({ children }: { children: ReactNode }): Rea
 		setIsPending(draft !== undefined);
 	}, []);
 
-	const requestDeparture = useCallback((proceed: () => void, onStay?: () => void): void => {
+	const requestDeparture = useCallback((proceed: () => void, onStay?: () => void): boolean => {
 		if(!draftRef.current) {
 			proceed();
 
-			return;
+			return true;
 		}
 
 		setDeparture({ proceed, onStay });
+
+		return false;
 	}, []);
 
 	const discardAndProceed = useCallback((): void => {

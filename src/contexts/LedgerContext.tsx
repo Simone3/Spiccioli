@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { STORAGE_CONFIG } from 'src/config/AppConfig';
 import { useUnsavedDraftGuard } from 'src/contexts/UnsavedDraftContext';
+import { getErrorMessage } from 'src/framework/utils/ErrorUtils';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { createSeededLedgerDocument, LEDGER_SCHEMA_VERSION } from 'src/logic/ledger/LedgerDocument';
 import { readLedgerDocument } from 'src/logic/ledger/LedgerReader';
@@ -134,6 +135,10 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 
 	// The document as the autosave and the retry see it, which has to be the newest one rather than the one this render closed over
 	const documentRef = useRef<LedgerDocument | undefined>(undefined);
+
+	// The open file as the scheduler sees it, for the same reason: a write that rejected has to name the file it was about, and
+	// the scheduler is built once and never closes over a later render
+	const filePathRef = useRef<string | undefined>(undefined);
 	const schedulerRef = useRef<AutosaveScheduler | undefined>(undefined);
 
 	// The last write that failed, or undefined once one has succeeded. **This is how a close knows whether the file has
@@ -157,12 +162,23 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 			save: (contents) => {
 				return window.spiccioliLedger.save(contents);
 			},
+
+			// A save that rejected never reached the file and never said so. It is reported as the failed write it was, so that
+			// the line on screen names it and the close finds it rather than taking the session for written.
+			onSaveRejected: (error) => {
+				return {
+					ok: false,
+					filePath: filePathRef.current ?? '',
+					message: getErrorMessage(error)
+				};
+			},
 			onResult: applyWriteResult
 		});
 	}
 
 	const setOpenDocument = useCallback((nextFilePath: string, nextDocument: LedgerDocument): void => {
 		documentRef.current = nextDocument;
+		filePathRef.current = nextFilePath;
 		setDocument(nextDocument);
 		setFilePath(nextFilePath);
 		setSaveState({ state: 'idle' });
@@ -179,6 +195,7 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 		const backup = await window.spiccioliLedger.closeSession({ door });
 
 		documentRef.current = undefined;
+		filePathRef.current = undefined;
 		lastWriteFailureRef.current = undefined;
 		setDocument(undefined);
 		setFilePath(undefined);
@@ -492,7 +509,7 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 		// Staying is the one answer that is not a close, and the main process has to be told so it can call the quit off — which
 		// is true of the draft guard here and of the unwritten-changes prompt "endSession" raises for itself.
 		const unsubscribeClose = window.spiccioliLedger.onPrepareForClose((door) => {
-			requestDeparture(
+			const departed = requestDeparture(
 				() => {
 					void endSession(door);
 				},
@@ -500,6 +517,13 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 					void window.spiccioliLedger.cancelClose();
 				}
 			);
+
+			// The draft prompt is up, and the main process is counting. It has to be told, for exactly the reason "endSession"
+			// tells it about its own prompt: a person reading a dialog is slower than anything it is counting for, and a close
+			// that gave up on one would destroy the very draft it had just asked what to do about.
+			if(!departed) {
+				void window.spiccioliLedger.pauseClose();
+			}
 		});
 
 		return () => {
