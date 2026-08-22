@@ -1,3 +1,8 @@
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { PRICES_CONFIG } from 'src/config/AppConfig';
+import { initializeAppLogger, resetAppLoggerForTests } from 'src/framework/main/logging/AppLogger';
 import { createYahooPriceProvider, toExchangeDay, toYahooSymbol, type FetchLike } from 'src/main/prices/YahooPriceProvider';
 import { EXCHANGES } from 'src/types/LedgerTypes';
 import type { PriceSpan } from 'src/main/prices/PriceProvider';
@@ -9,13 +14,20 @@ import type { PriceSpan } from 'src/main/prices/PriceProvider';
 
 const LATEST: PriceSpan = { kind: 'latest' };
 
-const respondWith = (payload: unknown, status = 200): FetchLike => {
+const respondWith = (payload: unknown, status = 200, headers: Record<string, string> = { 'content-type': 'application/json' }): FetchLike => {
 	return () => {
 		return Promise.resolve({
 			ok: status >= 200 && status < 300,
 			status,
-			json: () => {
-				return Promise.resolve(payload);
+			headers: {
+				forEach: (visit: (value: string, name: string) => void) => {
+					for(const [ name, value ] of Object.entries(headers)) {
+						visit(value, name);
+					}
+				}
+			},
+			text: () => {
+				return Promise.resolve(JSON.stringify(payload));
 			}
 		});
 	};
@@ -48,6 +60,39 @@ const seriesResponse = (closes: unknown[], firstBar = MILAN_OPEN_5_AUGUST): unkn
 			error: null
 		}
 	};
+};
+
+const LOG_FILE_NAME = 'spiccioli-logs.ndjson';
+
+// The exchange is written from the adapter, so reading it back means starting the process-wide logger on a folder of this test's own
+const startLoggerIn = (logDirectory: string): void => {
+	initializeAppLogger({
+		logDirectory,
+		fileName: LOG_FILE_NAME,
+		maximumFileSizeBytes: 1024 * 1024,
+		retainedArchiveCount: 1,
+		level: 'debug'
+	});
+};
+
+const readLoggedExchanges = (logDirectory: string): Record<string, unknown>[] => {
+	const logFilePath = path.join(logDirectory, LOG_FILE_NAME);
+
+	if(!existsSync(logFilePath)) {
+		return [];
+	}
+
+	return readFileSync(logFilePath, 'utf8')
+		.split('\n')
+		.filter((line) => {
+			return line.length > 0;
+		})
+		.map((line) => {
+			return JSON.parse(line) as Record<string, unknown>;
+		})
+		.filter((entry) => {
+			return entry.type === 'prices.http';
+		});
 };
 
 describe('the Yahoo price provider', () => {
@@ -228,5 +273,118 @@ describe('the Yahoo price provider', () => {
 		const provider = createYahooPriceProvider({ fetchResource: respondWith(seriesResponse([ null, null ])) });
 
 		expect(await provider.fetchQuotes({ ticker: 'SWDA', exchange: 'milan' }, SINCE)).toEqual({ outcome: 'no-quote' });
+	});
+});
+
+describe('what the adapter writes about one exchange', () => {
+	const logDirectories: string[] = [];
+
+	const makeLogDirectory = (): string => {
+		const logDirectory = mkdtempSync(path.join(tmpdir(), 'yahoo-provider-'));
+		logDirectories.push(logDirectory);
+		startLoggerIn(logDirectory);
+
+		return logDirectory;
+	};
+
+	afterEach(() => {
+		resetAppLoggerForTests();
+
+		while(logDirectories.length > 0) {
+			rmSync(logDirectories.pop()!, { recursive: true, force: true });
+		}
+	});
+
+	test('writes the whole request and the whole response, with how long it took', async() => {
+		const logDirectory = makeLogDirectory();
+		let clock = 1000;
+		const provider = createYahooPriceProvider({
+			fetchResource: respondWith(chartResponse(MILAN_CLOSE), 200, { 'content-type': 'application/json', 'x-request-id': 'abc' }),
+			now: () => {
+				clock += 37;
+
+				return clock;
+			}
+		});
+
+		await provider.fetchQuotes({ ticker: 'SWDA', exchange: 'milan' }, LATEST);
+
+		const [ exchange ] = readLoggedExchanges(logDirectory);
+
+		expect(exchange.method).toBe('GET');
+		expect(exchange.url).toContain('SWDA.MI');
+		expect(exchange.requestHeaders).toEqual({ accept: 'application/json', 'user-agent': 'Mozilla/5.0' });
+		expect(exchange.status).toBe(200);
+		expect(exchange.ok).toBe(true);
+		expect(exchange.responseHeaders).toEqual({ 'content-type': 'application/json', 'x-request-id': 'abc' });
+		expect(exchange.body).toBe(JSON.stringify(chartResponse(MILAN_CLOSE)));
+		expect(exchange.bodyTruncated).toBe(false);
+		expect(exchange.elapsedMs).toBe(37);
+	});
+
+	// Public market data is what already left the machine, and a token is not part of it
+	test('takes anything cookie-shaped out of the response headers', async() => {
+		const logDirectory = makeLogDirectory();
+		const provider = createYahooPriceProvider({
+			fetchResource: respondWith(chartResponse(MILAN_CLOSE), 200, { 'set-cookie': 'A3=d=AQ; Secure', 'content-type': 'application/json' })
+		});
+
+		await provider.fetchQuotes({ ticker: 'SWDA', exchange: 'milan' }, LATEST);
+
+		const [ exchange ] = readLoggedExchanges(logDirectory);
+
+		expect(exchange.responseHeaders).toEqual({ 'set-cookie': '[redacted]', 'content-type': 'application/json' });
+		expect(JSON.stringify(exchange)).not.toContain('AQ');
+	});
+
+	// A span of years is thousands of days, and one press of the button must not be able to fill the log with them
+	test('cuts a body that is longer than the log is allowed to carry, and says how long it really was', async() => {
+		const logDirectory = makeLogDirectory();
+		const closes = Array.from({ length: 3000 }, (_value, index) => {
+			return 10 + (index / 1000);
+		});
+		const provider = createYahooPriceProvider({ fetchResource: respondWith(seriesResponse(closes)) });
+
+		await provider.fetchQuotes({ ticker: 'SWDA', exchange: 'milan' }, SINCE);
+
+		const [ exchange ] = readLoggedExchanges(logDirectory);
+		const wholeBodyLength = JSON.stringify(seriesResponse(closes)).length;
+
+		expect(wholeBodyLength).toBeGreaterThan(PRICES_CONFIG.maximumLoggedBodyLength);
+		expect(exchange.bodyLength).toBe(wholeBodyLength);
+		expect(exchange.bodyTruncated).toBe(true);
+		expect(String(exchange.body)).toHaveLength(PRICES_CONFIG.maximumLoggedBodyLength + 1);
+	});
+
+	// The request that never completed is the one most worth having a line about
+	test('writes a request that came back with nothing at all, with what went wrong in place of a status', async() => {
+		const logDirectory = makeLogDirectory();
+		const provider = createYahooPriceProvider({
+			fetchResource: () => {
+				return Promise.reject(new Error('The operation was aborted due to timeout'));
+			}
+		});
+
+		const result = await provider.fetchQuotes({ ticker: 'SWDA', exchange: 'milan' }, LATEST);
+		const [ exchange ] = readLoggedExchanges(logDirectory);
+
+		expect(result).toEqual({ outcome: 'failed', message: 'The operation was aborted due to timeout' });
+		expect(exchange.status).toBeNull();
+		expect(exchange.ok).toBe(false);
+		expect(exchange.error).toBe('The operation was aborted due to timeout');
+		expect(exchange.elapsedMs).toEqual(expect.any(Number));
+	});
+
+	// Nothing about the holding is in any of it: the URL carries the symbol and the body carries public market data
+	test('names the security by its symbol and nothing else', async() => {
+		const logDirectory = makeLogDirectory();
+		const provider = createYahooPriceProvider({ fetchResource: respondWith(chartResponse(MILAN_CLOSE)) });
+
+		await provider.fetchQuotes({ ticker: 'SWDA', exchange: 'milan' }, LATEST);
+
+		const written = JSON.stringify(readLoggedExchanges(logDirectory));
+
+		expect(written).toContain('SWDA.MI');
+		expect(written).not.toContain('IE00');
 	});
 });

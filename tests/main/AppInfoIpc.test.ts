@@ -32,7 +32,8 @@ describe('AppInfoIpc', () => {
 					return '0.1.0';
 				}
 			},
-			platform: 'darwin'
+			platform: 'darwin',
+			logDirectory: '/Users/someone/Library/Application Support/Spiccioli/logs'
 		});
 
 		expect([ ...handlers.keys() ]).toEqual([ SPICCIOLI_APP_INFO_IPC_CHANNELS.getAppInfo ]);
@@ -48,14 +49,16 @@ describe('AppInfoIpc', () => {
 					return '2.4.1';
 				}
 			},
-			platform: 'win32'
+			platform: 'win32',
+			logDirectory: 'C:\\Users\\someone\\AppData\\Roaming\\Spiccioli\\logs'
 		});
 
 		const handler = handlers.get(SPICCIOLI_APP_INFO_IPC_CHANNELS.getAppInfo);
 
 		expect(handler?.({} as IpcMainInvokeEvent)).toEqual({
 			version: '2.4.1',
-			platform: 'win32'
+			platform: 'win32',
+			logDirectory: 'C:\\Users\\someone\\AppData\\Roaming\\Spiccioli\\logs'
 		} satisfies SpiccioliAppInfo);
 	});
 
@@ -69,7 +72,8 @@ describe('AppInfoIpc', () => {
 		registerAppInfoIpcHandlers({
 			ipcMain,
 			app: { getVersion },
-			platform: 'linux'
+			platform: 'linux',
+			logDirectory: '/home/someone/.config/Spiccioli/logs'
 		});
 
 		const handler = handlers.get(SPICCIOLI_APP_INFO_IPC_CHANNELS.getAppInfo);

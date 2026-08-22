@@ -6,6 +6,10 @@ export interface SpiccioliAppInfo {
 
 	// The operating system family the build is running on, as Node names it
 	platform: string;
+
+	// Where this installation keeps its operational log. Settings states it, read-only, and nothing in the application writes to it
+	// on the renderer's behalf.
+	logDirectory: string;
 }
 
 export interface SpiccioliAppInfoApi {

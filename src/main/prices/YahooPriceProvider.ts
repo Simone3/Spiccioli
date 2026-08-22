@@ -1,4 +1,5 @@
 import { PRICES_CONFIG } from 'src/config/AppConfig';
+import { appLogger } from 'src/framework/main/logging/AppLogger';
 import { getErrorMessage } from 'src/framework/utils/ErrorUtils';
 import type { PriceListing, PriceProvider, PriceSpan, ProviderDay, ProviderQuoteResult } from 'src/main/prices/PriceProvider';
 import type { Exchange, IsoDate } from 'src/types/LedgerTypes';
@@ -25,6 +26,13 @@ import type { Exchange, IsoDate } from 'src/types/LedgerTypes';
  * fall on included, and the currency it stated them all in; "PriceQuoteReview" is what decides which of them may be written. That
  * is what keeps the refusals testable without a provider and the provider replaceable without them. **A day the provider simply
  * carried no figure for is this file's business** rather than a refusal, and is dropped here and counted.
+ *
+ * **The whole exchange is written to the log**, at `debug` and from here, because this is the only place that has it: the method
+ * and the URL that went out, the two headers that went with it, the status and headers that came back, the response body — cut
+ * at the length `AppConfig` fixes, a span of years being several thousand days — and how many milliseconds the round trip took.
+ * A request that never completed is written the same way, with what went wrong in place of a status. **Nothing in any of it is
+ * about the holding**: the URL carries the symbol, the body carries public market data, and that is exactly what already left the
+ * machine. The one thing taken out is anything cookie-shaped, which says nothing about the quote and does not belong on disk.
  *
  * The name the screen shows beside the button is in the translation bundle, like every other word the user reads.
  */
@@ -87,11 +95,16 @@ interface YahooChartResult {
 	indicators?: unknown;
 }
 
-export type FetchLike = (url: string, init: { headers: Record<string, string>; signal: AbortSignal }) => Promise<{
+// Enough of a response to read a quote out of and to write the exchange down. The body is taken as text rather than as parsed
+// JSON, because the log wants what actually came back and the parse is this file's own job either way.
+export interface FetchLikeResponse {
 	ok: boolean;
 	status: number;
-	json: () => Promise<unknown>;
-}>;
+	headers: { forEach: (visit: (value: string, name: string) => void) => void };
+	text: () => Promise<string>;
+}
+
+export type FetchLike = (url: string, init: { headers: Record<string, string>; signal: AbortSignal }) => Promise<FetchLikeResponse>;
 
 export interface CreateYahooPriceProviderOptions {
 
@@ -103,6 +116,9 @@ export interface CreateYahooPriceProviderOptions {
 
 	// How long one request for a span is given, several thousand days being a longer answer than one figure
 	historyTimeoutMs?: number;
+
+	// What the elapsed milliseconds of one exchange are measured with. Injected so a test can pin them.
+	now?: () => number;
 }
 
 /**
@@ -280,38 +296,149 @@ const toChartQuery = (span: PriceSpan): string => {
 	return `${DAILY_INTERVAL}&period1=${from}&period2=${until}`;
 };
 
+// Anything cookie-shaped is taken out on the way to the log. It says nothing about the quote, and a token belongs on disk even
+// less than the rest of an exchange that is otherwise entirely public.
+const REDACTED_HEADERS = new Set([ 'set-cookie', 'cookie', 'authorization' ]);
+
+const REDACTED = '[redacted]';
+
+// What went out, which is two headers and never more: the request carries no key, no account and nothing about the holding
+const buildRequestHeaders = (): Record<string, string> => {
+	return { accept: 'application/json', 'user-agent': USER_AGENT };
+};
+
+const readResponseHeaders = (headers: FetchLikeResponse['headers']): Record<string, string> => {
+	const read: Record<string, string> = {};
+
+	headers.forEach((value, name) => {
+		const lowercased = name.toLowerCase();
+
+		read[lowercased] = REDACTED_HEADERS.has(lowercased) ? REDACTED : value;
+	});
+
+	return read;
+};
+
+const truncateBody = (body: string): string => {
+	return body.length <= PRICES_CONFIG.maximumLoggedBodyLength ?
+		body :
+		`${body.slice(0, PRICES_CONFIG.maximumLoggedBodyLength)}…`;
+};
+
+// One exchange, as it went and as it came back
+interface ChartExchange {
+	answered: boolean;
+	status: number;
+	ok: boolean;
+	body: string;
+	message: string;
+}
+
+/**
+ * Makes the one request, reads the body, and writes the whole exchange to the log.
+ *
+ * **The log entry is written whichever way it went**, because a request that never completed is the one most worth having a line
+ * about: it carries what went out, how long it took to get nowhere, and what the runtime said instead of a status.
+ * @param options What to ask and who to ask it with.
+ * @param options.fetchResource What makes the request.
+ * @param options.url The URL, symbol and query included.
+ * @param options.timeoutMs How long the request is given.
+ * @param options.now What the elapsed milliseconds are measured with.
+ * @returns The status and the body, or that nothing came back at all.
+ */
+const requestChart = async({ fetchResource, url, timeoutMs, now }: {
+	fetchResource: FetchLike;
+	url: string;
+	timeoutMs: number;
+	now: () => number;
+}): Promise<ChartExchange> => {
+	const requestHeaders = buildRequestHeaders();
+	const startedAt = now();
+
+	try {
+		const response = await fetchResource(url, {
+			headers: requestHeaders,
+			signal: AbortSignal.timeout(timeoutMs)
+		});
+		const body = await response.text();
+
+		appLogger.debug('Asked Yahoo Finance for a chart', {
+			type: 'prices.http',
+			method: 'GET',
+			url,
+			requestHeaders,
+			timeoutMs,
+			status: response.status,
+			ok: response.ok,
+			responseHeaders: readResponseHeaders(response.headers),
+			body: truncateBody(body),
+			bodyLength: body.length,
+			bodyTruncated: body.length > PRICES_CONFIG.maximumLoggedBodyLength,
+			elapsedMs: now() - startedAt
+		});
+
+		return { answered: true, status: response.status, ok: response.ok, body, message: '' };
+	}
+	catch(error) {
+		const message = getErrorMessage(error);
+
+		appLogger.debug('Asked Yahoo Finance for a chart and got nothing back', {
+			type: 'prices.http',
+			method: 'GET',
+			url,
+			requestHeaders,
+			timeoutMs,
+			status: null,
+			ok: false,
+			error: message,
+			elapsedMs: now() - startedAt
+		});
+
+		return { answered: false, status: 0, ok: false, body: '', message };
+	}
+};
+
 /**
  * Builds the provider the application runs with.
  * @param options How it reaches the network.
  * @param options.fetchResource What makes the request.
  * @param options.timeoutMs How long one request for the latest quote is given.
  * @param options.historyTimeoutMs How long one request for a span is given, a span being thousands of days rather than one.
+ * @param options.now What the elapsed milliseconds of one exchange are measured with.
  * @returns The provider.
  */
 export const createYahooPriceProvider = ({
 	fetchResource,
 	timeoutMs = PRICES_CONFIG.requestTimeoutMs,
-	historyTimeoutMs = PRICES_CONFIG.historyRequestTimeoutMs
+	historyTimeoutMs = PRICES_CONFIG.historyRequestTimeoutMs,
+	now = Date.now
 }: CreateYahooPriceProviderOptions): PriceProvider => {
 	return {
 		fetchQuotes: async(listing: PriceListing, span: PriceSpan): Promise<ProviderQuoteResult> => {
 			const symbol = toYahooSymbol(listing);
+			const exchange = await requestChart({
+				fetchResource,
+				url: `${CHART_ENDPOINT}${encodeURIComponent(symbol)}?${toChartQuery(span)}`,
+				timeoutMs: span.kind === 'latest' ? timeoutMs : historyTimeoutMs,
+				now
+			});
 
+			if(!exchange.answered) {
+				return { outcome: 'failed', message: exchange.message };
+			}
+
+			if(exchange.status === NOT_FOUND_STATUS) {
+				return { outcome: 'no-quote' };
+			}
+
+			if(!exchange.ok) {
+				return { outcome: 'failed', message: `The provider answered ${exchange.status}.` };
+			}
+
+			// The body is parsed here rather than by the response object, because the log wanted the text of it first. A body that
+			// is not JSON at all is the provider failing, exactly as a request that never completed is.
 			try {
-				const response = await fetchResource(`${CHART_ENDPOINT}${encodeURIComponent(symbol)}?${toChartQuery(span)}`, {
-					headers: { accept: 'application/json', 'user-agent': USER_AGENT },
-					signal: AbortSignal.timeout(span.kind === 'latest' ? timeoutMs : historyTimeoutMs)
-				});
-
-				if(response.status === NOT_FOUND_STATUS) {
-					return { outcome: 'no-quote' };
-				}
-
-				if(!response.ok) {
-					return { outcome: 'failed', message: `The provider answered ${response.status}.` };
-				}
-
-				const payload = await response.json();
+				const payload: unknown = JSON.parse(exchange.body);
 
 				return span.kind === 'latest' ? readLatest(payload) : readSeries(payload, span.from, span.to);
 			}

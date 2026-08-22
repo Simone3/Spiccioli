@@ -11,7 +11,7 @@
 	font-weight: 700;
 }
 
-/* One panel for the whole screen rather than a box per group: three boxes holding three, eight and one row can never be the
+/* One panel for the whole screen rather than a box per group: four boxes holding three, eight, one and one row can never be the
    same height, and each one measuring its own field column is what stops the controls from lining up with each other.
    It stops growing where a row would put a stretch of nothing between what a preference is called and the control holding it. */
 .settings-screen-sheet {

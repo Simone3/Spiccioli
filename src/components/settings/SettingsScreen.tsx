@@ -10,10 +10,12 @@ import { separatorsCollide } from 'src/logic/preferences/Preferences';
 import {
 	DATE_FORMATS,
 	DECIMAL_SEPARATORS,
+	LOG_LEVELS,
 	PENSION_CONTRIBUTION_PERIODS,
 	THOUSANDS_SEPARATORS,
 	type DateFormat,
 	type DecimalSeparator,
+	type LogLevel,
 	type Preferences,
 	type ThousandsSeparator
 } from 'src/types/PreferencesTypes';
@@ -25,11 +27,13 @@ import {
  * immediately; a value that cannot be applied is refused in place and the previous one stays in force. **Nothing here ever marks
  * the data file as modified** — the preferences are not in it, which is what the line at the top says.
  *
- * The two path rows are read-only facts about the session: where the open file is, and where its copies are.
+ * The three path rows are read-only. Two are facts about the session — where the open file is and where its copies are — and the
+ * third is a fact about the installation: the folder the operational log is kept in, which is where the log level decides how
+ * much lands.
  */
 
 // The preferences this screen carries, which is all of them
-const PREFERENCE_COUNT = 12;
+const PREFERENCE_COUNT = 13;
 
 // Only the field's own floor and ceiling live here; every other rule about a preference is the field's
 const UNBOUNDED = undefined;
@@ -45,7 +49,7 @@ interface SettingsGroupProps {
 	children: ReactNode;
 }
 
-// A group is what it is called in the gutter and its rows beside it, all three sharing the one panel the screen is
+// A group is what it is called in the gutter and its rows beside it, all four sharing the one panel the screen is
 const SettingsGroup = ({ title, children }: SettingsGroupProps): ReactElement => {
 	return (
 		<section className='settings-screen-group'>
@@ -78,6 +82,7 @@ export const SettingsScreen = (): ReactElement => {
 	const { preferences, setPreferences } = usePreferences();
 	const { filePath } = useLedger();
 	const [ backupDirectory, setBackupDirectory ] = useState<string | undefined>(undefined);
+	const [ logDirectory, setLogDirectory ] = useState<string | undefined>(undefined);
 	const [ separatorRefusal, setSeparatorRefusal ] = useState<'decimal' | 'thousands' | undefined>(undefined);
 
 	useEffect(() => {
@@ -97,6 +102,25 @@ export const SettingsScreen = (): ReactElement => {
 			isMounted = false;
 		};
 	}, [ filePath ]);
+
+	// The log folder belongs to the installation rather than to the session, so it is asked for once and never again
+	useEffect(() => {
+		let isMounted = true;
+
+		void Promise.resolve().then(() => {
+			return window.spiccioliAppInfo.getAppInfo();
+		}).then((appInfo) => {
+			if(isMounted) {
+				setLogDirectory(appInfo.logDirectory);
+			}
+		}).catch(() => {
+			// A folder that cannot be named is a row that says so, which is what an undefined path already reads as
+		});
+
+		return () => {
+			isMounted = false;
+		};
+	}, []);
 
 	const apply = <TKey extends keyof Preferences>(key: TKey, value: Preferences[TKey]): void => {
 		setPreferences({ ...preferences, [key]: value });
@@ -119,6 +143,11 @@ export const SettingsScreen = (): ReactElement => {
 
 	const thousandsSeparatorOptions: readonly SelectOption<ThousandsSeparator>[] = THOUSANDS_SEPARATORS.map((separator) => {
 		return { value: separator, label: t(`settings.separators.${separator}`) };
+	});
+
+	// Every level says what it lets through rather than naming a threshold, because the list is what the user is choosing between
+	const logLevelOptions: readonly SelectOption<LogLevel>[] = LOG_LEVELS.map((level) => {
+		return { value: level, label: t(`settings.logLevels.${level}`) };
 	});
 
 	// A closed set rather than a number to type: the lengths that divide a year are the only ones a period may have. The picker
@@ -297,6 +326,25 @@ export const SettingsScreen = (): ReactElement => {
 						<div className='settings-screen-path'>
 							<dt>{t('settings.backupFolder')}</dt>
 							<dd>{backupDirectory ?? t('settings.pathUnknown')}</dd>
+						</div>
+					</dl>
+				</SettingsGroup>
+
+				<SettingsGroup title={t('settings.diagnostics')}>
+					<SettingsField label={t('settings.logLevel')}>
+						<SelectField
+							value={preferences.logLevel}
+							options={logLevelOptions}
+							label={t('settings.logLevel')}
+							onChange={(value) => {
+								apply('logLevel', value);
+							}}/>
+					</SettingsField>
+
+					<dl className='settings-screen-paths'>
+						<div className='settings-screen-path'>
+							<dt>{t('settings.logFolder')}</dt>
+							<dd>{logDirectory ?? t('settings.pathUnavailable')}</dd>
 						</div>
 					</dl>
 				</SettingsGroup>

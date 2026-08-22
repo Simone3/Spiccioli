@@ -12,6 +12,7 @@ import { PreferencesProvider } from 'src/contexts/PreferencesContext';
 import { UnsavedDraftProvider } from 'src/contexts/UnsavedDraftContext';
 import { TranslationProvider } from 'src/i18n/TranslationContext';
 import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
+import type { SpiccioliAppInfoApi } from 'src/types/AppInfoTypes';
 import type { SpiccioliAppMenuApi } from 'src/types/AppMenuTypes';
 import type { SpiccioliDiagnosticsApi, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
 import type { SpiccioliPricesApi } from 'src/types/PriceIpcTypes';
@@ -59,6 +60,26 @@ export const stubPricesBridge = (overrides: Partial<SpiccioliPricesApi> = {}): S
 	};
 
 	Object.defineProperty(window, 'spiccioliPrices', { configurable: true, value: bridge });
+
+	return bridge;
+};
+
+export const TEST_LOG_DIRECTORY = '/Documents/Spiccioli/logs';
+
+/**
+ * What the build says about itself, stubbed. Settings is what reads it, for the folder the log is kept in.
+ * @param overrides What this test needs the bridge to answer.
+ * @returns The bridge that was put on the window.
+ */
+export const stubAppInfoBridge = (overrides: Partial<SpiccioliAppInfoApi> = {}): SpiccioliAppInfoApi => {
+	const bridge: SpiccioliAppInfoApi = {
+		getAppInfo: () => {
+			return Promise.resolve({ version: '0.1.0', platform: 'darwin', logDirectory: TEST_LOG_DIRECTORY });
+		},
+		...overrides
+	};
+
+	Object.defineProperty(window, 'spiccioliAppInfo', { configurable: true, value: bridge });
 
 	return bridge;
 };
@@ -150,6 +171,7 @@ export const stubLedgerBridge = (overrides: Partial<SpiccioliLedgerApi> = {}): S
 
 	Object.defineProperty(window, 'spiccioliLedger', { configurable: true, value: bridge });
 	stubPricesBridge();
+	stubAppInfoBridge();
 	Object.defineProperty(window, 'spiccioliDiagnostics', {
 		configurable: true,
 		value: {

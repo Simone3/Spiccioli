@@ -1,6 +1,7 @@
 import {
 	DATE_FORMATS,
 	DECIMAL_SEPARATORS,
+	LOG_LEVELS,
 	PENSION_CONTRIBUTION_PERIODS,
 	SEPARATOR_CHARACTERS,
 	THOUSANDS_SEPARATORS,
@@ -36,7 +37,10 @@ export const DEFAULT_PREFERENCES: Preferences = {
 
 	// One credit per month, which is the fund crediting as often as a payslip is written
 	pensionContributionMonths: 1,
-	backupCount: 10
+	backupCount: 10,
+
+	// Info and above, which is every entry that describes what the application did and none of the ones that describe how
+	logLevel: 'info'
 };
 
 /**
@@ -90,6 +94,7 @@ export const parsePreferences = (value: unknown): Preferences => {
 		transferMatchBackwardDays: readBoundedInteger(record.transferMatchBackwardDays, 0, 31, DEFAULT_PREFERENCES.transferMatchBackwardDays),
 		tradeMatchWindowDays: readBoundedInteger(record.tradeMatchWindowDays, 0, 31, DEFAULT_PREFERENCES.tradeMatchWindowDays),
 		pensionContributionMonths: readNumericChoice(record.pensionContributionMonths, PENSION_CONTRIBUTION_PERIODS, DEFAULT_PREFERENCES.pensionContributionMonths),
-		backupCount: readBoundedInteger(record.backupCount, 1, 100, DEFAULT_PREFERENCES.backupCount)
+		backupCount: readBoundedInteger(record.backupCount, 1, 100, DEFAULT_PREFERENCES.backupCount),
+		logLevel: readChoice(record.logLevel, LOG_LEVELS, DEFAULT_PREFERENCES.logLevel)
 	};
 };

@@ -143,5 +143,9 @@ export const PRICES_CONFIG = {
 	// A span of years comes back as one response of several thousand days, so it is given longer than a single quote is
 	historyRequestTimeoutMs: 30000,
 	maximumFailureMessageLength: 200,
-	maximumCurrencyCodeLength: 12
+	maximumCurrencyCodeLength: 12,
+
+	// How much of one response body the log is allowed to carry. A span of years comes back as several thousand days, and a pass
+	// over a file of forty securities would otherwise put a good part of the log's whole size limit down in one press of a button.
+	maximumLoggedBodyLength: 20000
 } as const;

@@ -282,14 +282,19 @@ const startApplication = (): void => {
 
 		const runtimePaths = resolveSpiccioliRuntimePaths(app);
 
+		// Read before the logger rather than after it, because the level the log opens at is one of the preferences and the very
+		// first entry has to be written under it. Reading the configuration file writes nothing, so nothing is lost by having no
+		// logger yet: a file that cannot be read comes back as the defaults.
+		const configStore = createSpiccioliConfigStore({ configFilePath: runtimePaths.configFilePath });
+		const preferences = configStore.readPreferences();
+
 		initializeAppLogger({
 			logDirectory: runtimePaths.logDirectory,
 			fileName: LOGGING_CONFIG.fileName,
 			maximumFileSizeBytes: LOGGING_CONFIG.maximumFileSizeBytes,
-			retainedArchiveCount: LOGGING_CONFIG.retainedArchiveCount
+			retainedArchiveCount: LOGGING_CONFIG.retainedArchiveCount,
+			level: preferences.logLevel
 		});
-
-		const configStore = createSpiccioliConfigStore({ configFilePath: runtimePaths.configFilePath });
 
 		logStartupConfiguration({
 			version: app.getVersion(),
@@ -311,9 +316,10 @@ const startApplication = (): void => {
 			maximumWriteAttempts: STORAGE_CONFIG.maximumWriteAttempts,
 			writeRetryDelayMs: STORAGE_CONFIG.writeRetryDelayMs,
 			writeTimeoutMs: STORAGE_CONFIG.writeTimeoutMs,
-			backupCount: configStore.readPreferences().backupCount,
+			backupCount: preferences.backupCount,
 			logMaximumFileSizeBytes: LOGGING_CONFIG.maximumFileSizeBytes,
-			logRetainedArchiveCount: LOGGING_CONFIG.retainedArchiveCount
+			logRetainedArchiveCount: LOGGING_CONFIG.retainedArchiveCount,
+			logLevel: preferences.logLevel
 		});
 
 		const session = createLedgerSession({
@@ -336,7 +342,8 @@ const startApplication = (): void => {
 		registerAppInfoIpcHandlers({
 			ipcMain,
 			app,
-			platform: process.platform
+			platform: process.platform,
+			logDirectory: runtimePaths.logDirectory
 		});
 
 		// The renderer is told what to draw, and nothing at all where the platform keeps its native menu bar, so a Spiccioli that has
@@ -386,7 +393,13 @@ const startApplication = (): void => {
 				setWindowTitleForFile(translator, filePath);
 				installApplicationMenu(translator, configStore, isDevelopment);
 			},
-			onCloseCancelled: cancelShutdown
+			onCloseCancelled: cancelShutdown,
+
+			// A preference applies the moment it is changed, and the log level is no exception: the next entry is written under the
+			// level that was just chosen rather than under the one this run started at
+			onPreferencesChanged: (changed) => {
+				appLogger.setLevel(changed.logLevel);
+			}
 		});
 
 		installApplicationMenu(translator, configStore, isDevelopment);

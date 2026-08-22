@@ -42,7 +42,7 @@ A channel is a request the renderer makes and the main process answers. For even
 ```
 src/index.tsx                    mounts React, in StrictMode
   └── AppErrorBoundary           catches a render failure so the window is never left empty
-      └── PreferencesProvider    the twelve preferences, which are not in the ledger (§10 of the analysis)
+      └── PreferencesProvider    the thirteen preferences, which are not in the ledger (§10 of the analysis)
           └── TranslationProvider  the translator every component reads wording from (§5)
               └── UnsavedDraftProvider  the guard every departure goes through, above the file because closing it is one
                   └── LedgerProvider   the open file: the document, the save state, the storage lines
@@ -76,7 +76,7 @@ The failure goes to the operational log over `window.spiccioliDiagnostics`, beca
 1. **Installs the crash handlers** before anything can fail. An uncaught exception or an unhandled rejection would otherwise leave no window and no trace, because the startup below runs inside a promise.
 2. **Resolves the language** first of all, so that every failure from here on has wording to report itself with (see [§5](05-text-and-languages.md)).
 3. **Resolves the window load target** — the built `build/index.html` or the development server — so every window of the run loads the same page.
-4. **Resolves the runtime paths**, **initializes the logger** into them, opens the configuration store, and writes the one entry that describes the run (`src/main/config/StartupConfigurationLog.ts`).
+4. **Resolves the runtime paths**, **opens the configuration store**, **initializes the logger** into them at the level the preferences hold, and writes the one entry that describes the run (`src/main/config/StartupConfigurationLog.ts`). The store comes before the logger, and has to: `logLevel` is a preference, and the very first entry is written under it. Reading the configuration file writes nothing, so nothing is lost by having no logger for the length of one read, and a file that cannot be read comes back as the defaults.
 5. **Creates the ledger session** and **registers the IPC handlers.**
 6. **Installs the application menu** — the File menu of four actions and the About item of [§12.2](../functional/specs/12-storage.md#122-the-menu-bar-and-which-file-is-open), with the Edit, View and Window menus each platform expects beside them, rebuilt whenever the recent list changes because Open Recent is part of it. **A development run gets three entries more** — reload, force reload and the developer tools — which an installed Spiccioli does not offer. The same call rebuilds the description the renderer draws from, where it draws one, and tells the window it changed.
 7. **Creates the window**, installs the navigation guard on it, and shows it maximized once it is ready to be shown. Where the renderer draws the menu bar the window is created without a title bar of its own, with the two colors Electron overlays the window buttons in, and the native menu bar — installed, because its items are what answer the keyboard — is hidden.
@@ -110,7 +110,9 @@ A development run keeps its own root so it never touches the real preferences, t
 
 **The ledger is not in this table and never will be.** It lives wherever the user put it, and its backups live beside it in a folder named after it — the file's own name without its extension, plus `-backups`, resolved by `src/main/storage/LedgerBackupNaming.ts` ([§12](../functional/specs/12-storage.md)). That is why the framework's own `RuntimePaths` is not used here: its layout resolves a database folder and a default backup folder inside the user-data folder, and both would be paths nothing ever writes to. See [§4](04-framework.md).
 
-The configuration file holds two things, through `src/main/config/SpiccioliConfigStore.ts`: the twelve preferences and the list of recently opened files. Neither is in the ledger, so both survive switching files and neither travels with a ledger that is copied.
+The configuration file holds two things, through `src/main/config/SpiccioliConfigStore.ts`: the thirteen preferences and the list of recently opened files. Neither is in the ledger, so both survive switching files and neither travels with a ledger that is copied. **The log folder is the one of these paths the interface states**, on Settings and read-only, because `logLevel` decides what lands in it.
+
+**Two of the preferences are acted on by the main process rather than only read by the renderer**, so both are followed live: `backupCount` is read again at each close, and `logLevel` reaches `appLogger.setLevel` through the `onPreferencesChanged` callback `Main.ts` gives the ledger IPC handlers. A preference applies the moment it is changed, and neither of those two is an exception.
 
 ## 1.7 What is deliberately not here yet
 

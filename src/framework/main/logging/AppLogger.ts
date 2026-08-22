@@ -7,7 +7,18 @@ export const LOG_WRITE_FAILED_MESSAGE = 'Logging is unavailable.';
 
 export const LOGGER_NOT_INITIALIZED_MESSAGE = 'Logging has not been initialized.';
 
-export type AppLogLevel = 'info' | 'warn' | 'error' | 'debug';
+// The four levels, most severe first. **A level in force admits itself and everything before it**: "info" writes info, warn and
+// error and drops debug, and "error" writes nothing but error.
+export const APP_LOG_LEVELS = [ 'error', 'warn', 'info', 'debug' ] as const;
+
+export type AppLogLevel = typeof APP_LOG_LEVELS[number];
+
+const LEVEL_SEVERITY: Record<AppLogLevel, number> = {
+	error: 0,
+	warn: 1,
+	info: 2,
+	debug: 3
+};
 
 type ElectronLogLevel = AppLogLevel | 'verbose' | 'silly' | false;
 
@@ -58,6 +69,9 @@ export interface AppLoggerConfiguration {
 	fileName: string;
 	maximumFileSizeBytes: number;
 	retainedArchiveCount: number;
+
+	// The level in force right now, which is the only part of the configuration that changes while the application runs
+	level: AppLogLevel;
 }
 
 export interface AppLoggerHealthyStatus {
@@ -76,6 +90,10 @@ export interface CreateAppLoggerOptions {
 	fileName: string;
 	maximumFileSizeBytes: number;
 	retainedArchiveCount: number;
+
+	// What the logger opens at. Everything below it is dropped before it is serialized, so a level that writes nothing costs nothing.
+	level?: AppLogLevel;
+
 	backendFactory?: CreateAppLoggerBackend;
 	now?: () => Date;
 }
@@ -88,6 +106,9 @@ export interface AppLogger {
 	flush: () => Promise<void>;
 	getStatus: () => AppLoggerStatus;
 	getConfiguration: () => AppLoggerConfiguration;
+
+	// Changed while the application runs, because the level is a preference and a preference applies the moment it is changed
+	setLevel: (level: AppLogLevel) => void;
 }
 
 const createElectronLoggerBackend: CreateAppLoggerBackend = (logId) => {
@@ -119,6 +140,9 @@ const createUninitializedAppLogger = (): AppLogger => {
 		},
 		getConfiguration: () => {
 			throw new Error(LOGGER_NOT_INITIALIZED_MESSAGE);
+		},
+		setLevel: () => {
+			return undefined;
 		}
 	};
 };
@@ -147,6 +171,9 @@ export const appLogger: AppLogger = {
 	},
 	getConfiguration: () => {
 		return activeAppLogger.getConfiguration();
+	},
+	setLevel: (level) => {
+		activeAppLogger.setLevel(level);
 	}
 };
 
@@ -223,6 +250,8 @@ const configureLoggerBackend = (
 		backend.transports.remote.level = false;
 	}
 
+	// The backend is left wide open and the level is applied on the way in instead, so that the four names the application knows
+	// are the only scale there is and none of the backend's own extra ones can ever be in force
 	backend.transports.file.level = 'debug';
 	backend.transports.file.fileName = configuration.fileName;
 	backend.transports.file.format = ({ data }) => {
@@ -280,6 +309,7 @@ export const createAppLogger = ({
 	fileName,
 	maximumFileSizeBytes,
 	retainedArchiveCount,
+	level: initialLevel = 'debug',
 	backendFactory = createElectronLoggerBackend,
 	now = () => {
 		return new Date();
@@ -289,7 +319,8 @@ export const createAppLogger = ({
 		filePath: path.join(logDirectory, fileName),
 		fileName,
 		maximumFileSizeBytes,
-		retainedArchiveCount
+		retainedArchiveCount,
+		level: initialLevel
 	};
 	const backend = backendFactory(createLogId(logDirectory));
 
@@ -309,6 +340,12 @@ export const createAppLogger = ({
 		};
 	};
 
+	// The level is filtered here rather than on the backend's own transport, so that the four names the application knows are the
+	// only scale in play and an entry below the level costs nothing at all: it is never serialized and never handed over.
+	const isEnabled = (entryLevel: AppLogLevel): boolean => {
+		return LEVEL_SEVERITY[entryLevel] <= LEVEL_SEVERITY[configuration.level];
+	};
+
 	// The file transport writes synchronously, so a line is on disk once this returns and the entries describing a crash survive it.
 	// The outcome is not checked: the log is a diagnostic trace, never a source of truth, and reading the file back to confirm every
 	// line costs far more than writing it. A write that fails is therefore lost, which is what the operational log contract allows.
@@ -318,6 +355,10 @@ export const createAppLogger = ({
 		message: string,
 		fields?: AppLogFields
 	): void => {
+		if(!isEnabled(level)) {
+			return;
+		}
+
 		try {
 			backend[level](serializeLogEntry(createLogEntry(level, message, fields, now)));
 		}
@@ -347,7 +388,13 @@ export const createAppLogger = ({
 		},
 		getStatus,
 		getConfiguration: () => {
-			return configuration;
+			return { ...configuration };
+		},
+
+		// The level is the one part of the configuration that moves: it is a preference, and a preference applies the moment it is
+		// changed rather than at the next start
+		setLevel: (nextLevel) => {
+			configuration.level = nextLevel;
 		}
 	};
 };

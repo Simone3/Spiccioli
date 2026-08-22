@@ -1,5 +1,5 @@
 /**
- * The twelve preferences, and the list of recently opened files.
+ * The thirteen preferences, and the list of recently opened files.
  *
  * **Neither is in the ledger.** They belong to the installation and live in the platform's own application-data folder, so they
  * survive switching files, apply to every file opened afterwards, and do not travel with a ledger that is copied or sent to
@@ -21,6 +21,12 @@ export type DecimalSeparator = typeof DECIMAL_SEPARATORS[number];
 export const THOUSANDS_SEPARATORS = [ 'dot', 'comma', 'space', 'none' ] as const;
 
 export type ThousandsSeparator = typeof THOUSANDS_SEPARATORS[number];
+
+// What the operational log is allowed to write, most severe first. A level in force admits itself and everything before it, so
+// "info" is info, warn and error. The names are the framework logger's own, and the value goes straight to it.
+export const LOG_LEVELS = [ 'error', 'warn', 'info', 'debug' ] as const;
+
+export type LogLevel = typeof LOG_LEVELS[number];
 
 // The lengths a contribution period may have: the divisors of 12, which are the ones that never straddle a year end
 export const PENSION_CONTRIBUTION_PERIODS = [ 1, 2, 3, 4, 6, 12 ] as const;
@@ -51,6 +57,9 @@ export interface Preferences {
 	// How many months of payslips one credit into the pension fund covers. One of PENSION_CONTRIBUTION_PERIODS, and 1 is a fund crediting every month.
 	pensionContributionMonths: number;
 	backupCount: number;
+
+	// How much the operational log is allowed to say. It reaches the main process's logger, and nothing below it is written at all.
+	logLevel: LogLevel;
 }
 
 export interface RecentLedgerFile {

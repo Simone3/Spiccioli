@@ -398,4 +398,85 @@ describe('AppLogger', () => {
 		}).not.toThrow();
 		expect(writtenLines).toEqual([]);
 	});
+
+	test('writes the level in force and everything more severe, and drops the rest', () => {
+		const logDirectory = makeTempLogDirectory();
+		tempStorageDirectories.push(logDirectory);
+		const logger = createTestLogger({
+			logDirectory,
+			level: 'info'
+		});
+
+		logger.debug('Dropped by the level in force');
+		logger.info('Storage SQL query completed');
+		logger.warn('A write attempt failed');
+		logger.error('A write failed for good');
+
+		expect(readAppLogEntries(logDirectory).map((entry) => {
+			return entry.level;
+		})).toEqual([ 'info', 'warn', 'error' ]);
+		expect(logger.getConfiguration().level).toBe('info');
+	});
+
+	test('writes everything when the level is the lowest and nothing but errors when it is the highest', () => {
+		const everyLevel = (logger: AppLogger): void => {
+			logger.debug('Tracing');
+			logger.info('Something happened');
+			logger.warn('Something is off');
+			logger.error('Something failed');
+		};
+		const debugDirectory = makeTempLogDirectory();
+		const errorDirectory = makeTempLogDirectory();
+		tempStorageDirectories.push(debugDirectory, errorDirectory);
+
+		everyLevel(createTestLogger({ logDirectory: debugDirectory, level: 'debug' }));
+		everyLevel(createTestLogger({ logDirectory: errorDirectory, level: 'error' }));
+
+		expect(readAppLogEntries(debugDirectory)).toHaveLength(4);
+		expect(readAppLogEntries(errorDirectory).map((entry) => {
+			return entry.level;
+		})).toEqual([ 'error' ]);
+	});
+
+	// The level is a preference, and a preference applies the moment it is changed rather than at the next start
+	test('changes the level in force without being rebuilt', () => {
+		const logDirectory = makeTempLogDirectory();
+		tempStorageDirectories.push(logDirectory);
+		const logger = createTestLogger({
+			logDirectory,
+			level: 'error'
+		});
+
+		logger.debug('Dropped while the level is errors only');
+		logger.setLevel('debug');
+		logger.debug('Written once the level admits it');
+
+		expect(readAppLogEntries(logDirectory).map((entry) => {
+			return entry.message;
+		})).toEqual([ 'Written once the level admits it' ]);
+		expect(logger.getConfiguration().level).toBe('debug');
+	});
+
+	// Nothing below the level is serialized at all, so a field JSON cannot represent cannot even throw on the way out
+	test('never serializes an entry the level drops', () => {
+		const logDirectory = makeTempLogDirectory();
+		tempStorageDirectories.push(logDirectory);
+		const writtenLines: string[] = [];
+		const backendFactory = createFakeBackendFactory((message) => {
+			writtenLines.push(message);
+		});
+		const serialize = vi.fn(() => {
+			return 'never asked for';
+		});
+		const logger = createTestLogger({
+			logDirectory,
+			backendFactory,
+			level: 'warn'
+		});
+
+		logger.debug('Dropped by the level in force', { type: 'sql.query', toJSON: serialize });
+
+		expect(serialize).not.toHaveBeenCalled();
+		expect(writtenLines).toEqual([]);
+	});
 });

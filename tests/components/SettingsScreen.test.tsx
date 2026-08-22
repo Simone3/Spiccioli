@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderOpenLedger, TEST_LEDGER_PATH } from '../testUtils';
+import { renderOpenLedger, TEST_LEDGER_PATH, TEST_LOG_DIRECTORY } from '../testUtils';
 import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
 import type { Preferences } from 'src/types/PreferencesTypes';
 
@@ -21,6 +21,32 @@ describe('the Settings screen', () => {
 
 		expect(screen.getByText(TEST_LEDGER_PATH)).toBeInTheDocument();
 		expect(screen.getByText('/Documents/finances-backups')).toBeInTheDocument();
+	});
+
+	test('states the log folder too, which belongs to the installation rather than to the session', async() => {
+		await openSettings();
+
+		expect(screen.getByText(TEST_LOG_DIRECTORY)).toBeInTheDocument();
+	});
+
+	test('opens the log at info and writes the level the moment it changes', async() => {
+		const written: Preferences[] = [];
+		await openSettings({
+			setPreferences: (preferences) => {
+				written.push(preferences);
+
+				return Promise.resolve();
+			}
+		});
+
+		const logLevel = screen.getByRole('combobox', { name: 'Log level' });
+
+		expect(logLevel).toHaveValue('info');
+
+		await userEvent.selectOptions(logLevel, 'debug');
+
+		expect(written).toHaveLength(1);
+		expect(written[0].logLevel).toBe('debug');
 	});
 
 	test('writes a preference the moment it changes, with no save button', async() => {

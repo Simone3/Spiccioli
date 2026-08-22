@@ -1,4 +1,5 @@
 import { appLogger } from 'src/framework/main/logging/AppLogger';
+import type { LogLevel } from 'src/types/PreferencesTypes';
 
 /**
  * The one entry that describes the run the rest of the log file belongs to.
@@ -42,6 +43,10 @@ export interface StartupConfigurationLogOptions {
 	backupCount: number;
 	logMaximumFileSizeBytes: number;
 	logRetainedArchiveCount: number;
+
+	// The level this entry itself was written under. It is the preference in force at startup, and it is what a reader has to know
+	// before concluding that an entry is missing because nothing happened rather than because nothing was allowed to say so.
+	logLevel: LogLevel;
 }
 
 /**

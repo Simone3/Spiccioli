@@ -54,9 +54,11 @@ The unused modules are compiled, linted and covered by their own tests, so they 
 
 ## 4.4 The logger
 
-`appLogger` is the one process-wide object in the framework, because a crash handler has to be able to reach it before anything has been constructed. `initializeAppLogger` points it at a directory, a file name, a maximum size and a number of archives to keep; until then, calls report that logging is not initialized rather than throwing.
+`appLogger` is the one process-wide object in the framework, because a crash handler has to be able to reach it before anything has been constructed. `initializeAppLogger` points it at a directory, a file name, a maximum size, a number of archives to keep and **the level it opens at**; until then, calls report that logging is not initialized rather than throwing.
 
 It writes NDJSON — one JSON object per line, with a timestamp, a level, a message and whatever fields the caller passed. That is a format a person can read with `tail` and a script can parse without a grammar.
+
+**The level is filtered here rather than on the backend's transport**, so the four names `APP_LOG_LEVELS` holds are the only scale in play and none of the backend's own extra ones can ever be in force. A level admits itself and everything more severe, and **an entry below it is never serialized and never handed over** — which is what makes a `debug` call affordable to leave in the code. `setLevel` moves it while the application runs, because the caller may well be holding it as a user preference, and `getConfiguration` reports the one currently in force. The framework's own default is `debug`, so an application that says nothing about it keeps everything; Spiccioli passes the `logLevel` preference of [§10](../functional/specs/10-settings.md) instead.
 
 Spiccioli logs into `logs/spiccioli-logs.ndjson` under the runtime root of [§1.6](01-architecture.md#16-where-the-installations-own-files-live).
 

@@ -42,6 +42,10 @@ export interface RegisterLedgerIpcHandlersOptions {
 
 	// Called when the renderer answers a shutdown with a refusal, which is the user choosing to stay with something unwritten
 	onCloseCancelled: () => void;
+
+	// Called once the preferences have been written, so that the ones the main process acts on rather than reads follow a change
+	// immediately: the level the log is kept at is the only one of them so far
+	onPreferencesChanged: (preferences: Preferences) => void;
 }
 
 const LEDGER_EXTENSION_WITHOUT_DOT = LEDGER_FILE_CONFIG.extension.replace(/^\./, '');
@@ -59,7 +63,8 @@ export const registerLedgerIpcHandlers = ({
 	translator,
 	getWindow,
 	onOpenFileChanged,
-	onCloseCancelled
+	onCloseCancelled,
+	onPreferencesChanged
 }: RegisterLedgerIpcHandlersOptions): void => {
 	const fileFilters = [ {
 		name: translator.t('storage.fileTypeName'),
@@ -171,5 +176,6 @@ export const registerLedgerIpcHandlers = ({
 
 	ipcMain.handle(SPICCIOLI_LEDGER_IPC_CHANNELS.setPreferences, (_event, preferences: Preferences) => {
 		configStore.writePreferences(preferences);
+		onPreferencesChanged(preferences);
 	});
 };

@@ -31,6 +31,14 @@ describe('parsePreferences', () => {
 		expect(parsePreferences({ decimalSeparator: 'dot', thousandsSeparator: 'comma' }).thousandsSeparator).toBe('comma');
 	});
 
+	test('opens the log at info and falls back there for a level nobody wrote', () => {
+		expect(DEFAULT_PREFERENCES.logLevel).toBe('info');
+		expect(parsePreferences({ logLevel: 'debug' }).logLevel).toBe('debug');
+		expect(parsePreferences({ logLevel: 'error' }).logLevel).toBe('error');
+		expect(parsePreferences({ logLevel: 'trace' }).logLevel).toBe('info');
+		expect(parsePreferences({ logLevel: 3 }).logLevel).toBe('info');
+	});
+
 	test('lets none be the thousands separator, which never collides', () => {
 		expect(parsePreferences({ decimalSeparator: 'comma', thousandsSeparator: 'none' }).thousandsSeparator).toBe('none');
 	});

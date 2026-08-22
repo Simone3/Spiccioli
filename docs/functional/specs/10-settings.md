@@ -24,6 +24,7 @@ Preferences, and nothing else. Every kind of reference data lives on the screen 
 | tradeMatchWindowDays | integer 0 – 31 | 5 | [§11.6](11-calculations.md#116-derived-matching), checks 6 and 7 |
 | pensionContributionMonths | 1 · 2 · 3 · 4 · 6 · 12 | 1 | [§11.6](11-calculations.md#116-derived-matching), check 5. **How many months of payslips one credit into the fund covers.** 1 is a fund crediting every month, 3 one crediting every quarter — against January + February + March added together. The values are the divisors of 12, so a period never straddles a year end ([§13](13-validation.md)) |
 | backupCount | integer 1 – 100 | 10 | [§12](12-storage.md) |
+| logLevel | `error` · `warn` · `info` · `debug` | `info` | How much the operational log is allowed to say. **A level admits itself and everything more severe**, so `info` writes info, warnings and errors and drops the tracing; `debug` adds it, the whole of every price request and response included; `error` writes nothing else at all. Nothing below the level in force reaches the file |
 
 **The three date formats are the three that are unambiguous to write down**, one per order, and the separator inside them is part of the format rather than a choice of its own. **The thousands separator may be none**, which prints `21900,00`; the decimal separator may not be ([§11](11-calculations.md)). The two must differ ([§13](13-validation.md)).
 
@@ -35,7 +36,7 @@ Formats are a **user preference, not a hard-coded locale**. Changing one re-rend
 
 - **Preferences are global, and are not stored in the data file.** They live with the application, in the platform's own application-data location, together with the list of recently opened files ([§12](12-storage.md)) — so they survive switching files, apply to every file opened afterwards, and do not travel with a ledger that is copied or sent to someone else. **The screen says so in a line at the top.**
 - **No save button.** A preference applies as it is changed and is written to that store immediately; a value that cannot be applied is refused in place and the previous one stays in force ([§13](13-validation.md)). **Nothing here ever marks the data file as modified.**
-- The two **path** rows are read-only facts about the session: where the open file is, and where its backups are. This is where you come to find out *where* the open file is; **File › Open…** in the menu bar ([§12.2](12-storage.md#122-the-menu-bar-and-which-file-is-open)) is how you open a different one.
+- The three **path** rows are read-only. Two are facts about the session — where the open file is, and where its backups are. This is where you come to find out *where* the open file is; **File › Open…** in the menu bar ([§12.2](12-storage.md#122-the-menu-bar-and-which-file-is-open)) is how you open a different one. The third is a fact about the installation: **the folder the operational log is kept in**, which is where `logLevel` decides how much lands and the only place the screen says the log exists. Nothing here opens it, empties it or offers to send it anywhere.
 
 ---
 

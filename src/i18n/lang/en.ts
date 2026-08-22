@@ -1309,6 +1309,7 @@ export const EN_TRANSLATIONS = {
 		formats: 'Formats',
 		thresholds: 'Thresholds',
 		file: 'File',
+		diagnostics: 'Diagnostics',
 		dateFormat: 'Date format',
 		decimalSeparator: 'Decimal separator',
 		thousandsSeparator: 'Thousands separator',
@@ -1328,6 +1329,16 @@ export const EN_TRANSLATIONS = {
 		tradeMatchWindowDays: 'Trade match window',
 		pensionContributionMonths: 'Pension fund credits',
 		backupCount: 'Backups kept',
+		logLevel: 'Log level',
+
+		// What each level lets through, said as what is written rather than as a threshold: the list is read top to bottom and
+		// every entry of a level includes the ones above it
+		logLevels: {
+			error: 'Errors only',
+			warn: 'Warnings and errors',
+			info: 'Info, warnings and errors',
+			debug: 'Everything, tracing included'
+		},
 
 		// How long one contribution period is, written as how often the fund credits
 		pensionContributionPeriods: {
@@ -1340,7 +1351,11 @@ export const EN_TRANSLATIONS = {
 		},
 		dataFile: 'Data file',
 		backupFolder: 'Backup folder',
-		pathUnknown: 'No file is open'
+		logFolder: 'Log folder',
+		pathUnknown: 'No file is open',
+
+		// A path the main process could not be asked for, which is a bridge that did not answer rather than a file that is not open
+		pathUnavailable: 'Not available'
 	},
 
 	// What a field says when it will not take a value. The message sits where the offending value is, and never in a modal.
