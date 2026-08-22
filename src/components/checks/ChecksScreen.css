@@ -50,6 +50,25 @@
 	color: var(--colors-text-secondary);
 }
 
+/* A threshold a description states is the preference that set it, so it is a real control and takes the one focus ring */
+.checks-screen-threshold {
+	padding: 0;
+	background: none;
+	border: none;
+	border-radius: 3px;
+	font: inherit;
+	color: inherit;
+	text-decoration: underline;
+	text-decoration-color: var(--colors-border-strong);
+	text-underline-offset: 3px;
+	cursor: pointer;
+}
+
+.checks-screen-threshold:hover {
+	color: var(--colors-text-primary);
+	text-decoration-color: currentcolor;
+}
+
 .checks-screen-side {
 	margin-top: 9px;
 	padding-left: 11px;

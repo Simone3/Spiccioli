@@ -74,6 +74,35 @@ export const ChecksScreen = (): ReactElement => {
 		);
 	};
 
+	// The sentence under a check's name, in the reading today's preferences give it. Every threshold in it is the preference
+	// that set it, so it is a real control and the way to Settings rather than a figure the reader has to go and look for.
+	const renderDescription = (check: CheckResult): ReactElement => {
+		return (
+			<p className='checks-screen-description'>
+				{check.description.map((part) => {
+					const link = part.link;
+
+					if(!link) {
+						return <span key={part.key}>{part.text}</span>;
+					}
+
+					return (
+						<button
+							key={part.key}
+							type='button'
+							className='checks-screen-threshold'
+							aria-label={t('checks.thresholdLink', { value: part.text })}
+							onClick={() => {
+								followLink(link);
+							}}>
+							{part.text}
+						</button>
+					);
+				})}
+			</p>
+		);
+	};
+
 	const renderCheck = (check: CheckResult): ReactElement => {
 		return (
 			<div key={check.id} className='checks-screen-check'>
@@ -85,7 +114,7 @@ export const ChecksScreen = (): ReactElement => {
 				</span>
 				<div className='checks-screen-body'>
 					<p className='checks-screen-name'>{t(`checks.items.${check.id}.name`)}</p>
-					<p className='checks-screen-description'>{t(`checks.items.${check.id}.description`)}</p>
+					{renderDescription(check)}
 					{check.sides.map(renderSide)}
 				</div>
 				<span className={check.passed ? 'checks-screen-reach' : 'checks-screen-reach checks-screen-reach-failed'}>

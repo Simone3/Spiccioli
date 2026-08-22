@@ -70,6 +70,8 @@ const TRADE_TABS: Record<TradeKind, InvestmentsHandoff['tab']> = {
  * contains it; a trade is handed its security, its account and its day; a payslip is handed its contract and its year, which is
  * the pair the Payslips tab is always scoped by; a security is handed itself, and an account is handed nothing at all — the
  * Accounts screen has no filter and no paging, so the record is on the table the moment the screen is reached.
+ *
+ * **One link names no record**: a threshold a check's description states is a preference, and following it lands on Settings.
  * @returns What to call with a link to go there.
  */
 export const useFollowCheckLink = (): (link: CheckLink) => void => {
@@ -105,6 +107,11 @@ export const useFollowCheckLink = (): (link: CheckLink) => void => {
 				void navigate(APP_ROUTES.salaries, {
 					state: { contractId: link.contractId, year: link.year } satisfies SalariesHandoff
 				});
+
+				return;
+			case 'settings':
+				// Not a record at all: a threshold a check's description states, which leads to the preference that set it
+				void navigate(APP_ROUTES.settings);
 
 				return;
 			case 'accounts':

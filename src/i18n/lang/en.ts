@@ -1488,65 +1488,114 @@ export const EN_TRANSLATIONS = {
 			other: '{count} records'
 		},
 
-		// What each of the fourteen is called, and the one line under it saying what it looks for
+		// What each of the fourteen is called, and the sentence under it saying what it looks for. A sentence that states a
+		// threshold leaves it to a {placeholder}: the figure is the preference's own, read at the run rather than written here.
 		items: {
 			transfersBalance: {
 				name: 'Internal transfers balance out',
-				description: 'Every internal transfer should appear in two accounts, with opposite signs.'
+				description: 'Every transaction in an internal-transfer category pairs one-to-one with a leg of the exactly opposite amount on a different account, dated {window}. Legs left without a partner are listed.'
 			},
 			transactionsCategorised: {
 				name: 'Every transaction has a category',
-				description: 'A transaction carrying no category at all.'
+				description: 'Every transaction carries a category, on open and closed accounts alike. Categories can be assigned either manually or automatically with a rule.'
 			},
 			pricesRecent: {
 				name: 'Prices are recent',
-				description: 'Every security with an open holding has a price, no older than the staleness threshold.'
+				description: 'Every security with an open holding has a price dated within the last {days}, so today no earlier than {date}. A security with no price at all fails too: its holding is carried at what it cost rather than valued.'
 			},
 			payslipsMatchSalaries: {
 				name: 'Payslips match salary transactions',
-				description: 'Net payment on each payslip against a Salary transaction in the same month or the next.'
+				description: 'Each payslip pairs one-to-one with a transaction in a salary category for exactly its net payment, sign included, dated in the payslip’s own month or the one after. Payslips and transactions left over are listed separately.'
 			},
 			pensionContributionsMatch: {
 				name: 'Payslip pension contributions match transactions',
-				description: 'Employee share, employer share and TFR of each contribution period, each against its own credit.'
+				description: 'Each non-zero pension figure of one contract — employee share, employer share, TFR — {period}, pairs with a credit of the same amount in a pension-contribution category, dated from the period’s first day to the end of the month after it ends. The three figures are expected as three separate credits; a figure summing to zero expects none.'
 			},
 			purchasesMatch: {
 				name: 'Purchase transactions match purchases',
-				description: 'Securities purchase transactions against the purchases on the Investments screen.'
+				description: 'Every purchase trade pairs one-to-one with a transaction in a securities-purchase category for quantity × price without commission — negative, the money leaving — in an account of the same institution, dated {window}. Commission is its own bank-fees transaction and is never part of the figure.'
 			},
 			salesMatch: {
 				name: 'Sale transactions match sales',
-				description: 'Securities sale transactions against the sales on the Investments screen.'
+				description: 'Every sale trade pairs one-to-one with a transaction in a securities-sale category for quantity × price minus tax withheld but without commission — positive, the money arriving — in an account of the same institution, dated {window}. Commission is its own bank-fees transaction and is never part of the figure.'
 			},
 			noNegativeHolding: {
 				name: 'No holding has gone negative',
-				description: 'The running quantity of a security in an account never drops below zero.'
+				description: 'Walking each security in each account by date, purchases before sales on a day they share, the running quantity never drops below zero. The trade that took a position negative is the one named.'
 			},
 			noSaleBeforePurchase: {
 				name: 'No sale precedes its purchase',
-				description: 'A sale with nothing bought on or before its date in the same account.'
+				description: 'Every sale has at least one purchase of that security in the same account dated on or before it.'
 			},
 			pensionFundRevalued: {
 				name: 'Pension fund revalued recently',
-				description: 'Every open pension fund account carries a recent value adjustment.'
+				description: 'Every open pension fund account carries a value-adjustment transaction from the last {months}, so dated {date} or later. A fund that has never been revalued fails too.'
 			},
 			closedAccountsEmpty: {
 				name: 'Closed accounts are empty',
-				description: 'An account with a closing date has a balance of zero and no holdings left in it.'
+				description: 'An account with a closing date has nothing left in it: a balance of exactly zero, or, on a brokerage account, no holding with a quantity above zero.'
 			},
 			recordsWithinAccountLife: {
 				name: 'Records fall within their account’s life',
-				description: 'No transaction or trade is dated before its account opened or after it closed.'
+				description: 'No transaction and no trade is dated before its account’s opening date or after its closing date.'
 			},
 			receiptTrackedHaveState: {
 				name: 'Receipt-tracked transactions carry a state',
-				description: 'A category that expects a receipt should never read N/A.'
+				description: 'A transaction in a receipt-tracked category reads Pending or Checked, never N/A.'
 			},
 			noOverduePendingReceipt: {
 				name: 'No receipt has been pending too long',
-				description: 'No transaction marked pending is older than the pending threshold.'
+				description: 'No transaction marked Pending is dated before {date}, which is {months} back from today. It is the transaction’s own date that ages, not the moment it was marked.'
 			}
 		},
+
+		// What a description leaves to a {placeholder}: every one of them is a preference of [§10] read at the run, and every
+		// one of them is a link to the setting that decided it. A window of no days at all is the same day rather than "up to 0 days".
+		thresholds: {
+			days: {
+				one: '1 day',
+				other: '{count} days'
+			},
+			months: {
+				one: '1 month',
+				other: '{count} months'
+			},
+
+			// The window either side of the sending leg, which is the only one of the five that reaches backwards
+			transferWindow: {
+				sameDay: 'on the sending leg’s own day',
+				both: '{forward} the sending leg or {backward} it',
+				forwardOnly: '{forward} the sending leg',
+				backwardOnly: 'on the sending leg’s own day or {backward} it',
+				forward: {
+					one: 'up to 1 day after',
+					other: 'up to {count} days after'
+				},
+				backward: {
+					one: 'up to 1 day before',
+					other: 'up to {count} days before'
+				}
+			},
+
+			// How long after a trade the bank may have settled it, which checks 6 and 7 share
+			tradeWindow: {
+				sameDay: 'on the trade’s own day',
+				after: 'on the trade’s day or {days} it',
+				days: {
+					one: 'up to 1 day after',
+					other: 'up to {count} days after'
+				}
+			},
+
+			// How many months of payslips one credit into the pension fund covers
+			pensionPeriod: {
+				one: 'taken one month at a time',
+				other: 'summed over each block of {count} months from January'
+			}
+		},
+
+		// What a threshold in a description is called when it is read out of its sentence, it being a control and not wording
+		thresholdLink: '{value}, set in Settings',
 
 		// What a check examined, stated whether it passed or failed, so that one that passed on nothing is distinguishable
 		reach: {

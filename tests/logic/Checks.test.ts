@@ -408,3 +408,77 @@ describe('checks 13 and 14 — receipts', () => {
 		expect(check(results, 'receiptTrackedHaveState').passed).toBe(false);
 	});
 });
+
+describe('what each check says it looks for', () => {
+	const sentence = (results: readonly CheckResult[], id: CheckId): string => {
+		return check(results, id).description.map((part) => {
+			return part.text;
+		}).join('');
+	};
+
+	const thresholds = (results: readonly CheckResult[], id: CheckId): string[] => {
+		return check(results, id).description.filter((part) => {
+			return part.link !== undefined;
+		}).map((part) => {
+			return part.text;
+		});
+	};
+
+	it('states the thresholds the run actually used, each of them a link to the preference that set it', () => {
+		const results = run({});
+
+		expect(sentence(results, 'pricesRecent')).toContain('within the last 30 days, so today no earlier than 19/07/2026');
+		expect(thresholds(results, 'pricesRecent')).toEqual([ '30 days', '19/07/2026' ]);
+		expect(thresholds(results, 'noOverduePendingReceipt')).toEqual([ '18/05/2026', '3 months' ]);
+		expect(check(results, 'pensionFundRevalued').description.every((part) => {
+			return part.link === undefined || part.link.screen === 'settings';
+		})).toBe(true);
+	});
+
+	it('says the same sentence whether the check passed or failed', () => {
+		const failing = run({
+			accounts: [ makeAccount() ],
+			transactions: [ makeTransaction({ date: '2026-08-01', categoryId: null }) ]
+		});
+
+		expect(check(failing, 'transactionsCategorised').passed).toBe(false);
+		expect(sentence(failing, 'transactionsCategorised')).toBe(sentence(run({}), 'transactionsCategorised'));
+	});
+
+	it('leaves a check with no threshold one run of plain wording', () => {
+		const description = check(run({}), 'closedAccountsEmpty').description;
+
+		expect(description).toHaveLength(1);
+		expect(description[0].link).toBeUndefined();
+	});
+
+	it('follows the preferences, a day count reading as a plural entry rather than as “1 days”', () => {
+		const results = run({}, { ...DEFAULT_PREFERENCES, priceStalenessDays: 1, pensionContributionMonths: 3 });
+
+		expect(thresholds(results, 'pricesRecent')).toEqual([ '1 day', '17/08/2026' ]);
+		expect(thresholds(results, 'pensionContributionsMatch')).toEqual([ 'summed over each block of 3 months from January' ]);
+	});
+
+	it('writes a window of no days at all as the same day, on either side of a transfer and on both', () => {
+		const bothWays = run({});
+		const forwardOnly = run({}, { ...DEFAULT_PREFERENCES, transferMatchBackwardDays: 0 });
+		const backwardOnly = run({}, { ...DEFAULT_PREFERENCES, transferMatchWindowDays: 0, transferMatchBackwardDays: 1 });
+		const sameDay = run({}, { ...DEFAULT_PREFERENCES, transferMatchWindowDays: 0, transferMatchBackwardDays: 0 });
+
+		expect(sentence(bothWays, 'transfersBalance')).toContain('dated up to 5 days after the sending leg or up to 3 days before it.');
+		expect(sentence(forwardOnly, 'transfersBalance')).toContain('dated up to 5 days after the sending leg.');
+		expect(sentence(backwardOnly, 'transfersBalance')).toContain('dated on the sending leg’s own day or up to 1 day before it.');
+		expect(sentence(sameDay, 'transfersBalance')).toContain('dated on the sending leg’s own day.');
+		expect(thresholds(sameDay, 'transfersBalance')).toEqual([ 'on the sending leg’s own day' ]);
+	});
+
+	it('writes the trade window on both of the checks that share it, the same way', () => {
+		const window = run({});
+		const sameDay = run({}, { ...DEFAULT_PREFERENCES, tradeMatchWindowDays: 0 });
+
+		expect(sentence(window, 'purchasesMatch')).toContain('dated on the trade’s day or up to 5 days after it.');
+		expect(thresholds(window, 'salesMatch')).toEqual([ 'up to 5 days after' ]);
+		expect(sentence(sameDay, 'purchasesMatch')).toContain('dated on the trade’s own day.');
+		expect(sentence(sameDay, 'salesMatch')).toContain('dated on the trade’s own day.');
+	});
+});

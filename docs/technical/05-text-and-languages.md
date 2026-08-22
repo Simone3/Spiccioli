@@ -35,6 +35,7 @@ The main process resolves it **first**, before anything else in startup, so that
 - A leaf may be one string or one string per plural category. **Use a plural entry rather than comparing a count against 1**: the category is picked by `Intl.PluralRules` from the `count` parameter, because a count of 1 is not "one" in every language.
 - Numbers interpolated into a translation are formatted with `Intl.NumberFormat` for the same locale, so a translated sentence and the numbers inside it can never disagree.
 - `formatList` joins already-translated fragments the way the locale joins a plain enumeration.
+- **A sentence part of which is a control is still one entry.** The Checks screen states each check's thresholds — the days a price may be stale for, the window either side of a transfer's sending leg — and each of those is a link to the preference that set it, so `Checks.ts` splits the sentence at its `{placeholders}` and hands the screen the runs it is made of. The wording stays one bundle entry with the fragments interpolated into it, never a sentence assembled out of pieces in the code, and a window of zero days is its own entry rather than a count compared against 1.
 
 ## 5.5 What is not translated
 

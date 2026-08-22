@@ -1,7 +1,7 @@
 import { CHECKS_CONFIG } from 'src/config/AppConfig';
 import { formatAccountName, indexInstitutions, isAccountClosed, sortAccounts } from 'src/logic/accounts/Accounts';
 import { categoryIdsWithRole, indexCategories } from 'src/logic/categories/Categories';
-import { addMonthsToIsoDate, daysBetweenIsoDates } from 'src/logic/checks/CheckDates';
+import { addDaysToIsoDate, addMonthsToIsoDate, daysBetweenIsoDates } from 'src/logic/checks/CheckDates';
 import { formatPensionPeriod, pensionFigureKey, type DerivedMatching, type PensionClaim, type PensionPeriod } from 'src/logic/checks/Matching';
 import { compareTradesInWalkOrder, walkPositions, type PositionWalk } from 'src/logic/investments/Holdings';
 import { indexLatestPrices, indexSecurities, sortSecurities } from 'src/logic/investments/Securities';
@@ -41,6 +41,11 @@ import type { Preferences } from 'src/types/PreferencesTypes';
  * The wording lives here rather than on the screen because each failure line is bespoke, and a check that names a record has to
  * write that record the way the rest of the application writes it — *Institution · Account*, the amount with its sign, the day
  * in the preferred format.
+ *
+ * **The sentence under a check's name is written here too, and it states the thresholds the run actually used**: the days a
+ * price may be stale for, the window either side of a transfer's sending leg, how long a contribution period is. Each of those
+ * figures is a preference of [§10] and is its own run of the sentence, so it is a link to the setting that decided it rather
+ * than a number the reader has to go and look for.
  */
 
 // The fourteen, in the order of the specification's table. The screen draws them in this order, failing and passing alike.
@@ -87,7 +92,24 @@ export type CheckLink = {
 } | {
 	screen: 'accounts';
 	accountId: LedgerId;
+} | {
+
+	// The one link that names no record: a threshold a description states, which leads to the preference that set it
+	screen: 'settings';
 };
+
+/**
+ * One run of the sentence under a check's name: plain wording, or the reading a preference gave it.
+ * **A run carrying a link is a threshold**, and following it lands on the setting that decided the figure it states.
+ */
+export interface CheckDescriptionPart {
+	key: string;
+	text: string;
+	link?: CheckLink;
+}
+
+// The same runs before the sentence is assembled, keys belonging to the whole sentence rather than to a fragment of it
+type DescriptionRuns = readonly Omit<CheckDescriptionPart, 'key'>[];
 
 /** One record a failing check names, written the way the application writes it, and the way back to it. */
 export interface CheckEntry {
@@ -116,12 +138,18 @@ export interface CheckResult {
 	id: CheckId;
 	passed: boolean;
 
+	// What the check looks for, in the reading today's preferences give it. The same sentence whether it passed or failed.
+	description: readonly CheckDescriptionPart[];
+
 	// What the check examined, stated whether it passed or failed: "117 payslips"
 	reach: string;
 
 	// Empty on a passing check
 	sides: readonly CheckSide[];
 }
+
+// What one check produces on its own. The description is attached by the run, being a reading of the preferences rather than of the file.
+type CheckOutcome = Omit<CheckResult, 'description'>;
 
 export interface ChecksOptions {
 	document: LedgerDocument;
@@ -177,6 +205,9 @@ interface CheckContext extends ChecksOptions {
 const buildSide = (key: string, label: string | undefined, entries: readonly CheckEntry[]): CheckSide => {
 	return { key, label, total: entries.length, entries: entries.slice(0, CHECKS_CONFIG.maximumEntriesPerSide) };
 };
+
+// What a description leaves to the preferences: one placeholder, and the name of the fragment that fills it
+const DESCRIPTION_PLACEHOLDER = /\{(\w+)\}/;
 
 // Everything below reads one context and words one check
 
@@ -251,7 +282,157 @@ const buildNaming = (options: ChecksOptions, accounts: ReadonlyMap<LedgerId, Acc
 	};
 };
 
-const checkTransfersBalance = (context: CheckContext): CheckResult => {
+/**
+ * Splits a sentence at its `{placeholders}` and puts the runs each one stands for in their place.
+ *
+ * **A placeholder nothing was handed for is left standing**, exactly as the translator leaves one, so a sentence asking for a
+ * fragment nobody built shows up instead of quietly becoming a gap.
+ * @param template The sentence, straight out of the bundle and with its placeholders unfilled.
+ * @param fragments What each placeholder stands for.
+ * @returns The sentence, in runs.
+ */
+const composeRuns = (template: string, fragments: Record<string, DescriptionRuns>): DescriptionRuns => {
+	const runs: Omit<CheckDescriptionPart, 'key'>[] = [];
+
+	// A split on a pattern with one group alternates literal wording and placeholder name, wording first
+	template.split(DESCRIPTION_PLACEHOLDER).forEach((piece, index) => {
+		if(index % 2 === 0) {
+			if(piece !== '') {
+				runs.push({ text: piece });
+			}
+
+			return;
+		}
+
+		const fragment = fragments[piece];
+
+		if(fragment === undefined) {
+			runs.push({ text: `{${piece}}` });
+
+			return;
+		}
+
+		runs.push(...fragment);
+	});
+
+	return runs;
+};
+
+// One fragment a preference decided, which is therefore the way to that preference
+const settingFragment = (text: string): DescriptionRuns => {
+	return [ { text, link: { screen: 'settings' } } ];
+};
+
+/**
+ * The window either side of a transfer's sending leg, which is two preferences and the one window of the five that reaches
+ * backwards. **A window of no days at all is the same day** rather than “up to 0 days”, on either side and on both.
+ * @param context What the check reads.
+ * @returns The clause, in runs.
+ */
+const transferWindowRuns = (context: CheckContext): DescriptionRuns => {
+	const { preferences, translator } = context;
+	const forwardDays = preferences.transferMatchWindowDays;
+	const backwardDays = preferences.transferMatchBackwardDays;
+
+	const forward = (): DescriptionRuns => {
+		return settingFragment(translator.t('checks.thresholds.transferWindow.forward', { count: forwardDays }));
+	};
+	const backward = (): DescriptionRuns => {
+		return settingFragment(translator.t('checks.thresholds.transferWindow.backward', { count: backwardDays }));
+	};
+
+	if(forwardDays === 0 && backwardDays === 0) {
+		return settingFragment(translator.t('checks.thresholds.transferWindow.sameDay'));
+	}
+
+	if(backwardDays === 0) {
+		return composeRuns(translator.t('checks.thresholds.transferWindow.forwardOnly'), { forward: forward() });
+	}
+
+	if(forwardDays === 0) {
+		return composeRuns(translator.t('checks.thresholds.transferWindow.backwardOnly'), { backward: backward() });
+	}
+
+	return composeRuns(translator.t('checks.thresholds.transferWindow.both'), { forward: forward(), backward: backward() });
+};
+
+/**
+ * How long after a trade the bank may have settled it, which checks 6 and 7 share.
+ * @param context What the check reads.
+ * @returns The clause, in runs.
+ */
+const tradeWindowRuns = (context: CheckContext): DescriptionRuns => {
+	const { preferences, translator } = context;
+	const days = preferences.tradeMatchWindowDays;
+
+	if(days === 0) {
+		return settingFragment(translator.t('checks.thresholds.tradeWindow.sameDay'));
+	}
+
+	return composeRuns(translator.t('checks.thresholds.tradeWindow.after'), {
+		days: settingFragment(translator.t('checks.thresholds.tradeWindow.days', { count: days }))
+	});
+};
+
+/**
+ * What one check's sentence leaves to a placeholder: the thresholds it states, each read out of the preferences and each
+ * carrying the way back to the one that set it. **A check that states none hands back nothing**, and its sentence is one run.
+ * @param id Which of the fourteen.
+ * @param context What the check reads.
+ * @returns The fragments, by the name the sentence calls each one.
+ */
+const descriptionFragments = (id: CheckId, context: CheckContext): Record<string, DescriptionRuns> => {
+	const { preferences, translator, formatter, today } = context;
+
+	switch(id) {
+		case 'transfersBalance':
+			return { window: transferWindowRuns(context) };
+		case 'pricesRecent':
+			return {
+				days: settingFragment(translator.t('checks.thresholds.days', { count: preferences.priceStalenessDays })),
+				date: settingFragment(formatter.storedDate(addDaysToIsoDate(today, -preferences.priceStalenessDays)))
+			};
+		case 'pensionContributionsMatch':
+			return {
+				period: settingFragment(translator.t('checks.thresholds.pensionPeriod', { count: preferences.pensionContributionMonths }))
+			};
+		case 'purchasesMatch':
+		case 'salesMatch':
+			return { window: tradeWindowRuns(context) };
+		case 'pensionFundRevalued':
+			return {
+				months: settingFragment(translator.t('checks.thresholds.months', { count: preferences.pensionRevaluationMonths })),
+				date: settingFragment(formatter.storedDate(addMonthsToIsoDate(today, -preferences.pensionRevaluationMonths)))
+			};
+		case 'noOverduePendingReceipt':
+			return {
+				date: settingFragment(formatter.storedDate(addMonthsToIsoDate(today, -preferences.receiptPendingMonths))),
+				months: settingFragment(translator.t('checks.thresholds.months', { count: preferences.receiptPendingMonths }))
+			};
+		default:
+			return {};
+	}
+};
+
+/**
+ * The sentence under one check's name, in the reading today's preferences give it.
+ *
+ * **Every threshold a check states is the preference that set it**, so it is written as its own run and is followed to Settings
+ * rather than repeated there in prose. A day count is a plural entry and a window of zero days is its own wording, so “1 days”
+ * and “up to 0 days” cannot be written.
+ * @param id Which of the fourteen.
+ * @param context What the check reads.
+ * @returns The sentence, in runs, keyed for the screen that draws it.
+ */
+const describeCheck = (id: CheckId, context: CheckContext): CheckDescriptionPart[] => {
+	const template = context.translator.t(`checks.items.${id}.description`);
+
+	return composeRuns(template, descriptionFragments(id, context)).map((run, index) => {
+		return { ...run, key: String(index) };
+	});
+};
+
+const checkTransfersBalance = (context: CheckContext): CheckOutcome => {
 	const { matching, translator } = context;
 	const { transactionEntry } = context.naming;
 	const reach = translator.t('checks.reach.transferLegs', { count: matching.transfers.legCount });
@@ -270,7 +451,7 @@ const checkTransfersBalance = (context: CheckContext): CheckResult => {
 	};
 };
 
-const checkTransactionsCategorised = (context: CheckContext): CheckResult => {
+const checkTransactionsCategorised = (context: CheckContext): CheckOutcome => {
 	const { document, translator } = context;
 	const { transactionEntry } = context.naming;
 	const reach = translator.t('checks.reach.transactions', { count: document.transactions.length });
@@ -298,7 +479,7 @@ const checkTransactionsCategorised = (context: CheckContext): CheckResult => {
  * @param context What the check reads.
  * @returns The result.
  */
-const checkPricesRecent = (context: CheckContext): CheckResult => {
+const checkPricesRecent = (context: CheckContext): CheckOutcome => {
 	const { document, preferences, translator, formatter, today, walk } = context;
 	const latestPrices = indexLatestPrices(document.prices);
 
@@ -347,7 +528,7 @@ const checkPricesRecent = (context: CheckContext): CheckResult => {
 	return { id: 'pricesRecent', passed: false, reach, sides: [ buildSide('securities', undefined, entries) ] };
 };
 
-const checkPayslipsMatchSalaries = (context: CheckContext): CheckResult => {
+const checkPayslipsMatchSalaries = (context: CheckContext): CheckOutcome => {
 	const { document, matching, translator, formatter } = context;
 	const { transactionEntry, monthOf, payslipLink, contractName } = context.naming;
 	const reach = translator.t('checks.reach.payslips', { count: document.payslips.length });
@@ -389,7 +570,7 @@ const checkPayslipsMatchSalaries = (context: CheckContext): CheckResult => {
  * @param context What the check reads.
  * @returns The result.
  */
-const checkPensionContributionsMatch = (context: CheckContext): CheckResult => {
+const checkPensionContributionsMatch = (context: CheckContext): CheckOutcome => {
 	const { matching, translator, formatter } = context;
 	const { transactionEntry, periodOf, periodLink, contractName } = context.naming;
 	const { transactionByFigure, unmatchedFigures, unmatchedTransactions } = matching.pension;
@@ -427,7 +608,7 @@ const checkPensionContributionsMatch = (context: CheckContext): CheckResult => {
 	};
 };
 
-const checkTradesMatch = (context: CheckContext, kind: TradeKind): CheckResult => {
+const checkTradesMatch = (context: CheckContext, kind: TradeKind): CheckOutcome => {
 	const { document, matching, translator, formatter } = context;
 	const { transactionEntry, tradeEntry, tickerOf, accountName } = context.naming;
 	const id: CheckId = kind === 'purchase' ? 'purchasesMatch' : 'salesMatch';
@@ -466,7 +647,7 @@ const checkTradesMatch = (context: CheckContext, kind: TradeKind): CheckResult =
  * @param context What the check reads.
  * @returns The result.
  */
-const checkNoNegativeHolding = (context: CheckContext): CheckResult => {
+const checkNoNegativeHolding = (context: CheckContext): CheckOutcome => {
 	const { translator, formatter, walk } = context;
 	const { tradeEntry, tickerOf, accountName } = context.naming;
 	const reach = translator.t('checks.reach.positions', { count: walk.positions.size });
@@ -509,7 +690,7 @@ const checkNoNegativeHolding = (context: CheckContext): CheckResult => {
  * @param context What the check reads.
  * @returns The result.
  */
-const checkNoSaleBeforePurchase = (context: CheckContext): CheckResult => {
+const checkNoSaleBeforePurchase = (context: CheckContext): CheckOutcome => {
 	const { document, translator } = context;
 	const { tradeEntry } = context.naming;
 	const sales = sortTrades(tradesOfKind(document.trades, 'sale'));
@@ -554,7 +735,7 @@ const checkNoSaleBeforePurchase = (context: CheckContext): CheckResult => {
  * @param context What the check reads.
  * @returns The result.
  */
-const checkPensionFundRevalued = (context: CheckContext): CheckResult => {
+const checkPensionFundRevalued = (context: CheckContext): CheckOutcome => {
 	const { document, preferences, translator, formatter, today } = context;
 	const { accountName } = context.naming;
 	const adjustmentIds = categoryIdsWithRole(document.categories, 'value-adjustment');
@@ -605,7 +786,7 @@ const checkPensionFundRevalued = (context: CheckContext): CheckResult => {
  * @param context What the check reads.
  * @returns The result.
  */
-const checkClosedAccountsEmpty = (context: CheckContext): CheckResult => {
+const checkClosedAccountsEmpty = (context: CheckContext): CheckOutcome => {
 	const { document, translator, formatter, walk } = context;
 	const { accountName } = context.naming;
 	const closed = sortAccounts(document.accounts.filter(isAccountClosed), document.institutions);
@@ -686,7 +867,7 @@ const checkClosedAccountsEmpty = (context: CheckContext): CheckResult => {
  * @param context What the check reads.
  * @returns The result.
  */
-const checkRecordsWithinAccountLife = (context: CheckContext): CheckResult => {
+const checkRecordsWithinAccountLife = (context: CheckContext): CheckOutcome => {
 	const { document, translator, formatter, accounts } = context;
 	const { transactionEntry, tradeEntry, tickerOf, accountName } = context.naming;
 	const reach = translator.t('checks.reach.recordsAndTrades', {
@@ -750,7 +931,7 @@ const checkRecordsWithinAccountLife = (context: CheckContext): CheckResult => {
 	return { id: 'recordsWithinAccountLife', passed: false, reach, sides: [ buildSide('records', undefined, entries) ] };
 };
 
-const checkReceiptTrackedHaveState = (context: CheckContext): CheckResult => {
+const checkReceiptTrackedHaveState = (context: CheckContext): CheckOutcome => {
 	const { document, translator } = context;
 	const { transactionEntry } = context.naming;
 	const categories = indexCategories(document.categories);
@@ -784,7 +965,7 @@ const checkReceiptTrackedHaveState = (context: CheckContext): CheckResult => {
  * @param context What the check reads.
  * @returns The result.
  */
-const checkNoOverduePendingReceipt = (context: CheckContext): CheckResult => {
+const checkNoOverduePendingReceipt = (context: CheckContext): CheckOutcome => {
 	const { document, preferences, translator, formatter, today } = context;
 	const { accountName } = context.naming;
 
@@ -855,7 +1036,9 @@ export const runChecks = (options: ChecksOptions): CheckResult[] => {
 		checkRecordsWithinAccountLife(context),
 		checkReceiptTrackedHaveState(context),
 		checkNoOverduePendingReceipt(context)
-	];
+	].map((outcome) => {
+		return { ...outcome, description: describeCheck(outcome.id, context) };
+	});
 };
 
 /**

@@ -54,6 +54,19 @@ describe('the Checks screen', () => {
 		expect(screen.getByText('2 records')).toBeInTheDocument();
 	});
 
+	test('states a threshold in the reading the preferences give it, and follows it to Settings', async() => {
+		await openChecks(makeSeededDocument());
+
+		// The window either side of a transfer's sending leg is two preferences, and the sentence states what they are today
+		expect(await screen.findByText(/pairs one-to-one with a leg of the exactly opposite amount/)).toBeInTheDocument();
+
+		const threshold = screen.getByRole('button', { name: 'up to 3 days before, set in Settings' });
+
+		await userEvent.click(threshold);
+
+		expect(await screen.findByRole('heading', { name: 'Settings', level: 1 })).toBeInTheDocument();
+	});
+
 	test('follows an entry to the screen the record it names lives on, with its filters set', async() => {
 		await openChecks(withRecords({
 			accounts: [ makeAccount() ],
