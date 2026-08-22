@@ -17,9 +17,9 @@ import { TranslationProvider } from 'src/i18n/TranslationContext';
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
 	<React.StrictMode>
-		<TranslationProvider>
-			<AppErrorBoundary>
-				<PreferencesProvider>
+		<AppErrorBoundary>
+			<PreferencesProvider>
+				<TranslationProvider>
 					<UnsavedDraftProvider>
 						<LedgerProvider>
 							<ChecksProvider>
@@ -29,8 +29,8 @@ root.render(
 							</ChecksProvider>
 						</LedgerProvider>
 					</UnsavedDraftProvider>
-				</PreferencesProvider>
-			</AppErrorBoundary>
-		</TranslationProvider>
+				</TranslationProvider>
+			</PreferencesProvider>
+		</AppErrorBoundary>
 	</React.StrictMode>
 );

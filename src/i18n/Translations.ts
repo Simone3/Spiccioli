@@ -44,14 +44,18 @@ export const resolveSpiccioliLanguage = (requestedLanguages: readonly string[]):
 /**
  * Creates the translator for a language.
  * @param language Language to translate into. An unknown one falls back to the default language.
+ * @param formatNumber How a number interpolated into a sentence is written. The renderer hands in the formatter the preferences
+ * define, so that a count inside a sentence carries the same separators as every figure beside it; the main process leaves it
+ * out, having no preferences to read, and gets the language's own formatting.
  * @returns A translator bound to that language.
  */
-export const createSpiccioliTranslator = (language: string): SpiccioliTranslator => {
+export const createSpiccioliTranslator = (language: string, formatNumber?: (value: number) => string): SpiccioliTranslator => {
 	const translations = TRANSLATION_BUNDLES[language] ?? EN_TRANSLATIONS;
 
 	return createTranslator({
 		language,
 		translations,
+		formatNumber,
 
 		// A bundle that is not translated all the way through shows English rather than showing the reader a key
 		fallbackTranslations: EN_TRANSLATIONS,

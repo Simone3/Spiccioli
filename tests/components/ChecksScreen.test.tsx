@@ -57,6 +57,19 @@ describe('the Checks screen', () => {
 		expect(screen.getByText('2 transactions')).toHaveClass('checks-screen-reach', { exact: true });
 	});
 
+	// A count inside a sentence is the same figure to the reader as an amount in the column beside it, so it is written with the
+	// separators the preferences fix and never with the ones the operating system's locale would pick
+	test('writes a count in a sentence with the separators in force', async() => {
+		await openChecks(withRecords({
+			accounts: [ makeAccount() ],
+			transactions: Array.from({ length: 1200 }, (unused, index) => {
+				return makeTransaction({ id: `transaction-${index + 1}`, insertionSeq: index + 1 });
+			})
+		}));
+
+		expect(await screen.findByText('1.200 transactions')).toBeInTheDocument();
+	});
+
 	test('states a threshold in the reading the preferences give it, and follows it to Settings', async() => {
 		await openChecks(makeSeededDocument());
 

@@ -41,9 +41,9 @@ A channel is a request the renderer makes and the main process answers. For even
 
 ```
 src/index.tsx                    mounts React, in StrictMode
-  └── TranslationProvider        the translator every component reads wording from (§5)
-      └── AppErrorBoundary       catches a render failure so the window is never left empty
-          └── PreferencesProvider  the twelve preferences, which are not in the ledger (§10 of the analysis)
+  └── AppErrorBoundary           catches a render failure so the window is never left empty
+      └── PreferencesProvider    the twelve preferences, which are not in the ledger (§10 of the analysis)
+          └── TranslationProvider  the translator every component reads wording from (§5)
               └── UnsavedDraftProvider  the guard every departure goes through, above the file because closing it is one
                   └── LedgerProvider   the open file: the document, the save state, the storage lines
                       └── ChecksProvider  the fourteen checks and the five pairings, run over whatever file is open (§9)
@@ -53,13 +53,15 @@ src/index.tsx                    mounts React, in StrictMode
 
 `SpiccioliApp` puts `TitleBar` above both of its states, and on most platforms it draws nothing at all: the main process answers with no menu, and the window keeps the title bar and the menu bar the operating system gave it. Where it does draw — Windows, outside a development run — the row is the menu bar and the window title both, so the launch screen needs it as much as an open file does. The file's name is read from `LedgerProvider` rather than from the window, because `setTitle` in the main process is invisible to the page.
 
-`AppErrorBoundary` wraps everything below the translator rather than one screen, so a failure inside a context provider is caught too. Its recovery is a reload: rendering the same tree again would usually throw the same error a second time, while a reload starts over from what is on disk.
+`AppErrorBoundary` is the outermost thing in the tree rather than a wrapper around one screen, so a failure inside any context provider is caught too. **Its wording comes from a translator it builds itself**, not from the context: what it exists to report includes a provider failing, and a crash screen that read the tree it is replacing would go down with it. The language is resolved once at load and nothing changes it, so it loses nothing by not reading it from above. Its recovery is a reload: rendering the same tree again would usually throw the same error a second time, while a reload starts over from what is on disk.
 
 The failure goes to the operational log over `window.spiccioliDiagnostics`, because the renderer console is developer-facing and an installed Spiccioli cannot open it. **The renderer chooses neither the message nor the level**: it sends three texts and `src/main/ipc/DiagnosticsIpc.ts` decides what the entry is called and how long each text may be, so nothing the renderer sends can grow a log line without limit.
 
 `LedgerProvider` is where the model lives. It reads the file the main process hands it, writes the text the main process puts on disk, debounces the autosave, and owns the three things [§12](../functional/specs/12-storage.md) puts on screen — the save state, the line while a failed write is being retried and the blocking message after the fifth attempt, and the line saying something else changed the file.
 
 `PreferencesProvider` carries a second thing besides the preferences: `useFormatter`, the reading of them that turns a stored figure or a day into what [§10](../functional/specs/10-settings.md) says it looks like. A screen never reads a separator or a date format itself, which is what makes changing a preference re-render every figure in the same pass.
+
+**`TranslationProvider` sits below it, and that is the whole reason for the order.** A count inside a sentence is the same figure to the reader as an amount in the column beside it, so the translator is handed `useFormatter`'s own way of writing a whole number and every `{placeholder}` holding a number follows the preferences rather than the operating system's locale ([§5.4](05-text-and-languages.md#54-placeholders-plurals-and-numbers)). Changing a separator therefore rebuilds the translator and redraws every sentence on screen, in the same pass as every figure.
 
 `ChecksProvider` sits **below** `LedgerProvider` and above the router, because it reads the open file and every screen reads it: the sidebar badge, the Checks screen, and the *Matched* columns of Transactions, Purchases and Sales. **The pairings and the checks are one computation with two readers** ([§11.6](../functional/specs/11-calculations.md#116-derived-matching)) — the checks report what the matching left over and the columns name what it paired — so a cell names its counterpart on the same run that reports it. **The run is debounced**, a change scheduling one rather than performing one and a scheduled run being superseded by the next; **the first run of a file is not**, there being no previous results to show while it waits.
 

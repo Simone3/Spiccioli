@@ -14,6 +14,11 @@ export interface CreateTranslatorOptions<TTranslations extends TranslationTree> 
 
 	// Called with any key no bundle could resolve, so an application can report it instead of failing silently
 	onMissingTranslation?: (key: string) => void;
+
+	// How a number interpolated into a sentence is written. Left undefined to write it the way the locale writes one, which is
+	// what an application with no formatting rules of its own wants; supplied by an application that fixes its own separators,
+	// so that a figure inside a sentence and the same figure beside it cannot disagree.
+	formatNumber?: (value: number) => string;
 }
 
 const PLACEHOLDER_PATTERN = /\{(\w+)\}/g;
@@ -80,13 +85,16 @@ export const createTranslator = <TTranslations extends TranslationTree>({
 	translations,
 	locale = language,
 	fallbackTranslations,
-	onMissingTranslation
+	onMissingTranslation,
+	formatNumber
 }: CreateTranslatorOptions<TTranslations>): Translator<TTranslations> => {
-	const formatNumber = (value: number): string => {
+	const formatNumberInLocale = (value: number): string => {
 		return getFromCache(numberFormatCache, locale, () => {
 			return new Intl.NumberFormat(locale);
 		}).format(value);
 	};
+
+	const writeNumber = formatNumber ?? formatNumberInLocale;
 
 	// A count of 1 is not "one" in every language, and no language has the same categories as the next, so the category is
 	// never guessed from the number: Intl is what knows which one a count falls into
@@ -118,7 +126,7 @@ export const createTranslator = <TTranslations extends TranslationTree>({
 				return placeholder;
 			}
 
-			return typeof value === 'number' ? formatNumber(value) : value;
+			return typeof value === 'number' ? writeNumber(value) : value;
 		});
 	};
 

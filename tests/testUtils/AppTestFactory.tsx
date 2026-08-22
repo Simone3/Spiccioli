@@ -162,10 +162,12 @@ export const stubLedgerBridge = (overrides: Partial<SpiccioliLedgerApi> = {}): S
 	return bridge;
 };
 
+// The nesting the real root uses, and it matters: the wording is provided inside the preferences, so that a number in a sentence
+// is written with the separators in force
 const AppTestProviders = ({ children }: { children: ReactNode }): ReactElement => {
 	return (
-		<TranslationProvider>
-			<PreferencesProvider>
+		<PreferencesProvider>
+			<TranslationProvider>
 				<UnsavedDraftProvider>
 					<LedgerProvider>
 						<ChecksProvider>
@@ -173,8 +175,8 @@ const AppTestProviders = ({ children }: { children: ReactNode }): ReactElement =
 						</ChecksProvider>
 					</LedgerProvider>
 				</UnsavedDraftProvider>
-			</PreferencesProvider>
-		</TranslationProvider>
+			</TranslationProvider>
+		</PreferencesProvider>
 	);
 };
 

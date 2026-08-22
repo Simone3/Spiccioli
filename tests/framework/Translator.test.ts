@@ -52,6 +52,20 @@ describe('Translator', () => {
 		expect(italian.t('group.withParameters', { directory: 'd', count: 1234 })).toContain('1234');
 	});
 
+	// An application that fixes its own separators writes them everywhere or nowhere: a sentence that fell back to the locale
+	// would state a figure one way and the column beside it another
+	test('writes an interpolated number the way the application asks, when it says how', () => {
+		const translator = createTranslator({
+			language: 'en',
+			translations: TRANSLATIONS,
+			formatNumber: (value) => {
+				return `<${value}>`;
+			}
+		});
+
+		expect(translator.t('group.withParameters', { directory: 'd', count: 12345 })).toBe('Folder "d" holds <12345> copies');
+	});
+
 	test('picks the plural category from the count', () => {
 		const translator = createEnglishTranslator();
 

@@ -11,13 +11,22 @@ export interface TranslationContextValue<TTranslations> {
 
 export interface CreateTranslationContextOptions<TTranslations extends TranslationTree> {
 
-	// The application owns which bundle belongs to a language, so the context only ever asks it for a translator
-	createTranslator: (language: string) => Translator<TTranslations>;
+	// The application owns which bundle belongs to a language, so the context only ever asks it for a translator. The way a
+	// number inside a sentence is written is handed straight back to it, because it is the provider that is told it.
+	createTranslator: (language: string, formatNumber?: (value: number) => string) => Translator<TTranslations>;
 	initialLanguage: string;
 }
 
+export interface TranslationProviderProps {
+	children: ReactNode;
+
+	// How a number interpolated into a sentence is written, for an application whose figures follow its own settings rather than
+	// a locale. A new one rebuilds the translator, so changing that setting re-renders every sentence below the provider.
+	formatNumber?: (value: number) => string;
+}
+
 export interface TranslationContextBinding<TTranslations> {
-	TranslationProvider: (props: { children: ReactNode }) => ReactElement;
+	TranslationProvider: (props: TranslationProviderProps) => ReactElement;
 
 	// The translator alone, which is what almost every component needs
 	useTranslator: () => Translator<TTranslations>;
@@ -34,17 +43,18 @@ export const createTranslationContext = <TTranslations extends TranslationTree>(
 }: CreateTranslationContextOptions<TTranslations>): TranslationContextBinding<TTranslations> => {
 	const TranslationContext = createContext<TranslationContextValue<TTranslations> | undefined>(undefined);
 
-	const TranslationProvider = ({ children }: { children: ReactNode }): ReactElement => {
+	const TranslationProvider = ({ children, formatNumber }: TranslationProviderProps): ReactElement => {
 		const [ language, setLanguage ] = useState(initialLanguage);
 
-		// The translator is rebuilt only when the language changes, so every render below the provider reads the same one
+		// The translator is rebuilt only when the language or the way a number is written changes, so every render below the
+		// provider reads the same one
 		const contextValue = useMemo((): TranslationContextValue<TTranslations> => {
 			return {
-				translator: createTranslator(language),
+				translator: createTranslator(language, formatNumber),
 				language,
 				setLanguage
 			};
-		}, [ language ]);
+		}, [ language, formatNumber ]);
 
 		return (
 			<TranslationContext.Provider value={contextValue}>
