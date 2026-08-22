@@ -922,11 +922,14 @@ export const EN_TRANSLATIONS = {
 
 	// The price history of one security: the only table in the application that reads newest first, and the only place a price is deleted
 	prices: {
-		add: 'Add price',
+		// The button says one word, the panel around it saying which list it adds to; what a screen reader reads is the whole of it
+		add: 'Add',
+		addLabel: 'Add price',
 		table: 'Price history',
-		heading: {
-			one: 'Price history — 1 record',
-			other: 'Price history — {count} records'
+		heading: 'Price history',
+		records: {
+			one: '1 record',
+			other: '{count} records'
 		},
 		empty: 'Nothing has been priced yet. Add a price, or record one on the Holdings tab.',
 		footer: '{count} · {range}',
@@ -944,7 +947,8 @@ export const EN_TRANSLATIONS = {
 		deleteTitle: 'Delete this price?',
 		deleteMessage: 'Delete the price of {date}, {value}? There is no undo.',
 		deleteConfirm: 'Delete price',
-		clearAll: 'Delete all',
+		historyMenu: 'What can be done to the whole price history of {ticker}',
+		clearAll: 'Delete all prices',
 		clearAllTitle: 'Delete the whole price history?',
 		clearAllMessage: {
 			one: 'Delete the 1 price record of {ticker}? There is no undo.',
@@ -954,14 +958,12 @@ export const EN_TRANSLATIONS = {
 			one: 'Delete the 1 price record of {ticker}? There is no undo.',
 			other: 'Delete all {count} price records of {ticker}? The ones you typed by hand go with them, and there is no undo.'
 		},
-		clearAllConfirm: 'Delete all prices',
-		clearFetched: 'Delete fetched',
+		clearFetched: 'Delete fetched prices',
 		clearFetchedTitle: 'Delete every fetched price?',
 		clearFetchedMessage: {
 			one: 'Delete the 1 price record of {ticker} that a price update wrote? What you typed by hand stays. There is no undo.',
 			other: 'Delete all {count} price records of {ticker} that a price update wrote? What you typed by hand stays. There is no undo.'
 		},
-		clearFetchedConfirm: 'Delete fetched prices',
 		form: {
 			addTitle: 'Add price',
 			editTitle: 'Edit price',

@@ -373,7 +373,8 @@ describe('the Investments screen', () => {
 		await userEvent.click(screen.getByRole('button', { name: 'Show the price history of SWDA' }));
 
 		// What a pass wrote goes and what was typed by hand stays
-		await userEvent.click(screen.getByRole('button', { name: 'Delete fetched' }));
+		await userEvent.click(screen.getByRole('button', { name: 'What can be done to the whole price history of SWDA' }));
+		await userEvent.click(screen.getByRole('menuitem', { name: 'Delete fetched prices' }));
 		expect(screen.getByRole('dialog')).toHaveTextContent('Delete all 2 price records of SWDA that a price update wrote?');
 		await userEvent.click(screen.getByRole('button', { name: 'Delete fetched prices' }));
 
@@ -382,17 +383,19 @@ describe('the Investments screen', () => {
 		// The head, the one record left and the line describing the whole history
 		expect(remaining).toHaveLength(3);
 		expect(within(remaining[1]).getByText('31/01/2026')).toBeInTheDocument();
-		expect(within(remaining[2]).getByText('Price history — 1 record · 31/01/2026 – 31/01/2026')).toBeInTheDocument();
+		expect(within(remaining[2]).getByText('1 record · 31/01/2026 – 31/01/2026')).toBeInTheDocument();
 
-		// Nothing fetched is left, so the pair is down to the one control that takes the rest
-		expect(screen.queryByRole('button', { name: 'Delete fetched' })).not.toBeInTheDocument();
-
-		await userEvent.click(screen.getByRole('button', { name: 'Delete all' }));
+		// Nothing fetched is left, so the menu is down to the one entry that takes the rest
+		await userEvent.click(screen.getByRole('button', { name: 'What can be done to the whole price history of SWDA' }));
+		expect(screen.queryByRole('menuitem', { name: 'Delete fetched prices' })).not.toBeInTheDocument();
+		await userEvent.click(screen.getByRole('menuitem', { name: 'Delete all prices' }));
 		await userEvent.click(screen.getByRole('button', { name: 'Delete all prices' }));
 
 		expect(screen.queryByRole('table', { name: 'Price history' })).not.toBeInTheDocument();
 		expect(screen.getByText('Nothing has been priced yet. Add a price, or record one on the Holdings tab.')).toBeInTheDocument();
-		expect(screen.queryByRole('button', { name: 'Delete all' })).not.toBeInTheDocument();
+
+		// A history that holds nothing has nothing that can be taken off it, so the menu is gone with it
+		expect(screen.queryByRole('button', { name: 'What can be done to the whole price history of SWDA' })).not.toBeInTheDocument();
 	});
 
 	test('pages the price history twenty records at a time, opening on the most recent ones', async() => {

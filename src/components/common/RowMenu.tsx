@@ -4,7 +4,9 @@ import { createPortal } from 'react-dom';
 import { useTranslator } from 'src/i18n/TranslationContext';
 
 /**
- * What a row can have done to it: duplicate, delete, whatever the screen puts there.
+ * What a row can have done to it: duplicate, delete, whatever the screen puts there. **The head of a panel uses it for what is
+ * done to the whole list** — the price history's two clearings — on the same grounds: a control that takes everything at once is
+ * not one the eye should land on first.
  *
  * The trigger and every entry are real buttons, so the keyboard reaches them and the one focus ring has something to draw
  * around. Opening the menu puts the keyboard on its first entry; Escape closes it and puts the keyboard back on the trigger; a

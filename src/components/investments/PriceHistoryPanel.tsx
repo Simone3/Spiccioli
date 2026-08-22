@@ -4,7 +4,7 @@ import { Chip } from 'src/components/common/Chip';
 import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { DataTable, type DataTableColumn } from 'src/components/common/DataTable';
 import { Pager } from 'src/components/common/Pager';
-import { RowMenu } from 'src/components/common/RowMenu';
+import { RowMenu, type RowMenuAction } from 'src/components/common/RowMenu';
 import { PriceForm, type PriceFormValues } from 'src/components/investments/PriceForm';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
@@ -23,8 +23,8 @@ import type { IsoDate, Price, Security } from 'src/types/LedgerTypes';
  * figure somebody has corrected stops claiming to be the provider's. Changing the date **moves** the record, replacing whatever
  * occupied the day it lands on, and **neither edit is confirmed**; deleting is, like every delete in the application.
  *
- * **A record goes one at a time from its row menu, and the whole history goes at once from the head of the panel** — every record,
- * or only the ones a price pass wrote. The bulk pair is there because a pass asked under a ticker or an exchange that names the
+ * **A record goes one at a time from its row menu, and the whole history goes at once from the menu at the head of the panel** —
+ * every record, or only the ones a price pass wrote. The bulk pair is there because a pass asked under a ticker or an exchange that names the
  * wrong listing writes thousands of records in one press, and undoing that a row at a time is not undoing it. Both are confirmed,
  * and each says what it is about to take.
  *
@@ -109,6 +109,32 @@ export const PriceHistoryPanel = ({ security, prices, onSave, onDelete, onClear,
 	}).length;
 	const manualCount = prices.length - fetchedCount;
 
+	// The two clearings, behind the same menu a row's own delete sits behind: three buttons and a heading do not share a line in a
+	// panel this narrow, and what takes a whole history at once is not what the head of the panel should offer first anyway
+	const clearances: RowMenuAction[] = [];
+
+	if(fetchedCount > 0 && manualCount > 0) {
+		clearances.push({
+			key: 'fetched',
+			label: t('prices.clearFetched'),
+			danger: true,
+			onSelect: () => {
+				setClearanceAsked('fetched');
+			}
+		});
+	}
+
+	if(prices.length > 0) {
+		clearances.push({
+			key: 'all',
+			label: t('prices.clearAll'),
+			danger: true,
+			onSelect: () => {
+				setClearanceAsked('all');
+			}
+		});
+	}
+
 	const columns: readonly DataTableColumn<Price>[] = [
 		{
 			key: 'date',
@@ -167,7 +193,7 @@ export const PriceHistoryPanel = ({ security, prices, onSave, onDelete, onClear,
 	const footer = prices.length === 0 ?
 		undefined :
 		t('prices.footer', {
-			count: t('prices.heading', { count: prices.length }),
+			count: t('prices.records', { count: prices.length }),
 			range: t('prices.range', { from: formatter.storedDate(oldest.date), to: formatter.storedDate(newest.date) })
 		});
 
@@ -184,27 +210,11 @@ export const PriceHistoryPanel = ({ security, prices, onSave, onDelete, onClear,
 			</div>
 
 			<div className='investments-screen-detail-actions'>
-				<h3 className='investments-screen-subhead'>{t('prices.heading', { count: prices.length })}</h3>
+				<h3 className='investments-screen-subhead'>{t('prices.heading')}</h3>
 				<div className='investments-screen-detail-buttons'>
-					{fetchedCount > 0 && manualCount > 0 && (
-						<AppButton
-							variant='ghost'
-							onClick={() => {
-								setClearanceAsked('fetched');
-							}}>
-							{t('prices.clearFetched')}
-						</AppButton>
-					)}
-					{prices.length > 0 && (
-						<AppButton
-							variant='ghost'
-							onClick={() => {
-								setClearanceAsked('all');
-							}}>
-							{t('prices.clearAll')}
-						</AppButton>
-					)}
+					{clearances.length > 0 && <RowMenu label={t('prices.historyMenu', { ticker: security.ticker })} actions={clearances}/>}
 					<AppButton
+						label={t('prices.addLabel')}
 						onClick={() => {
 							setPriceDraft({ price: undefined });
 						}}>
@@ -263,7 +273,7 @@ export const PriceHistoryPanel = ({ security, prices, onSave, onDelete, onClear,
 						count: prices.length,
 						ticker: security.ticker
 					})}
-					confirmLabel={t('prices.clearAllConfirm')}
+					confirmLabel={t('prices.clearAll')}
 					onConfirm={() => {
 						clearHistory('all');
 					}}
@@ -277,7 +287,7 @@ export const PriceHistoryPanel = ({ security, prices, onSave, onDelete, onClear,
 					danger
 					title={t('prices.clearFetchedTitle')}
 					message={t('prices.clearFetchedMessage', { count: fetchedCount, ticker: security.ticker })}
-					confirmLabel={t('prices.clearFetchedConfirm')}
+					confirmLabel={t('prices.clearFetched')}
 					onConfirm={() => {
 						clearHistory('fetched');
 					}}
