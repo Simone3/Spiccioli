@@ -1,0 +1,78 @@
+docs/technical/01-architecture.md
+  s_d4bb538bbdfe2a::t_740671b53a51d9 26,63-66,91,95-97,130
+docs/technical/02-repository-map.md
+  s_d4bb538bbdfe2a::t_d3457f7d3cd920 44,75,122
+docs/technical/04-framework.md
+  s_d4bb538bbdfe2a::t_654dc93c58569f 26
+src/components/SpiccioliApp.tsx
+  s_d4bb538bbdfe2a::t_90ab4ade5819c9 6,16-18,34
+src/components/import/BulkImportScreen.tsx
+  s_d4bb538bbdfe2a::t_7a14816e00019b 32,150-152,154,158-165
+src/components/session/UnwrittenChangesPrompt.css
+  s_d4bb538bbdfe2a::t_8611f2c4bb038b 1-24
+src/components/session/UnwrittenChangesPrompt.tsx
+  s_d4bb538bbdfe2a::t_3297cbbd27dd33 1-51
+src/components/session/WriteFailurePanel.tsx
+  s_d4bb538bbdfe2a::t_08e6ade7b0e99c 18,46
+src/components/transactions/TransactionsScreen.tsx
+  s_d4bb538bbdfe2a::t_613dee660eb70e 36,187-199,201-202,205-211,233-239,248-250,252-254
+src/config/AppConfig.ts
+  s_d4bb538bbdfe2a::t_f256cae4a48ca8 75-76,97-102,104-105,107-114
+src/contexts/LedgerContext.tsx
+  s_d4bb538bbdfe2a::t_0ddacd83687e67 52-65,84,87-89,98-102,131,133,139-146,148,173-176,178,182,192-224,272-274,284-322,433-435,443-451,492-493,520,522,539-540,548,553-554,560
+src/framework/main/config/JsonConfigStore.ts
+  s_d4bb538bbdfe2a::t_73a9b697b498b5 1,28-37,39-40,43-44,47-55
+src/i18n/lang/en.ts
+  s_d4bb538bbdfe2a::t_1819d3c68702ab 1321-1330,1484-1492
+src/logic/storage/AutosaveScheduler.ts
+  s_d4bb538bbdfe2a::t_6f5c35f760ef2d 8-11,34-37,85-92,102-104,106
+src/main/Main.ts
+  s_d4bb538bbdfe2a::t_0c80a142897aef 50-54,139-147,149-155,158,160,162,165-172,175,177-180,183,185-189,192-208,216,220-228,244,286-300,460,470,472-474,478-480,486
+src/main/ipc/LedgerIpc.ts
+  s_d4bb538bbdfe2a::t_db2cce9c30884e 1,29,47-53,75-77,103-127,141-148,151,204-207
+src/main/preload/Preload.ts
+  s_d4bb538bbdfe2a::t_d39def2738920a 68-70
+src/main/storage/LedgerBackupNaming.ts
+  s_d4bb538bbdfe2a::t_a6ff66566d1fea 75-88,95
+src/main/storage/LedgerSession.ts
+  s_d4bb538bbdfe2a::t_c6de05cded65af 1,7,52-55,94-126,147,422-424,426-429,433-434,489,494-496,503-525
+src/types/LedgerIpcChannels.ts
+  s_d4bb538bbdfe2a::t_2d943378b1e92c 17
+src/types/LedgerIpcTypes.ts
+  s_d4bb538bbdfe2a::t_18c7519fe1436e 143-148
+tests/components/UnwrittenChanges.test.tsx
+  s_d4bb538bbdfe2a::t_e2e44d50232f53 1-175
+tests/framework/JsonConfigStore.test.ts
+  s_d4bb538bbdfe2a::t_f9348329fa11a4 1-100
+tests/logic/AutosaveScheduler.test.ts
+  s_d4bb538bbdfe2a::t_6a06be5fc78480 151-202
+tests/main/LedgerBackupNaming.test.ts
+  s_d4bb538bbdfe2a::t_4795bceedaeaed 78-89
+tests/main/LedgerIpc.test.ts
+  s_d4bb538bbdfe2a::t_3f2fe5109ce069 1-148
+tests/main/LedgerSession.test.ts
+  s_d4bb538bbdfe2a::t_59a156d6906920 1,186-228,368-404
+tests/testUtils/AppTestFactory.tsx
+  s_d4bb538bbdfe2a::t_fac4c63a30a67d 151-153
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "54824cd2337a8b3bbadbaa3f9bd45663a8945eba",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d4bb538bbdfe2a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9a970437-8ce1-4db3-bc7b-c67d298bdea2",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
