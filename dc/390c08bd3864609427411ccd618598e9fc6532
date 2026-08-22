@@ -1,0 +1,26 @@
+src/components/settings/SettingsScreen.css
+  s_aad08ce31d53bf::t_4b53cc1cfa7ab8 14-19,26-48,50,59-72,74-82,93-94
+src/components/settings/SettingsScreen.tsx
+  s_aad08ce31d53bf::t_889bf94fe5ee72 43-57,65,68,159-186,188-277,279-290,302
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "dc390c08bd3864609427411ccd618598e9fc6532",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_aad08ce31d53bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b9a55640-5705-4b5d-b9b4-ed5c3d27c5d1",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
