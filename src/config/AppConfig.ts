@@ -112,7 +112,7 @@ export const PRICE_HISTORY_CONFIG = {
 } as const;
 
 // The list of types beside the pie on Portfolio, which runs in columns read downwards. Neither figure is fixed by the
-// functional analysis: the two is what the mockup draws, and the three is what keeps a portfolio of few types from being split
+// functional analysis: the two is what the screen is drawn to, and the three is what keeps a portfolio of few types from being split
 // into a column of two and a column of one.
 export const PORTFOLIO_CONFIG = {
 	typeListColumns: 2,

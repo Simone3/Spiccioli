@@ -1,6 +1,6 @@
 # §6 — Categories
 
-*[Index](../README.md) · [why it is this way](../why/06-categories.md) · [mockups for this section](../mockups/06-categories.html)*
+*[Index](../README.md) · [why it is this way](../why/06-categories.md)*
 
 Three tabs: Report, Rules, Category list. The report answers where the money goes, the rules put it there, and the list is what both are made of.
 
@@ -9,8 +9,6 @@ Three tabs: Report, Rules, Category list. The report answers where the money goe
 ## 6.1 Report
 
 The categories × years matrix — the one screen that answers where the money goes.
-
-> **Mockup —** [Report tab](../mockups/06-categories.html#report)
 
 - Rows are categories, **in the fixed `order` of [§2](02-domain-model.md)** — never by amount, and never alphabetically. Columns are calendar years plus a total. **The whole table is shown; there is no paging.**
 - **`order` exists for this table and is numbered to suit it.** It runs down the report's own reading order — the Income group, then Expense, then Internal, then the Investments group below Net — so the table ascends in it from top to bottom and the group boundaries fall where the numbering changes type. Nothing else in the application reads the field ([§6.3](#63-category-list)).
@@ -43,8 +41,6 @@ The categories × years matrix — the one screen that answers where the money g
 
 ## 6.2 Rules
 
-> **Mockup —** [Rules tab](../mockups/06-categories.html#rules)
-
 - Ordered, draggable, numbered. **First match wins**, so order is the logic and is visible. A rule is created with the substring and the category; nothing else.
 
 ### The list is edited as a session, and applied once
@@ -62,20 +58,18 @@ The categories × years matrix — the one screen that answers where the money g
 - **What "accounts for" means, exactly, and it is narrower than "matches".** A transaction counts towards a rule only where **that rule is the first one in the list to match it** — first match wins, so a row a rule matches but an earlier rule already claimed belongs to the earlier one and is counted there. And only **`automatic` rows are counted at all**: a `manual` row is one no rule may touch ([§2](02-domain-model.md)), so a rule whose substring appears in fifty hand-set descriptions accounts for none of them. **The column therefore sums to the number of categorised `automatic` transactions in the file**, once each, which is what makes a rule reading *0 transactions* a fact worth acting on rather than an artefact — it is a rule that is either shadowed by one above it or matching nothing at all ([§13](13-validation.md)).
 - **There is no per-rule tester.**
 - **Deleting a rule un-categorises the rows only it matched**, unless a rule further down the list picks them up. That is the second figure in the summary. **The deletion is confirmed there rather than at the click**: a rule removed from a draft has changed nothing in the file yet, so *Apply changes* and its summary are the confirmation, and this is the one delete in the application that is confirmed later rather than where it is made ([§13](13-validation.md)).
-- **The mockup's eleven rules are not the expectation.** A real file runs to several dozen, and the target is that **the rules categorise about 95% of transactions**, the remaining twentieth being set by hand — one-off transfers, gifts, the payment whose description is a reference number.
+- **A handful of rules is not the expectation.** A real file runs to several dozen, and the target is that **the rules categorise about 95% of transactions**, the remaining twentieth being set by hand — one-off transfers, gifts, the payment whose description is a reference number.
 
 ## 6.3 Category list
 
 Twenty-seven, seeded into every new file and not editable at runtime. Adding, renaming or removing one is a change to the application, not a setting ([§15](15-out-of-scope.md)). **The tab shows four columns — name, type, receipt tracked and a live transaction count.** The table further down carries what the screen does not: **role**, which is what [§9](09-checks.md) and the *gains and costs* card of [§3.1](03-portfolio.md#31-behaviour) key off — a blank one means no check and no card cares about the category — **order**, the report's row order ([§6.1](#61-report)), and **was**, the old Italian label, recorded for reference only: the migration script maps the two lists by hand, and the application stores no alias.
-
-> **Mockup —** [Category list tab](../mockups/06-categories.html#category-list)
 
 - **Read-only, and the only place the whole taxonomy is visible at once.**
 - **This list is alphabetical by name**, and so is every picker and every filter — the category picker on a transaction, the category filter, the category on a rule.
 - **The report is the one table that reads in `order` instead** ([§6.1](#61-report)).
 - **Neither `role` nor `order` is shown.** Both are wiring rather than facts about the money: nothing on any screen can set them, and a column of mostly blank roles reads as a setting somebody forgot to fill in. They are stored, they are what the checks and the report read ([§2](02-domain-model.md)), and they are written down in the table below.
 - Only the entries that are not categories sit outside the alphabet: *Automatic* at the top of the transaction picker and *Uncategorised* at the top of the filter ([§5.3](05-transactions.md#53-filters), [§5.4](05-transactions.md#54-editing)).
-- The **Transactions** column is a live count: a category with none is one the rules never reach, and the total across all 27 is every categorised transaction in the file — 4.811 of 4.812 in the mockup, the missing one being the failure of check 2.
+- The **Transactions** column is a live count: a category with none is one the rules never reach, and the total across all 27 is every categorised transaction in the file, falling short of the transactions the file holds by exactly the uncategorised ones — which are the failure of check 2.
 
 Listed as the tab lists them, **alphabetically**, and with `Role` and `Order` alongside — the two the tab does not show ([§9](09-checks.md), [§6.1](#61-report)).
 

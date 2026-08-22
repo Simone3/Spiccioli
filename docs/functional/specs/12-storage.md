@@ -1,6 +1,6 @@
 # §12 — Storage
 
-*[Index](../README.md) · [why it is this way](../why/12-storage.md) · [mockups for this section](../mockups/12-storage.html)*
+*[Index](../README.md) · [why it is this way](../why/12-storage.md)*
 
 ---
 
@@ -9,12 +9,8 @@
 - **The file lives wherever the user puts it** — a plain local folder, a cloud-synced folder, or an encrypted vault inside one. The application makes no assumption about the location and requires nothing of it.
 - **Autosave**, debounced, written **atomically** — write to a temporary file in the same directory, then rename — so an interrupted write cannot truncate it.
 
-> **Mockup —** [When the file cannot be written](../mockups/12-storage.html#write-failure)
-
 - **A write that fails is retried, five times in all, and said so on screen.** The attempts are spaced a few seconds apart rather than fired back to back. While they run, **the save state in the sidebar says so instead of *Saved 14:32*** ([§12.2](#122-the-menu-bar-and-which-file-is-open)), and a line on the screen the user is on says the file could not be written and is being retried. The session carries on: everything is in memory, nothing is lost, and a retry that succeeds clears the line and restores the ordinary save state without further ceremony.
 - **If all five fail, the application blocks with a message and a *Retry* button.** This is **the one thing besides an unreadable file that stops the screens working** ([§14](14-empty-and-error-states.md)). The message states **which file could not be written and what the system said**. *Retry* runs the same write; succeeding dismisses it and the session goes on exactly where it was, and failing puts the same message back with the new reason. There is no *Continue anyway* and no *Save As…* in v1: the way out is to free the disk, reconnect the volume or unlock the file, with the session still in memory waiting for it.
-> **Mockup —** [When something else changes the file](../mockups/12-storage.html#external)
-
 - **External modification detection.** Before writing, the application verifies the file has not changed on disk since it last read it. If it has, it **copies the version found on disk into the backup folder** and carries on with the session in memory — whose next save overwrites it.
 - **The user is told, in those terms, and not with a question.** A line appears on the screen they are on — *“This file was changed while you had it open. That version has been saved to the backup folder as **finances-2026-08-08-143207-848-external**, and your work has been kept. That copy is one of the 10 backups kept there, so it will be rotated out in time — move it somewhere else if you want to keep it.”* — and it stays until dismissed. **The count in that sentence is `backupCount` as it currently stands** ([§10](10-settings.md)), not the number ten. It is not a modal and it is not a choice between two versions.
 - **Rolling timestamped backups live beside the file they belong to, in a folder of their own.** A ledger at `…/ledgers/finances.spiccioli` keeps its backups in `…/ledgers/finances-backups/` — the file's own name without its extension, plus `-backups`, in the same directory. **The rotation is therefore per file**: `backupCount` copies of *this* ledger, ten by default ([§10](10-settings.md)), and a second ledger in the same directory keeps its own count in its own folder without either one pushing the other out.
@@ -40,7 +36,7 @@
 - **On launch the application always asks which file to open**, and never reopens the last one on its own. [§12.1](#121-the-launch-screen) is that screen.
 - **No undo/redo** in v1. This is why every delete confirms.
 - **The format must be documented** well enough for an external script to write it — the ten years of historical data will be loaded by a one-off migration script, not by the application. It carries a **schema version**, and every file is at exactly one of three positions relative to the running application: current, older, or not understood.
-- **What that format is, and what the file is called, are implementation decisions.** A text format, an embedded database, something else: this document requires only that it is one file, that a script can write it, and that it carries its schema version. The **extension is not specified either** and follows from the format chosen. Where these pages and the mockups need a filename they write `finances`, sometimes with an invented extension, and nothing anywhere depends on it — the backup folder takes the file's name without whatever extension it turns out to have, as above, and the window title carries the name alone ([§12.2](#122-the-menu-bar-and-which-file-is-open)).
+- **What that format is, and what the file is called, are implementation decisions.** A text format, an embedded database, something else: this document requires only that it is one file, that a script can write it, and that it carries its schema version. The **extension is not specified either** and follows from the format chosen. Where these pages need a filename they write `finances`, sometimes with an invented extension, and nothing anywhere depends on it — the backup folder takes the file's name without whatever extension it turns out to have, as above, and the window title carries the name alone ([§12.2](#122-the-menu-bar-and-which-file-is-open)).
 - **An older file is upgraded once, with the user's consent.** Opening one shows a screen that says which version wrote it and which version it will become, and states that a copy of the file as it stands now is written to the backup folder first. Confirm and the upgrade runs and the file opens; cancel and nothing is written and the launch screen returns. **It is never silent and never automatic.**
 - **An upgrade re-applies the rule list as part of itself.** The upgrade runs the same pass the Rules tab runs ([§6.2](06-categories.md#62-rules)) over every transaction whose `categorySource = automatic`, and writes the categories, the rules and the new schema version in one step. `manual` rows are untouched by *that* pass, here as everywhere.
 - **A category the new version retires is the upgrade's own problem to solve, and it is solved in the upgrade for that version.** The upgrade that retires a category says what becomes of the rows that pointed at it — mapped to whichever category now means what that one meant, or cleared to no category so check 2 lists them for the user to place — and which of the two is right is decided when the category is retired, not fixed here in advance. What this document does fix is that **no upgrade may leave a transaction pointing at a category the file no longer holds**. The dialog says which categories are going and what happened to their rows. It needs no separate consent — it is part of the upgrade the user has already confirmed.
@@ -49,8 +45,6 @@
 
 ## 12.1 The launch screen
 
-> **Mockup —** [The launch screen](../mockups/12-storage.html#launch)
-
 - The application **always** opens here — recent locations, *Open…*, and *New file…*. It never reopens the last file on its own.
 - ***New file…* asks where to put it, and creates it there and then.** It opens the platform's own save dialog, and the file — with the categories of [§6.3](06-categories.md#63-category-list) seeded and nothing else in it — is **written at the moment the location is chosen**, before any screen is shown. Cancelling the dialog writes nothing and leaves the launch screen up.
 - A recent entry whose file has moved or been deleted is shown struck through with the reason, and stays in the list until it is dismissed.
@@ -58,8 +52,6 @@
 - This is the only *screen* whose errors can keep you out of the rest of the application ([§14](14-empty-and-error-states.md)). The one other blocking error belongs to no screen: a file that cannot be written after five attempts ([§12](#12--storage)).
 
 ## 12.2 The menu bar, and which file is open
-
-> **Mockup —** [The File menu · switching files](../mockups/12-storage.html#conflicts)
 
 - **The window title is where the current file is named.** It carries the file's name and nothing else — *finances — Spiccioli*. The full path is on Settings ([§10](10-settings.md)), a click away.
 - **The sidebar carries the eight screens, the failing-check badge beside *Checks* ([§9](09-checks.md)), and the save state** — *Saved 14:32* in the ordinary case, and **the only other things it ever says are that a write is being retried and that one has failed** ([§12](#12--storage)). There is no third state and no spinner for the ordinary debounced write. **What it does not carry is the file name.**

@@ -1,6 +1,6 @@
 # §1 — Premise and constraints
 
-*[Index](../README.md) · [why it is this way](../why/01-premise-and-constraints.md) · no mockups for this section*
+*[Index](../README.md) · [why it is this way](../why/01-premise-and-constraints.md)*
 
 ---
 

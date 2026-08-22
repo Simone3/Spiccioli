@@ -1,6 +1,6 @@
 # §2 — Domain model
 
-*[Index](../README.md) · [why it is this way](../why/02-domain-model.md) · no mockups for this section*
+*[Index](../README.md) · [why it is this way](../why/02-domain-model.md)*
 
 Eleven stored entities and one derived one. *Italic* marks a derived field.
 

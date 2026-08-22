@@ -1,6 +1,6 @@
 # §14 — Empty and error states
 
-*[Index](../README.md) · [why it is this way](../why/14-empty-and-error-states.md) · no mockups for this section*
+*[Index](../README.md) · [why it is this way](../why/14-empty-and-error-states.md)*
 
 A file starts empty and stays that way for a while. Every screen therefore has a state with no data behind it, and every one of them says what to do next rather than showing a blank card.
 

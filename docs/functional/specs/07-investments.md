@@ -1,14 +1,12 @@
 # §7 — Investments
 
-*[Index](../README.md) · [why it is this way](../why/07-investments.md) · [mockups for this section](../mockups/07-investments.html)*
+*[Index](../README.md) · [why it is this way](../why/07-investments.md)*
 
 Four tabs: Holdings, Purchases, Sales, Securities. Holdings is entirely derived from the middle two; Securities is what all three point at.
 
 ---
 
 ## 7.1 Holdings
-
-> **Mockup —** [Holdings tab](../mockups/07-investments.html#holdings)
 
 - One row per (security, brokerage account) holding a position — quantity greater than 0, and a running quantity that never went below it ([§2](02-domain-model.md)). **Every figure is derived and every column is read-only**: **nothing on this tab writes to the file.**
 - **Ordered by the security's `ticker`, alphabetically**, then by account name where one security is held at two brokers and is therefore two rows ([§2](02-domain-model.md)). Case- and accent-insensitive, like every other comparison of text in the application.
@@ -27,8 +25,6 @@ Four tabs: Holdings, Purchases, Sales, Securities. Holdings is entirely derived 
 
 ## 7.2 Purchases
 
-> **Mockup —** [Purchases tab](../mockups/07-investments.html#purchases)
-
 - Where purchase trades are created, corrected and deleted. **A row is corrected on the form it was recorded on** ([§7.5](#75-recording-a-trade-and-where-securities-come-from)), opened by *Edit* in the row menu with every field filled in with what the row holds; nothing on a row is edited where it sits. *Total cost* and *Matched* are derived and are not on that form, and neither is `kind` — a purchase and a sale are two tabs and a trade never moves between them.
 - **The form a trade is corrected on picks its security from the ones already recorded**, rather than searching-or-creating the way the record form does ([§7.5](#75-recording-a-trade-and-where-securities-come-from)): creating a security belongs to the trade that first needs it, and a row being corrected already has one.
 - **Account** is the brokerage account the security sits in, written *Institution · Account* like every account column that has no institution column beside it ([§4](04-accounts.md)) — which is what makes the shared institution visible on the row. The cash for the trade moved through a different account — a cash one at the same institution — and pairing the two is what [§11.6](11-calculations.md#116-derived-matching) does.
@@ -41,18 +37,14 @@ Four tabs: Holdings, Purchases, Sales, Securities. Holdings is entirely derived 
 
 ## 7.3 Sales
 
-> **Mockup —** [Sales tab](../mockups/07-investments.html#sales)
-
 - The same table as Purchases with **three columns it does not have**. *Taxes* is the capital-gains tax the broker actually withheld, entered from the trade confirmation. *Net proceeds* replaces *Total cost* — `qty × price − taxes − fees`, what the sale was worth once the broker had taken both. **It is not what reached the account and not what check 7 pairs against**, the commission being debited separately ([§11.6](11-calculations.md#116-derived-matching)). *Realised gain* is derived per [§11.2](11-calculations.md#112-realised-gain-on-a-sale) and is the only figure on either tab that is neither entered nor a restatement of what was.
-- **Taxes is zero, not blank, when nothing was withheld** — a sale at a loss, like the March 2020 row in the mockup, or one whose gain the broker offset against a carried-forward loss. The figure feeds check 7.
+- **Taxes is zero, not blank, when nothing was withheld** — a sale at a loss, or one whose gain the broker offset against a carried-forward loss. The figure feeds check 7.
 - **Realised gain is net of everything the broker took**, so a sale can show a gain before tax and a loss after it. It is summed into the *gains and costs* card on Portfolio ([§3](03-portfolio.md)), where it is the one investment number that is a recorded fact rather than an estimate.
 - **Realised gain reads *undefined* when the position it came out of has no average cost.** A sale in a (security, account) whose running quantity ever went below zero has no cost basis to measure against: the walk of [§11.1](11-calculations.md#111-weighted-average-cost) stops, no `avgCost` exists, and the figure is undefined rather than zero or blank ([§11.2](11-calculations.md#112-realised-gain-on-a-sale), [§11](11-calculations.md)). The row is shown in full and only that one cell says so. Checks 8 and 9 name the trade that caused it, and putting the dates or the missing purchase right restores the figure ([§9](09-checks.md)).
 - The footer sums fees, taxes, net proceeds and realised gain. It is the only place the tax actually paid over ten years is visible as one figure. **The realised-gain total covers the sales that have one** and says how many it left out, which is the same rule the Portfolio *gains and costs* card follows ([§3.1](03-portfolio.md#31-behaviour)); the other three columns are entered figures and always total everything.
 - Everything else — ordering, filters, editing, matching, the fact that a sale creates no transaction — is exactly as [§7.2](#72-purchases).
 
 ## 7.4 Securities
-
-> **Mockup —** [Securities tab](../mockups/07-investments.html#securities)
 
 - **Everything about a price happens on this tab**: the whole history, the form that records and corrects one, the delete, and *Update prices*. That follows from the model rather than from taste — a Price belongs to a Security ([§2](02-domain-model.md)), so the tab that lists securities is the tab that keeps their prices, and no other screen writes one.
 - **One of the two places a security is created**, and the place one is corrected. *Add security* here creates it on its own; the purchase form creates it inline while recording the first trade that needs it ([§7.5](#75-recording-a-trade-and-where-securities-come-from)). The fields are the same either way and so is the record — there is no such thing as a security that came in by one path rather than the other.
@@ -71,8 +63,6 @@ Four tabs: Holdings, Purchases, Sales, Securities. Holdings is entirely derived 
 
 ## 7.5 Recording a trade, and where securities come from
 
-> **Mockup —** [Record a purchase · new security](../mockups/07-investments.html#record-trade)
-
 - **Total cost** is computed and shown live as quantity, price and fees are typed — never entered. It is what the position cost, not what the bank moved: the commission is a transaction of its own and the pairing of [§11.6](11-calculations.md#116-derived-matching) is made without it ([§7.2](#72-purchases)).
 - **Account** lists brokerage accounts only and starts empty, no picker in the application remembering what was chosen last ([§5.5](05-transactions.md#55-add-transaction)).
 - **A security can be created inline, here.** Typing an ISIN or ticker searches existing securities; if none matches, the form expands with the fields needed to create one, and it is saved together with the trade. No “create a security first” step is *required* — the Securities tab has *Add security* for when it is wanted anyway ([§7.4](#74-securities)).
@@ -83,8 +73,6 @@ Four tabs: Holdings, Purchases, Sales, Securities. Holdings is entirely derived 
 - **The sale form adds a Taxes field** below Fees, and shows **net proceeds** — `qty × price − taxes − fees` — live in place of total cost. It defaults to zero and is never pre-filled from the hypothetical rate of [§11.3](11-calculations.md#113-hypothetical-liquidation).
 
 ## 7.6 Prices
-
-> **Mockup —** [Update prices · choosing](../mockups/07-investments.html#fetch-choose) · [while it runs](../mockups/07-investments.html#fetch-running) · [the review](../mockups/07-investments.html#fetch-review) · [nothing to write](../mockups/07-investments.html#fetch-nothing)
 
 - Prices are entered per security with an **as-of date**, on the Securities tab and nowhere else ([§7.4](#74-securities)), and every day is kept as history. Recording a price for a day that already has one replaces that day and leaves the rest of the history alone.
 - **A price belongs to the security, not to a holding.** The same instrument held at two institutions is two holdings and one price, so a price recorded once moves both rows. **That is why no holding row is where a price is written** ([§7.1](#71-holdings)): a figure edited on one row and landing on two is a figure whose reach the row cannot state, and the tab that owns the security is the one place where what a price belongs to is unambiguous.

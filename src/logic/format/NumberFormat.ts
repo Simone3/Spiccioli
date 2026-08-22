@@ -16,7 +16,7 @@ import { MONEY_SCALES, roundHalfAwayFromZero } from 'src/logic/money/Money';
  * beside it writes the amount.
  */
 
-// The one currency, fixed rather than chosen, with the space the mockups put after it
+// The one currency, fixed rather than chosen, with the space that follows it everywhere it is printed
 const CURRENCY_PREFIX = '€ ';
 
 // A true minus rather than a hyphen, and a plus where a figure states its direction. Both are followed by a space.

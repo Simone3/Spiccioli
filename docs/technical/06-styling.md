@@ -37,11 +37,11 @@ The groups are:
 | Fonts | The three families, described below |
 | Focus | The one ring, described below |
 
-**The family is warm rather than neutral**, and it is the one the mockups of `docs/functional/mockups` are drawn in: the surfaces are an ink that keeps a trace of brown, the hairlines are solid warm lines rather than a translucent white — a white at 8% is the one thing that reads grey on every surface — and the accent is a brass rather than a signal amber, which is what stops a screen of figures from reading as a console. The accent is also the first chart series: the first line of a chart is its headline figure.
+**The family is warm rather than neutral**: the surfaces are an ink that keeps a trace of brown, the hairlines are solid warm lines rather than a translucent white — a white at 8% is the one thing that reads grey on every surface — and the accent is a brass rather than a signal amber, which is what stops a screen of figures from reading as a console. The accent is also the first chart series: the first line of a chart is its headline figure.
 
 **There are four surfaces and they are a scale, darkest to lightest.** The page is what a screen is drawn on, a section — a card, a dialog, the sidebar — sits on the page, and a raised surface is what a control wears on a section. Below all three is the field: what the user types into is a hole in the page and not a thing on it. A component picks the one its own depth calls for rather than a shade it likes.
 
-**Text has three strengths and they are roles, not sizes**: what is being read, what qualifies it, and the small uppercase labels that name a thing without competing with it. The faint one is the dimmest of the three and is still a legible one — the mockups go a step further down for the same labels, which a page of prose can afford and a screen of figures cannot.
+**Text has three strengths and they are roles, not sizes**: what is being read, what qualifies it, and the small uppercase labels that name a thing without competing with it. The faint one is the dimmest of the three and is still a legible one: a screen of figures cannot afford the step further down that a page of prose could.
 
 Where the accent is a background rather than a color — the primary button, the selected day of the calendar — what is written on it is `--colors-text-on-accent`, never the page's own background color.
 

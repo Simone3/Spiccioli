@@ -1,6 +1,6 @@
 # §11 — Calculations
 
-*[Index](../README.md) · [why it is this way](../why/11-calculations.md) · no mockups for this section*
+*[Index](../README.md) · [why it is this way](../why/11-calculations.md)*
 
 Every formula in one place. **All amounts are EUR and every monetary figure is printed with `€` before it** — fixed, not a preference ([§1](01-premise-and-constraints.md), [§10](10-settings.md)). Rounding is to 2 decimals at display, never in intermediate steps. **Every monetary figure carries exactly two decimals** — single amounts, column totals, yearly aggregates, hourly rates — so a round thousand reads `€ 21.900,00` and never `€ 21.900`, and a column of figures is a column of one shape. Quantities and unit prices carry four; percentages carry one. The only figures written short are the axis labels on a chart, where `100k` is the point.
 

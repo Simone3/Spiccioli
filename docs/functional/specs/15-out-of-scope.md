@@ -1,6 +1,6 @@
 # §15 — Out of scope for v1
 
-*[Index](../README.md) · [why it is this way](../why/15-out-of-scope.md) · no mockups for this section*
+*[Index](../README.md) · [why it is this way](../why/15-out-of-scope.md)*
 
 Each of these was raised and deliberately declined. They are listed so they are not reintroduced by accident.
 

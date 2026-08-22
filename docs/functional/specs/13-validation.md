@@ -1,6 +1,6 @@
 # §13 — Validation
 
-*[Index](../README.md) · [why it is this way](../why/13-validation.md) · no mockups for this section*
+*[Index](../README.md) · [why it is this way](../why/13-validation.md)*
 
 What the forms refuse. Everything here is enforced at the point of entry, by the field or by the save; nothing here is a check ([§9](09-checks.md)). The division is: a **rule about one record in isolation** is a validation and is prevented, while a **rule about how two records relate** is a check and is reported. That is why a trade cannot have a negative quantity but can sell more than was ever bought.
 

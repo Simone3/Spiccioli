@@ -1,10 +1,8 @@
 # §9 — Checks
 
-*[Index](../README.md) · [why it is this way](../why/09-checks.md) · [mockups for this section](../mockups/09-checks.html)*
+*[Index](../README.md) · [why it is this way](../why/09-checks.md)*
 
 Fourteen checks. Each passes or names the exact records that made it fail. No tabs.
-
-> **Mockup —** [Checks screen](../mockups/09-checks.html#checks)
 
 ---
 

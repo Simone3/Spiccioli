@@ -1,10 +1,8 @@
 # §10 — Settings
 
-*[Index](../README.md) · [why it is this way](../why/10-settings.md) · [mockups for this section](../mockups/10-settings.html)*
+*[Index](../README.md) · [why it is this way](../why/10-settings.md)*
 
 Preferences, and nothing else. Every kind of reference data lives on the screen that consumes it — accounts and institutions on Accounts ([§4](04-accounts.md)), securities and prices on Investments ([§7.4](07-investments.md#74-securities)), contracts on Salaries ([§8.2](08-salaries.md#82-contracts)), rules and the category list on Categories ([§6.2](06-categories.md#62-rules), [§6.3](06-categories.md#63-category-list)). What is left here belongs to no screen in particular.
-
-> **Mockup —** [Settings screen](../mockups/10-settings.html#settings)
 
 ---
 

@@ -1,6 +1,6 @@
 # §4 — Accounts
 
-*[Index](../README.md) · [why it is this way](../why/04-accounts.md) · [mockups for this section](../mockups/04-accounts.html)*
+*[Index](../README.md) · [why it is this way](../why/04-accounts.md)*
 
 Two tabs: Accounts, Institutions. The spine of the file — transactions, balances and net worth all hang off an account, so it sits second in the sidebar and everything else refers back to it.
 
@@ -14,8 +14,6 @@ Two tabs: Accounts, Institutions. The spine of the file — transactions, balanc
 
 ## 4.1 Accounts
 
-> **Mockup —** [Accounts tab](../mockups/04-accounts.html#accounts)
-
 - Every account ever opened, closed ones dimmed and last. The columns are the stored fields of [§2](02-domain-model.md) — name, institution, type, opening balance, exit tax, opening date, closing date and notes, which is **all of them but `id`**, and no screen anywhere shows one of those ([§2](02-domain-model.md)) — plus a **transaction count** and a **trade count**.
 - **Together those two columns are what says whether a row can be deleted**: a cash account is blocked by its transactions, a `Brokerage` one by its trades ([§13](13-validation.md)).
 - **No balance column.** Balances are what the Portfolio screen is for ([§3](03-portfolio.md)).
@@ -24,8 +22,6 @@ Two tabs: Accounts, Institutions. The spine of the file — transactions, balanc
 - Ordered by **institution name**, then opening date, then account name. **Accounts belonging to no institution come first** — which is to say the `Cash` accounts, those being the only ones that can ([§2](02-domain-model.md)); **closed accounts sort last regardless**, after everything open.
 
 ## 4.2 Institutions
-
-> **Mockup —** [Institutions tab](../mockups/04-accounts.html#institutions)
 
 - An institution exists to **group accounts** and to **carry a sell fee**. It has no balance, no history and no screen of its own.
 - **Institutions are created, edited and deleted here**, with the *Add institution* button above the list and the row menu on each line. This is the only place: the account form picks from what already exists and cannot create one ([§4.3](#43-creating-and-editing)).
@@ -37,8 +33,6 @@ Two tabs: Accounts, Institutions. The spine of the file — transactions, balanc
 ## 4.3 Creating and editing
 
 Both forms live on the Accounts screen, and **each tab creates what it lists**: *Add account* on the Accounts tab, *Add institution* on the Institutions tab. They are two independent forms and neither opens the other.
-
-> **Mockup —** [Add account · add institution](../mockups/04-accounts.html#forms)
 
 - **Default sell fee** is a flat amount, used only for the “if sold today” figures of [§11.3](11-calculations.md#113-hypothetical-liquidation) and therefore for net worth itself ([§3.1](03-portfolio.md#31-behaviour)). Fees actually charged are recorded on each trade. Type a zero to see gross figures — the field is required and has no empty state ([§13](13-validation.md)).
 - **Institution** offers the institutions already recorded and nothing else — no *None* entry and no *New institution…* entry ([§4.2](#42-institutions)). **It is required on seven of the eight types and disabled on the eighth**: a `Cash` account is physical cash, which is held by nobody, so the field greys out and shows *None* ([§13](13-validation.md)) — a disabled state rather than an entry anyone can pick. **Switching the type is what moves it**: choosing `Cash` clears the field and disables it, choosing anything else re-enables it empty and marks it until an institution is picked. This is the one field on the form whose *state* the type changes rather than its value; the other is exit tax, which the type adds and removes outright.

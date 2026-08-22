@@ -1,10 +1,8 @@
 # §5 — Transactions
 
-*[Index](../README.md) · [why it is this way](../why/05-transactions.md) · [mockups for this section](../mockups/05-transactions.html)*
+*[Index](../README.md) · [why it is this way](../why/05-transactions.md)*
 
 The screen with the most hours on it. No tabs.
-
-> **Mockup —** [Transactions list](../mockups/05-transactions.html#list)
 
 ---
 
@@ -39,7 +37,7 @@ Account · period · category · **set by** · amount range · receipt state · 
 - **The amount range is on the signed amount, and both ends are inclusive.** −100 to −10 selects payments between ten and a hundred euros; 0 to 0 selects the zero-amount rows ([§13](13-validation.md)); −10 to 10 selects the small ones in both directions.
 - **The search is case- and accent-insensitive**, on the description only, and matches anywhere in it. It is the same comparison a rule makes ([§2](02-domain-model.md)).
 
-Filters affect the footer totals and the page count. **No filter is applied when the screen is first opened** — it shows the whole history, and the period filter in the mockup is one the user set. **Filters that are set stay set while the file is open**: coming back from the sidebar finds every one of them where it was left ([§12.2](12-storage.md#122-the-menu-bar-and-which-file-is-open)). The three ways in that arrive with filters already set say so as they hand over ([§5.2](#52-ordering-and-paging)): a report cell, a finished import and a failing check's entry each set them where the user would have, and each leaves every control free to be changed or cleared. The category filter lists the twenty-seven categories **alphabetically**, with an *Uncategorised* entry above them ([§6.3](06-categories.md#63-category-list)).
+Filters affect the footer totals and the page count. **No filter is applied when the screen is first opened** — it shows the whole history, and any period filter in force is one the user set. **Filters that are set stay set while the file is open**: coming back from the sidebar finds every one of them where it was left ([§12.2](12-storage.md#122-the-menu-bar-and-which-file-is-open)). The three ways in that arrive with filters already set say so as they hand over ([§5.2](#52-ordering-and-paging)): a report cell, a finished import and a failing check's entry each set them where the user would have, and each leaves every control free to be changed or cleared. The category filter lists the twenty-seven categories **alphabetically**, with an *Uncategorised* entry above them ([§6.3](06-categories.md#63-category-list)).
 
 **Set by** filters on `categorySource`: *anything*, *a rule*, *by hand*.
 
@@ -56,8 +54,6 @@ Filters affect the footer totals and the page count. **No filter is applied when
 - **There is no “apply rules” action on this screen.** The one place the list is applied is the Rules tab, and it is applied there as part of changing it ([§6.2](06-categories.md#62-rules)).
 
 ## 5.5 Add transaction
-
-> **Mockup —** [Add transaction](../mockups/05-transactions.html#add-transaction)
 
 - **Seven fields, in this order: account, date, description, amount, category, receipt, notes** — every field of a transaction the user fills in. The three stored fields that are not on it are not asked for: `categorySource` follows from the category picker, *Automatic* meaning `automatic` and any category meaning `manual` ([§5.4](#54-editing)), and `id` and `insertionSeq` are the application's ([§2](02-domain-model.md)). Description is required and is the only thing a rule will match on ([§13](13-validation.md)); notes are optional and the application never writes to them ([§5.1](#51-columns)).
 - **Account** starts empty and lists cash accounts only — closed ones among them, marked and last ([§4.3](04-accounts.md#43-creating-and-editing)). **No picker in the application remembers what was chosen last.**
@@ -78,8 +74,6 @@ Filters affect the footer totals and the page count. **No filter is applied when
 ## 5.7 Bulk import
 
 One screen. One job: get raw rows in without duplicating anything. It is reached from the *Bulk import* button on the Transactions screen, and the sidebar stays on Transactions.
-
-> **Mockup —** [Bulk import](../mockups/05-transactions.html#bulk-import)
 
 ### One screen
 

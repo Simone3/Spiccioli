@@ -21,7 +21,7 @@ This file holds only the rules and the commands; the reasoning behind them lives
 
 When you need either set, start from its `README.md` and then read ONLY the sections relevant to the current task. Always read the relevant `docs/technical/` section before changing an area you have not touched yet in this session.
 
-The code MUST always adhere to `docs/functional/specs`. If a defect in a specification, or a reason to change one, comes up during development, raise it and stop there: the specification is amended only after the user has approved the change. In contrast, `docs/functional/mockups` are guidelines rather than hard specs and can be adapted when the need arises. `docs/functional/why` is read only to recover the original rationale when a change to a specification is being weighed.
+The code MUST always adhere to `docs/functional/specs`. If a defect in a specification, or a reason to change one, comes up during development, raise it and stop there: the specification is amended only after the user has approved the change. `docs/functional/why` is read only to recover the original rationale when a change to a specification is being weighed.
 
 ## Commands
 
