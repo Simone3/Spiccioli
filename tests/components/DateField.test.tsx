@@ -84,6 +84,26 @@ describe('the date field', () => {
 		expect(screen.getByText('This is required.')).toBeInTheDocument();
 	});
 
+	// A three-digit year is a real year to the parser, and "202-02-01" is a day the reader refuses the whole file for
+	test('refuses a year that has not been typed out, which never reaches the caller', async() => {
+		await renderDateField(undefined, DEFAULT_PREFERENCES.dateFormat, true);
+
+		await userEvent.type(screen.getByRole('textbox', { name: 'Date' }), '01/02/202');
+		await userEvent.click(screen.getByRole('button', { name: 'Elsewhere' }));
+
+		expect(screen.getByText('nothing')).toBeInTheDocument();
+		expect(screen.getByText('This is required.')).toBeInTheDocument();
+	});
+
+	test('keeps the day it had when a digit is taken off the year of it', async() => {
+		await renderDateField('2020-08-08');
+
+		await userEvent.type(await screen.findByDisplayValue('08/08/2020'), '{backspace}');
+		await userEvent.click(screen.getByRole('button', { name: 'Elsewhere' }));
+
+		expect(screen.getByText('2020-08-08')).toBeInTheDocument();
+	});
+
 	test('refuses a day after today, which never reaches the caller', async() => {
 		const nextYear = new Date().getFullYear() + 1;
 		await renderDateField();

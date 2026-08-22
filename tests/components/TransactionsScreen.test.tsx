@@ -73,6 +73,18 @@ describe('the Transactions screen', () => {
 		expect(screen.getByText('1 result · − € 42,50')).toBeInTheDocument();
 	});
 
+	// A year half typed parses to a year of its own, and the row it would write is one the reader refuses the whole file for
+	test('will not save a row whose date has been left half typed', async() => {
+		await openTransactions();
+		await userEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
+		await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Account' }), 'account-1');
+		await userEvent.type(screen.getByRole('textbox', { name: 'Description' }), 'PAGAMENTO POS');
+		await userEvent.type(screen.getByRole('textbox', { name: 'Amount' }), '-42,50');
+		await userEvent.type(screen.getByRole('textbox', { name: 'Date' }), '{backspace>10}01/02/202');
+
+		expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+	});
+
 	test('re-runs the rules when the description of an automatic row is edited', async() => {
 		await openTransactions(withRecords({
 			transactions: [ makeTransaction({ categoryId: null, description: 'ADDEBITO DIVERSI 4471' }) ],

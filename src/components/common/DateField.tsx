@@ -18,6 +18,10 @@ import type { IsoDate } from 'src/types/LedgerTypes';
  * **The format is the preference's**, never a system locale's, and **no day after today is offerable** — every date in the
  * application is a fact about a day that has happened. A caller that needs a different ceiling says so.
  *
+ * **A day the file cannot hold never reaches the caller.** A year is only a year once it has four digits, so a date half typed
+ * is refused exactly as one outside the range is: the caller keeps the day it had, and there is no day anywhere above this
+ * control that the reader would go on to refuse the file for.
+ *
  * **A required field says it is required once it has been left empty, and not before.** A form opens on the record it is about
  * to create and not on a refusal of a field nobody has been in yet; leave the field without a day in it, or take out the day
  * that was in it, and it says so from then on. Every required field in the application states it on those terms.
@@ -132,7 +136,16 @@ export const DateField = ({ value, onChange, label, disabled = false, required =
 			return;
 		}
 
-		onChange(DateUtils.toStandardYearMonthDay(day));
+		const standard = DateUtils.toStandardYearMonthDay(day);
+
+		// A year half typed is a year: "01/02/202" is read as the second of February of the year 202, which is a real day the
+		// range lets through and a day the file cannot hold. What the field cannot read back is what it never hands on, so the
+		// day is put through the same reader the value arrives by and refused where it does not survive the round trip.
+		if(!DateUtils.fromStandardYearMonthDay(standard)) {
+			return;
+		}
+
+		onChange(standard);
 	};
 
 	return (
