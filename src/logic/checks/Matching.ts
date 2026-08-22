@@ -59,6 +59,12 @@ export interface MatchCandidate {
 	amount: Cents;
 }
 
+/** The days a counterpart may be dated in, both ends inclusive. */
+export interface MatchWindow {
+	fromDate: IsoDate;
+	toDate: IsoDate;
+}
+
 interface OneToOneMatchOptions<TClaim> {
 
 	// Already in the order the claims are walked in, which is the ascending ordering of the claiming side's own records
@@ -73,7 +79,7 @@ interface OneToOneMatchOptions<TClaim> {
 	amountOf: (claim: TClaim) => Cents;
 
 	// The window the counterpart has to fall in, both ends inclusive
-	windowOf: (claim: TClaim) => { fromDate: IsoDate; toDate: IsoDate };
+	windowOf: (claim: TClaim) => MatchWindow;
 
 	// The day distances are measured from, which is the leading record's own. Defaults to the day the window opens on, the two
 	// being the same wherever the window only runs forwards.
@@ -656,8 +662,12 @@ export const sortPayslipsForMatching = (payslips: readonly Payslip[], contracts:
 	});
 };
 
-// The window a payslip's figures are paid in: its own month, or the one after it
-const payslipWindow = (payslip: Payslip): { fromDate: IsoDate; toDate: IsoDate } => {
+/**
+ * The window a payslip's figures are paid in: its own month, or the one after it.
+ * @param payslip The payslip.
+ * @returns The days its salary payment may be dated in.
+ */
+export const payslipWindow = (payslip: Payslip): MatchWindow => {
 	return {
 		fromDate: firstDayOfMonth(payslip.year, payslip.month),
 		toDate: lastDayOfNextMonth(payslip.year, payslip.month)
@@ -764,7 +774,7 @@ export const groupPayslipsIntoPeriods = (payslips: readonly Payslip[], months: n
  * @param period The period.
  * @returns The window.
  */
-const pensionPeriodWindow = (period: PensionPeriod): { fromDate: IsoDate; toDate: IsoDate } => {
+export const pensionPeriodWindow = (period: PensionPeriod): MatchWindow => {
 	return {
 		fromDate: firstDayOfMonth(period.year, period.startMonth),
 		toDate: lastDayOfNextMonth(period.year, period.endMonth)

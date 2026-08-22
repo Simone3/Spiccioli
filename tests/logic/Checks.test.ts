@@ -179,8 +179,13 @@ describe('checks 4 and 5 — payslips and their contributions', () => {
 	it('names which of the three pension figures is unmatched', () => {
 		const results = run({
 			...employed,
-			payslips: [ makePayslip({ employeeContribution: 5000, employerContribution: 0, severanceContribution: 0 }) ],
-			transactions: [ makeTransaction({ id: 'pay', date: '2026-08-01', amount: 210000, categoryId: 'salary' }) ]
+			payslips: [ makePayslip({ month: 5, employeeContribution: 5000, employerContribution: 0, severanceContribution: 0 }) ],
+			transactions: [
+				makeTransaction({ id: 'pay', date: '2026-06-01', amount: 210000, categoryId: 'salary' }),
+
+				// The file reaches past the end of the window, so the credit is expected rather than set aside
+				makeTransaction({ id: 'later', date: '2026-07-20' })
+			]
 		});
 
 		const contributions = check(results, 'pensionContributionsMatch');
@@ -211,6 +216,81 @@ describe('checks 4 and 5 — payslips and their contributions', () => {
 		expect(contributions.sides[0].entries[0].text).toContain('01/2026 – 03/2026');
 		expect(contributions.sides[0].entries[0].text).toContain('€ 150,00');
 		expect(contributions.sides[0].entries[0].link).toEqual({ screen: 'payslips', contractId: 'contract-1', year: 2026 });
+	});
+
+	it('sets aside a period the file could not hold a credit for yet, and says so beside the reach', () => {
+		const results = run({
+			...employed,
+			payslips: [ 4, 5, 6 ].map((month) => {
+				return makePayslip({ id: `payslip-${month}`, month, netPayment: 210000 });
+			}),
+
+			// The file is kept in batches and stops at June: the quarter's credits arrive in July and nothing has been imported yet
+			transactions: [ makeTransaction({ id: 'pay', date: '2026-06-01', amount: 210000, categoryId: 'salary' }) ]
+		}, { ...DEFAULT_PREFERENCES, pensionContributionMonths: 3 });
+
+		const contributions = check(results, 'pensionContributionsMatch');
+
+		expect(contributions.passed).toBe(true);
+		expect(contributions.reach).toBe('3 contributions · 3 not yet recorded');
+		expect(contributions.sides).toEqual([]);
+	});
+
+	it('expects the same period again once the file reaches past its window', () => {
+		const results = run({
+			...employed,
+			payslips: [ 4, 5, 6 ].map((month) => {
+				return makePayslip({ id: `payslip-${month}`, month, netPayment: 210000 });
+			}),
+			transactions: [
+				makeTransaction({ id: 'pay', date: '2026-06-01', amount: 210000, categoryId: 'salary' }),
+
+				// A later import: the window closed on 31 July and the file now holds August
+				makeTransaction({ id: 'later', date: '2026-08-10' })
+			]
+		}, { ...DEFAULT_PREFERENCES, pensionContributionMonths: 3 });
+
+		const contributions = check(results, 'pensionContributionsMatch');
+
+		expect(contributions.passed).toBe(false);
+		expect(contributions.reach).toBe('3 contributions');
+		expect(contributions.sides[0].total).toBe(3);
+	});
+
+	it('does not let a transaction dated in the future buy the file any reach', () => {
+		const results = run({
+			...employed,
+			transactions: [ makeTransaction({ id: 'ahead', date: '2027-03-01' }) ]
+		});
+
+		// July's window closes on 31 August, which is still ahead of today: a transaction dated next year does not make it past
+		expect(check(results, 'pensionContributionsMatch').passed).toBe(true);
+		expect(check(results, 'pensionContributionsMatch').reach).toBe('3 contributions · 3 not yet recorded');
+	});
+
+	it('reports both sides when a credit did arrive in the window and did not pair', () => {
+		const results = run({
+			...employed,
+			payslips: [ makePayslip({ month: 7, employeeContribution: 5000, employerContribution: 0, severanceContribution: 0 }) ],
+
+			// Inside the window, so something did arrive: a mismatch and not a gap, however far the file reaches
+			transactions: [ makeTransaction({ id: 'credit', date: '2026-08-05', amount: 5100, categoryId: 'pension-fund-contribution' }) ]
+		});
+
+		const contributions = check(results, 'pensionContributionsMatch');
+
+		expect(contributions.passed).toBe(false);
+		expect(contributions.reach).toBe('1 contribution');
+		expect(contributions.sides[0].total).toBe(1);
+		expect(contributions.sides[1].total).toBe(1);
+	});
+
+	it('expects nothing at all of a file holding no transactions', () => {
+		const results = run({ ...employed, transactions: [] });
+
+		expect(check(results, 'payslipsMatchSalaries').passed).toBe(true);
+		expect(check(results, 'payslipsMatchSalaries').reach).toBe('1 payslip · 1 not yet recorded');
+		expect(check(results, 'pensionContributionsMatch').passed).toBe(true);
 	});
 
 	it('passes with nothing to say when every figure is zero', () => {

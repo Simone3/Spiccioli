@@ -1508,11 +1508,11 @@ export const EN_TRANSLATIONS = {
 			},
 			payslipsMatchSalaries: {
 				name: 'Payslips match salary transactions',
-				description: 'Each payslip pairs one-to-one with a transaction in a salary category for exactly its net payment, sign included, dated in the payslip’s own month or the one after. Payslips and transactions left over are listed separately.'
+				description: 'Each payslip pairs one-to-one with a transaction in a salary category for exactly its net payment, sign included, dated in the payslip’s own month or the one after. Payslips and transactions left over are listed separately. A payslip whose window closes after the file’s last transaction is set aside: nothing that could have paid it has been imported yet.'
 			},
 			pensionContributionsMatch: {
 				name: 'Payslip pension contributions match transactions',
-				description: 'Each non-zero pension figure of one contract — employee share, employer share, TFR — {period}, pairs with a credit of the same amount in a pension-contribution category, dated from the period’s first day to the end of the month after it ends. The three figures are expected as three separate credits; a figure summing to zero expects none.'
+				description: 'Each non-zero pension figure of one contract — employee share, employer share, TFR — {period}, pairs with a credit of the same amount in a pension-contribution category, dated from the period’s first day to the end of the month after it ends. The three figures are expected as three separate credits; a figure summing to zero expects none. A period whose window closes after the file’s last transaction is set aside: nothing that could have credited it has been imported yet.'
 			},
 			purchasesMatch: {
 				name: 'Purchase transactions match purchases',
@@ -1650,6 +1650,13 @@ export const EN_TRANSLATIONS = {
 			pendingReceipts: {
 				one: '{count} pending receipt',
 				other: '{count} pending receipts'
+			},
+
+			// What checks 4 and 5 set aside because the file could not hold a counterpart for it yet, stated beside the reach so
+			// that a check which went quiet says why. The count is part of the reach and never of the failure.
+			notYetRecorded: {
+				one: '{reach} · 1 not yet recorded',
+				other: '{reach} · {count} not yet recorded'
 			}
 		},
 

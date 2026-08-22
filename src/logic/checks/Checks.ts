@@ -2,7 +2,7 @@ import { CHECKS_CONFIG } from 'src/config/AppConfig';
 import { formatAccountName, indexInstitutions, isAccountClosed, sortAccounts } from 'src/logic/accounts/Accounts';
 import { categoryIdsWithRole, indexCategories } from 'src/logic/categories/Categories';
 import { addDaysToIsoDate, addMonthsToIsoDate, daysBetweenIsoDates } from 'src/logic/checks/CheckDates';
-import { formatPensionPeriod, pensionFigureKey, type DerivedMatching, type PensionClaim, type PensionPeriod } from 'src/logic/checks/Matching';
+import { formatPensionPeriod, payslipWindow, pensionFigureKey, pensionPeriodWindow, type DerivedMatching, type MatchWindow, type PensionClaim, type PensionPeriod } from 'src/logic/checks/Matching';
 import { compareTradesInWalkOrder, walkPositions, type PositionWalk } from 'src/logic/investments/Holdings';
 import { indexLatestPrices, indexSecurities, sortSecurities } from 'src/logic/investments/Securities';
 import { sortTrades, tradeSettlement, tradesOfKind, tradeTotal } from 'src/logic/investments/Trades';
@@ -193,6 +193,10 @@ interface CheckContext extends ChecksOptions {
 	accounts: ReadonlyMap<LedgerId, Account>;
 	walk: PositionWalk;
 	naming: CheckNaming;
+
+	// How far the file's transactions reach, which is what checks 4 and 5 measure an expectation against. Undefined on a file
+	// holding no transactions at all, where nothing can be expected yet.
+	recordedThrough: IsoDate | undefined;
 }
 
 /**
@@ -204,6 +208,88 @@ interface CheckContext extends ChecksOptions {
  */
 const buildSide = (key: string, label: string | undefined, entries: readonly CheckEntry[]): CheckSide => {
 	return { key, label, total: entries.length, entries: entries.slice(0, CHECKS_CONFIG.maximumEntriesPerSide) };
+};
+
+/**
+ * How far the file's transactions reach: **the latest day any of them is dated on, never later than today**.
+ *
+ * This is what checks 4 and 5 measure an expectation against instead of the clock. A ledger is kept in batches — an export
+ * imported every few months — so a window that has closed on the calendar can still be ahead of everything the file holds, and
+ * the salary or the credit that would have paired is simply not in it yet. **Capping at today** keeps a transaction dated in
+ * the future from buying grace the calendar has not given.
+ * @param document The ledger.
+ * @param today The computer's own clock.
+ * @returns The day the file's transactions reach, or undefined when it holds none.
+ */
+const lastRecordedTransaction = (document: LedgerDocument, today: IsoDate): IsoDate | undefined => {
+	let latest: IsoDate | undefined;
+
+	for(const transaction of document.transactions) {
+		if(latest === undefined || transaction.date > latest) {
+			latest = transaction.date;
+		}
+	}
+
+	return latest !== undefined && latest > today ? today : latest;
+};
+
+/** One claim side of check 4 or 5, once the expectations the file could not hold yet are out of it. */
+interface DueClaims<TClaim> {
+
+	// What the check reports, in the order it was given them
+	due: TClaim[];
+
+	// How many were set aside, which the reach states
+	notYetRecorded: number;
+}
+
+/**
+ * Sets aside the claims whose counterpart could not be in the file yet: **the window closes after the last transaction the file
+ * records**, so nothing that could pair with them has been imported ([§9]).
+ *
+ * **A claim with an unmatched counterpart inside its window is due whatever its date.** Something did arrive and did not pair,
+ * which is a mismatch rather than a gap, and the check names both sides of it.
+ * @param claims The claims the pairing left over.
+ * @param windowOf The days each one's counterpart may be dated in.
+ * @param unmatchedTransactions What the pairing left over on the other side.
+ * @param recordedThrough How far the file's transactions reach.
+ * @returns The claims to report, and how many were set aside.
+ */
+const setAsideNotYetRecorded = <TClaim>(
+	claims: readonly TClaim[],
+	windowOf: (claim: TClaim) => MatchWindow,
+	unmatchedTransactions: readonly Transaction[],
+	recordedThrough: IsoDate | undefined
+): DueClaims<TClaim> => {
+	const due = claims.filter((claim) => {
+		const { fromDate, toDate } = windowOf(claim);
+
+		if(recordedThrough !== undefined && toDate <= recordedThrough) {
+			return true;
+		}
+
+		return unmatchedTransactions.some((transaction) => {
+			return transaction.date >= fromDate && transaction.date <= toDate;
+		});
+	});
+
+	return { due, notYetRecorded: claims.length - due.length };
+};
+
+/**
+ * States beside a reach how much of it was set aside as not yet recorded, so a check that went quiet says why.
+ * **This is wording and not a third state**: the check passed, and what it counted is still the whole count.
+ * @param reach What the check examined.
+ * @param notYetRecorded How many of those the file could not hold a counterpart for yet.
+ * @param translator The wording.
+ * @returns The reach, with the set-aside count where there is one.
+ */
+const reachSettingAside = (reach: string, notYetRecorded: number, translator: SpiccioliTranslator): string => {
+	if(notYetRecorded === 0) {
+		return reach;
+	}
+
+	return translator.t('checks.reach.notYetRecorded', { reach, count: notYetRecorded });
 };
 
 // What a description leaves to the preferences: one placeholder, and the name of the fragment that fills it
@@ -528,13 +614,21 @@ const checkPricesRecent = (context: CheckContext): CheckOutcome => {
 	return { id: 'pricesRecent', passed: false, reach, sides: [ buildSide('securities', undefined, entries) ] };
 };
 
+/**
+ * Check 4. **A payslip the file could not hold a payment for yet is set aside** rather than reported: its window closes after
+ * the last transaction the file records, so nothing that could have paid it has been imported ([§9]).
+ * @param context What the check reads.
+ * @returns The result.
+ */
 const checkPayslipsMatchSalaries = (context: CheckContext): CheckOutcome => {
-	const { document, matching, translator, formatter } = context;
+	const { document, matching, translator, formatter, recordedThrough } = context;
 	const { transactionEntry, monthOf, payslipLink, contractName } = context.naming;
-	const reach = translator.t('checks.reach.payslips', { count: document.payslips.length });
 	const { unmatchedPayslips, unmatchedTransactions } = matching.salaries;
 
-	if(unmatchedPayslips.length === 0 && unmatchedTransactions.length === 0) {
+	const { due, notYetRecorded } = setAsideNotYetRecorded(unmatchedPayslips, payslipWindow, unmatchedTransactions, recordedThrough);
+	const reach = reachSettingAside(translator.t('checks.reach.payslips', { count: document.payslips.length }), notYetRecorded, translator);
+
+	if(due.length === 0 && unmatchedTransactions.length === 0) {
 		return { id: 'payslipsMatchSalaries', passed: true, reach, sides: [] };
 	}
 
@@ -543,7 +637,7 @@ const checkPayslipsMatchSalaries = (context: CheckContext): CheckOutcome => {
 		passed: false,
 		reach,
 		sides: [
-			buildSide('payslips', translator.t('checks.sides.payslips'), unmatchedPayslips.map((payslip) => {
+			buildSide('payslips', translator.t('checks.sides.payslips'), due.map((payslip) => {
 				return {
 					key: payslip.id,
 					text: translator.t('checks.entries.payslip', {
@@ -567,18 +661,29 @@ const checkPayslipsMatchSalaries = (context: CheckContext): CheckOutcome => {
  * **What the check reaches is contribution periods and not payslips** ([§11.6]): at the default period of one month the two
  * counts are the same, and at three months a quarter's three headings are three claims however many payslips they were summed
  * over.
+ *
+ * **A period the file could not hold a credit for yet is set aside** rather than reported: its window closes after the last
+ * transaction the file records, and on a quarterly fund that is the ordinary state of the newest quarter ([§9]).
  * @param context What the check reads.
  * @returns The result.
  */
 const checkPensionContributionsMatch = (context: CheckContext): CheckOutcome => {
-	const { matching, translator, formatter } = context;
+	const { matching, translator, formatter, recordedThrough } = context;
 	const { transactionEntry, periodOf, periodLink, contractName } = context.naming;
 	const { transactionByFigure, unmatchedFigures, unmatchedTransactions } = matching.pension;
 
-	// Every claim the walk was handed: the ones that paired, and the ones that did not
-	const reach = translator.t('checks.reach.contributions', { count: transactionByFigure.size + unmatchedFigures.length });
+	const { due, notYetRecorded } = setAsideNotYetRecorded(unmatchedFigures, (claim) => {
+		return pensionPeriodWindow(claim.period);
+	}, unmatchedTransactions, recordedThrough);
 
-	if(unmatchedFigures.length === 0 && unmatchedTransactions.length === 0) {
+	// Every claim the walk was handed: the ones that paired, and the ones that did not
+	const reach = reachSettingAside(
+		translator.t('checks.reach.contributions', { count: transactionByFigure.size + unmatchedFigures.length }),
+		notYetRecorded,
+		translator
+	);
+
+	if(due.length === 0 && unmatchedTransactions.length === 0) {
 		return { id: 'pensionContributionsMatch', passed: true, reach, sides: [] };
 	}
 
@@ -600,7 +705,7 @@ const checkPensionContributionsMatch = (context: CheckContext): CheckOutcome => 
 		passed: false,
 		reach,
 		sides: [
-			buildSide('figures', translator.t('checks.sides.contributions'), unmatchedFigures.map(figureEntry)),
+			buildSide('figures', translator.t('checks.sides.contributions'), due.map(figureEntry)),
 			buildSide('transactions', translator.t('checks.sides.transactions'), unmatchedTransactions.map((transaction) => {
 				return transactionEntry(transaction);
 			}))
@@ -1018,7 +1123,8 @@ export const runChecks = (options: ChecksOptions): CheckResult[] => {
 		...options,
 		accounts,
 		walk: walkPositions(options.document.trades),
-		naming: buildNaming(options, accounts)
+		naming: buildNaming(options, accounts),
+		recordedThrough: lastRecordedTransaction(options.document, options.today)
 	};
 
 	return [
