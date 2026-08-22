@@ -39,10 +39,22 @@
 
 .investments-screen-detail-actions {
 	display: flex;
-	gap: 12px;
+	flex-wrap: wrap;
+	gap: 8px 12px;
 	align-items: baseline;
 	justify-content: space-between;
 	margin-bottom: 10px;
+}
+
+/* What is done to the history as a whole, beside what adds one record to it: the two clearings are ghosts because a history is
+   not something to take by accident, and the confirmation is what says how much of it goes. Three buttons do not share a line
+   with the heading in a panel this narrow, so the row above wraps and the margin keeps them to the right either way. */
+.investments-screen-detail-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+	margin-left: auto;
 }
 
 .investments-screen-subhead {

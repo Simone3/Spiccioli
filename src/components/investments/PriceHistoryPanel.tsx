@@ -8,7 +8,7 @@ import { RowMenu } from 'src/components/common/RowMenu';
 import { PriceForm, type PriceFormValues } from 'src/components/investments/PriceForm';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
-import { FIRST_PRICE_PAGE, priceHistoryPage, priceHistoryPageCount, priceHistoryPageHolding } from 'src/logic/investments/Securities';
+import { FIRST_PRICE_PAGE, priceHistoryPage, priceHistoryPageCount, priceHistoryPageHolding, type PriceClearance } from 'src/logic/investments/Securities';
 import type { IsoDate, Price, Security } from 'src/types/LedgerTypes';
 
 /**
@@ -22,6 +22,11 @@ import type { IsoDate, Price, Security } from 'src/types/LedgerTypes';
  * **Every edit a user makes sets the source to `manual`**, an edit to the value and an edit to the date alike, so a fetched
  * figure somebody has corrected stops claiming to be the provider's. Changing the date **moves** the record, replacing whatever
  * occupied the day it lands on, and **neither edit is confirmed**; deleting is, like every delete in the application.
+ *
+ * **A record goes one at a time from its row menu, and the whole history goes at once from the head of the panel** — every record,
+ * or only the ones a price pass wrote. The bulk pair is there because a pass asked under a ticker or an exchange that names the
+ * wrong listing writes thousands of records in one press, and undoing that a row at a time is not undoing it. Both are confirmed,
+ * and each says what it is about to take.
  *
  * **This panel and the form it opens are the whole of what a user does to a price**, the *Update prices* pass above it aside.
  */
@@ -41,6 +46,10 @@ export interface PriceHistoryPanelProps {
 	onSave: (original: Price | undefined, values: PriceFormValues) => void;
 
 	onDelete: (price: Price) => void;
+
+	// Takes the whole history at once: every record, or only the ones a price pass wrote
+	onClear: (scope: PriceClearance) => void;
+
 	onClose: () => void;
 }
 
@@ -51,14 +60,18 @@ export interface PriceHistoryPanelProps {
  * @param props.prices Its prices, newest first.
  * @param props.onSave What saving the form does.
  * @param props.onDelete What deleting one does.
+ * @param props.onClear What clearing the whole history does, all of it or only what was fetched.
  * @param props.onClose What closing the panel does.
  * @returns The panel.
  */
-export const PriceHistoryPanel = ({ security, prices, onSave, onDelete, onClose }: PriceHistoryPanelProps): ReactElement => {
+export const PriceHistoryPanel = ({ security, prices, onSave, onDelete, onClear, onClose }: PriceHistoryPanelProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
 	const [ priceDraft, setPriceDraft ] = useState<PriceDraft | undefined>(undefined);
 	const [ priceToDelete, setPriceToDelete ] = useState<Price | undefined>(undefined);
+
+	// Which bulk clearing has been asked for and is waiting on its confirmation, neither one being asked for otherwise
+	const [ clearanceAsked, setClearanceAsked ] = useState<PriceClearance | undefined>(undefined);
 
 	// The most recent records, which is where the panel opens however it was reached. A history that has shrunk under the page in
 	// view is read at its last page rather than at an empty one.
@@ -77,11 +90,24 @@ export const PriceHistoryPanel = ({ security, prices, onSave, onDelete, onClose 
 		setRequestedPage(next);
 	};
 
+	const clearHistory = (scope: PriceClearance): void => {
+		onClear(scope);
+		setClearanceAsked(undefined);
+		turnTo(FIRST_PRICE_PAGE);
+	};
+
 	const savePrice = (values: PriceFormValues): void => {
 		onSave(priceDraft?.price, values);
 		setPriceDraft(undefined);
 		setFollowed(values.date);
 	};
+
+	// What each of the two clearings would take. *Delete fetched* is offered only where the two kinds are both there: a history
+	// entirely written by a pass is cleared by *Delete all*, which takes exactly the same records and says so plainly.
+	const fetchedCount = prices.filter((price) => {
+		return price.source === 'fetched';
+	}).length;
+	const manualCount = prices.length - fetchedCount;
 
 	const columns: readonly DataTableColumn<Price>[] = [
 		{
@@ -159,12 +185,32 @@ export const PriceHistoryPanel = ({ security, prices, onSave, onDelete, onClose 
 
 			<div className='investments-screen-detail-actions'>
 				<h3 className='investments-screen-subhead'>{t('prices.heading', { count: prices.length })}</h3>
-				<AppButton
-					onClick={() => {
-						setPriceDraft({ price: undefined });
-					}}>
-					{t('prices.add')}
-				</AppButton>
+				<div className='investments-screen-detail-buttons'>
+					{fetchedCount > 0 && manualCount > 0 && (
+						<AppButton
+							variant='ghost'
+							onClick={() => {
+								setClearanceAsked('fetched');
+							}}>
+							{t('prices.clearFetched')}
+						</AppButton>
+					)}
+					{prices.length > 0 && (
+						<AppButton
+							variant='ghost'
+							onClick={() => {
+								setClearanceAsked('all');
+							}}>
+							{t('prices.clearAll')}
+						</AppButton>
+					)}
+					<AppButton
+						onClick={() => {
+							setPriceDraft({ price: undefined });
+						}}>
+						{t('prices.add')}
+					</AppButton>
+				</div>
 			</div>
 
 			{prices.length === 0 ?
@@ -206,6 +252,37 @@ export const PriceHistoryPanel = ({ security, prices, onSave, onDelete, onClose 
 					}}
 					onCancel={() => {
 						setPriceToDelete(undefined);
+					}}/>
+			)}
+
+			{clearanceAsked === 'all' && (
+				<ConfirmDialog
+					danger
+					title={t('prices.clearAllTitle')}
+					message={t(manualCount > 0 && fetchedCount > 0 ? 'prices.clearAllMessageMixed' : 'prices.clearAllMessage', {
+						count: prices.length,
+						ticker: security.ticker
+					})}
+					confirmLabel={t('prices.clearAllConfirm')}
+					onConfirm={() => {
+						clearHistory('all');
+					}}
+					onCancel={() => {
+						setClearanceAsked(undefined);
+					}}/>
+			)}
+
+			{clearanceAsked === 'fetched' && (
+				<ConfirmDialog
+					danger
+					title={t('prices.clearFetchedTitle')}
+					message={t('prices.clearFetchedMessage', { count: fetchedCount, ticker: security.ticker })}
+					confirmLabel={t('prices.clearFetchedConfirm')}
+					onConfirm={() => {
+						clearHistory('fetched');
+					}}
+					onCancel={() => {
+						setClearanceAsked(undefined);
 					}}/>
 			)}
 		</aside>

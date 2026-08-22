@@ -35,6 +35,7 @@ import {
 	walkPositions
 } from 'src/logic/investments/Holdings';
 import {
+	clearPriceHistory,
 	countSecurityUsage,
 	indexLatestPrices,
 	indexSecurities,
@@ -43,6 +44,7 @@ import {
 	sortSecurities,
 	writePrice,
 	writePrices,
+	type PriceClearance,
 	type SecurityUsage
 } from 'src/logic/investments/Securities';
 import {
@@ -254,6 +256,14 @@ export const InvestmentsScreen = (): ReactElement => {
 					return candidate.securityId !== price.securityId || candidate.date !== price.date;
 				})
 			};
+		});
+	};
+
+	// The bulk of the same delete: one security's whole history, or only the records a pass wrote. It is what puts right a pass
+	// asked under a ticker or an exchange that names the wrong listing, which writes thousands of records in one press.
+	const clearPriceRecords = (securityId: LedgerId, scope: PriceClearance): void => {
+		updateDocument((current) => {
+			return { ...current, prices: clearPriceHistory(current.prices, securityId, scope) };
 		});
 	};
 
@@ -638,6 +648,9 @@ export const InvestmentsScreen = (): ReactElement => {
 							savePriceRecord(selectedSecurity.id, original, values);
 						}}
 						onDelete={deletePriceRecord}
+						onClear={(scope) => {
+							clearPriceRecords(selectedSecurity.id, scope);
+						}}
 						onClose={() => {
 							setSelectedSecurityId(undefined);
 						}}/>

@@ -1,5 +1,6 @@
 import { makeFullDocument, makePrice, makeSecurity, makeTrade } from '../testUtils';
 import {
+	clearPriceHistory,
 	countSecurityUsage,
 	findSecurityByIsinOrTicker,
 	indexLatestPrices,
@@ -187,6 +188,36 @@ describe('the price history', () => {
 
 	test('changes nothing where a pass wrote nothing', () => {
 		expect(writePrices(prices, [])).toEqual(prices);
+	});
+});
+
+describe('clearing a price history', () => {
+	const prices: Price[] = [
+		makePrice({ securityId: 'swda', date: '2026-01-31', value: 10, source: 'manual' }),
+		makePrice({ securityId: 'swda', date: '2026-03-31', value: 40, source: 'fetched' }),
+		makePrice({ securityId: 'swda', date: '2026-06-30', value: 30, source: 'fetched' }),
+		makePrice({ securityId: 'vwce', date: '2026-06-30', value: 20, source: 'fetched' })
+	];
+
+	test('takes every record of the one security and leaves the others where they are', () => {
+		const cleared = clearPriceHistory(prices, 'swda', 'all');
+
+		expect(priceHistoryOf(cleared, 'swda')).toEqual([]);
+		expect(priceHistoryOf(cleared, 'vwce')).toHaveLength(1);
+	});
+
+	test('takes only what a pass wrote, where that is what was asked', () => {
+		const cleared = clearPriceHistory(prices, 'swda', 'fetched');
+
+		expect(priceHistoryOf(cleared, 'swda').map((price) => {
+			return price.date;
+		})).toEqual([ '2026-01-31' ]);
+		expect(priceHistoryOf(cleared, 'vwce')).toHaveLength(1);
+	});
+
+	test('leaves a security that has never been priced exactly as it was', () => {
+		expect(clearPriceHistory(prices, 'aggh', 'all')).toEqual(prices);
+		expect(clearPriceHistory(prices, 'aggh', 'fetched')).toEqual(prices);
 	});
 });
 

@@ -360,6 +360,41 @@ describe('the Investments screen', () => {
 		expect(within(screen.getByRole('table', { name: 'Price history' })).queryByText('fetched')).not.toBeInTheDocument();
 	});
 
+	test('clears a whole price history at once, the fetched records alone or every one of them', async() => {
+		// A pass asked under the wrong listing writes thousands of records in one press, so the head of the panel takes them back
+		await openInvestments(withRecords({
+			prices: [
+				makePrice({ securityId: 'swda', date: '2026-01-31', value: 60 * UNITS }),
+				makePrice({ securityId: 'swda', date: '2026-08-07', value: 88 * UNITS, source: 'fetched' }),
+				makePrice({ securityId: 'swda', date: '2026-08-08', value: 90 * UNITS, source: 'fetched' })
+			]
+		}));
+		await userEvent.click(screen.getByRole('tab', { name: 'Securities · 1' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Show the price history of SWDA' }));
+
+		// What a pass wrote goes and what was typed by hand stays
+		await userEvent.click(screen.getByRole('button', { name: 'Delete fetched' }));
+		expect(screen.getByRole('dialog')).toHaveTextContent('Delete all 2 price records of SWDA that a price update wrote?');
+		await userEvent.click(screen.getByRole('button', { name: 'Delete fetched prices' }));
+
+		const remaining = within(screen.getByRole('table', { name: 'Price history' })).getAllByRole('row');
+
+		// The head, the one record left and the line describing the whole history
+		expect(remaining).toHaveLength(3);
+		expect(within(remaining[1]).getByText('31/01/2026')).toBeInTheDocument();
+		expect(within(remaining[2]).getByText('Price history — 1 record · 31/01/2026 – 31/01/2026')).toBeInTheDocument();
+
+		// Nothing fetched is left, so the pair is down to the one control that takes the rest
+		expect(screen.queryByRole('button', { name: 'Delete fetched' })).not.toBeInTheDocument();
+
+		await userEvent.click(screen.getByRole('button', { name: 'Delete all' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Delete all prices' }));
+
+		expect(screen.queryByRole('table', { name: 'Price history' })).not.toBeInTheDocument();
+		expect(screen.getByText('Nothing has been priced yet. Add a price, or record one on the Holdings tab.')).toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: 'Delete all' })).not.toBeInTheDocument();
+	});
+
 	test('pages the price history twenty records at a time, opening on the most recent ones', async() => {
 		// Twenty-five days of January and February 2026, so the history is two pages of the twenty the panel holds
 		await openInvestments(withRecords({

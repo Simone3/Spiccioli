@@ -944,6 +944,24 @@ export const EN_TRANSLATIONS = {
 		deleteTitle: 'Delete this price?',
 		deleteMessage: 'Delete the price of {date}, {value}? There is no undo.',
 		deleteConfirm: 'Delete price',
+		clearAll: 'Delete all',
+		clearAllTitle: 'Delete the whole price history?',
+		clearAllMessage: {
+			one: 'Delete the 1 price record of {ticker}? There is no undo.',
+			other: 'Delete all {count} price records of {ticker}? There is no undo.'
+		},
+		clearAllMessageMixed: {
+			one: 'Delete the 1 price record of {ticker}? There is no undo.',
+			other: 'Delete all {count} price records of {ticker}? The ones you typed by hand go with them, and there is no undo.'
+		},
+		clearAllConfirm: 'Delete all prices',
+		clearFetched: 'Delete fetched',
+		clearFetchedTitle: 'Delete every fetched price?',
+		clearFetchedMessage: {
+			one: 'Delete the 1 price record of {ticker} that a price update wrote? What you typed by hand stays. There is no undo.',
+			other: 'Delete all {count} price records of {ticker} that a price update wrote? What you typed by hand stays. There is no undo.'
+		},
+		clearFetchedConfirm: 'Delete fetched prices',
 		form: {
 			addTitle: 'Add price',
 			editTitle: 'Edit price',

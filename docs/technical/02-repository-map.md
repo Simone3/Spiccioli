@@ -104,7 +104,7 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `logic/investments/Holdings.ts` | The weighted-average-cost walk in its one order, the realised gain a sale leaves, the holdings that survive it, and what each one would leave you with if it were sold today |
 | `logic/investments/AnnualisedReturn.ts` | The money-weighted return: the flows a position produces, the bisection that solves them, and every case that has no figure |
 | `logic/investments/Trades.ts` | Everything pure about the two trade tables: the one ordering and the two directions it is read in, the three filters, the derived total and what the footers sum |
-| `logic/investments/Securities.ts` | The ticker ordering, what points at a security, what makes an ISIN a duplicate, and the price history — which day a record lands on and when one has gone stale |
+| `logic/investments/Securities.ts` | The ticker ordering, what points at a security, what makes an ISIN a duplicate, and the price history — which day a record lands on, what a bulk clearing takes off one security, and when a price has gone stale |
 | `logic/investments/PriceUpdate.ts` | Everything pure about a price pass: what the modal offers to ask for, the listings that go out, what came back read against the file, and the records confirming it would write |
 | `logic/salaries/Contracts.ts` | Everything pure about a contract: the ordering, the years it covers, what falls inside its life, and what a narrowing or a deletion would run into |
 | `logic/salaries/Payslips.ts` | Which contract and which year a payslip belongs to, the order the table shows it in, and `netSalary` — the one derived field on the record |

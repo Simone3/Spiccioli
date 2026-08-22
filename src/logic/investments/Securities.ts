@@ -323,6 +323,26 @@ export const writePrices = (prices: readonly Price[], records: readonly Price[])
 	return [ ...written.values() ];
 };
 
+// Which of a security's records a clearing removes: every one of them, or only what a price pass wrote
+export type PriceClearance = 'all' | 'fetched';
+
+/**
+ * Clears a security's price history in one go, all of it or only the records a price pass wrote.
+ *
+ * **This is the bulk of the delete a row menu does one record at a time**, and it exists because a pass asked under a `ticker` or
+ * an `exchange` that names the wrong listing writes thousands of records in one press: undoing that a row at a time is not undoing
+ * it. Clearing the fetched ones is what puts such a pass right, hand-typed figures being the ones no fetch can write again.
+ * @param prices Every price in the file.
+ * @param securityId The security whose history is being cleared.
+ * @param scope Whether every record goes, or only the fetched ones.
+ * @returns The prices, without the ones that were cleared. Every other security is untouched.
+ */
+export const clearPriceHistory = (prices: readonly Price[], securityId: LedgerId, scope: PriceClearance): Price[] => {
+	return prices.filter((price) => {
+		return price.securityId !== securityId || (scope === 'fetched' && price.source !== 'fetched');
+	});
+};
+
 /**
  * Says whether a price has aged past the threshold the preferences hold.
  *
