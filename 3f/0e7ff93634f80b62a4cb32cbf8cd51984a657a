@@ -1,0 +1,40 @@
+docs/functional/specs/07-investments.md
+  s_d84fd6e2f78102::t_214465c408f8d4 58
+docs/technical/02-repository-map.md
+  s_d84fd6e2f78102::t_6ee985cfd33df4 107
+src/components/investments/InvestmentsScreen.tsx
+  s_d84fd6e2f78102::t_67214c5b013ec4 38,47,262-269,651-653
+src/components/investments/PriceHistoryPanel.tsx
+  s_d84fd6e2f78102::t_39c69430145924 11,26-30,49-52,63,67,73-75,93-98,105-111,188-213,257-287
+src/i18n/lang/en.ts
+  s_d84fd6e2f78102::t_f75c4d78a37f93 947-964
+src/logic/investments/Securities.ts
+  s_d84fd6e2f78102::t_dcaa61e6b44fe9 326-345
+tests/components/InvestmentsScreen.test.tsx
+  s_d84fd6e2f78102::t_6400d15a9f745b 363-397
+tests/logic/Securities.test.ts
+  s_d84fd6e2f78102::t_261d52bd572c72 3,194-223
+src/components/investments/InvestmentsScreen.css
+  s_d84fd6e2f78102::t_76ea479b1b9b1a 42-43,49-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "3f0e7ff93634f80b62a4cb32cbf8cd51984a657a",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d84fd6e2f78102": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dd9fd96f-bf4c-4ec8-b885-683a727808ce",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
