@@ -1,0 +1,26 @@
+docs/functional/specs/12-storage.md
+  s_d4bb538bbdfe2a::t_339007fda86a9f 14
+docs/functional/specs/14-empty-and-error-states.md
+  s_d4bb538bbdfe2a::t_4cf5dea1978016 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "193ef524f5fd39110ae01adccfeaf1ad620fb3e6",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d4bb538bbdfe2a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9a970437-8ce1-4db3-bc7b-c67d298bdea2",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
