@@ -1,0 +1,72 @@
+docs/functional/mockups/10-settings.html
+  s_f312eedf20f75d::t_d8ece64f331850 39,81-90
+docs/functional/specs/10-settings.md
+  s_f312eedf20f75d::t_9e4019cf6eaf8d 27,39
+docs/technical/01-architecture.md
+  s_f312eedf20f75d::t_48c264d3a0d914 45,79,113-115
+docs/technical/02-repository-map.md
+  s_f312eedf20f75d::t_dd5d7bc01f1263 40,42,76,87,127
+docs/technical/04-framework.md
+  s_f312eedf20f75d::t_a705289460afb8 57,61-62
+docs/technical/08-decisions.md
+  s_f312eedf20f75d::t_77e89d0390254f 76,78-80,88,110,115-116,119,131
+src/components/settings/SettingsScreen.css
+  s_f312eedf20f75d::t_d8cbd2b5263aa9 14
+src/components/settings/SettingsScreen.tsx
+  s_f312eedf20f75d::t_f562b7534395d6 13,18,30-32,36,52,85,106-124,148-152,332-350
+src/config/AppConfig.ts
+  s_f312eedf20f75d::t_7da2b4621b2d82 146-150
+src/framework/main/logging/AppLogger.ts
+  s_f312eedf20f75d::t_f244809c66ab5e 10-21,72-74,93-96,109-111,143-145,174-176,253-254,312,322-323,343-348,358-361,391-397
+src/i18n/lang/en.ts
+  s_f312eedf20f75d::t_b580e2913c87e6 1312,1332-1341,1354-1358
+src/logic/preferences/Preferences.ts
+  s_f312eedf20f75d::t_1e888d79ff34e2 4,40-43,97-98
+src/main/Main.ts
+  s_f312eedf20f75d::t_970afdd54aef9e 285-290,295-296,319,321-322,345-346,396-402
+src/main/config/StartupConfigurationLog.ts
+  s_f312eedf20f75d::t_22ae1be252430d 2,46-49
+src/main/ipc/AppInfoIpc.ts
+  s_f312eedf20f75d::t_f730be6e15a839 15-17,23,27-28
+src/main/ipc/LedgerIpc.ts
+  s_f312eedf20f75d::t_8afb2bef782708 45-48,66-67,179
+src/main/prices/YahooPriceProvider.ts
+  s_f312eedf20f75d::t_f3d6db04f37db9 2,30-36,98-100,103-107,119-121,299-400,407,413-414,419-428,430-432,434-436,438-441
+src/types/AppInfoTypes.ts
+  s_f312eedf20f75d::t_ad69183fb18625 9-12
+src/types/PreferencesTypes.ts
+  s_f312eedf20f75d::t_3ab6ff59a6b4b0 2,25-30,60-62
+tests/components/SettingsScreen.test.tsx
+  s_f312eedf20f75d::t_c93cd1c58e00db 3,26-51
+tests/framework/AppLogger.test.ts
+  s_f312eedf20f75d::t_df28cbd944e161 401-481
+tests/logic/Preferences.test.ts
+  s_f312eedf20f75d::t_56d7994b116220 34-41
+tests/main/AppInfoIpc.test.ts
+  s_f312eedf20f75d::t_77932d369ca231 35-36,52-53,60-61,75-76
+tests/main/YahooPriceProvider.test.ts
+  s_f312eedf20f75d::t_732ec6a7ab32db 1-5,17,22-30,65-97,278-390
+tests/testUtils/AppTestFactory.tsx
+  s_f312eedf20f75d::t_d46b291eccd842 15,67-86,174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "921fc3712e6906e013df87e2fe394bac3c0ecc20",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_f312eedf20f75d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f96115a1-f2b7-4af8-8401-9a9aae800a9c",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
