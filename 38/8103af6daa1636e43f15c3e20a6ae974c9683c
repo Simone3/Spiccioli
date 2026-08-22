@@ -1,0 +1,34 @@
+docs/functional/specs/07-investments.md
+  s_d84fd6e2f78102::t_77bd4e0eee1645 57-59
+src/components/common/RowMenu.tsx
+  s_d84fd6e2f78102::t_1350205db8c4a7 7-9
+src/components/investments/InvestmentsScreen.css
+  s_d84fd6e2f78102::t_39e863366eca2f 42,48-49,52
+src/components/investments/PriceHistoryPanel.tsx
+  s_d84fd6e2f78102::t_c6178b79fc8e72 7,26-27,112-137,196,213,215,217,276,290
+src/i18n/lang/en.ts
+  s_d84fd6e2f78102::t_e35d751b4a377d 925-927,929-932,950-951,961
+tests/components/InvestmentsScreen.test.tsx
+  s_d84fd6e2f78102::t_3bd92ac4f4b237 376-377,386,388-391,396-398
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "388103af6daa1636e43f15c3e20a6ae974c9683c",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d84fd6e2f78102": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dd9fd96f-bf4c-4ec8-b885-683a727808ce",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
