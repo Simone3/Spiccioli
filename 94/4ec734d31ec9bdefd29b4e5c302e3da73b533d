@@ -1,0 +1,36 @@
+docs/functional/specs/09-checks.md
+  s_60bb9f09e4c584::t_3eca0aedeac287 16-17,43
+docs/functional/specs/11-calculations.md
+  s_60bb9f09e4c584::t_3d3ca8ed821e15 162-163
+docs/technical/02-repository-map.md
+  s_60bb9f09e4c584::t_4f7803e592bd16 98
+src/i18n/lang/en.ts
+  s_60bb9f09e4c584::t_a5c9f2e09ae52a 1511,1515,1653-1659
+src/logic/checks/Checks.ts
+  s_60bb9f09e4c584::t_690ecb484296f8 5,196-199,213-294,617-622,624,628-631,640,664-666,671,675-678,680-684,686,708,1126-1127
+src/logic/checks/Matching.ts
+  s_60bb9f09e4c584::t_454a617e9758b7 62-67,82,665-670,777
+tests/logic/Checks.test.ts
+  s_60bb9f09e4c584::t_2bc93e3d884753 182-188,221-295
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "944ec734d31ec9bdefd29b4e5c302e3da73b533d",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_60bb9f09e4c584": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "98fc800b-acb1-46e6-8cc4-5bc4b0d6d9e4",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
