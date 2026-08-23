@@ -101,7 +101,7 @@ describe('the Portfolio screen', () => {
 		expect(within(table).getByText('€ 15.340,57')).toBeInTheDocument();
 		expect(within(table).getByText('€ 14.806,51')).toBeInTheDocument();
 
-		expect(screen.getByRole('button', { name: /^The same figure before the estimate is applied/ })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /^Gross value before taxes and sell fees/ })).toBeInTheDocument();
 	});
 
 	test('prints four lines that add to the headline where the cent they round to is not the one they each round to', async() => {
