@@ -51,6 +51,8 @@ const THOUSANDS_GROUP_SIZE = 3;
 
 const DIGITS_ONLY = /^\d+$/u;
 
+const ZEROS_ONLY = /^0*$/u;
+
 // Trim, collapse whitespace, case-fold: the whitespace of a bank description is not what tells two rows apart
 const WHITESPACE_RUN = /\s+/gu;
 
@@ -251,12 +253,27 @@ const removeGrouping = (text: string, thousandsSeparator: ThousandsSeparator): s
 };
 
 /**
+ * Says whether the decimal part of an amount is a figure the file can hold, which is a figure whose cents are all of it.
+ *
+ * **Places past the cent are read only when they are zeros**: an export writing `3.860000` is saying `3,86` in a longer hand, so
+ * the row is read rather than refused. A non-zero place past the cent is a figure this application has no room for and is
+ * refused, exactly as the amount field refuses a third decimal typed into it.
+ * @param decimalText The decimal part, digits only.
+ * @returns Whether it is a figure this paste admits.
+ */
+const readsAsCents = (decimalText: string): boolean => {
+	return ZEROS_ONLY.test(decimalText.slice(MONEY_SCALES.amount));
+};
+
+/**
  * Reads an amount column under the two separators the controls name.
  *
  * **The decimal character may appear at most once**, whichever character it is: a field is never asked to work out which of two
- * identical characters was meant as which. Zero, one and two decimals are all read and a third is refused, exactly as the amount
- * field refuses one. The sign is a leading "-" for money out and a leading "+" or nothing at all for money in, and **it may sit
- * on either side of a leading currency marker** — but only on one of the two, a field signed on both being unreadable.
+ * identical characters was meant as which. Zero, one and two decimals are all read, and further ones are read too **as long as
+ * they are zeros**, some exports writing an amount to six places; a non-zero place past the cent is refused, exactly as the
+ * amount field refuses a third decimal. The sign is a leading "-" for money out and a leading "+" or nothing at all for money
+ * in, and **it may sit on either side of a leading currency marker** — but only on one of the two, a field signed on both being
+ * unreadable.
  * @param text The column, trimmed.
  * @param format What the controls say the characters mean.
  * @returns The amount in cents, or undefined when the column is not one these separators admit.
@@ -283,11 +300,12 @@ const readAmount = (text: string, format: ImportFormat): Cents | undefined => {
 		return undefined;
 	}
 
-	if(decimalText !== undefined && (!DIGITS_ONLY.test(decimalText) || decimalText.length > MONEY_SCALES.amount)) {
+	if(decimalText !== undefined && (!DIGITS_ONLY.test(decimalText) || !readsAsCents(decimalText))) {
 		return undefined;
 	}
 
-	const cents = Number(`${removeGrouping(wholeText, format.thousandsSeparator)}${(decimalText ?? '').padEnd(MONEY_SCALES.amount, '0')}`);
+	const centsText = (decimalText ?? '').slice(0, MONEY_SCALES.amount).padEnd(MONEY_SCALES.amount, '0');
+	const cents = Number(`${removeGrouping(wholeText, format.thousandsSeparator)}${centsText}`);
 
 	if(!Number.isSafeInteger(cents)) {
 		return undefined;

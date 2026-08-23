@@ -122,11 +122,21 @@ describe('reading the date column', () => {
 });
 
 describe('reading the amount column', () => {
-	test('reads zero, one and two decimals and refuses a third', () => {
+	test('reads zero, one and two decimals and refuses a non-zero third', () => {
 		expect(readAmountOf('1234')).toBe(123400);
 		expect(readAmountOf('1234,5')).toBe(123450);
 		expect(readAmountOf('1234,56')).toBe(123456);
 		expect(readAmountOf('1234,567')).toBeUndefined();
+	});
+
+	test('reads places past the cent while they are zeros, which is how some exports write an amount', () => {
+		expect(readAmountOf('3,860000')).toBe(386);
+		expect(readAmountOf('3,800000')).toBe(380);
+		expect(readAmountOf('1.234,560')).toBe(123456);
+		expect(readAmountOf('0,000000')).toBe(0);
+		expect(readAmountOf('-3,860000')).toBe(-386);
+		expect(readAmountOf('3,860001')).toBeUndefined();
+		expect(readAmountOf('3,865000')).toBeUndefined();
 	});
 
 	test('reads a thousands separator only where it groups the integer part in threes', () => {
