@@ -1,0 +1,24 @@
+src/i18n/lang/en.ts
+  s_33469450d57987::t_ec7e15ac4f544e 284,337,423,649,1201,1297
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4490a6404597d5b82f111b09ea0cd53f3740b79b",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_33469450d57987": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fd717b07-48ff-488c-b629-ea155aac657d",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
