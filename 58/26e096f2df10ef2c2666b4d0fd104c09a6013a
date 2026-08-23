@@ -1,0 +1,34 @@
+docs/functional/specs/07-investments.md
+  s_2d56e7d9da4380::t_19f557ebbd881a 15,18-19,25
+docs/functional/specs/11-calculations.md
+  s_2d56e7d9da4380::t_7bf007dd3b8f82 36
+src/components/investments/HoldingDetailPanel.tsx
+  s_2d56e7d9da4380::t_3ece4a4a69448c 15-23,114-118,150
+src/i18n/lang/en.ts
+  s_2d56e7d9da4380::t_ea351eb7d28f72 714,744,762-763
+src/logic/investments/Holdings.ts
+  s_2d56e7d9da4380::t_2c89b9bdb295a3 86-88,347-351,383-385,407
+tests/logic/Holdings.test.ts
+  s_2d56e7d9da4380::t_656c15829814fd 195-234
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "5826e096f2df10ef2c2666b4d0fd104c09a6013a",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_2d56e7d9da4380": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "74d1508f-33ac-4eec-ae2c-b855fd806687",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
