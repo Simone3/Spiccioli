@@ -192,6 +192,46 @@ describe('the realised gain on a sale', () => {
 	});
 });
 
+describe('the purchase fees', () => {
+	test('are in the cost basis, so the gain is smaller than the one measured on the purchase price alone', () => {
+		const document = documentWith(
+			[ purchase({ quantity: 10 * QUANTITY_UNITS, unitPrice: 100 * UNITS, fees: 500 }) ],
+			{ prices: [ makePrice({ securityId: 'swda', date: '2026-08-08', value: 110 * UNITS }) ] }
+		);
+		const [ holding ] = holdingsOf(document);
+
+		expect(cents(holding.marketValue)).toBe(110000);
+		expect(cents(holding.invested)).toBe(100500);
+		expect(cents(holding.purchaseFees)).toBe(500);
+
+		// € 95,00 and not the € 100,00 a broker quotes, the € 5,00 commission being inside what the position cost
+		expect(cents(holding.gain)).toBe(9500);
+		expect(cents(holding.gain) + cents(holding.purchaseFees)).toBe(10000);
+	});
+
+	test('sum every purchase of the position', () => {
+		const [ holding ] = holdingsOf(documentWith([
+			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 50 * UNITS, fees: 500 }),
+			purchase({ id: 'two', date: '2021-06-01', quantity: 10 * QUANTITY_UNITS, unitPrice: 70 * UNITS, fees: 250 })
+		]));
+
+		expect(holding.lotCount).toBe(2);
+		expect(cents(holding.purchaseFees)).toBe(750);
+		expect(cents(holding.invested)).toBe(50000 + 70000 + 750);
+	});
+
+	test('stay the whole of what was paid on a position partly sold, of which only a share is still invested', () => {
+		const [ holding ] = holdingsOf(documentWith([
+			purchase({ id: 'one', date: '2020-01-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 100 * UNITS, fees: 500 }),
+			sale({ id: 'two', date: '2021-06-01', quantity: 5 * QUANTITY_UNITS, unitPrice: 110 * UNITS })
+		]));
+
+		// Half the position is left, so half the commission is still inside `invested` while the figure states all of it
+		expect(cents(holding.invested)).toBe(50250);
+		expect(cents(holding.purchaseFees)).toBe(500);
+	});
+});
+
 describe('the hypothetical liquidation', () => {
 	const priced = (value: number): LedgerDocument => {
 		return documentWith(

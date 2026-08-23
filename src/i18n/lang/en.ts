@@ -711,7 +711,7 @@ export const EN_TRANSLATIONS = {
 		vilnius: 'Vilnius'
 	},
 
-	// The Holdings tab: every figure derived, every column read-only except the price, and gross of tax and fees throughout
+	// The Holdings tab: every figure derived, every column read-only except the price, and before the cost of a sale throughout
 	holdings: {
 		table: 'Holdings',
 		summary: '{positions} · {accounts}',
@@ -741,7 +741,7 @@ export const EN_TRANSLATIONS = {
 
 		// What the columns with nothing to total read, the last row of the table stating every total under its own column
 		total: 'Total',
-		footerDerived: 'Everything in this table is computed from your purchases, your sales and your securities. Value and gain are gross of tax and fees.',
+		footerDerived: 'Everything in this table is computed from your purchases, your sales and your securities. Value and gain are before the capital-gains tax and the sell fee a sale would cost; the fees you paid to buy are already in what the positions cost.',
 		footerReturnOmitted: {
 			one: '1 position is left out of the annualised return whole: it is oversold, or its security has never been priced.',
 			other: '{count} positions are left out of the annualised return whole: they are oversold, or their security has never been priced.'
@@ -759,6 +759,8 @@ export const EN_TRANSLATIONS = {
 			sold: 'Sold',
 			avgCost: 'Weighted average cost',
 			invested: 'Invested, incl. fees',
+			purchaseFees: 'Of which purchase fees',
+			purchaseFeesPartlySold: 'Purchase fees paid',
 
 			// A price belongs to the security and not to this holding, which is why it is stated here and kept on Securities
 			latestPrice: 'Latest price',

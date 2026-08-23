@@ -12,9 +12,15 @@ import type { Account, Institution, LedgerId, Security, TenThousandths } from 's
  * What one holding is made of, and what selling it today would produce.
  *
  * The panel is in two halves and the order is the point. **The upper half is what has happened** — what is held, the lots it
- * came from, what was sold, the weighted average, what was invested including fees, the price the position is valued at with
- * the day it is as of, and the annualised return, which belongs here rather than below because it is a statement about the
- * position's history and not about liquidating it. **The lower half is an estimate**, and the caveat sits with it: average cost
+ * came from, what was sold, the weighted average, what was invested including fees, the purchase fees inside that figure, the
+ * price the position is valued at with the day it is as of, and the annualised return, which belongs here rather than below
+ * because it is a statement about the position's history and not about liquidating it.
+ *
+ * **The purchase-fee line is labelled by what it means on the position in front of the reader.** The fees are amortised into the
+ * average cost across the quantity purchased, so a sale carries off its share of them: on a position nothing has been sold out of
+ * the whole figure is still inside *Invested*, and it reads *of which*; on one partly sold only part of it is, and it reads as
+ * what was paid instead. It is stated at all because the gain above is measured on a cost that includes it, which is where a
+ * broker's own figure for the same position differs. **The lower half is an estimate**, and the caveat sits with it: average cost
  * is an approximation and a broker may match lots differently, the tax is worked out for this position alone so a loss on
  * another holding does not reduce it, and the sell fee is charged once per holding. The last two both push the figure down,
  * which is the part worth knowing about an estimate.
@@ -105,6 +111,11 @@ export const HoldingDetailPanel = ({
 		undefined :
 		institutions.get(account.institutionId);
 
+	// The fees are amortised into the average, so only a position nothing has been sold out of still holds all of them
+	const purchaseFeesLabel = holding.soldQuantity === 0 ?
+		t('holdings.detail.purchaseFees') :
+		t('holdings.detail.purchaseFeesPartlySold');
+
 	const netGainFigure = holding.netGainPct === undefined ?
 		amount(holding.netGain, true) :
 		t('holdings.gainWithPercentage', { gain: amount(holding.netGain, true), percentage: formatter.percentage(holding.netGainPct) });
@@ -136,6 +147,7 @@ export const HoldingDetailPanel = ({
 					{formatter.unitPrice(narrowFromWorkingScale(holding.avgCost, MONEY_SCALES.rate))}
 				</DetailFigure>
 				<DetailFigure label={t('holdings.detail.invested')}>{amount(holding.invested)}</DetailFigure>
+				<DetailFigure label={purchaseFeesLabel}>{amount(holding.purchaseFees)}</DetailFigure>
 				<DetailFigure label={t('holdings.detail.latestPrice')}>
 					{holding.price === undefined ?
 						<span className='investments-screen-nothing'>{t('holdings.noPrice')}</span> :

@@ -83,6 +83,9 @@ export interface Holding {
 	avgCost: WorkingAmount;
 	invested: WorkingAmount;
 
+	// What every purchase of this position was commissioned, which is the part of `invested` that never went to work
+	purchaseFees: WorkingAmount;
+
 	// Undefined where the security has no Price record at all, which is what carries the holding at its cost instead
 	price: TenThousandths | undefined;
 	priceDate: IsoDate | undefined;
@@ -341,6 +344,11 @@ export const valueHolding = ({ quantity, invested, price, sellFee, taxRate }: Ho
  * negative — a loss produces no rebate. **A holding whose security has no price at all is carried at what it cost**, its gain and
  * its tax are nothing and no fee is charged, since nothing is being sold; its `price` stays undefined, which is what the row reads
  * *none* from and what keeps it out of the annualised return.
+ *
+ * **`purchaseFees` is what every purchase of the position was commissioned, and it is a fact about its history rather than a
+ * component of `invested`**: the fees are amortised into `avgCost` across the quantity purchased, so a sale carries off its share
+ * of them and only the held portion's share is still inside `invested`. The two figures agree exactly on a position nothing has
+ * been sold out of, which is what the panel states them together for ([§7.1], [§11.1]).
  * @param options What the holdings are derived from.
  * @param options.document The ledger.
  * @param options.walk The positions as the walk left them.
@@ -372,6 +380,9 @@ export const deriveHoldings = ({ document, walk, translator }: HoldingsOptions):
 		const institution = account.institutionId === null ? undefined : institutions.get(account.institutionId);
 		const latest = latestPrices.get(position.securityId);
 		const invested = multiplyWorkingScaleByQuantityScale(position.avgCost, position.quantity);
+		const purchaseFees = position.trades.reduce((running, trade) => {
+			return trade.kind === 'purchase' ? running + widenToWorkingScale(trade.fees, MONEY_SCALES.amount) : running;
+		}, 0);
 		const valuation = valueHolding({
 			quantity: position.quantity,
 			invested,
@@ -393,6 +404,7 @@ export const deriveHoldings = ({ document, walk, translator }: HoldingsOptions):
 			lotCount: position.lotCount,
 			avgCost: position.avgCost,
 			invested,
+			purchaseFees,
 			price: latest?.value,
 			priceDate: latest?.date,
 			marketValue: valuation.marketValue,

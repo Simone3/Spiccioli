@@ -33,6 +33,7 @@ Nothing else rounds until it is displayed.
 - **Sale:** `quantity −= q`, `costBasis −= q × avgCost`. **`avgCost` is unchanged by a sale.**
 - Fees increase the cost basis on purchase and reduce proceeds on sale. **Taxes withheld on a sale never touch the cost basis** — they leave the proceeds, not the position.
 - **A sale that takes quantity to exactly 0 sets `costBasis` to 0 and clears `avgCost`.**
+- `purchaseFees = Σ fees of the position's purchases` — **a fact about the position's history and not a component of `invested`.** The fees enter `avgCost` amortised across the quantity purchased, so a sale carries off its share of them with the rest of the basis and only the held portion's share is still inside `invested`; the two agree exactly on a position nothing has been sold out of. It is displayed in the detail panel of [§7.1](07-investments.md#71-holdings) and nowhere else, and **it is stated because the gain above it is measured on a cost that includes it** — which is where a broker's own figure for the same position differs. **It is a sum and not a division**: the share of the fees still inside `invested` would need a second average, and `avgCost` stays the one division this walk turns on.
 - **A sale that takes quantity below 0 ends the walk.** No holding is derived for that (security, account) and no average cost, invested total, gain or valuation is computed from it, **whatever the walk ends at** ([§2](02-domain-model.md)) — checks 8 and 9 name the trade instead ([§9](09-checks.md)).
 
 ## 11.2 Realised gain on a sale
