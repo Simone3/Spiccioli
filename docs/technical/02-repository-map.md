@@ -25,7 +25,7 @@ Every non-generated file in the repository and what it is for. Generated folders
 
 | File | Purpose |
 | --- | --- |
-| `Main.ts` | The entry point: crash handlers, language, load target, logger, configuration, the ledger session, IPC handlers, the menu, the window, and the bounded shutdown |
+| `Main.ts` | The entry point: **the single-instance lock**, crash handlers, language, load target, logger, configuration, the ledger session, IPC handlers, the menu, the window, **the three ways a ledger arrives from outside**, and the bounded shutdown |
 | `config/SpiccioliRuntimePaths.ts` | Where the preferences, the recent-file list and the log live ([§1.6](01-architecture.md#16-where-the-installations-own-files-live)) |
 | `config/SpiccioliConfigStore.ts` | The preferences and the recent-file list, through the framework's configuration store |
 | `config/StartupConfigurationLog.ts` | The one entry that describes the run the rest of the log belongs to |
@@ -41,6 +41,8 @@ Every non-generated file in the repository and what it is for. Generated folders
 | `prices/PriceQuoteReview.ts` | The four refusals of [§7.6](../functional/specs/07-investments.md#76-prices), applied before the user ever sees a figure — the currency to a whole response, the date and the value to each day of it |
 | `prices/PricePass.ts` | One pass, end to end: one paced request per listing over the window it carries, each failing on its own, the answers it reports as it goes, the flag that abandons it, and the three log entries D14 fixes — the outcome of a listing, not the wire under it |
 | `preload/Preload.ts` | The context bridge: what the renderer is allowed to call |
+| `startup/FileOpenRequests.ts` | The ledger a launch asked for, held until the renderer takes it — and the rule that asking for the file already open only brings the window forward |
+| `startup/LedgerFileArguments.ts` | The ledger a command line names, if it names one, on the launch that starts Spiccioli and on the one the lock refuses |
 | `storage/LedgerSession.ts` | The one open ledger: which file, where its copies live, what its bytes hashed to, whether anything was written — and every storage entry in the log. **Every path that touches the file's bytes is serialized here**, so that two writes can never overlap |
 | `storage/LedgerBackupNaming.ts` | Where a ledger's copies live, what one is called, and how to recognise one |
 | `window/WindowLoadTarget.ts` | Whether the window loads the built file or the development server, and the refusal of the latter in a packaged run |

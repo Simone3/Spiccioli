@@ -18,6 +18,8 @@ import { registerLedgerIpcHandlers } from 'src/main/ipc/LedgerIpc';
 import { registerPricesIpcHandlers } from 'src/main/ipc/PricesIpc';
 import { buildAppMenuTemplate, buildDrawnMenuBar, drawsOwnMenuBar } from 'src/main/menu/AppMenu';
 import { createYahooPriceProvider } from 'src/main/prices/YahooPriceProvider';
+import { createFileOpenRequests, type FileOpenRequest, type FileOpenRequests } from 'src/main/startup/FileOpenRequests';
+import { findLedgerFileArgument } from 'src/main/startup/LedgerFileArguments';
 import { createLedgerSession, type LedgerSession } from 'src/main/storage/LedgerSession';
 import { isDevelopmentRun, resolveWindowLoadTarget, type WindowLoadTarget } from 'src/main/window/WindowLoadTarget';
 import { SPICCIOLI_APP_MENU_IPC_EVENTS } from 'src/types/AppMenuIpcChannels';
@@ -52,6 +54,17 @@ let shutdownPoll: ReturnType<typeof setInterval> | undefined;
 // Set while the renderer is asking the user what to do about changes that never reached the file. The close is still on and the
 // poll is still running; what stops is the clock that would otherwise give up on a renderer that is only waiting on a person.
 let isShutdownPaused = false;
+
+// Set once startup knows what a window loads, so that a ledger handed over with every window closed — which on macOS is an
+// ordinary state to be in — has one to be opened in
+let openMainWindow: (() => void) | undefined;
+
+// Where a ledger a launch asked for waits for the renderer to come and take it
+let fileOpenRequests: FileOpenRequests | undefined;
+
+// **macOS sends its "open-file" event as early as it likes**, and on a cold start that is well before there is a logger to write
+// it down or a window to open it in. What arrives before the application is ready is held here and handed on the moment it is.
+const requestsBeforeStartup: FileOpenRequest[] = [];
 
 /**
  * Tells the user about a failure that reached the top of the main process.
@@ -94,6 +107,39 @@ const setWindowTitleForFile = (translator: SpiccioliTranslator, filePath: string
 
 const sendToRenderer = (channel: string, payload: unknown): void => {
 	mainWindow?.webContents.send(channel, payload);
+};
+
+/**
+ * Puts the window this application already has in front of the user.
+ *
+ * **A second launch never becomes a second window.** Spiccioli holds one file in one window, so whatever a launch turns out to be
+ * asking for, it is asking it of this one — and asking for the file that is already open is answered by this and nothing else.
+ */
+const bringWindowForward = (): void => {
+	if(!mainWindow || mainWindow.isDestroyed()) {
+		// macOS keeps the application running with every window closed, and a ledger arriving then has nowhere to go until there is one
+		openMainWindow?.();
+
+		return;
+	}
+
+	if(mainWindow.isMinimized()) {
+		mainWindow.restore();
+	}
+
+	// Deliberately not "show": a window still on its way to "ready-to-show" is put on screen maximized by that handler, and
+	// showing it here would flash it at its unmaximized size first
+	mainWindow.focus();
+};
+
+// A ledger the operating system handed over, on its way to the holder — or into the queue, when there is not yet a holder
+const requestFileOpen = (request: FileOpenRequest): void => {
+	if(fileOpenRequests) {
+		fileOpenRequests.request(request);
+	}
+	else {
+		requestsBeforeStartup.push(request);
+	}
 };
 
 // The only place a version number appears, opened by the About item of whichever menu the platform draws
@@ -346,6 +392,29 @@ const startApplication = (): void => {
 		}
 	});
 
+	// **The two ways an operating system hands a ledger over, and both are listened for before the application is ready**: macOS
+	// sends its event during startup, and a second launch on Windows or Linux can arrive at any moment at all.
+	app.on('open-file', (event, filePath) => {
+		// Left unhandled, macOS opens the file in whatever it decides should have it instead
+		event.preventDefault();
+		requestFileOpen({ filePath, source: 'open-file-event' });
+	});
+
+	// The other side of the single-instance lock: the launch that was refused hands its command line over here rather than
+	// opening a second Spiccioli on the same ledger
+	app.on('second-instance', (_event, argv, workingDirectory) => {
+		const filePath = findLedgerFileArgument({ argv, isPackaged: app.isPackaged, workingDirectory });
+
+		if(filePath === undefined) {
+			// A second launch asking for nothing in particular is somebody looking for the window they already have
+			bringWindowForward();
+
+			return;
+		}
+
+		requestFileOpen({ filePath, source: 'second-launch' });
+	});
+
 	const startup = app.whenReady().then(() => {
 		// Resolved first, so that every failure from here on has wording to report itself with. The main process words the native
 		// dialogs and the failures it reports back to the renderer, so it resolves the language from the operating system the same
@@ -425,6 +494,19 @@ const startApplication = (): void => {
 			}
 		});
 
+		// **Nothing here opens the file**: a ledger handed over ends the session that is open, and the renderer is the only side
+		// that can finish writing that one first. So the path waits here until the window comes for it.
+		fileOpenRequests = createFileOpenRequests({
+			platform: process.platform,
+			getOpenFilePath: () => {
+				return session.getOpenFilePath();
+			},
+			bringWindowForward,
+			onFileWaiting: () => {
+				sendToRenderer(SPICCIOLI_LEDGER_IPC_EVENTS.fileWaitingToOpen, undefined);
+			}
+		});
+
 		registerAppInfoIpcHandlers({
 			ipcMain,
 			app,
@@ -481,6 +563,9 @@ const startApplication = (): void => {
 			},
 			onCloseCancelled: cancelShutdown,
 			onClosePaused: pauseShutdown,
+			takeFileWaitingToOpen: () => {
+				return fileOpenRequests?.take();
+			},
 
 			// A preference applies the moment it is changed, and the log level is no exception: the next entry is written under the
 			// level that was just chosen rather than under the one this run started at
@@ -489,8 +574,31 @@ const startApplication = (): void => {
 			}
 		});
 
+		openMainWindow = () => {
+			createWindow(loadTarget, translator, session);
+		};
+
 		installApplicationMenu(translator, configStore, isDevelopment);
 		createWindow(loadTarget, translator, session);
+
+		// **The launch's own command line is the third way in**, and the one a first launch uses on Windows and Linux, where a
+		// ledger is an argument rather than an event. It is read once the window exists, so that the renderer about to mount is
+		// the one that comes for it.
+		const launchFilePath = findLedgerFileArgument({
+			argv: process.argv,
+			isPackaged: app.isPackaged,
+			workingDirectory: process.cwd()
+		});
+
+		if(launchFilePath !== undefined) {
+			requestFileOpen({ filePath: launchFilePath, source: 'launch' });
+		}
+
+		// Whatever macOS handed over while there was still nowhere to put it. Drained after the command line so that the later
+		// request is the one that stands, which is the rule everywhere else here.
+		for(const request of requestsBeforeStartup.splice(0)) {
+			requestFileOpen(request);
+		}
 
 		// A quit is a close of the session, and the renderer is asked to finish first so that the closing copy is taken with
 		// everything already written. Closing the window is the same event by another door and is handled on the window itself,
@@ -536,6 +644,13 @@ const startApplication = (): void => {
 // instead of opening a window nobody asked for in the middle of an install, an update or an uninstall. It is false on every other
 // platform and on every normal launch.
 if(squirrelStartup) {
+	app.quit();
+}
+else if(!app.requestSingleInstanceLock()) {
+	// **One Spiccioli runs at a time.** The ledger is held in memory and written whole, so two processes on one file would be two
+	// owners of it — each overwriting the other's work, and each finding the other's write an external modification of its own.
+	// Asking for the lock is also what hands this launch's command line to the process already holding it, so a ledger
+	// double-clicked while Spiccioli is running has reached that window by the time this process quits.
 	app.quit();
 }
 else {

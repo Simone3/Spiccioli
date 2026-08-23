@@ -166,10 +166,14 @@ export const stubLedgerBridge = (overrides: Partial<SpiccioliLedgerApi> = {}): S
 		setPreferences: () => {
 			return Promise.resolve();
 		},
+		takeFileWaitingToOpen: () => {
+			return Promise.resolve(undefined);
+		},
 		onWriteAttemptFailed: unsubscribe,
 		onExternalModification: unsubscribe,
 		onMenuCommand: unsubscribe,
 		onPrepareForClose: unsubscribe,
+		onFileWaitingToOpen: unsubscribe,
 		...overrides
 	};
 

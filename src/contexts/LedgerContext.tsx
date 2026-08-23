@@ -489,6 +489,38 @@ export const LedgerProvider = ({ children }: { children: ReactNode }): ReactElem
 		};
 	}, []);
 
+	/**
+	 * Opens the ledger a launch handed over, if one is waiting.
+	 *
+	 * **The main process holds it and this side takes it**, which is what makes the two ways in one way: the launch that started
+	 * Spiccioli left a file behind before this window existed and it is found on mount, and a launch arriving afterwards says so
+	 * and is answered here. The take clears what it returns, so the two of them can never open one file twice.
+	 *
+	 * From there it is *Open Recent* by another name: the session that is open closes and takes its copy, a close with changes
+	 * the file never took still asks, and a file that is refused leaves the one already open exactly where it was.
+	 */
+	const openFileWaitingToOpen = useCallback(async(): Promise<void> => {
+		const waiting = await window.spiccioliLedger.takeFileWaitingToOpen();
+
+		if(waiting === undefined) {
+			return;
+		}
+
+		requestDeparture(() => {
+			void openPath(waiting);
+		});
+	}, [ openPath, requestDeparture ]);
+
+	useEffect(() => {
+		// The launch that started this window, whose file was left waiting long before there was anything here to take it
+		void openFileWaitingToOpen();
+
+		// And every launch after it, which finds the window already up and has to send it for one
+		return window.spiccioliLedger.onFileWaitingToOpen(() => {
+			void openFileWaitingToOpen();
+		});
+	}, [ openFileWaitingToOpen ]);
+
 	useEffect(() => {
 		// All three menu actions end the current session, so all three are a departure and go through the guard first
 		const unsubscribeMenu = window.spiccioliLedger.onMenuCommand((command) => {

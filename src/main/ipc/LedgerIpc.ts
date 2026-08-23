@@ -48,6 +48,10 @@ export interface RegisterLedgerIpcHandlersOptions {
 	// reached the file. The close is still on; only the wait is held off.
 	onClosePaused: () => void;
 
+	// The ledger a launch handed over, if one is still waiting. Taking it is what clears it, so the renderer asking on mount and
+	// the renderer answering the event cannot both be given the same file.
+	takeFileWaitingToOpen: () => string | undefined;
+
 	// Whether a file is already at a path. Injected so that the overwrite check is testable without a filesystem.
 	fileExists?: (filePath: string) => boolean;
 
@@ -74,12 +78,19 @@ export const registerLedgerIpcHandlers = ({
 	onCloseCancelled,
 	onClosePaused,
 	onPreferencesChanged,
+	takeFileWaitingToOpen,
 	fileExists = existsSync
 }: RegisterLedgerIpcHandlersOptions): void => {
 	const fileFilters = [ {
 		name: translator.t('storage.fileTypeName'),
 		extensions: [ LEDGER_EXTENSION_WITHOUT_DOT ]
 	} ];
+
+	// The other way a file is chosen, and the one nobody in the window asked for: a launch handed it over and the renderer is
+	// coming to collect it. It answers once, because taking it is what clears it.
+	ipcMain.handle(SPICCIOLI_LEDGER_IPC_CHANNELS.takeFileWaitingToOpen, (): string | undefined => {
+		return takeFileWaitingToOpen();
+	});
 
 	ipcMain.handle(SPICCIOLI_LEDGER_IPC_CHANNELS.chooseFileToOpen, async(): Promise<ChooseLedgerFileResult> => {
 		const window = getWindow();

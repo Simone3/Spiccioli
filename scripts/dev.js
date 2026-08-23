@@ -21,8 +21,9 @@ let esbuildContext;
 // Undefined while no Electron process is running, which is also how the exit handler tells a relaunch from the user closing the application
 let electronProcess;
 
-// Rebuilds can arrive while a relaunch is still stopping the previous process, and two of them must never spawn Electron at the same time:
-// nothing stops a second Spiccioli from running, so what would come up is two windows on one development loop
+// Rebuilds can arrive while a relaunch is still stopping the previous process, and two of them must never spawn Electron at the same time.
+// A second Spiccioli quits on the single-instance lock rather than opening a window of its own, so what that would cost is not two windows
+// but a relaunch that silently did nothing.
 let relaunchChain = Promise.resolve();
 
 let isShuttingDown = false;

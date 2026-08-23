@@ -149,6 +149,15 @@ export interface SpiccioliLedgerApi {
 	// Where the open ledger's copies live. Derived from the ledger and never chosen, so the main process is what answers it.
 	getBackupDirectory: () => Promise<string | undefined>;
 
+	/**
+	 * The ledger a launch handed over, taken from the main process rather than pushed by it.
+	 *
+	 * A launch that started Spiccioli left one here before this window existed, and one that arrived while it was running says
+	 * so on "onFileWaitingToOpen" — so both are taken through this one call, and it clears what it returns. Nothing that races
+	 * with it can therefore open the same file twice.
+	 */
+	takeFileWaitingToOpen: () => Promise<string | undefined>;
+
 	getRecentFiles: () => Promise<RecentLedgerFile[]>;
 	dismissRecentFile: (filePath: string) => Promise<RecentLedgerFile[]>;
 	getPreferences: () => Promise<Preferences>;
@@ -157,6 +166,9 @@ export interface SpiccioliLedgerApi {
 	onExternalModification: (listener: (event: LedgerExternalModificationEvent) => void) => () => void;
 	onMenuCommand: (listener: (command: LedgerMenuCommand) => void) => () => void;
 	onPrepareForClose: (listener: (door: LedgerCloseDoor) => void) => () => void;
+
+	// Said when a launch has left a ledger waiting and the window is already up. It carries no path: the path is taken.
+	onFileWaitingToOpen: (listener: () => void) => () => void;
 }
 
 export interface RenderErrorReport {

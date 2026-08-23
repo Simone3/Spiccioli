@@ -83,6 +83,9 @@ const spiccioliLedger: SpiccioliLedgerApi = {
 	setPreferences: (preferences) => {
 		return ipcRenderer.invoke(SPICCIOLI_LEDGER_IPC_CHANNELS.setPreferences, preferences);
 	},
+	takeFileWaitingToOpen: () => {
+		return ipcRenderer.invoke(SPICCIOLI_LEDGER_IPC_CHANNELS.takeFileWaitingToOpen);
+	},
 	onWriteAttemptFailed: (listener) => {
 		return subscribeToChannel(ipcRenderer, SPICCIOLI_LEDGER_IPC_EVENTS.writeAttemptFailed, listener);
 	},
@@ -94,6 +97,9 @@ const spiccioliLedger: SpiccioliLedgerApi = {
 	},
 	onPrepareForClose: (listener) => {
 		return subscribeToChannel(ipcRenderer, SPICCIOLI_LEDGER_IPC_EVENTS.prepareForClose, listener);
+	},
+	onFileWaitingToOpen: (listener) => {
+		return subscribeToChannel(ipcRenderer, SPICCIOLI_LEDGER_IPC_EVENTS.fileWaitingToOpen, listener);
 	}
 };
 

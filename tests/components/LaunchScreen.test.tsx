@@ -66,6 +66,44 @@ describe('the launch screen', () => {
 		expect(screen.queryByText('Choose a file to open')).not.toBeInTheDocument();
 	});
 
+	// A ledger handed over by the operating system reaches the window through the main process holding it and this side taking it,
+	// and from there it is an open like any other
+	test('opens the file a launch handed over rather than waiting to be asked', async() => {
+		const document = makeSeededDocument();
+		const takes = { count: 0 };
+
+		stubLedgerBridge({
+			takeFileWaitingToOpen: () => {
+				takes.count += 1;
+
+				// Taking is what clears it, so only the first ask is answered with a file
+				return Promise.resolve(takes.count === 1 ? '/Documents/finances.spiccioli' : undefined);
+			},
+			readFile: () => {
+				return Promise.resolve({
+					outcome: 'read',
+					filePath: '/Documents/finances.spiccioli',
+					contents: writeLedgerDocument(document),
+					sizeBytes: 100
+				});
+			}
+		});
+
+		renderApp();
+
+		await waitFor(() => {
+			expect(screen.getByRole('heading', { name: 'Portfolio', level: 1 })).toBeInTheDocument();
+		});
+		expect(screen.queryByText('Choose a file to open')).not.toBeInTheDocument();
+	});
+
+	test('stays where it is when a launch handed nothing over', async() => {
+		stubLedgerBridge();
+		renderApp();
+
+		expect(await screen.findByText('Choose a file to open')).toBeInTheDocument();
+	});
+
 	test('states what was not understood about a file, with the other files still openable', async() => {
 		stubLedgerBridge({
 			getRecentFiles: () => {

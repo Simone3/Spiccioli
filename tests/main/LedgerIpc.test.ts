@@ -67,6 +67,9 @@ const makeHarness = (): IpcHarness => {
 		onPreferencesChanged: () => {
 			return undefined;
 		},
+		takeFileWaitingToOpen: () => {
+			return undefined;
+		},
 		fileExists: (filePath) => {
 			return existingFiles.has(filePath);
 		}

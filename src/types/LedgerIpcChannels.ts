@@ -19,14 +19,16 @@ export const SPICCIOLI_LEDGER_IPC_CHANNELS = {
 	getRecentFiles: 'spiccioli:ledger:get-recent-files',
 	dismissRecentFile: 'spiccioli:ledger:dismiss-recent-file',
 	getPreferences: 'spiccioli:ledger:get-preferences',
-	setPreferences: 'spiccioli:ledger:set-preferences'
+	setPreferences: 'spiccioli:ledger:set-preferences',
+	takeFileWaitingToOpen: 'spiccioli:ledger:take-file-waiting-to-open'
 } as const;
 
 export const SPICCIOLI_LEDGER_IPC_EVENTS = {
 	writeAttemptFailed: 'spiccioli:ledger:write-attempt-failed',
 	externalModification: 'spiccioli:ledger:external-modification',
 	menuCommand: 'spiccioli:ledger:menu-command',
-	prepareForClose: 'spiccioli:ledger:prepare-for-close'
+	prepareForClose: 'spiccioli:ledger:prepare-for-close',
+	fileWaitingToOpen: 'spiccioli:ledger:file-waiting-to-open'
 } as const;
 
 export const SPICCIOLI_DIAGNOSTICS_IPC_CHANNELS = {
