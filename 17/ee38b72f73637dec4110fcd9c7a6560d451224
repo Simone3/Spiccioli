@@ -1,0 +1,42 @@
+docs/functional/specs/03-portfolio.md
+  s_ba5fecbadbe908::t_cbde9d0e0f2af3 46-53
+docs/functional/specs/11-calculations.md
+  s_ba5fecbadbe908::t_8f02235dda3413 126-137
+docs/functional/why/03-portfolio.md
+  s_ba5fecbadbe908::t_2fa1dddfec2461 27,29-32
+docs/technical/02-repository-map.md
+  s_ba5fecbadbe908::t_856bf2589461d5 86
+src/components/portfolio/AccountBalancesTable.tsx
+  s_ba5fecbadbe908::t_ac99c0bd536814 10,20,23-25,27-34,47-49,53,55-57,66-67,69,72-80,84-94,122-141,144-145,149,167-168
+src/components/portfolio/PortfolioScreen.tsx
+  s_ba5fecbadbe908::t_d0939bf231e751 105,107-108
+src/i18n/lang/en.ts
+  s_ba5fecbadbe908::t_cdeeef2b81b2d0 156-157,209-210,212
+src/logic/portfolio/NetWorth.ts
+  s_ba5fecbadbe908::t_af61ccc010f986 21-24,73-79,122-134,203-207,211,229,234,240,250,254,256,265,267,269,277,279,284,287,299-300
+tests/components/PortfolioScreen.test.tsx
+  s_ba5fecbadbe908::t_b401ea3084f9d9 82-106,125-127,141-142,172,178-179
+tests/logic/NetWorth.test.ts
+  s_ba5fecbadbe908::t_98e28c21f05d34 6,159-218
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "17ee38b72f73637dec4110fcd9c7a6560d451224",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_ba5fecbadbe908": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c9f27d62-30ee-4d6f-82ad-a83cb40875ef",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
