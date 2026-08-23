@@ -1,0 +1,26 @@
+docs/functional/specs/15-out-of-scope.md
+  s_39923442ac1403::t_4c87554e304cbd 32
+docs/functional/why/15-out-of-scope.md
+  s_39923442ac1403::t_c18bb58fdab1b3 40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "3bcca60ad1dd1b276ee00bffdaf1533d20cedacb",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_39923442ac1403": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d31e8818-9476-47dc-bdce-dc88834784fb",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
