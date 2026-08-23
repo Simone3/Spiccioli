@@ -153,7 +153,7 @@ export const EN_TRANSLATIONS = {
 			securitiesAtCost: 'Every holding still open, valued at what was paid for it with the purchase fees included.',
 			unrealisedNetGain: 'An estimate. What selling every holding today would add to the portfolio or take out of it, after the capital-gains tax and the sell fee. The tax is worked out one holding at a time, so a loss on one does not reduce the tax on another, and the fee is charged once per holding — both push this figure down. The gross picture is on Investments.',
 			pensionNet: 'An estimate. Every pension fund at its balance less the exit tax, which falls on what was paid in rather than on what the fund earned, at a rate typed by hand. Netting a fund for tax does not make it liquid: this is still money that cannot be had before retirement.',
-			grossBalance: 'Gross value before taxes and sell fees. A pension fund at its balance before the exit tax, and a brokerage account at what its holdings are worth at their latest known price. No value for standard accounts, which only have the net balance.',
+			grossBalance: 'Gross value before taxes and sell fees. A pension fund at its balance before the exit tax, and a brokerage account at what its holdings are worth at their latest known price. No value for standard accounts, which only have the net balance. They are in the gross total all the same, so the two totals differ by exactly the tax and the fees.',
 			netBalance: 'Opening balance plus every transaction on standard accounts. A pension fund is shown after its exit tax. A brokerage account reads as the net value of its holdings, after the capital-gains tax and the sell fee.'
 		},
 
