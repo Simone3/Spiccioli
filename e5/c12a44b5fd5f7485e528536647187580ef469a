@@ -1,0 +1,30 @@
+docs/functional/specs/05-transactions.md
+  s_0f30f826b47f79::t_da0479e46da981 107
+docs/functional/specs/13-validation.md
+  s_0f30f826b47f79::t_e9d02d28a7f0d7 26
+src/logic/transactions/TransactionImport.ts
+  s_0f30f826b47f79::t_13978f83db7dbb 54-55,255-267,272-276,303,307-308
+tests/logic/TransactionImport.test.ts
+  s_0f30f826b47f79::t_9e442e7820f207 125,132-141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e5c12a44b5fd5f7485e528536647187580ef469a",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0f30f826b47f79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f2ca6a1c-0e33-4adf-abf3-257ac82783f1",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
