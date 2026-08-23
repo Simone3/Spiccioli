@@ -1,0 +1,14 @@
+src/i18n/lang/en.ts
+  h_08e8a5184a38af 156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "189a7070a7e801788a1030e46281fed3eabd2afb",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
