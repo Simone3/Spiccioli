@@ -70,10 +70,15 @@ interface DateTextInputProps {
 	placeholder?: string;
 	onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
 	ref?: Ref<HTMLInputElement>;
+
+	// The library's own class, which is what tells its click-outside listener that a click in here is not outside
+	className?: string;
 }
 
-// The typing is ours: a character that is neither a digit nor the separator of the format in force never lands in the box
-const DateTextInput = ({ label, separator, refusalId, invalid, value, onChange, ref, ...rest }: DateTextInputProps): ReactElement => {
+// The typing is ours: a character that is neither a digit nor the separator of the format in force never lands in the box, and
+// the class the library hands down is kept alongside our own: it is the one its click-outside listener ignores, so an input that
+// drops it counts as outside itself and a second click closes the calendar and blurs the box the click had just put the caret in
+const DateTextInput = ({ label, separator, refusalId, invalid, value, className, onChange, ref, ...rest }: DateTextInputProps): ReactElement => {
 	return (
 		<input
 			{...rest}
@@ -81,7 +86,7 @@ const DateTextInput = ({ label, separator, refusalId, invalid, value, onChange, 
 			type='text'
 			inputMode='numeric'
 			autoComplete='off'
-			className='date-field-input'
+			className={`date-field-input${className ? ` ${className}` : ''}`}
 			value={value ?? ''}
 			aria-label={label}
 			aria-invalid={invalid ? true : undefined}

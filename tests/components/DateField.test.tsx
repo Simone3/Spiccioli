@@ -104,6 +104,19 @@ describe('the date field', () => {
 		expect(screen.getByText('2020-08-08')).toBeInTheDocument();
 	});
 
+	// A field already in hand is clicked again all the time, and the click must not take the caret out of the box it just landed in
+	test('is still typed in after a second click on the field the calendar is already open under', async() => {
+		await renderDateField();
+
+		const field = screen.getByRole('textbox', { name: 'Date' });
+
+		await userEvent.click(field);
+		await userEvent.click(field);
+		await userEvent.type(field, '08/08/2020');
+
+		expect(screen.getByText('2020-08-08')).toBeInTheDocument();
+	});
+
 	test('refuses a day after today, which never reaches the caller', async() => {
 		const nextYear = new Date().getFullYear() + 1;
 		await renderDateField();
