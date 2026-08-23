@@ -3,7 +3,7 @@ import { createSpiccioliTranslator } from 'src/i18n/Translations';
 import { deriveHoldings, walkPositions } from 'src/logic/investments/Holdings';
 import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
 import { deriveGainsAndCosts } from 'src/logic/portfolio/GainsAndCosts';
-import { derivePensionFund, derivePortfolioBalances } from 'src/logic/portfolio/NetWorth';
+import { derivePensionFund, derivePortfolioBalances, hasGrossBalance } from 'src/logic/portfolio/NetWorth';
 import { deriveTypeBreakdown } from 'src/logic/portfolio/TypeBreakdown';
 import type { Account, LedgerDocument, Transaction } from 'src/types/LedgerTypes';
 
@@ -153,6 +153,66 @@ describe('the four lines and the headline', () => {
 		expect(figures.netWorth).toBe(0);
 		expect(figures.securitiesAtCost).toBe(0);
 		expect(figures.unrealisedNetGain).toBe(0);
+	});
+});
+
+describe('the gross balances', () => {
+	const document = portfolioDocument({
+		accounts: [ currentAccount({ openingBalance: 250000 }), pensionAccount(), brokerageAccount() ],
+		prices: [ makePrice({ securityId: 'swda', date: '2026-08-01', value: 1200 * UNITS }) ],
+		trades: [ makeTrade({ id: 'bought', securityId: 'swda', accountId: 'dossier', date: '2026-01-05', quantity: 10 * QUANTITY_UNITS, unitPrice: 1000 * UNITS, fees: 500 }) ],
+		transactions: [
+			makeTransaction({ id: 'shopping', accountId: 'current', amount: -12345 }),
+			contribution({ id: 'paid-in', amount: 500000 }),
+			contribution({ id: 'grew', categoryId: valueAdjustment(makeSeededDocument()), amount: 60000 })
+		]
+	});
+
+	test('put each of the three kinds of account at what it is worth before the estimate is applied', () => {
+		const { grossBalances } = balancesOf(document);
+
+		// Money already, so the gross figure is the balance: 2.500,00 less the 123,45 spent
+		expect(cents(grossBalances.get('current') ?? 0)).toBe(237655);
+
+		// The fund's two halves added, before the exit tax comes off them
+		expect(cents(grossBalances.get('pension') ?? 0)).toBe(560000);
+
+		// 10 units at the latest price of 1.200,00, before the sell fee and the capital-gains tax
+		expect(cents(grossBalances.get('dossier') ?? 0)).toBe(1200000);
+	});
+
+	test('total over every account, so that the two totals differ by exactly the tax and the fees', () => {
+		const { figures, grossNetWorth, grossBalances, pensionFunds } = balancesOf(document);
+
+		const summed = [ ...grossBalances.values() ].reduce((running, balance) => {
+			return running + balance;
+		}, 0);
+
+		expect(summed).toBe(grossNetWorth);
+		expect(cents(grossNetWorth)).toBe(237655 + 560000 + 1200000);
+
+		// The 19,00 sell fee, 26% of the taxable gain on the holding, and 15% of what was paid into the fund
+		expect(cents(grossNetWorth) - cents(figures.netWorth)).toBe(1900 + 51376 + (pensionFunds.get('pension')?.exitTax ?? 0));
+	});
+
+	test('are the balances themselves on every type that has nothing taken off it', () => {
+		const { balances, grossBalances } = balancesOf(portfolioDocument({
+			accounts: [ currentAccount({ openingBalance: 250000 }), makeAccount({ id: 'wallet', name: 'Wallet', institutionId: null, type: 'cash', openingBalance: 34057 }) ]
+		}));
+
+		expect(grossBalances.get('current')).toBe(balances.get('current'));
+		expect(grossBalances.get('wallet')).toBe(balances.get('wallet'));
+	});
+});
+
+describe('a gross figure of its own', () => {
+	test('belongs to the two account types the hypothetical liquidation values, and to no other', () => {
+		expect(hasGrossBalance(brokerageAccount())).toBe(true);
+		expect(hasGrossBalance(pensionAccount())).toBe(true);
+
+		expect(hasGrossBalance(currentAccount())).toBe(false);
+		expect(hasGrossBalance(makeAccount({ id: 'wallet', type: 'cash', institutionId: null }))).toBe(false);
+		expect(hasGrossBalance(makeAccount({ id: 'voucher', type: 'voucher' }))).toBe(false);
 	});
 });
 

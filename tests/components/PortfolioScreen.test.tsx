@@ -79,6 +79,31 @@ describe('the Portfolio screen', () => {
 		expect(within(table).getByText('€ 14.806,51')).toBeInTheDocument();
 	});
 
+	test('states each account gross and net, and dashes the gross column on every type that has nothing taken off it', async() => {
+		await renderOpenLedger(portfolioDocument());
+
+		const table = await screen.findByRole('table', { name: 'Balances by account' });
+
+		const cellsOf = (name: string): HTMLElement[] => {
+			return within(within(table).getByText(name).closest('tr') as HTMLElement).getAllByRole('cell');
+		};
+
+		// A current account and physical cash are money already, so there is no *before* of theirs to state
+		expect(cellsOf('Conto Corrente')[3]).toHaveTextContent('—');
+		expect(cellsOf('Conto Corrente')[4]).toHaveTextContent('€ 3.000,00');
+		expect(cellsOf('Wallet')[3]).toHaveTextContent('—');
+
+		// 10 units at the latest price of 1.200,00, then the same position less the 19,00 fee and 26% of the gain on it
+		expect(cellsOf('Dossier Titoli')[3]).toHaveTextContent('€ 12.000,00');
+		expect(cellsOf('Dossier Titoli')[4]).toHaveTextContent('€ 11.465,94');
+
+		// The gross total counts the two dashed rows all the same, so the two totals differ by exactly the fee and the tax
+		expect(within(table).getByText('€ 15.340,57')).toBeInTheDocument();
+		expect(within(table).getByText('€ 14.806,51')).toBeInTheDocument();
+
+		expect(screen.getByRole('button', { name: /^The same figure before the estimate is applied/ })).toBeInTheDocument();
+	});
+
 	test('prints four lines that add to the headline where the cent they round to is not the one they each round to', async() => {
 		// Three units at 10,00 with a fee of a cent, one of them sold: what is left cost 20,006667 and is priced at 24,684, so
 		// the cost line rounds up, the gain line rounds down, and the two of them printed on their own read a cent over the total
@@ -97,8 +122,9 @@ describe('the Portfolio screen', () => {
 			transactions: []
 		}));
 
-		// The headline is the figure the working scale produces, and the table under it still totals to the same one
-		expect(await screen.findAllByText('€ 3.024,68')).toHaveLength(2);
+		// The headline is the figure the working scale produces, and the table under it still totals to the same one — twice over,
+		// this file charging neither a fee nor a tax, so the gross total is the net one
+		expect(await screen.findAllByText('€ 3.024,68')).toHaveLength(3);
 
 		// The cent goes to the cost line, which is the one that gave up the most of it in its own rounding
 		const card = screen.getByText('Net worth').closest('section') as HTMLElement;
@@ -112,7 +138,8 @@ describe('the Portfolio screen', () => {
 		// fraction — the brokerage account in the table, the security type in the breakdown, and never a row that is exact
 		const table = screen.getByRole('table', { name: 'Balances by account' });
 
-		expect(within(table).getByText('€ 24,68')).toBeInTheDocument();
+		// The brokerage row states it in both of its columns, nothing being taken off it here
+		expect(within(table).getAllByText('€ 24,68')).toHaveLength(2);
 
 		expect(within(screen.getByRole('list', { name: 'Breakdown by type' })).getByText('€ 24,68')).toBeInTheDocument();
 	});
@@ -142,14 +169,14 @@ describe('the Portfolio screen', () => {
 			transactions: []
 		}));
 
-		expect(await screen.findAllByText('€ 3.024,69')).toHaveLength(2);
+		expect(await screen.findAllByText('€ 3.024,69')).toHaveLength(3);
 
 		// The cent falls on one of the two rows that carry the fraction, and never on the cash row, which gave up nothing
 		const table = screen.getByRole('table', { name: 'Balances by account' });
 
 		expect(within(table).getByText('€ 3.000,00')).toBeInTheDocument();
-		expect(within(table).getByText('€ 12,35')).toBeInTheDocument();
-		expect(within(table).getByText('€ 12,34')).toBeInTheDocument();
+		expect(within(table).getAllByText('€ 12,35')).toHaveLength(2);
+		expect(within(table).getAllByText('€ 12,34')).toHaveLength(2);
 
 		// The breakdown by type is the same total divided a different way, and it is fitted to it the same way
 		const slices = screen.getByRole('list', { name: 'Breakdown by type' });

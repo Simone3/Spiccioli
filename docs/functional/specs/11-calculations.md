@@ -123,6 +123,18 @@ Nothing else rounds until it is displayed.
 - Securities purchases already reduce the cash account through their transaction, so holdings are added, not double-counted.
 - **Closed accounts are included, exactly like open ones.** **Check 11 is what reports a closed account that is not empty**, naming it and the balance left in it, and the Portfolio banner carries that until the account is emptied or its closing date removed.
 
+### The gross balance of an account
+
+**Every account also has a gross balance, which is the same figure with nothing taken off it.** It is derived in the same pass as the balance above and is read in one place, the breakdown by account of [§3.1](03-portfolio.md#31-behaviour).
+
+- Cash account other than a pension fund: `accountGrossBalance = accountBalance` — **money already**, and nothing is taken off it.
+- Pension fund account: `accountGrossBalance = grossBalance` of [§11.3](#113-hypothetical-liquidation) — the contributions plus the revaluation, before the exit tax.
+- Brokerage account: `accountGrossBalance = Σ grossProceeds of its holdings` ([§11.3](#113-hypothetical-liquidation)) — the positions at their latest known price, before the sell fee and the capital-gains tax. **A holding with no price is at its cost in both figures**, that being what [§11.3](#113-hypothetical-liquidation) carries it at and there being no fee or tax on it either.
+- `grossNetWorth = Σ accountGrossBalance` over **every account**, the six types whose gross balance is their balance included.
+- `grossNetWorth − netWorth = Σ sellFee + Σ tax + Σ exitTax` over the holdings and the pension funds, **by construction**: the two figures differ only where [§11.3](#113-hypothetical-liquidation) is applied, and there it differs by exactly what that section subtracts. This is the whole reason the six types that have no gross figure of their own are still counted in the total.
+- **`grossNetWorth` is not net worth and is not offered as an alternative to it.** It is not the headline of [§3.1](03-portfolio.md#31-behaviour), it is not a fifth line of the decomposition above, it is not what the chart of [§11.5](#115-net-worth-over-time) plots, and no check reads it. It exists so that the breakdown by account can state what the estimate took.
+- **An oversold position is absent from it too**, exactly as it is absent from every figure above: no holding is derived for it, so it contributes to neither total and the difference between them is still exactly the tax and the fees.
+
 ## 11.5 Net worth over time
 
 - Monthly points at each month end, from **the month the file starts in** up to the last month end before today — **plus one final point at today itself**, which is the only point not on a month end. **On a day that is itself a month end there is one point, not two.**

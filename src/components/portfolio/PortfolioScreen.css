@@ -236,21 +236,6 @@
 	color: var(--colors-text-secondary);
 }
 
-.portfolio-screen-table-footer {
-	display: flex;
-	gap: 16px;
-	align-items: baseline;
-	justify-content: space-between;
-}
-
-.portfolio-screen-table-total {
-	font-family: var(--font-family-mono);
-	font-size: 13px;
-	font-weight: 700;
-	font-variant-numeric: tabular-nums;
-	color: var(--colors-text-primary);
-}
-
 .portfolio-screen-link {
 	border-radius: 3px;
 	color: inherit;

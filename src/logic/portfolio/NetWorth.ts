@@ -18,6 +18,10 @@ import type { Account, Cents, LedgerDocument, LedgerId, Transaction } from 'src/
  * **Closed accounts are in every figure**, exactly like open ones: a closing date marks an account and sorts it last, it does
  * not take it out of the arithmetic.
  *
+ * **Every account carries a gross balance beside its net one**, which is the same figure before [§11.3] is applied. Only two
+ * account types have one that differs — a brokerage account and a pension fund — and the other six carry their own balance
+ * there, so that the two totals differ by exactly the hypothetical tax and sell fee and by nothing else.
+ *
  * **Every figure here is at the working scale of eight decimal places** and is narrowed to the cent once, at display — with the
  * one exception the calculations name, the exit tax, which is rounded to the cent before it is subtracted.
  */
@@ -66,6 +70,13 @@ export interface PortfolioBalances {
 	// One entry per account in the file, closed ones included. A brokerage account with no holding reads zero.
 	balances: ReadonlyMap<LedgerId, WorkingAmount>;
 
+	// The same one entry per account, before the hypothetical tax and sell fee of [§11.3]. An account whose type is money
+	// already carries its balance here, so that the two totals differ by exactly what [§11.3] takes off.
+	grossBalances: ReadonlyMap<LedgerId, WorkingAmount>;
+
+	// Σ grossBalances over every account, which is what net worth would be if nothing were ever taxed or charged to sell
+	grossNetWorth: WorkingAmount;
+
 	// The two halves and the tax of every pension fund account, which is what the account's own note states
 	pensionFunds: ReadonlyMap<LedgerId, PensionFundFigures>;
 }
@@ -106,6 +117,19 @@ export interface PortfolioBalancesOptions {
  */
 export const isPensionFund = (account: Account): boolean => {
 	return account.type === PENSION_FUND;
+};
+
+/**
+ * Says whether an account has a gross figure that is anything other than its balance, which the two account types [§11.3]
+ * values as if they had been realised are the only ones to have.
+ *
+ * The other six cash types are money already: nothing is taken off them, so there is no *before* of theirs to state, and the
+ * breakdown by account shows a dash rather than the same figure twice.
+ * @param account The account.
+ * @returns Whether it is a brokerage account or a pension fund.
+ */
+export const hasGrossBalance = (account: Account): boolean => {
+	return !isCashAccountType(account.type) || isPensionFund(account);
 };
 
 /**
@@ -176,10 +200,15 @@ export const derivePensionFund = ({ account, transactions, valueAdjustmentCatego
  * exit tax; **a brokerage account holds no money of its own** and is the net value of its holdings after the tax and the sell fee
  * of [§11.3]. **An oversold position contributes nothing to any of them**, no holding being derived for it at all, and no figure
  * here says so — checks 8 and 9 name the trade instead.
+ *
+ * **The same pass produces the gross balance of every account**, which is the same three sums with nothing taken off: a pension
+ * fund before its exit tax, a brokerage account at its holdings' market value, and every other cash account at the balance it
+ * already has. **Every account is in the gross total**, which is what makes the difference between the two totals exactly the
+ * hypothetical tax and sell fee of [§11.3] and nothing else.
  * @param options What the balances are derived from.
  * @param options.document The ledger.
  * @param options.holdings The holdings, already valued.
- * @returns The headline and its four lines, every account's balance, and the pension funds' own figures.
+ * @returns The headline and its four lines, every account's balance gross and net, and the pension funds' own figures.
  */
 export const derivePortfolioBalances = ({ document, holdings }: PortfolioBalancesOptions): PortfolioBalances => {
 	const valueAdjustmentCategoryIds = categoryIdsWithRole(document.categories, 'value-adjustment');
@@ -197,15 +226,18 @@ export const derivePortfolioBalances = ({ document, holdings }: PortfolioBalance
 	}
 
 	const balances = new Map<LedgerId, WorkingAmount>();
+	const grossBalances = new Map<LedgerId, WorkingAmount>();
 	const pensionFunds = new Map<LedgerId, PensionFundFigures>();
 
 	let cash = 0;
 	let pensionNet = 0;
+	let grossNetWorth = 0;
 
 	for(const account of document.accounts) {
 		if(!isCashAccountType(account.type)) {
 			// A brokerage account is entirely its holdings, and they are summed below
 			balances.set(account.id, 0);
+			grossBalances.set(account.id, 0);
 
 			continue;
 		}
@@ -215,10 +247,13 @@ export const derivePortfolioBalances = ({ document, holdings }: PortfolioBalance
 		if(isPensionFund(account)) {
 			const figures = derivePensionFund({ account, transactions, valueAdjustmentCategoryIds });
 			const balance = widenToWorkingScale(figures.balance, MONEY_SCALES.amount);
+			const grossBalance = widenToWorkingScale(figures.grossBalance, MONEY_SCALES.amount);
 
 			pensionFunds.set(account.id, figures);
 			balances.set(account.id, balance);
+			grossBalances.set(account.id, grossBalance);
 			pensionNet += balance;
+			grossNetWorth += grossBalance;
 
 			continue;
 		}
@@ -227,8 +262,11 @@ export const derivePortfolioBalances = ({ document, holdings }: PortfolioBalance
 			return running + transaction.amount;
 		}, account.openingBalance), MONEY_SCALES.amount);
 
+		// Money already: its gross figure is its balance, which is what keeps the gross total a total of every account
 		balances.set(account.id, balance);
+		grossBalances.set(account.id, balance);
 		cash += balance;
+		grossNetWorth += balance;
 	}
 
 	let securitiesAtCost = 0;
@@ -236,14 +274,17 @@ export const derivePortfolioBalances = ({ document, holdings }: PortfolioBalance
 
 	for(const holding of holdings) {
 		const standing = balances.get(holding.accountId);
+		const standingGross = grossBalances.get(holding.accountId);
 
-		if(standing === undefined) {
+		if(standing === undefined || standingGross === undefined) {
 			continue;
 		}
 
 		balances.set(holding.accountId, standing + holding.netProceeds);
+		grossBalances.set(holding.accountId, standingGross + holding.marketValue);
 		securitiesAtCost += holding.invested;
 		unrealisedNetGain += holding.netProceeds - holding.invested;
+		grossNetWorth += holding.marketValue;
 	}
 
 	return {
@@ -255,6 +296,8 @@ export const derivePortfolioBalances = ({ document, holdings }: PortfolioBalance
 			pensionNet
 		},
 		balances,
+		grossBalances,
+		grossNetWorth,
 		pensionFunds
 	};
 };

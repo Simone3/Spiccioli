@@ -102,8 +102,10 @@ export const PortfolioScreen = (): ReactElement => {
 					accounts={portfolio.accounts}
 					institutions={portfolio.institutions}
 					balances={portfolio.balances.balances}
+					grossBalances={portfolio.balances.grossBalances}
 					summary={summary}
-					total={portfolio.balances.figures.netWorth}/>
+					total={portfolio.balances.figures.netWorth}
+					grossTotal={portfolio.balances.grossNetWorth}/>
 			</section>
 		</ScreenLayout>
 	);

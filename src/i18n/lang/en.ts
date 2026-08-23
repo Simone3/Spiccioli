@@ -153,7 +153,8 @@ export const EN_TRANSLATIONS = {
 			securitiesAtCost: 'Every holding still open, valued at what was paid for it with the purchase fees included.',
 			unrealisedNetGain: 'An estimate. What selling every holding today would add to the portfolio or take out of it, after the capital-gains tax and the sell fee. The tax is worked out one holding at a time, so a loss on one does not reduce the tax on another, and the fee is charged once per holding — both push this figure down. The gross picture is on Investments.',
 			pensionNet: 'An estimate. Every pension fund at its balance less the exit tax, which falls on what was paid in rather than on what the fund earned, at a rate typed by hand. Netting a fund for tax does not make it liquid: this is still money that cannot be had before retirement.',
-			balance: 'Opening balance plus every transaction on standard accounts. A pension fund is shown after its exit tax. A brokerage account reads as the net value of its holdings, after the capital-gains tax and the sell fee.'
+			grossBalance: 'The same figure before the estimate is applied: a pension fund at its balance before the exit tax, and a brokerage account at what its holdings are worth at their latest known price, before the capital-gains tax and the sell fee. An account that is money already has nothing taken off it and shows a dash — its balance is in the total all the same, so the two totals differ by exactly the tax and the fees.',
+			netBalance: 'Opening balance plus every transaction on standard accounts. A pension fund is shown after its exit tax. A brokerage account reads as the net value of its holdings, after the capital-gains tax and the sell fee.'
 		},
 
 		// What the portfolio has gained and lost by being kept in banks and funds instead of as cash. Nothing on this card is
@@ -205,8 +206,10 @@ export const EN_TRANSLATIONS = {
 				institution: 'Institution',
 				account: 'Account',
 				type: 'Type',
-				balance: 'Balance'
+				grossBalance: 'Gross balance',
+				netBalance: 'Net balance'
 			},
+			total: 'Total',
 			footer: '{accounts} · {closed} closed · {institutions}'
 		}
 	},
