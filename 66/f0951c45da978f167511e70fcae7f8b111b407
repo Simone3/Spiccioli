@@ -1,0 +1,26 @@
+docs/functional/specs/03-portfolio.md
+  s_2d56e7d9da4380::t_7cd98ebc3751ad 51-52
+tests/components/PortfolioScreen.test.tsx
+  s_2d56e7d9da4380::t_47efa28fbe1a47 104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "66f0951c45da978f167511e70fcae7f8b111b407",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_2d56e7d9da4380": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "74d1508f-33ac-4eec-ae2c-b855fd806687",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
