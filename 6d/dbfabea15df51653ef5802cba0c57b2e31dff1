@@ -1,0 +1,26 @@
+src/components/common/SelectField.css
+  s_ca44e5c5a87c3e::t_8881d214c1de65 9-14,16,20,37-53,60-63
+src/components/common/SelectField.tsx
+  s_ca44e5c5a87c3e::t_747a5f26f1f4e9 58-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "6ddbfabea15df51653ef5802cba0c57b2e31dff1",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_ca44e5c5a87c3e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44af7623-2ba2-404d-b7dd-e4fcb92a676c",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
