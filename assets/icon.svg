@@ -1,16 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
 	<defs>
-		<linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
-			<stop offset="0" stop-color="#F5B940"/>
-			<stop offset="1" stop-color="#D98A0B"/>
+		<linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0" stop-color="#EFC176"/>
+			<stop offset="1" stop-color="#C4892A"/>
 		</linearGradient>
 	</defs>
 	<rect width="1024" height="1024" rx="228" fill="url(#tile)"/>
-	<circle cx="512" cy="512" r="344" fill="none" stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="80"/>
-	<circle cx="512" cy="512" r="232" fill="#FFFFFF"/>
-	<g fill="none" stroke="#B26A00" stroke-width="52" stroke-linecap="round">
-		<path d="M610 415 A130 130 0 1 0 610 609"/>
-		<path d="M376 470 L596 470"/>
-		<path d="M376 554 L596 554"/>
-	</g>
+
+	<!-- A handful of loose change: four coins of four different sizes, which is what the name says and the only thing on
+	     the tile. There is no currency symbol, because there is nothing here that a second currency would make untrue.
+
+	     Coin and tile are the same brass, so the separation is carried by value and by three devices, in this order: a
+	     deeper brass halo that cuts each coin out of what is behind it, a milled rim that makes a disc read as struck
+	     metal rather than as a circle, and a faint inner ring. The milling is one dashed circle per coin rather than a
+	     line per notch: `pathLength` is set to a hundred units per notch, so the dash pattern is exact at any size.
+
+	     The coins are drawn smallest to largest, so the largest sits in front. -->
+
+	<!-- Small, upper left -->
+	<circle cx="322" cy="296" r="121" fill="#A0691A"/>
+	<circle cx="322" cy="296" r="104" fill="#E3D3B4"/>
+	<circle cx="322" cy="296" r="94" fill="none" stroke="#A0691A" stroke-width="24" pathLength="1600" stroke-dasharray="18 82"/>
+	<circle cx="322" cy="296" r="68" fill="none" stroke="#8A5814" stroke-opacity="0.22" stroke-width="13"/>
+
+	<!-- Medium, upper right -->
+	<circle cx="660" cy="386" r="195" fill="#A0691A"/>
+	<circle cx="660" cy="386" r="178" fill="#EFE2C8"/>
+	<circle cx="660" cy="386" r="168" fill="none" stroke="#A0691A" stroke-width="24" pathLength="2500" stroke-dasharray="26 74"/>
+	<circle cx="660" cy="386" r="142" fill="none" stroke="#8A5814" stroke-opacity="0.22" stroke-width="13"/>
+
+	<!-- Little, lower right -->
+	<circle cx="676" cy="682" r="135" fill="#A0691A"/>
+	<circle cx="676" cy="682" r="118" fill="#FFFBF2"/>
+	<circle cx="676" cy="682" r="108" fill="none" stroke="#A0691A" stroke-width="24" pathLength="1700" stroke-dasharray="18 82"/>
+	<circle cx="676" cy="682" r="82" fill="none" stroke="#8A5814" stroke-opacity="0.22" stroke-width="13"/>
+
+	<!-- Big, in front -->
+	<circle cx="392" cy="610" r="261" fill="#A0691A"/>
+	<circle cx="392" cy="610" r="244" fill="#FAF2E0"/>
+	<circle cx="392" cy="610" r="234" fill="none" stroke="#A0691A" stroke-width="24" pathLength="3500" stroke-dasharray="36 64"/>
+	<circle cx="392" cy="610" r="208" fill="none" stroke="#8A5814" stroke-opacity="0.22" stroke-width="13"/>
 </svg>
