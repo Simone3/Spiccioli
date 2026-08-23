@@ -55,21 +55,24 @@ export const SelectField = <TValue extends string>({
 
 	return (
 		<div className='select-field'>
-			<select
-				className={`select-field-control${refusal ? ' select-field-control-invalid' : ''}`}
-				value={value}
-				disabled={disabled}
-				aria-label={label}
-				aria-invalid={refusal ? true : undefined}
-				aria-describedby={refusal ? refusalId : undefined}
-				onChange={(event) => {
-					onChange(event.target.value as TValue);
-				}}
-				onBlur={onBlur}>
-				{options.map((option) => {
-					return <option key={option.value} value={option.value}>{option.label}</option>;
-				})}
-			</select>
+			{/* The wrapper is what the arrow is drawn on, the platform's own being fixed against the border */}
+			<div className='select-field-wrapper'>
+				<select
+					className={`select-field-control${refusal ? ' select-field-control-invalid' : ''}`}
+					value={value}
+					disabled={disabled}
+					aria-label={label}
+					aria-invalid={refusal ? true : undefined}
+					aria-describedby={refusal ? refusalId : undefined}
+					onChange={(event) => {
+						onChange(event.target.value as TValue);
+					}}
+					onBlur={onBlur}>
+					{options.map((option) => {
+						return <option key={option.value} value={option.value}>{option.label}</option>;
+					})}
+				</select>
+			</div>
 			{refusal && <p className='select-field-refusal' id={refusalId}>{refusal}</p>}
 		</div>
 	);
