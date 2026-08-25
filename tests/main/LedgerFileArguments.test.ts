@@ -8,6 +8,10 @@ import { findLedgerFileArgument } from 'src/main/startup/LedgerFileArguments';
  * What is worth testing here is everything that is *not* the file: a packaged launch and a development one count their arguments
  * differently, Chromium and Electron both leave switches on the line, and a second launch is started from a directory that is not
  * this process's own.
+ *
+ * **Every expectation is resolved by the host rather than written out**, because making an absolute path is the platform's own job
+ * and not what is being tested. A Windows host answers `/Documents/finances.spiccioli` with the current drive in front of it, which
+ * is correct: the argument the command line named is still the one that was picked.
  */
 
 const LEDGER = `finances${LEDGER_FILE_CONFIG.extension}`;
@@ -18,7 +22,7 @@ describe('LedgerFileArguments', () => {
 			argv: [ '/Applications/Spiccioli.app/Contents/MacOS/Spiccioli', `/Documents/${LEDGER}` ],
 			isPackaged: true,
 			workingDirectory: '/'
-		})).toBe(`/Documents/${LEDGER}`);
+		})).toBe(path.resolve('/', `/Documents/${LEDGER}`));
 	});
 
 	test('skips the project directory a development run is started on', () => {
@@ -26,7 +30,7 @@ describe('LedgerFileArguments', () => {
 			argv: [ '/node_modules/electron/dist/electron', '/project', `/Documents/${LEDGER}` ],
 			isPackaged: false,
 			workingDirectory: '/'
-		})).toBe(`/Documents/${LEDGER}`);
+		})).toBe(path.resolve('/', `/Documents/${LEDGER}`));
 	});
 
 	test('resolves a relative path against the directory the launch came from', () => {
@@ -34,7 +38,7 @@ describe('LedgerFileArguments', () => {
 			argv: [ 'Spiccioli', LEDGER ],
 			isPackaged: true,
 			workingDirectory: '/home/user/ledgers'
-		})).toBe(path.join('/home/user/ledgers', LEDGER));
+		})).toBe(path.resolve('/home/user/ledgers', LEDGER));
 	});
 
 	test('ignores the switches Chromium and Electron leave on the command line', () => {
@@ -42,7 +46,7 @@ describe('LedgerFileArguments', () => {
 			argv: [ 'Spiccioli', '--allow-file-access-from-files', `--trace=${LEDGER}`, `/Documents/${LEDGER}` ],
 			isPackaged: true,
 			workingDirectory: '/'
-		})).toBe(`/Documents/${LEDGER}`);
+		})).toBe(path.resolve('/', `/Documents/${LEDGER}`));
 	});
 
 	test('reads the extension whatever case it is written in', () => {
@@ -52,7 +56,7 @@ describe('LedgerFileArguments', () => {
 			argv: [ 'Spiccioli', shouted ],
 			isPackaged: true,
 			workingDirectory: '/'
-		})).toBe(shouted);
+		})).toBe(path.resolve('/', shouted));
 	});
 
 	test('takes the first ledger where a command line names more than one', () => {
@@ -60,7 +64,7 @@ describe('LedgerFileArguments', () => {
 			argv: [ 'Spiccioli', `/Documents/${LEDGER}`, `/Documents/other${LEDGER_FILE_CONFIG.extension}` ],
 			isPackaged: true,
 			workingDirectory: '/'
-		})).toBe(`/Documents/${LEDGER}`);
+		})).toBe(path.resolve('/', `/Documents/${LEDGER}`));
 	});
 
 	test('finds nothing where an argument is not a ledger', () => {

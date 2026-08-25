@@ -28,8 +28,9 @@ const SAMPLE_LEDGER_SCRIPT = path.join(PROJECT_ROOT, 'scripts', 'write-sample-le
 
 const FILE_FORMAT_DOCUMENT = path.join(PROJECT_ROOT, 'docs', 'technical', '09-file-format.md');
 
-// The fenced JSON block of §9.6, which is the only one on the page
-const JSON_FENCE_PATTERN = /```json\n([\s\S]*?)```/;
+// The fenced JSON block of §9.6, which is the only one on the page. The line break is matched loosely because a checkout on Windows
+// writes the document with CRLF endings, and what is being read here is the block's contents rather than the bytes between its lines.
+const JSON_FENCE_PATTERN = /```json\r?\n([\s\S]*?)```/;
 
 // The backtick-quoted category ids of §9.3, listed on one line between the two paragraphs that explain them
 const CATEGORY_ID_LINE_PATTERN = /^`salary` · .+$/m;
