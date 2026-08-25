@@ -8,7 +8,7 @@ Spiccioli is an Electron + React desktop ledger for macOS, Windows and Linux: on
 
 **The application is feature complete and the implementation plan is spent**, so there is no phase to be in: a change from here is an ordinary change to a finished application, made against [`docs/functional/specs`](docs/functional/README.md) and the section of `docs/technical/` that covers the area. A file can be created, opened, saved, backed up, rotated, displaced by an external write and refused when unreadable; an open file lands on Portfolio, the sidebar reaches all eight screens, and **every one of the eight is finished**. The kit those screens are built from is `src/components/common/`, and the two files that import the charting library are `LineChart.tsx` and `PieChart.tsx` inside it; the one thing in the application that touches the network lives behind one interface in `src/main/prices/`; the fourteen checks and the five pairings of [§11.6](docs/functional/specs/11-calculations.md#116-derived-matching) are run in one place, `src/contexts/ChecksContext.tsx`, and everything pure about them is in `src/logic/checks/`.
 
-**What is left before v1 is the release itself**: the `version` field of `package.json` raised in the commit the `v<version>` tag is put on, and `.github/workflows/release.yml` run by hand once before it.
+**v1 is released**: `package.json` is at `1.0.0` and `v1.0.0` is the tag `.github/workflows/release.yml` builds its installers from, into a draft GitHub release that is published by hand. A later version is raised in the commit its own `v<version>` tag is put on.
 
 ## Documentation
 
