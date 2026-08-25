@@ -1,0 +1,25 @@
+CLAUDE.md
+  s_cbc0f73d04fe85::t_a9daee15dae400 11
+README.md
+  s_cbc0f73d04fe85::t_661cd6e5ea72b5 20-59
+package-lock.json
+  s_cbc0f73d04fe85::t_1225f7072dd7f0 3,9
+package.json
+  s_cbc0f73d04fe85::t_d3b7e6e941720b 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "dded4e33145b9b2df51a968182db4d81efa39602",
+  "prompts": {},
+  "sessions": {
+    "s_cbc0f73d04fe85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4634df3f-ff25-49a7-a558-d36f6f340122",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
