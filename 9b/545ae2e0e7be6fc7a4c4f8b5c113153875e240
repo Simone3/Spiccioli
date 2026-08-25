@@ -1,0 +1,14 @@
+TODO.md
+  h_08e8a5184a38af 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "9b545ae2e0e7be6fc7a4c4f8b5c113153875e240",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
