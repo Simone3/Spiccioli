@@ -1,0 +1,25 @@
+docs/technical/07-testing.md
+  s_cbc0f73d04fe85::t_8cb2382ff8de52 44
+tests/logic/FileFormat.test.ts
+  s_cbc0f73d04fe85::t_2c86b841a3e0d8 31-33
+tests/main/FileOpenRequests.test.ts
+  s_cbc0f73d04fe85::t_040cb1a3fad835 1,10-14,17-21,59,78,88,99,110,119,127,138,147,150
+tests/main/LedgerFileArguments.test.ts
+  s_cbc0f73d04fe85::t_d696a73119f737 11-14,25,33,41,49,59,67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "b76638d5cca63df1ca4402b0e57532698b5f4214",
+  "prompts": {},
+  "sessions": {
+    "s_cbc0f73d04fe85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4634df3f-ff25-49a7-a558-d36f6f340122",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
