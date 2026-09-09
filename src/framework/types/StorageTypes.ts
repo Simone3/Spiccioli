@@ -13,11 +13,15 @@ export interface StorageDatabaseStatus {
 // The backup folder is a write-only destination for rotated copies, so a failing backup never means the records themselves are at risk
 export type BackupHealth = 'idle' | 'ok' | 'failed';
 
+// The folder holds two kinds of copy and they are reported separately: the one that is kept up to date says how recent the backup
+// is, and the newest dated one says how far back the folder still reaches.
 export interface BackupStatus {
 	state: BackupHealth;
 	directory: string;
-	lastBackupAt?: string;
-	lastBackupPath?: string;
+	latestCopyAt?: string;
+	latestCopyPath?: string;
+	lastArchiveAt?: string;
+	lastArchivePath?: string;
 	message?: string;
 }
 

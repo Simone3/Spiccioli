@@ -1,7 +1,7 @@
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { createBackupLocationManager, type BackupDirectoryStore } from 'src/framework/main/config/BackupLocationManager';
+import { createBackupLocationManager, type BackupSettingsStore, type StoredBackupSettings } from 'src/framework/main/config/BackupLocationManager';
 import type { RuntimePaths } from 'src/framework/main/config/RuntimePaths';
 import { initializeAppLogger, resetAppLoggerForTests } from 'src/framework/main/logging/AppLogger';
 import type { BackupDirectoryMessages } from 'src/framework/main/storage/BackupDirectory';
@@ -10,10 +10,18 @@ const DATABASE_FILE_NAME = 'app.sqlite';
 
 const LOG_FILE_NAME = 'app-logs.ndjson';
 
+const DEFAULT_RETAINED_BACKUP_COUNT = 10;
+
+const MINIMUM_RETAINED_BACKUP_COUNT = 0;
+
+const MAXIMUM_RETAINED_BACKUP_COUNT = 50;
+
 interface FakeStorage {
 	selectedDirectories: string[];
+	selectedCounts: number[];
 	storage: {
 		setBackupDirectory: (directory: string) => void;
+		setRetainedBackupCount: (retainedBackupCount: number) => void;
 	};
 }
 
@@ -54,25 +62,36 @@ const createRuntimePaths = (rootDirectory: string, isDevelopment = false): Runti
 	};
 };
 
-const createFakeDirectoryStore = (savedDirectory?: string): {
-	directoryStore: BackupDirectoryStore;
-	getSavedDirectory: () => string | undefined;
+const createFakeSettingsStore = (savedSettings: StoredBackupSettings = {}): {
+	settingsStore: BackupSettingsStore;
+	getSavedSettings: () => StoredBackupSettings;
 } => {
-	let currentDirectory = savedDirectory;
+	let currentSettings = savedSettings;
 
 	return {
-		directoryStore: {
+		settingsStore: {
 			read: () => {
-				return currentDirectory;
+				return currentSettings;
 			},
-			write: vi.fn((directory: string) => {
-				currentDirectory = directory;
+			write: vi.fn((settings: StoredBackupSettings) => {
+				currentSettings = settings;
 			})
 		},
-		getSavedDirectory: () => {
-			return currentDirectory;
+		getSavedSettings: () => {
+			return currentSettings;
 		}
 	};
+};
+
+// The manager takes the count it starts from and the range it holds a choice to, so the tests supply them once
+const createTestManager = (options: Omit<Parameters<typeof createBackupLocationManager>[0], 'directoryMessages' | 'defaultRetainedBackupCount' | 'minimumRetainedBackupCount' | 'maximumRetainedBackupCount'>) => {
+	return createBackupLocationManager({
+		directoryMessages,
+		defaultRetainedBackupCount: DEFAULT_RETAINED_BACKUP_COUNT,
+		minimumRetainedBackupCount: MINIMUM_RETAINED_BACKUP_COUNT,
+		maximumRetainedBackupCount: MAXIMUM_RETAINED_BACKUP_COUNT,
+		...options
+	});
 };
 
 // Starts the process-wide logger on a folder of this test's own, so that what the manager wrote can be read back from the file it wrote it to
@@ -104,12 +123,17 @@ const readLoggedMessages = (logDirectory: string): string[] => {
 
 const createFakeStorage = (): FakeStorage => {
 	const selectedDirectories: string[] = [];
+	const selectedCounts: number[] = [];
 
 	return {
 		selectedDirectories,
+		selectedCounts,
 		storage: {
 			setBackupDirectory: vi.fn((directory: string) => {
 				selectedDirectories.push(directory);
+			}),
+			setRetainedBackupCount: vi.fn((retainedBackupCount: number) => {
+				selectedCounts.push(retainedBackupCount);
 			})
 		}
 	};
@@ -127,9 +151,9 @@ describe('BackupLocationManager', () => {
 	test('starts on the default backup folder and creates it', async() => {
 		const rootDirectory = makeTempDirectory();
 		const runtimePaths = createRuntimePaths(rootDirectory);
-		const { directoryStore } = createFakeDirectoryStore();
+		const { settingsStore } = createFakeSettingsStore();
 		const { selectedDirectories, storage } = createFakeStorage();
-		const manager = createBackupLocationManager({ runtimePaths, storage, directoryStore, directoryMessages });
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
 
 		const location = await manager.initialize();
 
@@ -147,15 +171,15 @@ describe('BackupLocationManager', () => {
 		const rootDirectory = makeTempDirectory();
 		const savedDirectory = makeTempDirectory();
 		const runtimePaths = createRuntimePaths(rootDirectory);
-		const { directoryStore } = createFakeDirectoryStore(savedDirectory);
+		const { settingsStore } = createFakeSettingsStore({ directory: savedDirectory });
 		const { selectedDirectories, storage } = createFakeStorage();
-		const manager = createBackupLocationManager({ runtimePaths, storage, directoryStore, directoryMessages });
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
 
 		const location = await manager.initialize();
 
 		expect(location.directory).toBe(savedDirectory);
 		expect(selectedDirectories).toEqual([ savedDirectory ]);
-		expect(directoryStore.write).not.toHaveBeenCalled();
+		expect(settingsStore.write).not.toHaveBeenCalled();
 	});
 
 	// The records live in the local database, so an unreachable backup folder only costs the copies
@@ -164,9 +188,9 @@ describe('BackupLocationManager', () => {
 		const blockedDirectory = path.join(makeTempDirectory(), 'blocked');
 		writeFileSync(blockedDirectory, 'not a folder', 'utf8');
 		const runtimePaths = createRuntimePaths(rootDirectory);
-		const { directoryStore } = createFakeDirectoryStore(blockedDirectory);
+		const { settingsStore } = createFakeSettingsStore({ directory: blockedDirectory });
 		const { storage } = createFakeStorage();
-		const manager = createBackupLocationManager({ runtimePaths, storage, directoryStore, directoryMessages });
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
 
 		const location = await manager.initialize();
 
@@ -178,9 +202,9 @@ describe('BackupLocationManager', () => {
 		const rootDirectory = makeTempDirectory();
 		const savedDirectory = makeTempDirectory();
 		const runtimePaths = createRuntimePaths(rootDirectory, true);
-		const { directoryStore } = createFakeDirectoryStore(savedDirectory);
+		const { settingsStore } = createFakeSettingsStore({ directory: savedDirectory });
 		const { selectedDirectories, storage } = createFakeStorage();
-		const manager = createBackupLocationManager({ runtimePaths, storage, directoryStore, directoryMessages });
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
 
 		const location = await manager.initialize();
 
@@ -193,10 +217,10 @@ describe('BackupLocationManager', () => {
 		const rootDirectory = makeTempDirectory();
 		const chosenDirectory = makeTempDirectory();
 		const runtimePaths = createRuntimePaths(rootDirectory);
-		const { directoryStore, getSavedDirectory } = createFakeDirectoryStore();
+		const { settingsStore, getSavedSettings } = createFakeSettingsStore();
 		const { selectedDirectories, storage } = createFakeStorage();
-		const onBackupDirectoryChanged = vi.fn();
-		const manager = createBackupLocationManager({ runtimePaths, storage, directoryStore, directoryMessages, onBackupDirectoryChanged });
+		const onBackupSettingsChanged = vi.fn();
+		const manager = createTestManager({ runtimePaths, storage, settingsStore, onBackupSettingsChanged });
 
 		await manager.initialize();
 		const result = await manager.setBackupDirectory(chosenDirectory);
@@ -207,9 +231,9 @@ describe('BackupLocationManager', () => {
 				directory: chosenDirectory
 			}
 		});
-		expect(getSavedDirectory()).toBe(chosenDirectory);
+		expect(getSavedSettings().directory).toBe(chosenDirectory);
 		expect(selectedDirectories).toEqual([ runtimePaths.defaultBackupDirectory, chosenDirectory ]);
-		expect(onBackupDirectoryChanged).toHaveBeenCalledTimes(2);
+		expect(onBackupSettingsChanged).toHaveBeenCalledTimes(1);
 	});
 
 	test('keeps the current folder when the chosen one cannot be used', async() => {
@@ -217,16 +241,16 @@ describe('BackupLocationManager', () => {
 		const blockedDirectory = path.join(makeTempDirectory(), 'blocked');
 		writeFileSync(blockedDirectory, 'not a folder', 'utf8');
 		const runtimePaths = createRuntimePaths(rootDirectory);
-		const { directoryStore, getSavedDirectory } = createFakeDirectoryStore();
+		const { settingsStore, getSavedSettings } = createFakeSettingsStore();
 		const { storage } = createFakeStorage();
-		const manager = createBackupLocationManager({ runtimePaths, storage, directoryStore, directoryMessages });
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
 
 		await manager.initialize();
 		const result = await manager.setBackupDirectory(blockedDirectory);
 
 		expect(result.ok).toBe(false);
 		expect(manager.getLocation().directory).toBe(runtimePaths.defaultBackupDirectory);
-		expect(getSavedDirectory()).toBeUndefined();
+		expect(getSavedSettings().directory).toBeUndefined();
 	});
 
 	// Every launch applies the folder it already had, and an entry saying so at every startup would push the ones that mean something out of the log
@@ -236,9 +260,9 @@ describe('BackupLocationManager', () => {
 		const logDirectory = makeTempDirectory();
 		startLogger(logDirectory);
 		const runtimePaths = createRuntimePaths(rootDirectory);
-		const { directoryStore } = createFakeDirectoryStore(savedDirectory);
+		const { settingsStore } = createFakeSettingsStore({ directory: savedDirectory });
 		const { storage } = createFakeStorage();
-		const manager = createBackupLocationManager({ runtimePaths, storage, directoryStore, directoryMessages });
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
 
 		await manager.initialize();
 
@@ -251,9 +275,9 @@ describe('BackupLocationManager', () => {
 		const logDirectory = makeTempDirectory();
 		startLogger(logDirectory);
 		const runtimePaths = createRuntimePaths(rootDirectory);
-		const { directoryStore } = createFakeDirectoryStore();
+		const { settingsStore } = createFakeSettingsStore();
 		const { storage } = createFakeStorage();
-		const manager = createBackupLocationManager({ runtimePaths, storage, directoryStore, directoryMessages });
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
 
 		await manager.initialize();
 		await manager.setBackupDirectory(chosenDirectory);
@@ -266,9 +290,9 @@ describe('BackupLocationManager', () => {
 		const logDirectory = makeTempDirectory();
 		startLogger(logDirectory);
 		const runtimePaths = createRuntimePaths(rootDirectory);
-		const { directoryStore } = createFakeDirectoryStore();
+		const { settingsStore } = createFakeSettingsStore();
 		const { storage } = createFakeStorage();
-		const manager = createBackupLocationManager({ runtimePaths, storage, directoryStore, directoryMessages });
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
 
 		await manager.initialize();
 		await manager.setBackupDirectory(runtimePaths.defaultBackupDirectory);
@@ -280,7 +304,7 @@ describe('BackupLocationManager', () => {
 		const rootDirectory = makeTempDirectory();
 		const chosenDirectory = makeTempDirectory();
 		const runtimePaths = createRuntimePaths(rootDirectory);
-		const { directoryStore } = createFakeDirectoryStore();
+		const { settingsStore } = createFakeSettingsStore();
 		const { storage } = createFakeStorage();
 		const trackExclusiveRun = vi.fn();
 		const runExclusively = <TResult>(operation: () => Promise<TResult>): Promise<TResult> => {
@@ -288,11 +312,108 @@ describe('BackupLocationManager', () => {
 
 			return operation();
 		};
-		const manager = createBackupLocationManager({ runtimePaths, storage, directoryStore, directoryMessages, runExclusively });
+		const manager = createTestManager({ runtimePaths, storage, settingsStore, runExclusively });
 
 		await manager.initialize();
 		await manager.setBackupDirectory(chosenDirectory);
 
-		expect(trackExclusiveRun).toHaveBeenCalledTimes(2);
+		expect(trackExclusiveRun).toHaveBeenCalledTimes(3);
+	});
+	test('starts on the default number of copies and hands it to storage', async() => {
+		const rootDirectory = makeTempDirectory();
+		const runtimePaths = createRuntimePaths(rootDirectory);
+		const { settingsStore } = createFakeSettingsStore();
+		const { selectedCounts, storage } = createFakeStorage();
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
+
+		const location = await manager.initialize();
+
+		expect(location.retainedBackupCount).toBe(DEFAULT_RETAINED_BACKUP_COUNT);
+		expect(manager.getRetainedBackupCount()).toBe(DEFAULT_RETAINED_BACKUP_COUNT);
+		expect(selectedCounts).toEqual([ DEFAULT_RETAINED_BACKUP_COUNT ]);
+	});
+
+	test('reuses the saved number of copies without persisting it again', async() => {
+		const rootDirectory = makeTempDirectory();
+		const runtimePaths = createRuntimePaths(rootDirectory);
+		const { settingsStore } = createFakeSettingsStore({ retainedBackupCount: 3 });
+		const { storage } = createFakeStorage();
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
+
+		const location = await manager.initialize();
+
+		expect(location.retainedBackupCount).toBe(3);
+		expect(settingsStore.write).not.toHaveBeenCalled();
+	});
+
+	// A development run reads and writes its own configuration file, so the count it saved there is its own to reuse
+	test('keeps the saved number of copies on a development run', async() => {
+		const rootDirectory = makeTempDirectory();
+		const savedDirectory = makeTempDirectory();
+		const runtimePaths = createRuntimePaths(rootDirectory, true);
+		const { settingsStore } = createFakeSettingsStore({ directory: savedDirectory, retainedBackupCount: 2 });
+		const { storage } = createFakeStorage();
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
+
+		const location = await manager.initialize();
+
+		expect(location.directory).toBe(runtimePaths.defaultBackupDirectory);
+		expect(location.retainedBackupCount).toBe(2);
+	});
+
+	// A count reaches the manager from a field the user typed in and from a file anything could have written, so neither is trusted
+	test('holds a number of copies outside its range to the nearest one inside it', async() => {
+		const rootDirectory = makeTempDirectory();
+		const runtimePaths = createRuntimePaths(rootDirectory);
+		const { settingsStore } = createFakeSettingsStore();
+		const { storage } = createFakeStorage();
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
+
+		await manager.initialize();
+
+		expect((await manager.setRetainedBackupCount(-4)).location.retainedBackupCount).toBe(MINIMUM_RETAINED_BACKUP_COUNT);
+		expect((await manager.setRetainedBackupCount(9000)).location.retainedBackupCount).toBe(MAXIMUM_RETAINED_BACKUP_COUNT);
+		expect((await manager.setRetainedBackupCount(4.6)).location.retainedBackupCount).toBe(5);
+		expect((await manager.setRetainedBackupCount(Number.NaN)).location.retainedBackupCount).toBe(DEFAULT_RETAINED_BACKUP_COUNT);
+	});
+
+	test('persists a number of copies chosen by the user and asks for a backup covering the change', async() => {
+		const rootDirectory = makeTempDirectory();
+		const logDirectory = makeTempDirectory();
+		startLogger(logDirectory);
+		const runtimePaths = createRuntimePaths(rootDirectory);
+		const { settingsStore, getSavedSettings } = createFakeSettingsStore();
+		const { selectedCounts, storage } = createFakeStorage();
+		const onBackupSettingsChanged = vi.fn();
+		const manager = createTestManager({ runtimePaths, storage, settingsStore, onBackupSettingsChanged });
+
+		await manager.initialize();
+
+		const result = await manager.setRetainedBackupCount(4);
+
+		expect(result.ok).toBe(true);
+		expect(getSavedSettings().retainedBackupCount).toBe(4);
+		expect(selectedCounts).toEqual([ DEFAULT_RETAINED_BACKUP_COUNT, 4 ]);
+		expect(onBackupSettingsChanged).toHaveBeenCalledTimes(1);
+		expect(readLoggedMessages(logDirectory)).toEqual([ 'Backup copy count changed' ]);
+	});
+
+	// The folder the user chose is not lost by saving the count beside it, and the other way round
+	test('saves the folder and the number of copies together', async() => {
+		const rootDirectory = makeTempDirectory();
+		const chosenDirectory = makeTempDirectory();
+		const runtimePaths = createRuntimePaths(rootDirectory);
+		const { settingsStore, getSavedSettings } = createFakeSettingsStore();
+		const { storage } = createFakeStorage();
+		const manager = createTestManager({ runtimePaths, storage, settingsStore });
+
+		await manager.initialize();
+		await manager.setRetainedBackupCount(4);
+		await manager.setBackupDirectory(chosenDirectory);
+
+		expect(getSavedSettings()).toEqual({
+			directory: chosenDirectory,
+			retainedBackupCount: 4
+		});
 	});
 });

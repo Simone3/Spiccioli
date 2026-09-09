@@ -11,6 +11,7 @@ export interface BackupLocationIpcChannels {
 	chooseBackupDirectory: string;
 	setBackupDirectory: string;
 	setDefaultBackupDirectory: string;
+	setRetainedBackupCount: string;
 }
 
 // The native folder dialog names the application, so its wording is supplied instead of being fixed here
@@ -91,5 +92,9 @@ export const registerBackupLocationIpcHandlers = ({
 
 	ipcMain.handle(channels.setDefaultBackupDirectory, () => {
 		return backupLocationManager.setDefaultBackupDirectory();
+	});
+
+	ipcMain.handle(channels.setRetainedBackupCount, (_event, retainedBackupCount: number) => {
+		return backupLocationManager.setRetainedBackupCount(retainedBackupCount);
 	});
 };

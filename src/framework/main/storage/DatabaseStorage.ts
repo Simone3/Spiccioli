@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { appLogger, type AppLogFields } from 'src/framework/main/logging/AppLogger';
 import type { AppDatabase } from 'src/framework/main/storage/AppDatabase';
-import { createDatabaseBackup } from 'src/framework/main/storage/DatabaseBackup';
+import { latestBackupExists, readLastArchiveBackupTime, writeArchiveBackup, writeLatestBackup } from 'src/framework/main/storage/DatabaseBackup';
 import { isInvalidChangeError } from 'src/framework/main/storage/InvalidChangeError';
 import { getErrorMessage } from 'src/framework/utils/ErrorUtils';
 import type { BackupFileNaming } from 'src/framework/types/BackupTypes';
@@ -18,7 +18,19 @@ export interface DatabaseStorage<TCommand, TRecord> {
 	getDatabaseDirectory: () => string;
 	getBackupDirectory: () => string;
 	setBackupDirectory: (backupDirectory: string) => void;
-	createBackup: () => Promise<BackupResult>;
+	setRetainedBackupCount: (retainedBackupCount: number) => void;
+
+	// Refreshes the copy that is kept up to date, which is the only backup operation that reads the database
+	syncLatestBackup: () => Promise<BackupResult>;
+
+	// Adds a dated copy beside it, taken from that copy rather than from the database. Only called when the folder keeps more than
+	// the up-to-date copy alone, because a dated copy that is rotated out the moment it is written is worse than none.
+	archiveLatestBackup: () => Promise<BackupResult>;
+
+	// When the newest dated copy in the folder was written, read from the folder itself so that it survives a restart and so that a
+	// folder that was just selected is immediately due for one
+	getLastArchiveTime: () => Promise<Date | undefined>;
+
 	prepareForShutdown: () => Promise<void>;
 }
 
@@ -27,6 +39,8 @@ export interface CreateDatabaseStorageOptions<TCommand, TRecord> {
 	databaseFileName: string;
 	backupDirectory: string;
 	backupNaming: BackupFileNaming;
+
+	// How many copies the folder keeps, counting the up-to-date one. It is a user setting, so this is only what it starts the run at.
 	retainedBackupCount: number;
 
 	// Opens the database this storage owns. It is called lazily, on the first operation that needs it, and never again once shutdown closed it.
@@ -49,7 +63,7 @@ export const createDatabaseStorage = <TCommand, TRecord>({
 	databaseFileName,
 	backupDirectory: initialBackupDirectory,
 	backupNaming,
-	retainedBackupCount,
+	retainedBackupCount: initialRetainedBackupCount,
 	openDatabase,
 	readRecords,
 	executeCommand,
@@ -65,6 +79,7 @@ export const createDatabaseStorage = <TCommand, TRecord>({
 	let database: AppDatabase | undefined;
 	let isClosed = false;
 	let backupDirectory = initialBackupDirectory;
+	let retainedBackupCount = initialRetainedBackupCount;
 	let backupStatus: BackupStatus = {
 		state: 'idle',
 		directory: initialBackupDirectory
@@ -165,25 +180,48 @@ export const createDatabaseStorage = <TCommand, TRecord>({
 	};
 
 	// A failed backup is reported without touching the database status: the records are already saved in the local database either way
-	const createBackup = async(): Promise<BackupResult> => {
+	const reportBackupFailure = (error: unknown, message: string, fields: AppLogFields): BackupResult => {
+		const failureMessage = getErrorMessage(error);
+
+		backupStatus = {
+			...backupStatus,
+			state: 'failed',
+			directory: backupDirectory,
+			message: failureMessage
+		};
+
+		appLogger.error(message, {
+			...fields,
+			backupDirectory,
+			error: failureMessage
+		});
+
+		return {
+			ok: false,
+			message: failureMessage,
+			status: backupStatus
+		};
+	};
+
+	const syncLatestBackup = async(): Promise<BackupResult> => {
 		try {
-			const backupPath = await createDatabaseBackup({
+			const backupPath = await writeLatestBackup({
 				database: getDatabase(),
 				backupDirectory,
 				temporaryDirectory: databaseDirectory,
-				naming: backupNaming,
-				retainedBackupCount,
-				now
+				naming: backupNaming
 			});
 
 			backupStatus = {
+				...backupStatus,
 				state: 'ok',
 				directory: backupDirectory,
-				lastBackupAt: getCurrentDate().toISOString(),
-				lastBackupPath: backupPath
+				latestCopyAt: getCurrentDate().toISOString(),
+				latestCopyPath: backupPath,
+				message: undefined
 			};
 
-			appLogger.info('Database backup written', {
+			appLogger.info('The up-to-date database backup copy was written', {
 				type: 'storage.backup',
 				backupPath
 			});
@@ -195,28 +233,61 @@ export const createDatabaseStorage = <TCommand, TRecord>({
 			};
 		}
 		catch(error) {
-			const message = getErrorMessage(error);
+			return reportBackupFailure(error, 'Could not write the up-to-date database backup copy', { type: 'storage.backup' });
+		}
+	};
+
+	// The dated copy is taken from the up-to-date one, so a folder that has not received that one yet — one just selected, most of
+	// all — gets it first rather than being left without a dated copy until the next task change
+	const archiveLatestBackup = async(): Promise<BackupResult> => {
+		try {
+			if(!await latestBackupExists(backupNaming, backupDirectory)) {
+				await writeLatestBackup({
+					database: getDatabase(),
+					backupDirectory,
+					temporaryDirectory: databaseDirectory,
+					naming: backupNaming
+				});
+			}
+
+			const backupPath = await writeArchiveBackup({
+				backupDirectory,
+				naming: backupNaming,
+
+				// The count the user chooses covers the up-to-date copy as well, and that one is never rotated out
+				retainedArchiveCount: Math.max(0, retainedBackupCount - 1),
+
+				now
+			});
 
 			backupStatus = {
-				state: 'failed',
+				...backupStatus,
+				state: 'ok',
 				directory: backupDirectory,
-				lastBackupAt: backupStatus.lastBackupAt,
-				lastBackupPath: backupStatus.lastBackupPath,
-				message
+				lastArchiveAt: getCurrentDate().toISOString(),
+				lastArchivePath: backupPath,
+				message: undefined
 			};
 
-			appLogger.error('Could not write the database backup', {
+			appLogger.info('A dated database backup copy was written', {
 				type: 'storage.backup',
-				backupDirectory,
-				error: message
+				backupPath,
+				retainedBackupCount
 			});
 
 			return {
-				ok: false,
-				message,
+				ok: true,
+				backupPath,
 				status: backupStatus
 			};
 		}
+		catch(error) {
+			return reportBackupFailure(error, 'Could not write a dated database backup copy', { type: 'storage.backup' });
+		}
+	};
+
+	const getLastArchiveTime = (): Promise<Date | undefined> => {
+		return readLastArchiveBackupTime(backupNaming, backupDirectory);
 	};
 
 	// The previous folder keeps the copies it already received, and the status starts over because nothing was written to the new one yet
@@ -258,7 +329,12 @@ export const createDatabaseStorage = <TCommand, TRecord>({
 			return backupDirectory;
 		},
 		setBackupDirectory,
-		createBackup,
+		setRetainedBackupCount: (nextRetainedBackupCount: number) => {
+			retainedBackupCount = nextRetainedBackupCount;
+		},
+		syncLatestBackup,
+		archiveLatestBackup,
+		getLastArchiveTime,
 		prepareForShutdown
 	};
 };
