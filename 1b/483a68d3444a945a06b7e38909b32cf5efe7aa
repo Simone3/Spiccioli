@@ -1,0 +1,44 @@
+docs/technical/04-framework.md
+  s_24042e965eea7a::t_45767990554f18 49-50
+src/framework/main/config/BackupLocationManager.ts
+  s_24042e965eea7a::t_c6ad7fa2cbff64 5,9,12-21,27,29-34,36,42-45,51-54,58-60,64,66-68,72,78-92,99,104-109,111,114-115,121-123,125,131,137,140,145-146,149,155,159,164-169,173,177-219,221-225,229,241,243,248-250,252-253,258-260
+src/framework/main/ipc/BackupLocationIpc.ts
+  s_24042e965eea7a::t_052aab9916263a 14,96-99
+src/framework/main/storage/BackupScheduler.ts
+  s_24042e965eea7a::t_3970aee08ec3b5 6-8,13-14,16-22,25-28,32,36,40,57-81,85-86,88,92-93,96,98-103,114-115,117-118,121,124-146,148-153,156-176,179,181-182,201-202,211-230,233,239,243
+src/framework/main/storage/DatabaseBackup.ts
+  s_24042e965eea7a::t_310d5357942792 1,6,11-20,24-35,41-66,82,84,88-110,121-125,131,136-154,156-157,163,170-171,174,182-223,225
+src/framework/main/storage/DatabaseStorage.ts
+  s_24042e965eea7a::t_4fe309d17651db 4,21-33,42-43,66,82,183-206,208,212,216,219-221,224,236-261,264-265,267-269,272,274-275,279-280,284-290,332-337
+src/framework/types/BackupTypes.ts
+  s_24042e965eea7a::t_5e0132c430e486 2-3,13-15,29-31,43-45,48,54-57
+src/framework/types/StorageTypes.ts
+  s_24042e965eea7a::t_0fc59560d0295b 16-17,21-24
+tests/framework/BackupLocationManager.test.ts
+  s_24042e965eea7a::t_c42d231cdc2a9d 4,13-18,21,24,65-67,69,72,74,76-77,80-81,86-96,126,130,134-136,154,156,174,176,182,191,193,205,207,220,222-223,234,236,244,246,253,263,265,278,280,293,295,307,315,320-417
+tests/framework/BackupScheduler.test.ts
+  s_24042e965eea7a::t_d16ea7d0369cb9 10,12-20,24-25,27-32,40,44,61-73,75-82,97-98,104,106,110,115,118-119,126,129-133,145,154,169-170,175-245,248-251,253-262,264-290,292,299-300,313
+tests/framework/DatabaseBackup.test.ts
+  s_24042e965eea7a::t_e3abcff5dfd8b9 1,6,13-14,17,81-83,85,87-96,104,108,111-112,114,123-145,151-167,171-174,176-177,180-182,185,189-211,215-222,224-225,228,233,235-236,239-241,244,251,255,259,263,272,276
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "1b483a68d3444a945a06b7e38909b32cf5efe7aa",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_24042e965eea7a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "755eb65e-3a18-46c4-b468-a9dce84409b0",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
