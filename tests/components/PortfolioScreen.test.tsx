@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeAll } from 'vitest';
+import { afterAll, beforeAll } from 'vitest';
 import {
 	makeAccount,
 	makeInstitution,
@@ -30,6 +30,23 @@ const UNITS = 10000;
 const QUANTITY_UNITS = 1000000;
 
 beforeAll(stubChartLayout);
+
+/**
+ * The document below is a fixed scene, so the day it is read on has to be fixed too. Its newest price is the 1st of August, and
+ * check 3 asks whether a held security has been priced inside the staleness window: left on the real clock, the banner says two
+ * failing checks until that window closes and three ever after, so the assertion rots on the calendar rather than on the code.
+ *
+ * Only `Date` is stood in for. The timers stay real, so the polling `findBy*` queries and `userEvent` still resolve here.
+ */
+const TODAY = new Date('2026-08-20T09:00:00');
+
+beforeAll(() => {
+	vi.useFakeTimers({ toFake: [ 'Date' ], now: TODAY });
+});
+
+afterAll(() => {
+	vi.useRealTimers();
+});
 
 const portfolioDocument = (overrides: Partial<LedgerDocument> = {}): LedgerDocument => {
 	return {
