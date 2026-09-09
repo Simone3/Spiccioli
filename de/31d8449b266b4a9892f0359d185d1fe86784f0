@@ -1,0 +1,24 @@
+tests/components/PortfolioScreen.test.tsx
+  s_24042e965eea7a::t_fb79067ab8a063 3,34-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "de31d8449b266b4a9892f0359d185d1fe86784f0",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_24042e965eea7a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "755eb65e-3a18-46c4-b468-a9dce84409b0",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
