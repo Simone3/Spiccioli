@@ -243,3 +243,36 @@ export const deriveNetWorthSeries = ({ document, walk, today }: NetWorthSeriesOp
 		return { date, value, fromCost };
 	});
 };
+
+/**
+ * The three stretches of the line the chart may be read over ([§3.1]).
+ */
+export const NET_WORTH_WINDOWS = [ '1-year', '5-years', 'all' ] as const;
+
+export type NetWorthWindow = typeof NET_WORTH_WINDOWS[number];
+
+// How many points each window keeps: twelve month ends and today, sixty month ends and today, and every point there is
+const WINDOW_POINTS: Record<NetWorthWindow, number> = {
+	'1-year': 13,
+	'5-years': 61,
+	all: Number.POSITIVE_INFINITY
+};
+
+/**
+ * The stretch of the line a window draws.
+ *
+ * **It cuts the view and never the arithmetic.** Every point kept is net worth at its own date, computed from the start of the
+ * file exactly as it was before the cut, and no point is rebased to the left edge of the window: the line is the headline
+ * quantity wherever it is cut, which is the whole reason it may be cut at all. **The last point is today's under all three
+ * windows**, so the equality with the headline holds whichever one is showing.
+ *
+ * **A file shorter than the window keeps everything it has**, which is what lets the three be offered whatever the file holds.
+ * @param points The whole line, ascending.
+ * @param window Which stretch of it is showing.
+ * @returns The points that window draws, ascending, ending at today.
+ */
+export const windowNetWorthPoints = (points: readonly NetWorthPoint[], window: NetWorthWindow): readonly NetWorthPoint[] => {
+	const kept = WINDOW_POINTS[window];
+
+	return points.length <= kept ? points : points.slice(points.length - kept);
+};

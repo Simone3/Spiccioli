@@ -1,0 +1,38 @@
+/* A raised strip on a card, with the options inset in it. It has no overflow of its own, so a focused option's ring is drawn
+   over the strip rather than clipped by it. */
+.segmented-control {
+	display: inline-flex;
+	gap: 2px;
+	padding: 2px;
+	background-color: var(--colors-background-raised);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 6px;
+}
+
+/* The options are set in the mono of the small uppercase labels, because that is what sits beside them: a card's title on one
+   side of the heading and the switch on the other. */
+.segmented-control-option {
+	padding: 4px 10px;
+	background: none;
+	border: none;
+	border-radius: 4px;
+	font: inherit;
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--colors-text-secondary);
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.segmented-control-option:hover {
+	background-color: var(--colors-interactive-hover-background);
+	color: var(--colors-text-primary);
+}
+
+.segmented-control-option-chosen,
+.segmented-control-option-chosen:hover {
+	background-color: var(--colors-accent-primary);
+	color: var(--colors-text-on-accent);
+}

@@ -7,6 +7,7 @@ import { DataTable } from 'src/components/common/DataTable';
 import { EmptyState } from 'src/components/common/EmptyState';
 import { AmountField } from 'src/components/common/NumericFields';
 import { RowMenu } from 'src/components/common/RowMenu';
+import { SegmentedControl } from 'src/components/common/SegmentedControl';
 
 // A form holds what the field hands it, which is what a save button is enabled against
 const AmountFieldHarness = ({ initial }: { initial?: number }): ReactElement => {
@@ -194,6 +195,41 @@ describe('the one numeric field', () => {
 		await userEvent.click(screen.getByRole('button', { name: 'Elsewhere' }));
 
 		expect(field).toHaveValue('');
+	});
+});
+
+// One of the few is chosen, and the harness holds which so that pressing another is a change and not a no-op
+const SegmentedControlHarness = (): ReactElement => {
+	const [ value, setValue ] = useState<'1-year' | 'all'>('1-year');
+
+	return (
+		<SegmentedControl
+			options={[ { key: '1-year', label: '1 year' }, { key: 'all', label: 'All' } ]}
+			value={value}
+			label='Period shown'
+			onChange={setValue}/>
+	);
+};
+
+describe('the segmented control', () => {
+	test('is a group of real buttons saying which one is pressed, and never a tab list', async() => {
+		stubLedgerBridge();
+		renderWithProviders(<SegmentedControlHarness/>);
+
+		const group = screen.getByRole('group', { name: 'Period shown' });
+
+		expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+		expect(within(group).getByRole('button', { name: '1 year' })).toHaveAttribute('aria-pressed', 'true');
+		expect(within(group).getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'false');
+
+		// The keyboard reaches every option and activates it, which is what makes them controls
+		await userEvent.tab();
+		await userEvent.tab();
+		expect(screen.getByRole('button', { name: 'All' })).toHaveFocus();
+
+		await userEvent.keyboard('{Enter}');
+		expect(screen.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true');
+		expect(screen.getByRole('button', { name: '1 year' })).toHaveAttribute('aria-pressed', 'false');
 	});
 });
 

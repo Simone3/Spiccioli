@@ -259,6 +259,36 @@ describe('the Portfolio screen', () => {
 		expect(screen.queryByText('Holdings, if any, at their latest known price')).not.toBeInTheDocument();
 	});
 
+	test('opens the line on five years, and cuts it to the window that is chosen', async() => {
+		// The vertices of the one line the library draws, which is how many points the window kept
+		const drawnPoints = (): number => {
+			const path = document.querySelector('path.recharts-curve.recharts-line-curve')?.getAttribute('d') ?? '';
+
+			return (path.match(/L/g) ?? []).length + 1;
+		};
+
+		// A decade of history and no holdings at all, so the line is one solid series over a hundred and fifty-two points
+		await renderOpenLedger(portfolioDocument({
+			accounts: [
+				makeAccount({ id: 'current', name: 'Conto Corrente', institutionId: 'fineco', openingBalance: 300000, openingDate: '2014-01-10' })
+			],
+			transactions: [ makeTransaction({ id: 'one', accountId: 'current', date: '2014-02-03' }) ],
+			trades: [],
+			prices: []
+		}));
+
+		await screen.findByRole('img', { name: 'Net worth over time' });
+
+		// Sixty month ends and today, which is where it opens and what it is found on until it is moved
+		expect(drawnPoints()).toBe(61);
+
+		await userEvent.click(screen.getByRole('button', { name: '1 year' }));
+		expect(drawnPoints()).toBe(13);
+
+		await userEvent.click(screen.getByRole('button', { name: 'All' }));
+		expect(drawnPoints()).toBe(152);
+	});
+
 	test('says the line needs history on a file whose accounts have had nothing recorded on them', async() => {
 		await renderOpenLedger(portfolioDocument({ trades: [], prices: [] }));
 
@@ -267,6 +297,9 @@ describe('the Portfolio screen', () => {
 
 		// The pie is not in that state and never says it: opening balances divide by type perfectly well
 		expect(screen.getByRole('img', { name: 'Portfolio split by type' })).toBeInTheDocument();
+
+		// There is no line, so there is nothing for a window to be a window onto
+		expect(screen.queryByRole('group', { name: 'Period shown' })).not.toBeInTheDocument();
 	});
 
 	test('puts the failing-check banner above everything else and follows it to the Checks screen', async() => {

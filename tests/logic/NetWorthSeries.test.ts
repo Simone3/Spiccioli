@@ -2,7 +2,7 @@ import { makeAccount, makeInstitution, makePrice, makeSeededDocument, makeSecuri
 import { createSpiccioliTranslator } from 'src/i18n/Translations';
 import { deriveHoldings, walkPositions } from 'src/logic/investments/Holdings';
 import { derivePortfolioBalances } from 'src/logic/portfolio/NetWorth';
-import { deriveNetWorthSeries, type NetWorthPoint } from 'src/logic/portfolio/NetWorthSeries';
+import { deriveNetWorthSeries, windowNetWorthPoints, type NetWorthPoint } from 'src/logic/portfolio/NetWorthSeries';
 import type { LedgerDocument } from 'src/types/LedgerTypes';
 
 /**
@@ -235,5 +235,45 @@ describe('the final point', () => {
 		// The two agree not because nothing falls back to cost at today, but because both sides fall back to the same thing
 		expect(last.value).toBe(figures.netWorth);
 		expect(last.fromCost).toBe(true);
+	});
+});
+
+describe('the window the line is read over', () => {
+	// A month end a month apart, ascending, which is the shape the window is cut out of
+	const line = (count: number): NetWorthPoint[] => {
+		return Array.from({ length: count }, (unused, index): NetWorthPoint => {
+			return { date: `2026-01-${String(index + 1).padStart(2, '0')}`, value: index, fromCost: false };
+		});
+	};
+
+	test('keeps twelve month ends and today over a year, and sixty and today over five', () => {
+		expect(windowNetWorthPoints(line(200), '1-year')).toHaveLength(13);
+		expect(windowNetWorthPoints(line(200), '5-years')).toHaveLength(61);
+	});
+
+	test('keeps every point over all time', () => {
+		expect(windowNetWorthPoints(line(200), 'all')).toHaveLength(200);
+	});
+
+	test('ends at today under every window, which is what keeps the last point the headline', () => {
+		const points = line(200);
+		const last = points[points.length - 1];
+
+		for(const window of [ '1-year', '5-years', 'all' ] as const) {
+			const shown = windowNetWorthPoints(points, window);
+
+			expect(shown[shown.length - 1]).toBe(last);
+		}
+	});
+
+	test('shows what the file has where it is shorter than the window', () => {
+		expect(windowNetWorthPoints(line(4), '1-year')).toHaveLength(4);
+		expect(windowNetWorthPoints(line(0), '5-years')).toHaveLength(0);
+	});
+
+	test('cuts the view and never the figures', () => {
+		const points = line(200);
+
+		expect(windowNetWorthPoints(points, '1-year')).toEqual(points.slice(187));
 	});
 });

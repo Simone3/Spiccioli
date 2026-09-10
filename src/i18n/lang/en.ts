@@ -195,6 +195,16 @@ export const EN_TRANSLATIONS = {
 			fromPrices: 'Holdings, if any, at their latest known price',
 			fromCost: 'At least one holding at cost — no price to value it at',
 			rates: 'Net of capital-gains tax, sell fees and pension exit tax at today’s rates',
+
+			// The three stretches the line may be read over. Every point is the same figure under all three; what changes is how
+			// many of them are drawn.
+			window: {
+				label: 'Period shown',
+				'1-year': '1 year',
+				'5-years': '5 years',
+				all: 'All'
+			},
+
 			needsHistory: 'There is no history to draw yet — the line fills in as transactions and trades arrive. The figures above are the opening balances.'
 		},
 

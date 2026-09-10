@@ -12,13 +12,14 @@ import { APP_ROUTES } from 'src/components/shell/AppRoutes';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useChecks } from 'src/contexts/ChecksContext';
 import { useLedger } from 'src/contexts/LedgerContext';
+import { useRemembered } from 'src/contexts/ScreenMemoryContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { indexInstitutions, isAccountClosed, sortAccounts } from 'src/logic/accounts/Accounts';
 import { deriveHoldings, walkPositions } from 'src/logic/investments/Holdings';
 import { deriveGainsAndCosts } from 'src/logic/portfolio/GainsAndCosts';
 import { derivePortfolioBalances } from 'src/logic/portfolio/NetWorth';
-import { deriveNetWorthSeries } from 'src/logic/portfolio/NetWorthSeries';
+import { deriveNetWorthSeries, type NetWorthWindow } from 'src/logic/portfolio/NetWorthSeries';
 import { deriveTypeBreakdown } from 'src/logic/portfolio/TypeBreakdown';
 
 /**
@@ -26,7 +27,9 @@ import { deriveTypeBreakdown } from 'src/logic/portfolio/TypeBreakdown';
  *
  * **Every figure on it is somebody else's output**, which is why it is the last screen built and why it holds no control that
  * changes anything: what it shows is the accounts, the transactions and the trades every other screen records, valued the way
- * the calculations say. It has no filter, no tab and no form.
+ * the calculations say. It has no filter, no tab and no form. **Its one control changes what is drawn and never what is
+ * computed** — the window the line is read over ([§3.1]), which is what the screen is found showing and so is remembered
+ * ([§12.2]) — and every figure on the screen is the same whichever window is chosen.
  *
  * **Everything on it is derived from one walk and one set of balances.** The four lines add to the headline by construction, the
  * breakdown by account totals to the same headline, the breakdown by type divides the same figures, and the last point of the
@@ -43,6 +46,9 @@ export const PortfolioScreen = (): ReactElement => {
 	const { failingCount } = useChecks();
 
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
+
+	// Five years is where the line opens, and where it is found until it is moved ([§3.1])
+	const [ chartWindow, setChartWindow ] = useRemembered<NetWorthWindow>('portfolio', 'chartWindow', '5-years');
 
 	const portfolio = useMemo(() => {
 		if(!document) {
@@ -94,7 +100,11 @@ export const PortfolioScreen = (): ReactElement => {
 			</div>
 
 			<TypeBreakdownCard breakdown={portfolio.breakdown}/>
-			<NetWorthChart points={portfolio.series} hasHistory={document.transactions.length > 0 || document.trades.length > 0}/>
+			<NetWorthChart
+				points={portfolio.series}
+				hasHistory={document.transactions.length > 0 || document.trades.length > 0}
+				window={chartWindow}
+				onWindowChange={setChartWindow}/>
 
 			<section className='portfolio-screen-card'>
 				<h2 className='portfolio-screen-card-title'>{t('portfolio.accounts.title')}</h2>

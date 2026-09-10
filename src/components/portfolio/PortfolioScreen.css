@@ -51,6 +51,15 @@
 	color: var(--colors-text-faint);
 }
 
+/* The chart's heading is a row rather than a title on its own: the card's name at one end and the window the line is read over
+   at the other. It is the one card on the screen whose heading holds a control. */
+.portfolio-screen-chart-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+
 /* The headline. It is the one figure on the screen carrying no note of its own: the four lines beneath it carry them. */
 .portfolio-screen-hero {
 	display: flex;

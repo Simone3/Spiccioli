@@ -33,12 +33,15 @@ import {
  * would not be the safeguard this one is.
  */
 
-// The five screens with something to remember, and exactly what each of them remembers. Portfolio, Checks and Settings carry
-// nothing the user sets, and the bulk-import screen belongs to its paste from beginning to end ([§5.7]), so none of the four is here.
+// The six screens with something to remember, and exactly what each of them remembers. Checks and Settings carry nothing the
+// user sets, and the bulk-import screen belongs to its paste from beginning to end ([§5.7]), so none of the three is here.
+// Portfolio is here for one field and it is not a filter: the window its line is read over changes what is drawn and nothing
+// that is computed ([§3.1]).
 export interface RememberedFields {
 	accounts: 'tab';
 	categories: 'tab' | 'reportFilters';
 	investments: 'tab' | 'purchaseFilters' | 'saleFilters' | 'holding' | 'security';
+	portfolio: 'chartWindow';
 	salaries: 'tab' | 'contract' | 'year';
 	transactions: 'filters' | 'page';
 }
