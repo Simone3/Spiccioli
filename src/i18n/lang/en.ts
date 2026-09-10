@@ -1294,13 +1294,24 @@ export const EN_TRANSLATIONS = {
 
 		// The two charts, side by side, covering every year of the contract
 		charts: {
+			// What the pair of charts is called, which is what the one window they share is named over
+			overTime: 'Salary over time',
+
 			averages: 'Average per month, per year',
 			averageGross: 'average gross',
 			averageNet: 'average net',
 			totals: 'Totals per year',
 			totalGross: 'gross',
 			totalNet: 'net salary',
-			contractLine: 'contract × months'
+			contractLine: 'contract × months',
+
+			// The three stretches both charts are read over. A point here is a year, so these count years rather than name spans.
+			window: {
+				label: 'Years shown',
+				'last-5': 'Last 5',
+				'last-10': 'Last 10',
+				all: 'All'
+			}
 		},
 		form: {
 			addTitle: 'Add payslip',

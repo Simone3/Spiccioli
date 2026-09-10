@@ -23,7 +23,7 @@ import { createLedgerId } from 'src/logic/ledger/LedgerDocument';
 import { formatMinorUnitsAsPlainDecimal, MONEY_SCALES } from 'src/logic/money/Money';
 import { countPayslipsPerContract, contractYearRange, sortContracts } from 'src/logic/salaries/Contracts';
 import { netSalary, payslipsOfContract, sortPayslipsOfYear } from 'src/logic/salaries/Payslips';
-import { deriveSalaryYears, type SalaryYearFigures } from 'src/logic/salaries/SalaryFigures';
+import { deriveSalaryYears, type SalaryChartWindow, type SalaryYearFigures } from 'src/logic/salaries/SalaryFigures';
 import type { Contract, ContractYear, LedgerId, Payslip } from 'src/types/LedgerTypes';
 
 /**
@@ -65,6 +65,9 @@ export const SalariesScreen = (): ReactElement => {
 	const [ tab, setTab ] = useRemembered<SalariesTab>('salaries', 'tab', 'payslips');
 	const [ chosenContractId, setChosenContractId ] = useRemembered<LedgerId | undefined>('salaries', 'contract', undefined);
 	const [ chosenYear, setChosenYear ] = useRemembered<number | undefined>('salaries', 'year', undefined);
+
+	// The two charts share one window, and five years is where it opens ([§8.1])
+	const [ chartWindow, setChartWindow ] = useRemembered<SalaryChartWindow>('salaries', 'chartWindow', 'last-5');
 	const [ contractDraft, setContractDraft ] = useState<ContractDraft | undefined>(undefined);
 	const [ payslipDraft, setPayslipDraft ] = useState<PayslipDraft | undefined>(undefined);
 	const [ contractToDelete, setContractToDelete ] = useState<Contract | undefined>(undefined);
@@ -383,7 +386,7 @@ export const SalariesScreen = (): ReactElement => {
 
 		return (
 			<>
-				<SalaryCharts years={years}/>
+				<SalaryCharts years={years} window={chartWindow} onWindowChange={setChartWindow}/>
 
 				<section className='salaries-screen-card'>
 					<h2 className='salaries-screen-card-title'>{t('payslips.yearTable')}</h2>

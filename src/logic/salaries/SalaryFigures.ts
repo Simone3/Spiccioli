@@ -141,3 +141,39 @@ export const deriveSalaryYears = ({ contract, payslips, contractYears, today }: 
 		};
 	});
 };
+
+/**
+ * The three stretches the two charts of the Payslips tab may be read over ([§8.1]).
+ *
+ * **They count years and do not name spans**, a point on either chart being a year: a window of one year is a dot, which is why
+ * these are the report's kind of window ([§6.1]) rather than the net worth chart's.
+ */
+export const SALARY_CHART_WINDOWS = [ 'last-5', 'last-10', 'all' ] as const;
+
+export type SalaryChartWindow = typeof SALARY_CHART_WINDOWS[number];
+
+// How many years each window keeps
+const WINDOW_YEARS: Record<SalaryChartWindow, number> = {
+	'last-5': 5,
+	'last-10': 10,
+	all: Number.POSITIVE_INFINITY
+};
+
+/**
+ * The years the two charts draw under a window.
+ *
+ * **It cuts the view and never the figures**: every year kept is the row the per-year table holds, computed exactly as it was
+ * before the cut, and the table itself is never windowed. **A contract shorter than the window keeps every year it has**, which
+ * is what lets the three be offered whatever the contract covers.
+ * @param years Every year of the contract, ascending.
+ * @param window Which stretch of them is showing.
+ * @returns The years the charts draw, ascending, ending at the contract's last.
+ */
+export const windowSalaryYears = (
+	years: readonly SalaryYearFigures[],
+	window: SalaryChartWindow
+): readonly SalaryYearFigures[] => {
+	const kept = WINDOW_YEARS[window];
+
+	return years.length <= kept ? years : years.slice(years.length - kept);
+};

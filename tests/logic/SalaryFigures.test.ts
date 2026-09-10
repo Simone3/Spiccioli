@@ -1,6 +1,6 @@
 import { makeContract, makeContractYear, makePayslip } from '../testUtils';
 import { netSalary, sortPayslipsOfYear } from 'src/logic/salaries/Payslips';
-import { deriveSalaryYears, type SalaryYearFigures } from 'src/logic/salaries/SalaryFigures';
+import { deriveSalaryYears, windowSalaryYears, type SalaryYearFigures } from 'src/logic/salaries/SalaryFigures';
 import type { ContractYear, Payslip } from 'src/types/LedgerTypes';
 
 const TODAY = '2026-08-18';
@@ -142,5 +142,53 @@ describe('the per-year rows', () => {
 		]);
 
 		expect(rowOf(rows, 2025).payslipCount).toBe(1);
+	});
+});
+
+describe('the window the two charts are read over', () => {
+	// A year per row, ascending, which is the shape the window is cut out of
+	const rows = (count: number): SalaryYearFigures[] => {
+		return Array.from({ length: count }, (unused, index): SalaryYearFigures => {
+			return {
+				year: 2000 + index,
+				payslipCount: 12,
+				yearContractGross: 0,
+				totalGross: 0,
+				totalNetSalary: 0,
+				workingDays: undefined,
+				grossPerHour: undefined,
+				netPerHour: undefined,
+				yearAvgGross: 0,
+				yearAvgNet: 0
+			};
+		});
+	};
+
+	test('counts years rather than months, keeping five of them or ten', () => {
+		expect(windowSalaryYears(rows(20), 'last-5').map((row) => {
+			return row.year;
+		})).toEqual([ 2015, 2016, 2017, 2018, 2019 ]);
+
+		expect(windowSalaryYears(rows(20), 'last-10')).toHaveLength(10);
+	});
+
+	test('keeps every year of the contract over all of it', () => {
+		expect(windowSalaryYears(rows(20), 'all')).toHaveLength(20);
+	});
+
+	test('shows every year a contract shorter than the window has', () => {
+		expect(windowSalaryYears(rows(3), 'last-5')).toHaveLength(3);
+		expect(windowSalaryYears(rows(0), 'last-10')).toHaveLength(0);
+	});
+
+	test('ends on the contract’s last year under every window', () => {
+		const years = rows(20);
+		const last = years[years.length - 1];
+
+		for(const window of [ 'last-5', 'last-10', 'all' ] as const) {
+			const shown = windowSalaryYears(years, window);
+
+			expect(shown[shown.length - 1]).toBe(last);
+		}
 	});
 });
