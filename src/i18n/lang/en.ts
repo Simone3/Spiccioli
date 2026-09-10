@@ -1294,9 +1294,6 @@ export const EN_TRANSLATIONS = {
 
 		// The two charts, side by side, covering every year of the contract
 		charts: {
-			// What the pair of charts is called, which is what the one window they share is named over
-			overTime: 'Salary over time',
-
 			averages: 'Average per month, per year',
 			averageGross: 'average gross',
 			averageNet: 'average net',

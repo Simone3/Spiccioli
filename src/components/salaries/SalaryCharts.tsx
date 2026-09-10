@@ -22,9 +22,11 @@ import {
  * year and there is no term to state, so the point is left out of that series and the line skips it. Both totals are genuinely
  * zero in that year and are drawn as zero, which is the difference between a figure and an absence.
  *
- * **One window governs both, and it is one control and not two** ([§8.1]). The two charts are read across — an average against
- * a total, both against the contract line — so a window applying to one and not the other would be comparing two periods; and a
- * switch on each card would be one state wearing two faces, which reads as a defect the first time moving one moves the other.
+ * **One window, shown on each of the two cards** ([§8.1]). The two charts are read across — an average against a total, both
+ * against the contract line — so the window is the pair's and moving either switch moves both. **The control is drawn on each
+ * card rather than once above them** so that it is always beside the chart it governs, including where the window narrows and
+ * the two cards stack.
+ *
  * **It cuts the view and never the figures**: the per-year table below is never windowed, and every point kept is the figure it
  * always was.
  */
@@ -91,37 +93,40 @@ export const SalaryCharts = ({ years, window, onWindowChange }: SalaryChartsProp
 	});
 
 	return (
-		<>
-			<div className='salaries-screen-charts-heading'>
-				<h2 className='salaries-screen-card-title'>{t('payslips.charts.overTime')}</h2>
-				<SegmentedControl
-					options={windowOptions}
-					value={window}
-					label={t('payslips.charts.window.label')}
-					onChange={onWindowChange}/>
-			</div>
-
-			<div className='salaries-screen-charts'>
-				<section className='salaries-screen-card'>
+		<div className='salaries-screen-charts'>
+			<section className='salaries-screen-card'>
+				<div className='salaries-screen-card-heading'>
 					<h2 className='salaries-screen-card-title'>{t('payslips.charts.averages')}</h2>
-					<LineChart
-						points={averagePoints}
-						series={averageSeries}
-						label={t('payslips.charts.averages')}
-						formatValue={formatter.amount}
-						formatAxisValue={axisValue}/>
-				</section>
+					<SegmentedControl
+						options={windowOptions}
+						value={window}
+						label={t('payslips.charts.window.label')}
+						onChange={onWindowChange}/>
+				</div>
+				<LineChart
+					points={averagePoints}
+					series={averageSeries}
+					label={t('payslips.charts.averages')}
+					formatValue={formatter.amount}
+					formatAxisValue={axisValue}/>
+			</section>
 
-				<section className='salaries-screen-card'>
+			<section className='salaries-screen-card'>
+				<div className='salaries-screen-card-heading'>
 					<h2 className='salaries-screen-card-title'>{t('payslips.charts.totals')}</h2>
-					<LineChart
-						points={totalPoints}
-						series={totalSeries}
-						label={t('payslips.charts.totals')}
-						formatValue={formatter.amount}
-						formatAxisValue={axisValue}/>
-				</section>
-			</div>
-		</>
+					<SegmentedControl
+						options={windowOptions}
+						value={window}
+						label={t('payslips.charts.window.label')}
+						onChange={onWindowChange}/>
+				</div>
+				<LineChart
+					points={totalPoints}
+					series={totalSeries}
+					label={t('payslips.charts.totals')}
+					formatValue={formatter.amount}
+					formatAxisValue={axisValue}/>
+			</section>
+		</div>
 	);
 };

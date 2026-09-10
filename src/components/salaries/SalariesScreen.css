@@ -7,16 +7,6 @@
 }
 
 /* The two charts, side by side, each covering every year of the contract. They drop under each other where there is no room. */
-/* The window the pair of charts is read over belongs to both of them, so it sits above the two cards rather than inside either
-   one. The row is what names the pair and holds the one switch. */
-.salaries-screen-charts-heading {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 16px;
-	margin-bottom: 12px;
-}
-
 .salaries-screen-charts {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -40,6 +30,15 @@
 	background-color: var(--colors-background-secondary);
 	border: 1px solid var(--colors-border-subtle);
 	border-radius: 6px;
+}
+
+/* A chart card's heading is a row rather than a title on its own: what the chart is called at one end and the window it is read
+   over at the other. The window is the pair's, so both charts draw the same switch and either one moves both. */
+.salaries-screen-card-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
 }
 
 .salaries-screen-card-title {

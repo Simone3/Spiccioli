@@ -9,8 +9,8 @@ import type { SalaryChartWindow, SalaryYearFigures } from 'src/logic/salaries/Sa
 /**
  * The two charts of the Payslips tab and the one window they share.
  *
- * **What is asserted here is that there is one switch and that both charts follow it**: a window applying to one and not the
- * other would be putting two periods side by side and calling it a comparison ([§8.1]). The charts' own drawing is asserted in
+ * **What is asserted here is that the two switches are one window**: each chart carries the control, moving either moves both,
+ * and there is no moment at which the two charts are showing different years ([§8.1]). The charts' own drawing is asserted in
  * `LineChart.test.tsx`.
  *
  * The container measures the box it is put in, and jsdom lays nothing out, so `stubChartLayout` stands in for the file.
@@ -48,6 +48,13 @@ const drawnYears = (chart: string): number => {
 	return (path.match(/L/g) ?? []).length + 1;
 };
 
+// The switch drawn on one chart's own card
+const switchOf = (chart: string): HTMLElement => {
+	const section = screen.getByRole('img', { name: chart }).closest('section') as HTMLElement;
+
+	return within(section).getByRole('group', { name: 'Years shown' });
+};
+
 const renderCharts = async(): Promise<void> => {
 	stubLedgerBridge();
 	renderWithProviders(<SalaryChartsHarness/>);
@@ -55,28 +62,37 @@ const renderCharts = async(): Promise<void> => {
 };
 
 describe('the two salary charts', () => {
-	test('share one switch, which is above the pair rather than on either card', async() => {
+	test('each carry the switch, and both open on the last five years', async() => {
 		await renderCharts();
 
 		const switches = screen.getAllByRole('group', { name: 'Years shown' });
 
-		expect(switches).toHaveLength(1);
-		expect(within(switches[0]).getByRole('button', { name: 'Last 5' })).toHaveAttribute('aria-pressed', 'true');
-	});
+		expect(switches).toHaveLength(2);
 
-	test('open on the last five years and follow the switch together', async() => {
-		await renderCharts();
+		for(const control of switches) {
+			expect(within(control).getByRole('button', { name: 'Last 5' })).toHaveAttribute('aria-pressed', 'true');
+		}
 
 		expect(drawnYears('Average per month, per year')).toBe(5);
 		expect(drawnYears('Totals per year')).toBe(5);
+	});
 
-		await userEvent.click(screen.getByRole('button', { name: 'Last 10' }));
+	test('move together whichever of the two switches is pressed', async() => {
+		await renderCharts();
+
+		// The totals chart's own switch, which moves the averages chart beside it
+		await userEvent.click(within(switchOf('Totals per year')).getByRole('button', { name: 'Last 10' }));
+
 		expect(drawnYears('Average per month, per year')).toBe(10);
 		expect(drawnYears('Totals per year')).toBe(10);
+		expect(within(switchOf('Average per month, per year')).getByRole('button', { name: 'Last 10' }))
+			.toHaveAttribute('aria-pressed', 'true');
 
-		// Twelve years, which is more than either window and every row the per-year table holds
-		await userEvent.click(screen.getByRole('button', { name: 'All' }));
+		// And the averages chart's switch moves the totals chart, twelve years being every row the per-year table holds
+		await userEvent.click(within(switchOf('Average per month, per year')).getByRole('button', { name: 'All' }));
+
 		expect(drawnYears('Average per month, per year')).toBe(12);
 		expect(drawnYears('Totals per year')).toBe(12);
+		expect(within(switchOf('Totals per year')).getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true');
 	});
 });
