@@ -1,0 +1,44 @@
+docs/functional/specs/08-salaries.md
+  s_1c24369dae6a81::t_57f266abf7a160 24-27
+docs/functional/why/08-salaries.md
+  s_1c24369dae6a81::t_beb37ae69988e6 15-16
+docs/technical/01-architecture.md
+  s_1c24369dae6a81::t_1ae26587b3c299 77
+src/components/salaries/SalariesScreen.css
+  s_1c24369dae6a81::t_f047ea420ffb45 10-19
+src/components/salaries/SalariesScreen.tsx
+  s_1c24369dae6a81::t_2ccfc25038133a 26,68-70,389
+src/components/salaries/SalaryCharts.tsx
+  s_1c24369dae6a81::t_2d44ff011589be 4,7-12,24-29,36-40,47-48,51,56-61,73,80,94-125
+src/contexts/ScreenMemoryContext.tsx
+  s_1c24369dae6a81::t_5a268da5a2f2cf 38-39,45
+src/i18n/lang/en.ts
+  s_1c24369dae6a81::t_644bcaed24be24 1297-1299,1306-1314
+src/logic/salaries/SalaryFigures.ts
+  s_1c24369dae6a81::t_e67a15bb30180b 144-179
+tests/components/SalaryCharts.test.tsx
+  s_1c24369dae6a81::t_eadd893f51d789 1-82
+tests/logic/SalaryFigures.test.ts
+  s_1c24369dae6a81::t_503eab959944c4 3,147-194
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "61ba5c4f69c3dfeb97fbd5ff789b246ea8c35dbe",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_1c24369dae6a81": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "be89a13d-1b05-4c08-b3c3-bc4cbf03cdee",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
