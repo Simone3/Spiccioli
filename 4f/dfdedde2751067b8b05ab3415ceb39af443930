@@ -1,0 +1,32 @@
+docs/functional/specs/08-salaries.md
+  s_1c24369dae6a81::t_c143ae00966bc1 25
+docs/functional/why/08-salaries.md
+  s_1c24369dae6a81::t_a7d67c2210ebfa 15
+src/components/salaries/SalariesScreen.css
+  s_1c24369dae6a81::t_c9eccfe8d149ef 35-43
+src/components/salaries/SalaryCharts.tsx
+  s_1c24369dae6a81::t_bedee9a7be7dc4 25-29,96-98,100-115,117-130
+tests/components/SalaryCharts.test.tsx
+  s_1c24369dae6a81::t_6cf4b5fff02d97 12-13,51-57,65,70,72-74,78-84,88-92,96
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4fdfdedde2751067b8b05ab3415ceb39af443930",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_1c24369dae6a81": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "be89a13d-1b05-4c08-b3c3-bc4cbf03cdee",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
