@@ -1,0 +1,52 @@
+docs/functional/specs/03-portfolio.md
+  s_1c24369dae6a81::t_35e32a82e26856 42-46
+docs/functional/why/03-portfolio.md
+  s_1c24369dae6a81::t_c5ca114909eb22 25
+docs/technical/01-architecture.md
+  s_1c24369dae6a81::t_d4ac3f8dd14ca6 77
+docs/technical/02-repository-map.md
+  s_1c24369dae6a81::t_c9d82b6bd41972 64
+src/components/common/SegmentedControl.css
+  s_1c24369dae6a81::t_24dcd735689b31 1-38
+src/components/common/SegmentedControl.tsx
+  s_1c24369dae6a81::t_1ebf545e914502 1-66
+src/components/portfolio/NetWorthChart.tsx
+  s_1c24369dae6a81::t_32e67f2b05685a 4,8-13,38-43,53-57,69-70,73,78-84,95,99,112-120
+src/components/portfolio/PortfolioScreen.css
+  s_1c24369dae6a81::t_a0c32d91884eab 54-62
+src/components/portfolio/PortfolioScreen.tsx
+  s_1c24369dae6a81::t_da1a16953bb74e 15,22,30-32,50-52,103-107
+src/contexts/ScreenMemoryContext.tsx
+  s_1c24369dae6a81::t_54e47cac92388d 36-39,44
+src/i18n/lang/en.ts
+  s_1c24369dae6a81::t_a372300e7fe953 198-207
+src/logic/portfolio/NetWorthSeries.ts
+  s_1c24369dae6a81::t_b50d18ab1acd76 246-278
+tests/components/CommonKit.test.tsx
+  s_1c24369dae6a81::t_e48c13b8bfe68a 10,201-235
+tests/components/PortfolioScreen.test.tsx
+  s_1c24369dae6a81::t_1a0fac251584ef 262-291,300-302
+tests/logic/NetWorthSeries.test.ts
+  s_1c24369dae6a81::t_34d4aa0447ba87 5,240-279
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "cf2159c7e447c5b3cb66dda4c093822e38d3dbc1",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_1c24369dae6a81": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "be89a13d-1b05-4c08-b3c3-bc4cbf03cdee",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
