@@ -135,3 +135,23 @@
 	font-size: 13px;
 	line-height: 1.6;
 }
+
+/* The paste card's heading carries the one control that fills the box from a file, so the two sit on one row */
+.bulk-import-screen-card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+/* What the last upload put in the box, stated where it will be read rather than in a dialog that has already closed */
+.bulk-import-screen-uploaded {
+	margin: 0;
+	padding: 8px 12px;
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 8px;
+	background-color: var(--colors-background-field);
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--colors-text-secondary);
+}

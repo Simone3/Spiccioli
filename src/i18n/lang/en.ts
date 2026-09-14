@@ -468,6 +468,51 @@ export const EN_TRANSLATIONS = {
 			one: '1 unreadable',
 			other: '{count} unreadable'
 		},
+		upload: 'Upload…',
+		uploadReading: 'Reading…',
+		uploadTitle: 'Upload a bank export',
+		uploadSubtitle: 'Its rows go into the paste box, where they are read exactly as a paste is.',
+		uploadChooseFile: 'Choose file…',
+		uploadDialogTitle: 'Choose a bank export',
+		template: 'Template',
+		templateChoose: 'Choose a template',
+		templateNote: 'A template says which sheet an export puts its rows on, which columns carry what, and how it writes its dates and its figures. Nothing is worked out from the file itself.',
+		uploadedNotice: {
+			one: 'Read 1 row from {fileName}. The three controls below have been set to what that template declares.',
+			other: 'Read {count} rows from {fileName}. The three controls below have been set to what that template declares.'
+		},
+
+		// The file is refused whole and the paste box is left as it was. A row the template read and the screen cannot is not
+		// one of these: it goes into the box and is marked in the preview like any other unreadable row.
+		uploadRefusal: {
+			notAWorkbook: 'That file is not a spreadsheet this template can read. Nothing has been changed.',
+			sheetMissing: 'That workbook carries no sheet called “{sheet}”, which is where this template expects the rows. Nothing has been changed.',
+			empty: 'That file holds no rows at all. Nothing has been changed.',
+			unreadable: 'That file could not be read. Nothing has been changed.',
+			headerMissing: 'The headings this template expects are not in that file. Nothing has been changed.',
+			columnMissing: 'That file carries no “{label}” column, which this template needs. Nothing has been changed.',
+			noRows: 'The template found its headings and no rows under them. Nothing has been changed.'
+		},
+
+		// What the chooser calls the files it offers, named for the shape rather than for the extension
+		fileTypes: {
+			xlsx: 'Excel workbook',
+			csv: 'CSV file'
+		},
+
+		// One entry per template the application ships: what it is called, and the shape it expects
+		templates: {
+			sample: {
+				name: 'Sample spreadsheet',
+				shape: 'A sheet whose first row carries Date, Description and Amount, with the rows under it. Dates are real dates and amounts are real numbers, which is what a spreadsheet writes when they are typed in.'
+			}
+		},
+		replaceTitle: 'Replace what is in the box?',
+		replaceMessage: {
+			one: 'The paste box already holds 1 row. Uploading replaces it.',
+			other: 'The paste box already holds {count} rows. Uploading replaces them.'
+		},
+		replaceConfirm: 'Replace',
 		pasteTitle: 'Paste rows — tab separated',
 		pasteLabel: 'Pasted rows',
 		pastePlaceholder: 'Paste the three columns straight out of your bank’s export.',

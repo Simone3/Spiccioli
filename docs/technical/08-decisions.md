@@ -69,6 +69,8 @@ Four libraries, and they are the whole of what v1 added to the five runtime depe
 
 **None of them owns anything.** `react-router` is taken in declarative mode only and the ban in [`CLAUDE.md`](../../CLAUDE.md) still stands against its framework mode; recharts' Redux store is internal to recharts and is not a state library this application may reach for — the ledger lives in a context (D2) and nothing else is allowed to hold it.
 
+**The set stayed at four when the import learned to read a file** ([§5.7](../functional/specs/05-transactions.md#57-bulk-import)), and the reason is not only the count. An `.xlsx` is a zip of XML documents, and the part of it a table of rows uses — the sheet list, the shared strings, a cell's value — is a few hundred lines, so `src/main/import/` reads one itself. **What a library would have cost is the boundary D3 depends on**: every spreadsheet reader hands back a JavaScript `number` for an amount cell, which is a binary double that has already been rounded, and converting *that* to cents would put a rounding between the file and the import parser that [§8.2](#82-what-d3-fixes) names as the one place the conversion happens. Reading the literal text out of the document keeps the parser the boundary and lets a figure the file has no room for be refused rather than quietly shortened — which is what [§5.7](../functional/specs/05-transactions.md#57-bulk-import) already promises about a paste. The same goes for the delimited half: the quoting rules are twenty lines, and the encoding is the template's to state rather than something to sniff.
+
 **D10 was taken on `@dnd-kit/react` and landed on the same project's settled pair.** At 0.5.0 that package was pre-1.0 — the project's newer React package, whose API can still move under a minor bump — so `@dnd-kit/core` with `@dnd-kit/sortable` was taken instead. The keyboard sensor and the accessibility layer that decided D10 are in both, so the fallback cost an API and no capability.
 
 ## 8.4 What D14 logs
@@ -100,6 +102,13 @@ Four libraries, and they are the whole of what v1 added to the five runtime depe
 | A save that failed | `storage.save` | `warn` | Which attempt of the five, what the system said, and how long until the next. **`info` when a later attempt or the blocking *Retry* succeeds, `error` after the fifth** |
 | An external modification | `storage.external` | `warn` | The path, the hash that was recorded against the hash found (D13), the name of the copy the displaced version went to, and whether that copy was written |
 | A copy written | `storage.backup` | `info` | Which of the three kinds — close, external, pre-upgrade — its name, how many copies the folder now holds and which was rotated out. **`error` with what the system said when it could not be written** |
+
+**A bank export read into the import** ([§5.7](../functional/specs/05-transactions.md#57-bulk-import)), from `src/main/ipc/ImportIpc.ts`. **An export is somebody's spending line by line, so nothing from inside one is written** — not a description, not a figure, not a heading. What a line says is where the file was, how it was read, and how many rows came out.
+
+| Entry | `type` | Level | Carries |
+| --- | --- | --- | --- |
+| An export read | `import.read` | `info` | The path, whether it was read as a workbook or as a delimited file, and the number of rows the grid came to |
+| An export refused | `import.refused` | `warn` | The path and which refusal it was — not a workbook, the sheet missing, no rows, or unreadable — with what the system said where the file could not be read off the disk at all |
 
 **The renderer's way into the log**, over IPC, in `src/main/ipc/DiagnosticsIpc.ts`. It is what [§1.3](01-architecture.md#13-layers-inside-the-renderer) rests on: a render error written to the renderer console alone would go to a place an installed Spiccioli cannot open and that outlives nothing.
 

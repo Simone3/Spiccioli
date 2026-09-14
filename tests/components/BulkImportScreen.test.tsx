@@ -1,7 +1,8 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { makeAccount, makeInstitution, makeRule, makeSeededDocument, makeTransaction, renderOpenLedger } from '../testUtils';
+import { makeAccount, makeInstitution, makeRule, makeSeededDocument, makeTransaction, renderOpenLedger, stubImportBridge } from '../testUtils';
 import type { LedgerDocument } from 'src/types/LedgerTypes';
+import type { ReadImportFileResult } from 'src/types/ImportIpcTypes';
 
 const withRecords = (overrides: Partial<LedgerDocument> = {}): LedgerDocument => {
 	return {
@@ -34,6 +35,26 @@ const preview = (): HTMLElement => {
 const paste = async(text: string): Promise<void> => {
 	await userEvent.click(screen.getByRole('textbox', { name: 'Pasted rows' }));
 	await userEvent.paste(text);
+};
+
+// A grid the main process would hand over for the sample template: real dates as the day counts a sheet holds them as, and real
+// amounts as the literal text a sheet spells them with
+const SAMPLE_GRID: string[][] = [
+	[ 'Date', 'Description', 'Amount' ],
+	[ '46237', 'Salary August', '2480.55' ],
+	[ '46238', 'Supermarket', '-84.2' ]
+];
+
+const uploadSample = async(result?: ReadImportFileResult): Promise<void> => {
+	stubImportBridge({
+		readFile: () => {
+			return Promise.resolve(result ?? { outcome: 'read', fileName: 'statement.xlsx', rows: SAMPLE_GRID });
+		}
+	});
+
+	await userEvent.click(screen.getByRole('button', { name: 'Upload…' }));
+	await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Template' }), 'sample');
+	await userEvent.click(screen.getByRole('button', { name: 'Choose file…' }));
 };
 
 describe('the Bulk import screen', () => {
@@ -122,5 +143,53 @@ describe('the Bulk import screen', () => {
 		expect(within(list).getByText('Electricity')).toBeInTheDocument();
 		expect(within(list).queryByText('CANONE MENSILE CONTO')).not.toBeInTheDocument();
 		expect(screen.getByText('3 results · + € 1.165,25')).toBeInTheDocument();
+	});
+
+	test('fills the paste box from a file and moves the three controls to what the template declares', async() => {
+		await openImport();
+		await uploadSample();
+
+		// Awaited, because what the box was filled with and what arrived ticked are settled in two renders rather than one
+		expect(await screen.findByText('Read 2 rows from statement.xlsx. The three controls below have been set to what that template declares.')).toBeInTheDocument();
+		expect(screen.getByRole('combobox', { name: 'Date format' })).toHaveValue('DD/MM/YYYY');
+		expect(screen.getByRole('combobox', { name: 'Decimal separator' })).toHaveValue('dot');
+		expect(screen.getByRole('combobox', { name: 'Thousands separator' })).toHaveValue('none');
+
+		// The day counts became dates and every row is one the box takes, which is the whole point of a template
+		expect(within(preview()).getByText('03/08/2026')).toBeInTheDocument();
+		expect(within(preview()).getAllByText('new')).toHaveLength(2);
+		expect(await screen.findByText('2 rows pasted · 2 selected')).toBeInTheDocument();
+	});
+
+	test('asks before it replaces a box that already holds something', async() => {
+		await openImport();
+		await paste(PASTE);
+		await uploadSample();
+
+		expect(screen.getByRole('dialog', { name: 'Replace what is in the box?' })).toBeInTheDocument();
+		expect(screen.getByText('The paste box already holds 4 rows. Uploading replaces them.')).toBeInTheDocument();
+
+		await userEvent.click(screen.getByRole('button', { name: 'Replace' }));
+
+		expect(await within(preview()).findByText('Salary August')).toBeInTheDocument();
+		expect(within(preview()).queryByText('PAGAMENTO POS COOP 2213')).not.toBeInTheDocument();
+	});
+
+	test('leaves the box exactly as it was when the file is not what the template describes', async() => {
+		await openImport();
+		await paste(PASTE);
+		await uploadSample({ outcome: 'refused', refusal: { reason: 'not-a-workbook' } });
+		await userEvent.click(screen.getByRole('button', { name: 'Replace' }));
+
+		expect(await screen.findByText('That file is not a spreadsheet this template can read. Nothing has been changed.')).toBeInTheDocument();
+		expect(within(preview()).getByText('PAGAMENTO POS COOP 2213')).toBeInTheDocument();
+	});
+
+	test('refuses a workbook whose rows are not where the template says, without touching the box', async() => {
+		await openImport();
+		await uploadSample({ outcome: 'read', fileName: 'other.xlsx', rows: [ [ 'Data', 'Causale', 'Importo' ], [ '1', '2', '3' ] ] });
+
+		expect(await screen.findByText('The headings this template expects are not in that file. Nothing has been changed.')).toBeInTheDocument();
+		expect(screen.queryByRole('table', { name: 'Rows to import' })).not.toBeInTheDocument();
 	});
 });

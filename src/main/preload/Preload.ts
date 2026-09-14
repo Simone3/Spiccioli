@@ -2,10 +2,12 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { subscribeToChannel } from 'src/framework/preload/IpcBridge';
 import { SPICCIOLI_APP_INFO_IPC_CHANNELS } from 'src/types/AppInfoIpcChannels';
 import { SPICCIOLI_APP_MENU_IPC_CHANNELS, SPICCIOLI_APP_MENU_IPC_EVENTS } from 'src/types/AppMenuIpcChannels';
+import { SPICCIOLI_IMPORT_IPC_CHANNELS } from 'src/types/ImportIpcChannels';
 import { SPICCIOLI_DIAGNOSTICS_IPC_CHANNELS, SPICCIOLI_LEDGER_IPC_CHANNELS, SPICCIOLI_LEDGER_IPC_EVENTS } from 'src/types/LedgerIpcChannels';
 import { SPICCIOLI_PRICES_IPC_CHANNELS } from 'src/types/PriceIpcChannels';
 import type { SpiccioliAppInfoApi } from 'src/types/AppInfoTypes';
 import type { SpiccioliAppMenuApi } from 'src/types/AppMenuTypes';
+import type { SpiccioliImportApi } from 'src/types/ImportIpcTypes';
 import type { SpiccioliDiagnosticsApi, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
 import type { PricePassProgress, SpiccioliPricesApi } from 'src/types/PriceIpcTypes';
 
@@ -103,6 +105,14 @@ const spiccioliLedger: SpiccioliLedgerApi = {
 	}
 };
 
+// A bank export on its way into the paste box. What goes out says which sheet or which delimiter to read it by, and what comes
+// back is the text of the cells: the main process reads the file and the renderer works out what the columns mean.
+const spiccioliImport: SpiccioliImportApi = {
+	readFile: (request) => {
+		return ipcRenderer.invoke(SPICCIOLI_IMPORT_IPC_CHANNELS.readFile, request);
+	}
+};
+
 // The one thing in the application that reaches the network, and it reaches it from the other side of this bridge: the renderer
 // hands over a listing per security and is handed a quote or a reason back, and never a socket of its own
 const spiccioliPrices: SpiccioliPricesApi = {
@@ -141,4 +151,5 @@ contextBridge.exposeInMainWorld('spiccioliAppInfo', spiccioliAppInfo);
 contextBridge.exposeInMainWorld('spiccioliAppMenu', spiccioliAppMenu);
 contextBridge.exposeInMainWorld('spiccioliLedger', spiccioliLedger);
 contextBridge.exposeInMainWorld('spiccioliPrices', spiccioliPrices);
+contextBridge.exposeInMainWorld('spiccioliImport', spiccioliImport);
 contextBridge.exposeInMainWorld('spiccioliDiagnostics', spiccioliDiagnostics);

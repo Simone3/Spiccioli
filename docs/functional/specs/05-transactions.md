@@ -82,7 +82,20 @@ One screen. One job: get raw rows in without duplicating anything. It is reached
 - **Fixed column order: date · description · amount**, one row per line, **columns separated by tabs**.
 - A line is split on tabs and each field trimmed; **a line that is empty or all whitespace is skipped silently**, not reported as unreadable.
 - **Columns after the third are ignored**, not treated as an error. Only *fewer* than three columns makes a row unreadable.
-- A single signed amount column; debit/credit pairs are not supported. Bank-specific import profiles are future work.
+- A single signed amount column; **the box never carries a debit/credit pair**, a template being what turns one into the signed column it takes ([below](#from-a-file)).
+
+### From a file
+
+**The paste box is still the only thing the application parses.** A bank export cannot be pasted as it stands — it is a spreadsheet, not a column of tabs — so the screen carries an *Upload* button beside the box that reads one and **writes its rows into the box**. Everything after that is the screen exactly as it already is: the preview, the marks, the duplicate flags, the ticks and the count on *Import* all read the box and know nothing about where its text came from.
+
+- **A template is chosen first, and a file second.** *Upload* opens a list of the templates the application ships, named for the bank and the export they read. **There is no generic template and no column mapper** ([§15](15-out-of-scope.md)): a shape nobody wrote a template for is reshaped by hand and pasted, as it always was.
+- **A template says what it reads, and the application reads exactly that.** Which sheet, how far down the rows start, which columns carry the date, the description and the amount, and — because an export is not obliged to write them the way this file does — **what its dates and its separators mean**. Nothing is detected from the data: as with the three controls, the user names the shape and the application obeys.
+- **Choosing a template moves the three format controls** to what that template declares, and the box is filled with the rows as the export wrote them. The controls stay controls: they can be moved afterwards, and moving one re-reads the box like any other change. This is the one thing on the screen that sets them, and it sets them because the template states them — not because a row was examined.
+- **Two kinds of refusal, and they are not the same.** A file the template cannot read *at all* — the wrong sheet, a header that is not there, no rows where the rows should be — **is refused whole**, with a message naming what was expected, and **the box is left as it was**. A row the template read but the screen cannot is not a refusal at all: it goes into the box with everything else and is marked in the preview like any other unreadable row, because an unreadable row never blocks the rows around it.
+- **An amount may be one signed column or a debit-and-credit pair.** Where a template names a pair, the two are read into the one signed figure the box carries — money out negative, money in positive — and a row carrying a figure in both columns cannot be read.
+- **A description is written into the box with its whitespace collapsed**, a tab or a line break inside a cell being something the box cannot carry. It is the same normalisation the duplicate detection already applies, done one step earlier and visibly.
+- **Uploading into a box that is not empty asks first**, and replaces rather than appends.
+- **Nothing about the upload is remembered or recorded.** The template opens unchosen on every import, like every picker in the application ([§5.5](#55-add-transaction)); the file's path is written to the log and its contents never are ([§12](12-storage.md)); and the transactions the import writes carry no more trace of the file than a pasted row carries of the clipboard.
 
 ### The three format controls
 

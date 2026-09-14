@@ -14,6 +14,7 @@ import { logStartupConfiguration } from 'src/main/config/StartupConfigurationLog
 import { registerAppInfoIpcHandlers } from 'src/main/ipc/AppInfoIpc';
 import { registerAppMenuIpcHandlers } from 'src/main/ipc/AppMenuIpc';
 import { registerDiagnosticsIpcHandlers } from 'src/main/ipc/DiagnosticsIpc';
+import { registerImportIpcHandlers } from 'src/main/ipc/ImportIpc';
 import { registerLedgerIpcHandlers } from 'src/main/ipc/LedgerIpc';
 import { registerPricesIpcHandlers } from 'src/main/ipc/PricesIpc';
 import { buildAppMenuTemplate, buildDrawnMenuBar, drawsOwnMenuBar } from 'src/main/menu/AppMenu';
@@ -547,6 +548,16 @@ const startApplication = (): void => {
 		registerPricesIpcHandlers({
 			ipcMain,
 			provider: createYahooPriceProvider({ fetchResource: fetch })
+		});
+
+		// A bank export read into the paste box. It opens a chooser and reads one file when the user asks for it, and does
+		// nothing at all otherwise: no watching, no folder and no second way in.
+		registerImportIpcHandlers({
+			ipcMain,
+			dialog,
+			getWindow: () => {
+				return mainWindow;
+			}
 		});
 		registerLedgerIpcHandlers({
 			ipcMain,

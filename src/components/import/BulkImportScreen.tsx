@@ -2,15 +2,19 @@ import 'src/components/import/BulkImportScreen.css';
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { AccountPicker } from 'src/components/accounts/AccountPicker';
 import { AppButton, AppLinkButton } from 'src/components/common/AppButton';
+import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { EmptyState } from 'src/components/common/EmptyState';
 import { SelectField, type SelectOption } from 'src/components/common/SelectField';
 import { ImportPreviewTable } from 'src/components/import/ImportPreviewTable';
+import { ImportTemplateDialog } from 'src/components/import/ImportTemplateDialog';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useHandOverToTransactions } from 'src/components/shell/ScreenHandoff';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter, usePreferences } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
+import { applyImportTemplate, type ImportTemplate } from 'src/logic/import/ImportTemplate';
+import { extensionsForImportSource } from 'src/logic/import/ImportTemplates';
 import { separatorsCollide } from 'src/logic/preferences/Preferences';
 import {
 	buildImportedTransactions,
@@ -30,6 +34,7 @@ import {
 	type ThousandsSeparator
 } from 'src/types/PreferencesTypes';
 import { CASH_ACCOUNT_TYPES, type LedgerId, type Transaction } from 'src/types/LedgerTypes';
+import type { ImportFileRefusal } from 'src/types/ImportIpcTypes';
 
 /**
  * Bulk import: one screen, one job, and the only text the application parses.
@@ -43,6 +48,11 @@ import { CASH_ACCOUNT_TYPES, type LedgerId, type Transaction } from 'src/types/L
  *
  * **The user lands on Transactions afterwards**, filtered to the account imported into and to the days the rows cover — the
  * ordinary screen with two filters set, where a wrong category is fixed in place. Nothing here previews a categorisation.
+ *
+ * **A file fills the box and never bypasses it.** *Upload* asks which export is being read, reads it, and writes its rows into
+ * the paste box with the three controls moved to what that template declares; everything after that is this screen unchanged.
+ * A file the template cannot read at all is refused here with the box left as it was, and a row it read that the screen cannot
+ * is an ordinary marked row in the preview.
  */
 
 // The three columns, in the one order every import reads
@@ -65,6 +75,14 @@ export const BulkImportScreen = (): ReactElement => {
 
 	// Undefined until a control is changed, which is what keeps the screen opening at whatever the preferences currently hold
 	const [ chosenFormat, setChosenFormat ] = useState<ImportFormat | undefined>(undefined);
+
+	// What the upload is doing: which panel is up, which template it is waiting on an answer about, and what the last attempt
+	// left behind. None of it is remembered — an upload is something the screen is doing, not something it is showing.
+	const [ templateDialogOpen, setTemplateDialogOpen ] = useState(false);
+	const [ templateToReplaceWith, setTemplateToReplaceWith ] = useState<ImportTemplate | undefined>(undefined);
+	const [ reading, setReading ] = useState(false);
+	const [ uploadRefusal, setUploadRefusal ] = useState<string | undefined>(undefined);
+	const [ uploaded, setUploaded ] = useState<{ fileName: string; rowCount: number } | undefined>(undefined);
 
 	const format = useMemo((): ImportFormat => {
 		return chosenFormat ?? {
@@ -135,6 +153,79 @@ export const BulkImportScreen = (): ReactElement => {
 
 		setSeparatorRefusal(undefined);
 		setChosenFormat({ ...format, thousandsSeparator });
+	};
+
+	const refusalMessage = (refusal: ImportFileRefusal): string => {
+		if(refusal.reason === 'sheet-missing') {
+			return t('import.uploadRefusal.sheetMissing', { sheet: refusal.sheet });
+		}
+
+		return refusal.reason === 'not-a-workbook' ? t('import.uploadRefusal.notAWorkbook') : t(`import.uploadRefusal.${refusal.reason}`);
+	};
+
+	/**
+	 * Reads one export under one template, and fills the box with what it holds.
+	 *
+	 * **The box and the three controls move together or not at all**: a file that could not be read leaves both as they were and
+	 * says why, and a file that could leaves the controls at what the template declares — which is what makes the rows it just
+	 * wrote readable without touching anything.
+	 * @param template The template the user chose.
+	 */
+	const readWithTemplate = async(template: ImportTemplate): Promise<void> => {
+		setTemplateDialogOpen(false);
+		setTemplateToReplaceWith(undefined);
+		setUploadRefusal(undefined);
+		setReading(true);
+
+		try {
+			const result = await window.spiccioliImport.readFile({
+				source: template.source,
+				fileTypeName: t(`import.fileTypes.${template.source.kind}`),
+				extensions: extensionsForImportSource(template.source),
+				dialogTitle: t('import.uploadDialogTitle')
+			});
+
+			if(result.outcome === 'cancelled') {
+				return;
+			}
+
+			if(result.outcome === 'refused') {
+				setUploadRefusal(refusalMessage(result.refusal));
+
+				return;
+			}
+
+			const applied = applyImportTemplate(result.rows, template);
+
+			if(applied.outcome === 'refused') {
+				setUploadRefusal(applied.refusal.reason === 'column-missing' ?
+					t('import.uploadRefusal.columnMissing', { label: applied.refusal.label }) :
+					t(`import.uploadRefusal.${applied.refusal.reason === 'header-missing' ? 'headerMissing' : 'noRows'}`));
+
+				return;
+			}
+
+			setChosenFormat(template.format);
+			setSeparatorRefusal(undefined);
+			setPasted(applied.text);
+			setUploaded({ fileName: result.fileName, rowCount: applied.rowCount });
+		}
+		finally {
+			setReading(false);
+		}
+	};
+
+	// Filling a box that already holds something replaces it, so the question is asked before the chooser opens rather than
+	// after a file has been read and there is nothing left to go back to
+	const chooseTemplate = (template: ImportTemplate): void => {
+		if(pasted.trim() === '') {
+			void readWithTemplate(template);
+
+			return;
+		}
+
+		setTemplateDialogOpen(false);
+		setTemplateToReplaceWith(template);
 	};
 
 	const toggleRow = (line: number): void => {
@@ -227,7 +318,23 @@ export const BulkImportScreen = (): ReactElement => {
 			actions={actions}>
 			<div className='bulk-import-screen-columns'>
 				<section className='bulk-import-screen-card'>
-					<h2 className='bulk-import-screen-card-title'>{t('import.pasteTitle')}</h2>
+					<div className='bulk-import-screen-card-header'>
+						<h2 className='bulk-import-screen-card-title'>{t('import.pasteTitle')}</h2>
+						<AppButton
+							disabled={reading}
+							onClick={() => {
+								setUploadRefusal(undefined);
+								setTemplateDialogOpen(true);
+							}}>
+							{reading ? t('import.uploadReading') : t('import.upload')}
+						</AppButton>
+					</div>
+					{uploaded && (
+						<p className='bulk-import-screen-uploaded'>
+							{t('import.uploadedNotice', { fileName: uploaded.fileName, count: uploaded.rowCount })}
+						</p>
+					)}
+					{uploadRefusal !== undefined && <p className='bulk-import-screen-warning'>{uploadRefusal}</p>}
 					<textarea
 						className='bulk-import-screen-paste'
 						value={pasted}
@@ -319,6 +426,27 @@ export const BulkImportScreen = (): ReactElement => {
 						)}
 					</>}
 			</section>
+
+			{templateDialogOpen && (
+				<ImportTemplateDialog
+					onChoose={chooseTemplate}
+					onCancel={() => {
+						setTemplateDialogOpen(false);
+					}}/>
+			)}
+
+			{templateToReplaceWith && (
+				<ConfirmDialog
+					title={t('import.replaceTitle')}
+					message={t('import.replaceMessage', { count: rows.length })}
+					confirmLabel={t('import.replaceConfirm')}
+					onConfirm={() => {
+						void readWithTemplate(templateToReplaceWith);
+					}}
+					onCancel={() => {
+						setTemplateToReplaceWith(undefined);
+					}}/>
+			)}
 		</ScreenLayout>
 	);
 };

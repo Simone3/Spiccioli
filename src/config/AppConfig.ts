@@ -117,6 +117,12 @@ export const SHUTDOWN_CONFIG = {
 	pollIntervalMs: 50
 } as const;
 
+// The bank export an import may be filled from. The bound is on the file rather than on the rows: a whole export is read into
+// memory to be turned into a grid, and a file far past what a statement can be is refused before that happens.
+export const IMPORT_FILE_CONFIG = {
+	maximumFileSizeBytes: 20 * 1024 * 1024
+} as const;
+
 // The transactions list, one of the two paginated tables in the application. Every other table is shown in full.
 export const TRANSACTIONS_CONFIG = {
 	rowsPerPage: 50

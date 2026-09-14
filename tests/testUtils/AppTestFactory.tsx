@@ -15,6 +15,7 @@ import { TranslationProvider } from 'src/i18n/TranslationContext';
 import { DEFAULT_PREFERENCES } from 'src/logic/preferences/Preferences';
 import type { SpiccioliAppInfoApi } from 'src/types/AppInfoTypes';
 import type { SpiccioliAppMenuApi } from 'src/types/AppMenuTypes';
+import type { SpiccioliImportApi } from 'src/types/ImportIpcTypes';
 import type { SpiccioliDiagnosticsApi, SpiccioliLedgerApi } from 'src/types/LedgerIpcTypes';
 import type { SpiccioliPricesApi } from 'src/types/PriceIpcTypes';
 
@@ -61,6 +62,24 @@ export const stubPricesBridge = (overrides: Partial<SpiccioliPricesApi> = {}): S
 	};
 
 	Object.defineProperty(window, 'spiccioliPrices', { configurable: true, value: bridge });
+
+	return bridge;
+};
+
+/**
+ * The one bridge that reads a bank export, stubbed. A test that says nothing about it gets a chooser nobody chose anything in.
+ * @param overrides What this test needs the read to answer.
+ * @returns The bridge that was put on the window.
+ */
+export const stubImportBridge = (overrides: Partial<SpiccioliImportApi> = {}): SpiccioliImportApi => {
+	const bridge: SpiccioliImportApi = {
+		readFile: () => {
+			return Promise.resolve({ outcome: 'cancelled' });
+		},
+		...overrides
+	};
+
+	Object.defineProperty(window, 'spiccioliImport', { configurable: true, value: bridge });
 
 	return bridge;
 };
@@ -180,6 +199,7 @@ export const stubLedgerBridge = (overrides: Partial<SpiccioliLedgerApi> = {}): S
 	Object.defineProperty(window, 'spiccioliLedger', { configurable: true, value: bridge });
 	stubPricesBridge();
 	stubAppInfoBridge();
+	stubImportBridge();
 	Object.defineProperty(window, 'spiccioliDiagnostics', {
 		configurable: true,
 		value: {
