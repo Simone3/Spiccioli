@@ -1,0 +1,90 @@
+docs/functional/specs/05-transactions.md
+  s_3695fd908ba7c2::t_9cd78b2528a723 85-98
+docs/functional/specs/15-out-of-scope.md
+  s_3695fd908ba7c2::t_371231350c7103 20-21
+docs/functional/why/15-out-of-scope.md
+  s_3695fd908ba7c2::t_f94758448cc4e9 53
+scripts/write-sample-import.js
+  s_3695fd908ba7c2::t_09fa39a89dd19a 1-287
+src/components/common/FormDialog.tsx
+  s_3695fd908ba7c2::t_8f637f529afeaf 35-37,106,111,138
+src/components/import/BulkImportScreen.css
+  s_3695fd908ba7c2::t_6bb9136db054cc 138-157
+src/components/import/BulkImportScreen.tsx
+  s_3695fd908ba7c2::t_76554e4d310d66 5,9,16-17,37,51-55,79-86,158-230,321-337,429-449
+src/components/import/ImportTemplateDialog.tsx
+  s_3695fd908ba7c2::t_25860987ca4913 1-75
+src/config/AppConfig.ts
+  s_3695fd908ba7c2::t_06280c0620ea37 120-125
+src/i18n/lang/en.ts
+  s_3695fd908ba7c2::t_d5dc3cf07ae6d0 471-515
+src/logic/import/ImportTemplate.ts
+  s_3695fd908ba7c2::t_ffcb80c861a150 1-354
+src/logic/import/ImportTemplates.ts
+  s_3695fd908ba7c2::t_1e3f53be71ba13 1-50
+src/main/Main.ts
+  s_3695fd908ba7c2::t_3dfd5c95ad1bf1 17,552-561
+src/main/import/DelimitedGrid.ts
+  s_3695fd908ba7c2::t_7b44a4df811207 1-132
+src/main/import/XlsxGrid.ts
+  s_3695fd908ba7c2::t_61d77547df2d8d 1-274
+src/main/import/ZipArchive.ts
+  s_3695fd908ba7c2::t_3fdd1b1d65b7b2 1-205
+src/main/ipc/ImportIpc.ts
+  s_3695fd908ba7c2::t_a1a3363168db34 1-131
+src/main/preload/Preload.ts
+  s_3695fd908ba7c2::t_b9e97cbe644c29 5,10,108-115,154
+src/types/ImportIpcChannels.ts
+  s_3695fd908ba7c2::t_aa815593611b2a 1-6
+src/types/ImportIpcTypes.ts
+  s_3695fd908ba7c2::t_864f7e77607320 1-96
+src/vite-env.d.ts
+  s_3695fd908ba7c2::t_94062e230f049e 5,15
+tests/main/DelimitedGrid.test.ts
+  s_3695fd908ba7c2::t_b91103d49ea22d 1-58
+CLAUDE.md
+  s_3695fd908ba7c2::t_0de33b4593097e 53
+docs/technical/02-repository-map.md
+  s_3695fd908ba7c2::t_7120f1d506157b 37-40,85,127-128,162
+docs/technical/03-build-and-run.md
+  s_3695fd908ba7c2::t_075b16d9c40feb 26
+docs/technical/07-testing.md
+  s_3695fd908ba7c2::t_e63299a752668d 46
+docs/technical/08-decisions.md
+  s_3695fd908ba7c2::t_dd01d1853405f8 72-73,106-112
+package.json
+  s_3695fd908ba7c2::t_5598279bd27ca7 13
+tests/components/BulkImportScreen.test.tsx
+  s_3695fd908ba7c2::t_281a0a06777c27 3,5,40-59,147-194
+tests/logic/ImportTemplate.test.ts
+  s_3695fd908ba7c2::t_844756facf8a3a 1-124
+tests/main/ImportIpc.test.ts
+  s_3695fd908ba7c2::t_2d661ea9ea5435 1-153
+tests/main/SampleImport.test.ts
+  s_3695fd908ba7c2::t_82ed78c4e99bb2 1-96
+tests/main/XlsxGrid.test.ts
+  s_3695fd908ba7c2::t_963b04709f7e45 1-97
+tests/testUtils/AppTestFactory.tsx
+  s_3695fd908ba7c2::t_a97c68c84d9f7b 18,69-86,202
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "61eba2fcfcf16dddeffded3cc0af6d68c5fd6649",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3695fd908ba7c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7d6b7b23-31de-4cf0-a6c4-563ce25d3822",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
