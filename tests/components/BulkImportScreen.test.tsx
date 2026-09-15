@@ -150,7 +150,7 @@ describe('the Bulk import screen', () => {
 		await uploadSample();
 
 		// Awaited, because what the box was filled with and what arrived ticked are settled in two renders rather than one
-		expect(await screen.findByText('Read 2 rows from statement.xlsx. The three controls below have been set to what that template declares.')).toBeInTheDocument();
+		expect(await screen.findByText('Read 2 rows from statement.xlsx.')).toBeInTheDocument();
 		expect(screen.getByRole('combobox', { name: 'Date format' })).toHaveValue('DD/MM/YYYY');
 		expect(screen.getByRole('combobox', { name: 'Decimal separator' })).toHaveValue('dot');
 		expect(screen.getByRole('combobox', { name: 'Thousands separator' })).toHaveValue('none');

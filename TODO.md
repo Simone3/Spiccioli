@@ -3,7 +3,7 @@
 
 
 
-TEST BASIC IMPORT + review
+TEST BASIC IMPORT
 
 
 
@@ -35,13 +35,14 @@ I'm also uploading a sample anonymized file for each.
 	- amount -> "IMPORTO IN EURO"
 
 
+add generic template that tries to find the correct rows, in multiple languages
 
 
 
 
-add transactions via file upload
-	auto detect template and then fallback to generic if none match? way to force template? or just select template after click on "upload" button (multiple templates per bank possible too)
-	upload and then put them in the bulk import standard form
+
+
+
 
 
 add payslips via pdf upload (and save PDF as attachment too?)

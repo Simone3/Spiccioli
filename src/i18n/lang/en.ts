@@ -471,15 +471,14 @@ export const EN_TRANSLATIONS = {
 		upload: 'Upload…',
 		uploadReading: 'Reading…',
 		uploadTitle: 'Upload a bank export',
-		uploadSubtitle: 'Its rows go into the paste box, where they are read exactly as a paste is.',
 		uploadChooseFile: 'Choose file…',
 		uploadDialogTitle: 'Choose a bank export',
 		template: 'Template',
 		templateChoose: 'Choose a template',
-		templateNote: 'A template says which sheet an export puts its rows on, which columns carry what, and how it writes its dates and its figures. Nothing is worked out from the file itself.',
+		templateNote: 'Pick a template for your bank export.',
 		uploadedNotice: {
-			one: 'Read 1 row from {fileName}. The three controls below have been set to what that template declares.',
-			other: 'Read {count} rows from {fileName}. The three controls below have been set to what that template declares.'
+			one: 'Read 1 row from {fileName}.',
+			other: 'Read {count} rows from {fileName}.'
 		},
 
 		// The file is refused whole and the paste box is left as it was. A row the template read and the screen cannot is not
@@ -504,7 +503,7 @@ export const EN_TRANSLATIONS = {
 		templates: {
 			sample: {
 				name: 'Sample spreadsheet',
-				shape: 'A sheet whose first row carries Date, Description and Amount, with the rows under it. Dates are real dates and amounts are real numbers, which is what a spreadsheet writes when they are typed in.'
+				shape: 'A sample spreadsheet with Date, Description and Amount columns.'
 			}
 		},
 		replaceTitle: 'Replace what is in the box?',

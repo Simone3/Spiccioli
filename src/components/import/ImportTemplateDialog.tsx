@@ -52,7 +52,6 @@ export const ImportTemplateDialog = ({ onChoose, onCancel }: ImportTemplateDialo
 	return (
 		<FormDialog
 			title={t('import.uploadTitle')}
-			subtitle={t('import.uploadSubtitle')}
 			canSave={chosen !== undefined}
 			saveLabel={t('import.uploadChooseFile')}
 			onSave={() => {
