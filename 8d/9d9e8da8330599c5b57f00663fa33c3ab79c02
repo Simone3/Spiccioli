@@ -1,0 +1,56 @@
+docs/functional/specs/05-transactions.md
+  s_3695fd908ba7c2::t_30a494125cb545 92-93,95-96,98
+docs/functional/specs/15-out-of-scope.md
+  s_3695fd908ba7c2::t_7b606a79c78057 21
+docs/technical/02-repository-map.md
+  s_3695fd908ba7c2::t_7788b0c60136ef 127-128,162
+docs/technical/03-build-and-run.md
+  s_3695fd908ba7c2::t_0af91b74b6dba7 26
+docs/technical/07-testing.md
+  s_3695fd908ba7c2::t_7b508945c91ddc 46
+package.json
+  s_3695fd908ba7c2::t_1dea90fbed1946 13
+scripts/write-sample-imports.js
+  s_3695fd908ba7c2::t_85376f38c511cb 6,8-11,13-20,28,44-222,255-257,259-281,283-285,287-292,295-301,327,338,356,437-439,441-448,452-454,456-481,483-486,490-491,493,496,498,500-502
+src/i18n/lang/en.ts
+  s_3695fd908ba7c2::t_3bf6537f516be1 502-503,505-523
+src/logic/import/ImportTemplate.ts
+  s_3695fd908ba7c2::t_bcd47aa21c65b6 1-3,5,41-47,60-74,77-96,115-133,140,153-154,219-222,297-380,387,389,395,403-408,410-420,458-472,475,478,492-523,526,543,545
+src/logic/import/ImportTemplates.ts
+  s_3695fd908ba7c2::t_ca410be4c6e319 12-15,20-64,66-77,82-137
+src/logic/transactions/TransactionImport.ts
+  s_3695fd908ba7c2::t_2bfda7f7bce313 277-280,285
+tests/components/BulkImportScreen.test.tsx
+  s_3695fd908ba7c2::t_d622360f3480c4 40-41,43-46,57,175,191
+tests/logic/ImportTemplate.test.ts
+  s_3695fd908ba7c2::t_bc0eead7b96fce 12-13,16-17,21,27-43,108,115,124-139,143,150,154-214
+tests/main/ImportIpc.test.ts
+  s_3695fd908ba7c2::t_68927cc7988bf5 2,54,78
+tests/main/SampleImportFixtures.ts
+  s_3695fd908ba7c2::t_9b276a6f27c630 7,9-11,16-25,28-30,32-39,42,44
+tests/main/SampleImports.test.ts
+  s_3695fd908ba7c2::t_97c60dfc948111 1-111
+tests/main/XlsxGrid.test.ts
+  s_3695fd908ba7c2::t_4c71c3cadfa1c4 1,11-13,19,31,34-35,38,41-47,53-54,58,62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "8d9d9e8da8330599c5b57f00663fa33c3ab79c02",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3695fd908ba7c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7d6b7b23-31de-4cf0-a6c4-563ce25d3822",
+        "model": "unknown"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
