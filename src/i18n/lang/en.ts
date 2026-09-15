@@ -499,11 +499,28 @@ export const EN_TRANSLATIONS = {
 			csv: 'CSV file'
 		},
 
-		// One entry per template the application ships: what it is called, and the shape it expects
+		// One entry per template the application ships: what it is called, and the shape it expects. Each was written against a
+		// real export of that bank's, so what a shape says is what that export actually does.
 		templates: {
-			sample: {
-				name: 'Sample spreadsheet',
-				shape: 'A sample spreadsheet with Date, Description and Amount columns.'
+			isybank: {
+				name: 'Isybank — movements',
+				shape: 'The “Lista Operazione” sheet, with the account and the period printed above the headings. The description is “Operazione” and “Dettagli” joined.'
+			},
+			ing: {
+				name: 'ING — Conto Corrente Arancio',
+				shape: 'The movements sheet, with the account and the period printed above the headings. The date taken is the value date, not the booking date.'
+			},
+			directa: {
+				name: 'Directa — movements',
+				shape: 'The movements sheet, with the account and the period printed above the headings. The description is the type, the ticker, the ISIN and the description joined.'
+			},
+			edenred: {
+				name: 'Edenred — vouchers',
+				shape: 'The voucher movements sheet, which repeats its headings before every movement. The amount is the number of vouchers times what one is worth, and the direction comes from the movement type.'
+			},
+			'trade-republic': {
+				name: 'Trade Republic — transactions',
+				shape: 'The CSV export, with its headings on the first line.'
 			}
 		},
 		replaceTitle: 'Replace what is in the box?',

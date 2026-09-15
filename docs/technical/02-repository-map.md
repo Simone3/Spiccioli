@@ -124,8 +124,8 @@ Thirty files that know nothing about Spiccioli. Listed and explained in [§4](04
 | `logic/menu/DrawnMenu.ts` | The only module that touches the menu bridge: what to draw, when it changed, and what a click asks for |
 | `logic/ledger/` | The document: its version, its seed, its reader, its writer, its refusals and its upgrade ([§9](09-file-format.md)) |
 | `logic/money/Money.ts` | The scales, the one division rule and the roundings |
-| `logic/import/ImportTemplate.ts` | What a template is and what applying one to a grid produces: where the rows begin, which column is which, a spreadsheet's day count turned into a date, and a debit-and-credit pair turned into the one signed column the box takes. **What it produces is text for the paste box** — every reading of it is still the parser's |
-| `logic/import/ImportTemplates.ts` | The templates the application ships, which are the whole of what *Upload* offers. A template is code and not configuration ([§15](../functional/specs/15-out-of-scope.md)); what one is called lives in the translation bundle beside its id |
+| `logic/import/ImportTemplate.ts` | What a template is and what applying one to a grid produces: where the rows begin — under one heading row, or under each of many where an export repeats them — which column is which, a spreadsheet's day count turned into a date, a date taken out of a timestamp, a debit-and-credit pair turned into the one signed column, and a count times a unit price where an export states no figure at all. **What it produces is text for the paste box** — every reading of it is still the parser's |
+| `logic/import/ImportTemplates.ts` | The five templates the application ships — Isybank, ING, Directa, Edenred and Trade Republic — each written against a real export of that bank's. A template is code and not configuration ([§15](../functional/specs/15-out-of-scope.md)); what one is called lives in the translation bundle beside its id |
 | `logic/preferences/Preferences.ts` | The defaults, the reading of whatever the configuration file holds, and the rule that the two separators must differ — which Settings and the import's own controls both apply |
 | `logic/storage/AutosaveScheduler.ts` | The debounce, and the rule that two writes never overlap. **Every write of the open file goes through it**, the blocking failure message's own *Retry* included, and nothing that leaves its queue goes unreported — a save that rejects becomes a failed write rather than vanishing |
 | `types/AppInfoTypes.ts` `AppInfoIpcChannels.ts` | The shape and the channel names of the app-info request |
@@ -159,7 +159,7 @@ Covered in [§7](07-testing.md).
 | `dev.js` | The development loop: Vite dev server, watched esbuild, and an Electron process relaunched on every rebuild |
 | `build-icons.js` | Rasterizes `assets/icon.svg` into the three icon formats the packagers want |
 | `write-sample-ledger.js` | Writes a `.spiccioli` file from [§9](09-file-format.md) alone, importing nothing from `src` — the worked example a migration script starts from, and what `tests/logic/FileFormat.test.ts` holds §9 to |
-| `write-sample-import.js` | Writes the sample bank export the shipped import template reads — a one-sheet workbook, packed by a zip writer of its own and importing nothing from `src`. `tests/main/SampleImport.test.ts` runs it and takes the bytes the whole way to rows the paste box accepts |
+| `write-sample-imports.js` | Writes one sample bank export per import template — each one that bank's real shape with invented figures, packed by a zip writer of its own and importing nothing from `src`. `tests/main/SampleImports.test.ts` runs it and takes every file the whole way to rows the paste box accepts |
 
 ## 2.7 Everything else
 

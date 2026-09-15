@@ -37,12 +37,13 @@ const paste = async(text: string): Promise<void> => {
 	await userEvent.paste(text);
 };
 
-// A grid the main process would hand over for the sample template: real dates as the day counts a sheet holds them as, and real
-// amounts as the literal text a sheet spells them with
+// A grid the main process would hand over for the Isybank template: a preamble row, the headings, and rows whose dates are the
+// day counts a sheet holds a real date as and whose figures are the literal text a sheet spells a real number with
 const SAMPLE_GRID: string[][] = [
-	[ 'Date', 'Description', 'Amount' ],
-	[ '46237', 'Salary August', '2480.55' ],
-	[ '46238', 'Supermarket', '-84.2' ]
+	[ '', 'Conti e Carte:', 'Conto 1000 / 00104567' ],
+	[ 'Data', 'Operazione', 'Dettagli', 'Importo' ],
+	[ '46237', 'Accredito stipendio', '', '2480.55' ],
+	[ '46238', 'Pagamento POS', 'Esselunga', '-84.2' ]
 ];
 
 const uploadSample = async(result?: ReadImportFileResult): Promise<void> => {
@@ -53,7 +54,7 @@ const uploadSample = async(result?: ReadImportFileResult): Promise<void> => {
 	});
 
 	await userEvent.click(screen.getByRole('button', { name: 'Upload…' }));
-	await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Template' }), 'sample');
+	await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Template' }), 'isybank');
 	await userEvent.click(screen.getByRole('button', { name: 'Choose file…' }));
 };
 
@@ -171,7 +172,7 @@ describe('the Bulk import screen', () => {
 
 		await userEvent.click(screen.getByRole('button', { name: 'Replace' }));
 
-		expect(await within(preview()).findByText('Salary August')).toBeInTheDocument();
+		expect(await within(preview()).findByText('Accredito stipendio')).toBeInTheDocument();
 		expect(within(preview()).queryByText('PAGAMENTO POS COOP 2213')).not.toBeInTheDocument();
 	});
 
@@ -187,7 +188,7 @@ describe('the Bulk import screen', () => {
 
 	test('refuses a workbook whose rows are not where the template says, without touching the box', async() => {
 		await openImport();
-		await uploadSample({ outcome: 'read', fileName: 'other.xlsx', rows: [ [ 'Data', 'Causale', 'Importo' ], [ '1', '2', '3' ] ] });
+		await uploadSample({ outcome: 'read', fileName: 'other.xlsx', rows: [ [ 'Date', 'Description', 'Amount' ], [ '1', '2', '3' ] ] });
 
 		expect(await screen.findByText('The headings this template expects are not in that file. Nothing has been changed.')).toBeInTheDocument();
 		expect(screen.queryByRole('table', { name: 'Rows to import' })).not.toBeInTheDocument();

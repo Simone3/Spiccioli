@@ -10,7 +10,7 @@
 		"build-electron": "node scripts/build-electron.js",
 		"build-icons": "electron scripts/build-icons.js",
 		"write-sample-ledger": "node scripts/write-sample-ledger.js",
-		"write-sample-import": "node scripts/write-sample-import.js",
+		"write-sample-imports": "node scripts/write-sample-imports.js",
 		"start": "node scripts/dev.js",
 		"start-packaged": "npm run build && electron-forge start",
 		"test": "vitest run",

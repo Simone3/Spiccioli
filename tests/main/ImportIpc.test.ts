@@ -1,8 +1,5 @@
-import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
 import type { Dialog, IpcMain, IpcMainInvokeEvent, OpenDialogReturnValue } from 'electron';
+import { buildSampleImport } from './SampleImportFixtures';
 import { registerImportIpcHandlers } from 'src/main/ipc/ImportIpc';
 import { SPICCIOLI_IMPORT_IPC_CHANNELS } from 'src/types/ImportIpcChannels';
 import type { ReadImportFileRequest, ReadImportFileResult } from 'src/types/ImportIpcTypes';
@@ -11,28 +8,6 @@ import type { ReadImportFileRequest, ReadImportFileResult } from 'src/types/Impo
  * The one channel a bank export crosses. What it answers with is a grid or a reason, and **never a path**: the file is read
  * here and the window is told what was in it, not where it was.
  */
-
-const PROJECT_ROOT = path.resolve(import.meta.dirname, '..', '..');
-
-const SAMPLE_IMPORT_SCRIPT = path.join(PROJECT_ROOT, 'scripts', 'write-sample-import.js');
-
-/**
- * Runs the sample script the way somebody would run it by hand, and hands back what it wrote.
- * @returns The workbook's bytes.
- */
-const buildSampleImport = (): Buffer => {
-	const directory = mkdtempSync(path.join(tmpdir(), 'spiccioli-sample-import-'));
-	const samplePath = path.join(directory, 'sample-import.xlsx');
-
-	try {
-		execFileSync(process.execPath, [ SAMPLE_IMPORT_SCRIPT, samplePath ], { stdio: 'pipe' });
-
-		return readFileSync(samplePath);
-	}
-	finally {
-		rmSync(directory, { force: true, recursive: true });
-	}
-};
 
 type RegisteredIpcHandler = (event: IpcMainInvokeEvent, ...args: unknown[]) => unknown;
 
@@ -76,7 +51,7 @@ const invokeRead = async(options: HandlerOptions, request: ReadImportFileRequest
 				throw new Error('no such file');
 			}
 
-			return options.bytes ?? buildSampleImport();
+			return options.bytes ?? buildSampleImport('isybank');
 		},
 		fileSize: () => {
 			return options.size ?? 1000;
@@ -100,7 +75,7 @@ describe('reading a bank export over IPC', () => {
 
 		if(result.outcome === 'read') {
 			expect(result.fileName).toBe('statement.xlsx');
-			expect(result.rows[0]).toEqual([ 'Date', 'Description', 'Amount' ]);
+			expect(result.rows[13]).toEqual([ 'Data', 'Operazione', 'Dettagli', 'Conto o carta', 'Contabilizzazione', 'Categoria ', 'Valuta', 'Importo' ]);
 			expect(JSON.stringify(result)).not.toContain('/somewhere');
 		}
 	});

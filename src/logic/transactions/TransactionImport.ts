@@ -274,11 +274,15 @@ const readsAsCents = (decimalText: string): boolean => {
  * amount field refuses a third decimal. The sign is a leading "-" for money out and a leading "+" or nothing at all for money
  * in, and **it may sit on either side of a leading currency marker** — but only on one of the two, a field signed on both being
  * unreadable.
+ *
+ * **It is exported because a template may have to read a figure before the box does** — a cell holding a count and a unit
+ * price is two figures, and the one that multiplies them reads each of them by this and never by a grammar of its own
+ * ([`ImportTemplate.ts`](../import/ImportTemplate.ts)).
  * @param text The column, trimmed.
  * @param format What the controls say the characters mean.
  * @returns The amount in cents, or undefined when the column is not one these separators admit.
  */
-const readAmount = (text: string, format: ImportFormat): Cents | undefined => {
+export const readAmount = (text: string, format: ImportFormat): Cents | undefined => {
 	const outside = stripLeadingSign(text);
 	const inside = stripLeadingSign(stripCurrencyMarker(outside.rest));
 

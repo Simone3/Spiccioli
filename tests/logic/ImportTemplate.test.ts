@@ -9,19 +9,36 @@ import {
  * What a template does to a grid: where it finds its rows, what it makes of the columns, and what it refuses.
  *
  * **Nothing here reads a figure or a date.** A template produces text for the paste box and the box's own parser is what makes
- * anything of it, so the cases below are all about what lands in the box — with `tests/main/SampleImport.test.ts` taking the
- * shipped template the rest of the way, from the bytes of an export to rows the box takes.
+ * anything of it, so the cases below are all about what lands in the box — with `tests/main/SampleImports.test.ts` taking each
+ * shipped template the rest of the way, from the bytes of an export to rows the box accepts.
  */
 
-const TEXT_TEMPLATE: ImportTemplate = {
-	id: 'sample',
+const PAIRED: ImportTemplate = {
+	id: 'isybank',
 	source: { kind: 'csv', delimiter: ';', encoding: 'utf-8' },
 	header: { by: 'labels', labels: [ 'Data', 'Causale', 'Uscite', 'Entrate' ] },
 	date: { column: { by: 'header', label: 'Data' }, cell: 'text' },
-	description: [ { by: 'header', label: 'Causale' } ],
+	description: { columns: [ { by: 'header', label: 'Causale' } ], separator: ' - ' },
 	amount: { kind: 'debitCredit', debit: { by: 'header', label: 'Uscite' }, credit: { by: 'header', label: 'Entrate' } },
 	format: { dateFormat: 'DD/MM/YYYY', decimalSeparator: 'comma', thousandsSeparator: 'dot' },
 	stopAtBlankRow: true
+};
+
+// The shape a voucher account states a movement in: no figure at all, but a count, a unit price and a movement type
+const VOUCHERS: ImportTemplate = {
+	id: 'edenred',
+	source: { kind: 'xlsx', sheet: { by: 'index', index: 0 } },
+	header: { by: 'labels', labels: [ 'Data e ora', 'Tipo', 'Buoni' ], repeats: true },
+	date: { column: { by: 'header', label: 'Data e ora' }, cell: 'text', pattern: /^(\S+)/u },
+	description: { columns: [ { by: 'header', label: 'Tipo' } ], separator: ' - ' },
+	amount: {
+		kind: 'countTimesPrice',
+		column: { by: 'header', label: 'Buoni' },
+		pattern: /^(\d+)\s*da\s+(.+)$/iu,
+		sign: { by: 'column', column: { by: 'header', label: 'Tipo' }, negative: [ 'Utilizzo' ], positive: [ 'Ricarica' ] }
+	},
+	format: { dateFormat: 'DD/MM/YYYY', decimalSeparator: 'comma', thousandsSeparator: 'none' },
+	stopAtBlankRow: false
 };
 
 const textOf = (rows: string[][], template: ImportTemplate): string => {
@@ -88,14 +105,14 @@ describe('applying a template', () => {
 	};
 
 	test('finds its headings under whatever the export prints above them', () => {
-		expect(textOf(rows(), TEXT_TEMPLATE)).toBe([
+		expect(textOf(rows(), PAIRED)).toBe([
 			'03/08/2026\tStipendio agosto\t2.480,55',
 			'04/08/2026\tEsselunga Milano\t-84,20'
 		].join('\n'));
 	});
 
 	test('stops at the blank row, so a totals line never becomes a transaction', () => {
-		const applied = applyImportTemplate(rows(), TEXT_TEMPLATE);
+		const applied = applyImportTemplate(rows(), PAIRED);
 
 		expect(applied.outcome === 'rows' && applied.rowCount).toBe(2);
 	});
@@ -104,21 +121,96 @@ describe('applying a template', () => {
 		expect(textOf([
 			[ 'Data', 'Causale', 'Uscite', 'Entrate' ],
 			[ '04/08/2026', ' Esselunga\tMilano \n ', '84,20', '' ]
-		], TEXT_TEMPLATE)).toBe('04/08/2026\tEsselunga Milano\t-84,20');
+		], PAIRED)).toBe('04/08/2026\tEsselunga Milano\t-84,20');
+	});
+
+	test('joins the description columns that are not empty, and leaves no separator dangling on the ones that are', () => {
+		const template: ImportTemplate = {
+			...PAIRED,
+			description: { columns: [ { by: 'header', label: 'Causale' }, { by: 'header', label: 'Entrate' } ], separator: ' - ' }
+		};
+
+		expect(textOf([
+			[ 'Data', 'Causale', 'Uscite', 'Entrate' ],
+			[ '03/08/2026', 'Stipendio', '', '2.480,55' ],
+			[ '04/08/2026', 'Esselunga', '84,20', '' ]
+		], template).split('\n').map((line) => {
+			return line.split('\t')[1];
+		})).toEqual([ 'Stipendio - 2.480,55', 'Esselunga' ]);
 	});
 
 	test('refuses a file whose headings are not there, rather than reading the rows it can see', () => {
-		expect(refusalOf([ [ 'Date', 'Description', 'Amount' ], [ '1', '2', '3' ] ], TEXT_TEMPLATE)).toBe('header-missing');
+		expect(refusalOf([ [ 'Date', 'Description', 'Amount' ], [ '1', '2', '3' ] ], PAIRED)).toBe('header-missing');
 	});
 
 	test('refuses a file missing one of the columns the template needs', () => {
 		expect(refusalOf([
 			[ 'Data', 'Causale', 'Uscite', 'Entrate' ],
 			[ '03/08/2026', 'Stipendio', '', '2.480,55' ]
-		], { ...TEXT_TEMPLATE, description: [ { by: 'header', label: 'Descrizione' } ] })).toBe('column-missing');
+		], { ...PAIRED, description: { columns: [ { by: 'header', label: 'Descrizione' } ], separator: ' - ' } })).toBe('column-missing');
 	});
 
 	test('refuses a file whose headings are there with nothing under them', () => {
-		expect(refusalOf([ [ 'Data', 'Causale', 'Uscite', 'Entrate' ] ], TEXT_TEMPLATE)).toBe('no-rows');
+		expect(refusalOf([ [ 'Data', 'Causale', 'Uscite', 'Entrate' ] ], PAIRED)).toBe('no-rows');
+	});
+});
+
+describe('an export that prints its headings again before every row', () => {
+	const rows = (): string[][] => {
+		return [
+			[ 'Data e ora', 'Tipo', 'Buoni' ],
+			[ '06/09/2026 10:34:19', 'Utilizzo', '1 da  €9,00' ],
+			[ '', 'ID Terminale', 'Esercente' ],
+			[ '', '000291204', 'CARREFOUR' ],
+			[ 'Data e ora', 'Tipo', 'Buoni' ],
+			[ '27/08/2026 00:32:13', 'Ricarica', '12 da  €9,00' ],
+			[ '', 'ID Carnet', 'Scadenza' ],
+			[ '', 'S20TZWN', '12/2026' ]
+		];
+	};
+
+	test('takes the rows under the headings and nothing else on the sheet', () => {
+		expect(textOf(rows(), VOUCHERS)).toBe([
+			'06/09/2026\tUtilizzo\t-9,00',
+			'27/08/2026\tRicarica\t108,00'
+		].join('\n'));
+	});
+
+	test('takes the date out of a cell the export wrote a time into as well', () => {
+		expect(textOf(rows(), VOUCHERS).split('\n')[0].split('\t')[0]).toBe('06/09/2026');
+	});
+});
+
+describe('a count and a unit price in one cell', () => {
+	const oneRow = (type: string, cell: string): string => {
+		return textOf([
+			[ 'Data e ora', 'Tipo', 'Buoni' ],
+			[ '06/09/2026', type, cell ]
+		], VOUCHERS).split('\t')[2];
+	};
+
+	test('are multiplied exactly, the product being whole cents times a whole count', () => {
+		expect(oneRow('Ricarica', '12 da  €9,00')).toBe('108,00');
+		expect(oneRow('Ricarica', '7 da €12,35')).toBe('86,45');
+	});
+
+	test('take their direction from the column the template names', () => {
+		expect(oneRow('Utilizzo', '1 da  €9,00')).toBe('-9,00');
+		expect(oneRow('Ricarica', '1 da  €9,00')).toBe('9,00');
+	});
+
+	test('are written out under the separators the template declares, so the box reads back what was computed', () => {
+		expect(oneRow('Ricarica', '1 da €0,05')).toBe('0,05');
+		expect(oneRow('Ricarica', '100 da €10,00')).toBe('1000,00');
+	});
+
+	// The template is the wrong place to decide a row is unreadable: the preview marks it, beside what the export actually said
+	test('leave the cell as it stands where the movement type is one the template does not list', () => {
+		expect(oneRow('Rettifica', '1 da  €9,00')).toBe('1 da €9,00');
+	});
+
+	test('leave the cell as it stands where it is not a count and a price at all', () => {
+		expect(oneRow('Ricarica', 'Annullato')).toBe('Annullato');
+		expect(oneRow('Ricarica', '3 da tre euro')).toBe('3 da tre euro');
 	});
 });

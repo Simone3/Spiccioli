@@ -23,7 +23,7 @@ npm run start-packaged # build both bundles once, then electron-forge start
 npm run build          # build-react + build-electron
 npm run build-icons    # regenerate assets/icon.{icns,ico,png} from assets/icon.svg
 npm run write-sample-ledger  # write dist/sample-ledger.spiccioli from §9 alone
-npm run write-sample-import  # write dist/sample-import.xlsx, the export the shipped import template reads
+npm run write-sample-imports # write dist/sample-imports/, one sample bank export per import template
 npm run make           # build the installers for the current platform
 ```
 
