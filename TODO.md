@@ -1,7 +1,48 @@
 
 # current
 
+
+
+TEST BASIC IMPORT + review
+
+
+
+
+Let's now create some real templates to replace our sample one.
+Some of these are weird so we'll probably need to refactor something in our core import logic.
+I'll list them and give the logic I currently use to manually import the data.
+I'm also uploading a sample anonymized file for each.
+
+- Isybank Excel
+	- date -> "Data"
+	- description -> "Operazione" + "Dettagli" (concatenated with hyphen, one of the two may be empty)
+	- amount -> "Importo"
+- Trade Republic CSV
+	- date -> "date"
+	- description -> "description"
+	- amount -> "amount"
+- Edenred Excel
+	- date -> "Data e ora"
+	- description -> "Dettaglio"
+	- amount -> "N. e importo buoni" (value: quantity and single-voucher price multiplied), with sign based on the description ("Utilizzo" means negative, "Ricarica" or "Ordine tessera" or "Ordine Cloud" means positive);
+- Directa Excel
+	- date -> "Data operazione"
+	- description -> "Tipo operazione" + "Ticker" + "Isin" + "Descrizione" (concatenated with hyphen, some of them may be empty)
+	- amount -> "Importo euro"
+- ING Excel
+	- date -> "DATA VALUTA"
+	- description -> "DESCRIZIONE OPERAZIONE"
+	- amount -> "IMPORTO IN EURO"
+
+
+
+
+
+
 add transactions via file upload
+	auto detect template and then fallback to generic if none match? way to force template? or just select template after click on "upload" button (multiple templates per bank possible too)
+	upload and then put them in the bulk import standard form
+
 
 add payslips via pdf upload (and save PDF as attachment too?)
 
@@ -107,15 +148,15 @@ payslip PDF attachment
 individual bonds
 
 extra operations on investments
-    corporate actions (split/merger/ISIN-change adjustment records)
-    transferring a position between brokers
-    merging two securities (e.g. for the mistyped-ISIN case)
+	corporate actions (split/merger/ISIN-change adjustment records)
+	transferring a position between brokers
+	merging two securities (e.g. for the mistyped-ISIN case)
 
 opening position on a holding
 
 taxes
-    loss offsetting in the liquidation estimate, across holdings rather than one at a time
-    carried-forward capital losses, with a warning before the four-year expiry
+	loss offsetting in the liquidation estimate, across holdings rather than one at a time
+	carried-forward capital losses, with a warning before the four-year expiry
 
 percentage, tiered, or per-order sell fees instead of flat-per-holding
 
