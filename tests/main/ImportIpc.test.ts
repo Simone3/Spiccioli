@@ -1,4 +1,4 @@
-import type { Dialog, IpcMain, IpcMainInvokeEvent, OpenDialogReturnValue } from 'electron';
+import type { Dialog, IpcMain, IpcMainInvokeEvent, OpenDialogOptions, OpenDialogReturnValue } from 'electron';
 import { buildSampleImport } from './SampleImportFixtures';
 import { registerImportIpcHandlers } from 'src/main/ipc/ImportIpc';
 import { SPICCIOLI_IMPORT_IPC_CHANNELS } from 'src/types/ImportIpcChannels';
@@ -25,15 +25,31 @@ interface HandlerOptions {
 	throws?: boolean;
 }
 
-const invokeRead = async(options: HandlerOptions, request: ReadImportFileRequest = XLSX_REQUEST): Promise<ReadImportFileResult> => {
+const DOWNLOADS = '/Users/someone/Downloads';
+
+/**
+ * Registers the handler and hands back a way to call it as many times as a test needs, which is what a folder remembered
+ * across imports has to be asked about: one registration is one run of the application.
+ * @param options What this test needs the disk and the chooser to do.
+ * @returns The way to invoke the channel, and the choosers that were opened.
+ */
+const registerRun = (options: HandlerOptions): {
+	read: (request?: ReadImportFileRequest) => Promise<ReadImportFileResult>;
+	opened: OpenDialogOptions[];
+} => {
 	const handlers = new Map<string, RegisteredIpcHandler>();
+
+	// Every chooser the run opened, so that a test can say where each of them opened
+	const opened: OpenDialogOptions[] = [];
 	const ipcMain: Pick<IpcMain, 'handle'> = {
 		handle: vi.fn((channel: string, handler: RegisteredIpcHandler) => {
 			handlers.set(channel, handler);
 		})
 	};
 	const dialog: Pick<Dialog, 'showOpenDialog'> = {
-		showOpenDialog: vi.fn(() => {
+		showOpenDialog: vi.fn((dialogOptions: OpenDialogOptions) => {
+			opened.push(dialogOptions);
+
 			const filePaths = options.chosen ?? [ '/somewhere/statement.xlsx' ];
 
 			return Promise.resolve({ canceled: filePaths.length === 0, filePaths } as OpenDialogReturnValue);
@@ -45,6 +61,9 @@ const invokeRead = async(options: HandlerOptions, request: ReadImportFileRequest
 		dialog,
 		getWindow: () => {
 			return undefined;
+		},
+		initialDirectory: () => {
+			return DOWNLOADS;
 		},
 		readFile: () => {
 			if(options.throws) {
@@ -64,7 +83,16 @@ const invokeRead = async(options: HandlerOptions, request: ReadImportFileRequest
 		throw new Error('The import channel was not registered');
 	}
 
-	return await handler({} as IpcMainInvokeEvent, request) as ReadImportFileResult;
+	return {
+		opened,
+		read: async(request: ReadImportFileRequest = XLSX_REQUEST) => {
+			return await handler({} as IpcMainInvokeEvent, request) as ReadImportFileResult;
+		}
+	};
+};
+
+const invokeRead = async(options: HandlerOptions, request: ReadImportFileRequest = XLSX_REQUEST): Promise<ReadImportFileResult> => {
+	return await registerRun(options).read(request);
 };
 
 describe('reading a bank export over IPC', () => {
@@ -124,5 +152,45 @@ describe('reading a bank export over IPC', () => {
 		);
 
 		expect(result.outcome === 'read' && result.rows).toEqual([ [ 'Città', '12' ] ]);
+	});
+});
+
+describe('where the chooser opens', () => {
+	test('opens the first chooser of a run in the downloads folder, where an export has just landed', async() => {
+		const run = registerRun({});
+
+		await run.read();
+
+		expect(run.opened[0].defaultPath).toBe(DOWNLOADS);
+	});
+
+	test('opens every later chooser of that run where the last export was taken from', async() => {
+		const run = registerRun({ chosen: [ '/Users/someone/Documents/Banks/statement.xlsx' ] });
+
+		await run.read();
+		await run.read();
+
+		expect(run.opened[1].defaultPath).toBe('/Users/someone/Documents/Banks');
+	});
+
+	// The folder was where the user went to, whether or not what they found there could be read: sending them back to the
+	// downloads folder to try again would be the wrong help
+	test('remembers the folder of a file it went on to refuse', async() => {
+		const run = registerRun({ chosen: [ '/Users/someone/Documents/statement.xlsx' ], bytes: Buffer.from('not a workbook', 'utf8') });
+
+		expect((await run.read()).outcome).toBe('refused');
+
+		await run.read();
+
+		expect(run.opened[1].defaultPath).toBe('/Users/someone/Documents');
+	});
+
+	test('remembers nothing from a chooser that was dismissed', async() => {
+		const run = registerRun({ chosen: [] });
+
+		await run.read();
+		await run.read();
+
+		expect(run.opened[1].defaultPath).toBe(DOWNLOADS);
 	});
 });

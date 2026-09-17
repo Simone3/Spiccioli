@@ -32,6 +32,12 @@ export interface RegisterImportIpcHandlersOptions {
 	// The window the chooser is attached to, so that it opens as a sheet rather than as a separate window
 	getWindow: () => BrowserWindow | undefined;
 
+	/**
+	 * Where the chooser opens the **first** time it is opened in a run, which is the downloads folder: a bank export has just
+	 * been downloaded, so that is where it is. Every later import opens where the last one was taken from instead.
+	 */
+	initialDirectory: () => string;
+
 	// Reading the file off the disk, injected so that the handler is testable without one
 	readFile?: (filePath: string) => Buffer;
 
@@ -70,15 +76,28 @@ export const registerImportIpcHandlers = ({
 	ipcMain,
 	dialog,
 	getWindow,
+	initialDirectory,
 	readFile = readFileSync,
 	fileSize = (filePath) => {
 		return statSync(filePath).size;
 	}
 }: RegisterImportIpcHandlersOptions): void => {
+	/**
+	 * The folder the last export was taken from, which is where the next chooser opens.
+	 *
+	 * **It lives as long as the run and no longer.** A statement is imported a few at a time, from one folder, so opening the
+	 * chooser back where the last one came from saves the walk there on every file after the first — and starting a fresh run
+	 * back at the downloads folder is right, that being where the export that prompted the run has just landed. Remembering it
+	 * any longer would be a stored setting, and the preferences of [§10](../../../docs/functional/specs/10-settings.md) are a
+	 * closed list that has no place for one.
+	 */
+	let lastDirectory: string | undefined;
+
 	ipcMain.handle(SPICCIOLI_IMPORT_IPC_CHANNELS.readFile, async(_event, request: ReadImportFileRequest): Promise<ReadImportFileResult> => {
 		const window = getWindow();
 		const options = {
 			title: request.dialogTitle,
+			defaultPath: lastDirectory ?? initialDirectory(),
 			properties: [ 'openFile' as const ],
 			filters: [ { name: request.fileTypeName, extensions: request.extensions } ]
 		};
@@ -89,6 +108,11 @@ export const registerImportIpcHandlers = ({
 		}
 
 		const filePath = chosen.filePaths[0];
+
+		// Taken from the file that was chosen rather than from the one that was read: a file refused afterwards was still found
+		// in the folder the user went to, and sending them back to the downloads folder to try again would be the wrong help
+		lastDirectory = path.dirname(filePath);
+
 		let bytes: Buffer;
 
 		try {

@@ -557,6 +557,11 @@ const startApplication = (): void => {
 			dialog,
 			getWindow: () => {
 				return mainWindow;
+			},
+
+			// Where the first chooser of a run opens: an export that has just been downloaded is in the downloads folder
+			initialDirectory: () => {
+				return app.getPath('downloads');
 			}
 		});
 		registerLedgerIpcHandlers({
