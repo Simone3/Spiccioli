@@ -54,7 +54,7 @@ const uploadSample = async(result?: ReadImportFileResult): Promise<void> => {
 	});
 
 	await userEvent.click(screen.getByRole('button', { name: 'Upload…' }));
-	await userEvent.click(screen.getByRole('button', { name: 'Isybank — movements' }));
+	await userEvent.click(screen.getByRole('button', { name: 'Isybank Excel' }));
 	await userEvent.click(screen.getByRole('button', { name: 'Choose file…' }));
 };
 
@@ -200,12 +200,12 @@ describe('the Bulk import screen', () => {
 
 		expect(screen.getAllByRole('button', { pressed: false })).toHaveLength(5);
 
-		await userEvent.type(screen.getByRole('textbox', { name: 'Search templates' }), 'movements');
+		await userEvent.type(screen.getByRole('textbox', { name: 'Search templates' }), 'excel');
 
-		// Two of the five are called that, and neither of them is chosen by having been typed towards
-		expect(screen.getByRole('button', { name: 'Isybank — movements' })).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: 'Directa — movements' })).toBeInTheDocument();
-		expect(screen.queryByRole('button', { name: 'ING — Conto Corrente Arancio' })).not.toBeInTheDocument();
+		// The four workbooks are called that and the one CSV is not, and none of them is chosen by having been typed towards
+		expect(screen.getAllByRole('button', { pressed: false })).toHaveLength(4);
+		expect(screen.getByRole('button', { name: 'Isybank Excel' })).toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: 'Trade Republic CSV' })).not.toBeInTheDocument();
 		expect(screen.getByRole('button', { name: 'Choose file…' })).toBeDisabled();
 	});
 
@@ -221,11 +221,11 @@ describe('the Bulk import screen', () => {
 	test('forgets a template the search has narrowed away, so the file is never read under one that is out of sight', async() => {
 		await openImport();
 		await userEvent.click(screen.getByRole('button', { name: 'Upload…' }));
-		await userEvent.click(screen.getByRole('button', { name: 'Isybank — movements' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Isybank Excel' }));
 
 		expect(screen.getByRole('button', { name: 'Choose file…' })).toBeEnabled();
 
-		await userEvent.type(screen.getByRole('textbox', { name: 'Search templates' }), 'Directa');
+		await userEvent.type(screen.getByRole('textbox', { name: 'Search templates' }), 'Trade Republic');
 
 		expect(screen.getByRole('button', { name: 'Choose file…' })).toBeDisabled();
 	});

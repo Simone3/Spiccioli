@@ -503,11 +503,11 @@ export const EN_TRANSLATIONS = {
 
 		// One entry per template the application ships, each written against a real export of that bank's
 		templates: {
-			isybank: { name: 'Isybank — movements' },
-			ing: { name: 'ING — Conto Corrente Arancio' },
-			directa: { name: 'Directa — movements' },
-			edenred: { name: 'Edenred — vouchers' },
-			'trade-republic': { name: 'Trade Republic — transactions' }
+			isybank: { name: 'Isybank Excel' },
+			ing: { name: 'ING Excel' },
+			directa: { name: 'Directa Excel' },
+			edenred: { name: 'Edenred Excel' },
+			'trade-republic': { name: 'Trade Republic CSV' }
 		},
 		replaceTitle: 'Replace what is in the box?',
 		replaceMessage: {
