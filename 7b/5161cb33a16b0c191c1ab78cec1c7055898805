@@ -1,0 +1,36 @@
+src/main/Main.ts
+  s_3695fd908ba7c2::t_6920f73d9db02e 560-564
+tests/main/ImportIpc.test.ts
+  s_3695fd908ba7c2::t_17217961b6d1cc 1,38,41-43,50
+  s_3695fd908ba7c2::t_be4cc8992d4f97 28-37,39,51-52,65-67,86-95,157-195
+  s_3695fd908ba7c2::t_c5a8448acdd72b 196
+docs/technical/02-repository-map.md
+  s_3695fd908ba7c2::t_e8101855ed8aa3 37
+docs/functional/specs/05-transactions.md
+  s_3695fd908ba7c2::t_e8101855ed8aa3 102
+src/main/ipc/ImportIpc.ts
+  s_3695fd908ba7c2::t_7044f27fd48906 35-40
+  s_3695fd908ba7c2::t_3bae3f5e4089f6 79,85-93,95,100,111-115
+  s_3695fd908ba7c2::t_5bc889717e63a1 94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "7b5161cb33a16b0c191c1ab78cec1c7055898805",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3695fd908ba7c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7d6b7b23-31de-4cf0-a6c4-563ce25d3822",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
