@@ -1,0 +1,26 @@
+src/components/import/ImportTemplateDialog.tsx
+  s_3695fd908ba7c2::t_c7b154719a9670 81-102
+src/components/import/ImportTemplateDialog.css
+  s_3695fd908ba7c2::t_d7f9bb1f896e24 1-3,7-8,10-17,52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e82234be5478a781a1c03ffc98cb7d6dc96da1c9",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3695fd908ba7c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7d6b7b23-31de-4cf0-a6c4-563ce25d3822",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
