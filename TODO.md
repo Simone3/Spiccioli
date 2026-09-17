@@ -1,50 +1,6 @@
 
 # current
 
-
-
-TEST BASIC IMPORT
-
-
-
-
-Let's now create some real templates to replace our sample one.
-Some of these are weird so we'll probably need to refactor something in our core import logic.
-I'll list them and give the logic I currently use to manually import the data.
-I'm also uploading a sample anonymized file for each.
-
-- Isybank Excel
-	- date -> "Data"
-	- description -> "Operazione" + "Dettagli" (concatenated with hyphen, one of the two may be empty)
-	- amount -> "Importo"
-- Trade Republic CSV
-	- date -> "date"
-	- description -> "description"
-	- amount -> "amount"
-- Edenred Excel
-	- date -> "Data e ora"
-	- description -> "Dettaglio"
-	- amount -> "N. e importo buoni" (value: quantity and single-voucher price multiplied), with sign based on the description ("Utilizzo" means negative, "Ricarica" or "Ordine tessera" or "Ordine Cloud" means positive);
-- Directa Excel
-	- date -> "Data operazione"
-	- description -> "Tipo operazione" + "Ticker" + "Isin" + "Descrizione" (concatenated with hyphen, some of them may be empty)
-	- amount -> "Importo euro"
-- ING Excel
-	- date -> "DATA VALUTA"
-	- description -> "DESCRIZIONE OPERAZIONE"
-	- amount -> "IMPORTO IN EURO"
-
-
-add generic template that tries to find the correct rows, in multiple languages
-
-
-
-
-
-
-
-
-
 add payslips via pdf upload (and save PDF as attachment too?)
 
 add investments via pdf upload
@@ -95,6 +51,10 @@ over time graph: show to lines/areas for cash and investments? cash on the botto
 ## transactions
 
 wider import tolerance — trailing-sign and parenthesised negatives, debit/credit column pairs, D/C markers, header rows, quoted fields, BOMs, month-name and two-digit-year dates
+
+add generic bulk import template that tries to find the correct rows (with column names with synonyms / multiple languages)
+
+custom bulk import templates that the user can define and save
 
 ## categories
 
