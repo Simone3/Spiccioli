@@ -503,23 +503,23 @@ export const EN_TRANSLATIONS = {
 		// real export of that bank's, so what a shape says is what that export actually does.
 		templates: {
 			isybank: {
-				name: 'Isybank — movements',
+				name: 'Isybank Excel',
 				shape: 'The “Lista Operazione” sheet, with the account and the period printed above the headings. The description is “Operazione” and “Dettagli” joined.'
 			},
 			ing: {
-				name: 'ING — Conto Corrente Arancio',
+				name: 'ING Excel',
 				shape: 'The movements sheet, with the account and the period printed above the headings. The date taken is the value date, not the booking date.'
 			},
 			directa: {
-				name: 'Directa — movements',
+				name: 'Directa Excel',
 				shape: 'The movements sheet, with the account and the period printed above the headings. The description is the type, the ticker, the ISIN and the description joined.'
 			},
 			edenred: {
-				name: 'Edenred — vouchers',
+				name: 'Edenred Excel',
 				shape: 'The voucher movements sheet, which repeats its headings before every movement. The amount is the number of vouchers times what one is worth, and the direction comes from the movement type.'
 			},
 			'trade-republic': {
-				name: 'Trade Republic — transactions',
+				name: 'Trade Republic CSV',
 				shape: 'The CSV export, with its headings on the first line.'
 			}
 		},
