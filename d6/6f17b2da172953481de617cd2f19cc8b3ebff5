@@ -1,0 +1,26 @@
+src/i18n/lang/en.ts
+  s_3695fd908ba7c2::t_2c15d364e8d5a1 506-510
+tests/components/BulkImportScreen.test.tsx
+  s_3695fd908ba7c2::t_ce553b7e035288 57,203,205-208,224,228
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "d66f17b2da172953481de617cd2f19cc8b3ebff5",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3695fd908ba7c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7d6b7b23-31de-4cf0-a6c4-563ce25d3822",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
