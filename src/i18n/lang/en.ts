@@ -474,7 +474,9 @@ export const EN_TRANSLATIONS = {
 		uploadChooseFile: 'Choose file…',
 		uploadDialogTitle: 'Choose a bank export',
 		template: 'Template',
-		templateChoose: 'Choose a template',
+		templateSearch: 'Search templates',
+		templateSearchPlaceholder: 'Type a bank name',
+		templateNoMatch: 'No template is called anything like “{search}”.',
 		templateNote: 'Pick a template for your bank export.',
 		uploadedNotice: {
 			one: 'Read 1 row from {fileName}.',
@@ -499,29 +501,13 @@ export const EN_TRANSLATIONS = {
 			csv: 'CSV file'
 		},
 
-		// One entry per template the application ships: what it is called, and the shape it expects. Each was written against a
-		// real export of that bank's, so what a shape says is what that export actually does.
+		// One entry per template the application ships, each written against a real export of that bank's
 		templates: {
-			isybank: {
-				name: 'Isybank Excel',
-				shape: 'The “Lista Operazione” sheet, with the account and the period printed above the headings. The description is “Operazione” and “Dettagli” joined.'
-			},
-			ing: {
-				name: 'ING Excel',
-				shape: 'The movements sheet, with the account and the period printed above the headings. The date taken is the value date, not the booking date.'
-			},
-			directa: {
-				name: 'Directa Excel',
-				shape: 'The movements sheet, with the account and the period printed above the headings. The description is the type, the ticker, the ISIN and the description joined.'
-			},
-			edenred: {
-				name: 'Edenred Excel',
-				shape: 'The voucher movements sheet, which repeats its headings before every movement. The amount is the number of vouchers times what one is worth, and the direction comes from the movement type.'
-			},
-			'trade-republic': {
-				name: 'Trade Republic CSV',
-				shape: 'The CSV export, with its headings on the first line.'
-			}
+			isybank: { name: 'Isybank — movements' },
+			ing: { name: 'ING — Conto Corrente Arancio' },
+			directa: { name: 'Directa — movements' },
+			edenred: { name: 'Edenred — vouchers' },
+			'trade-republic': { name: 'Trade Republic — transactions' }
 		},
 		replaceTitle: 'Replace what is in the box?',
 		replaceMessage: {

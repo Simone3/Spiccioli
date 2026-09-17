@@ -1,0 +1,49 @@
+/* The templates, under the box that narrows them. It scrolls rather than growing, so the panel is the same height whether the
+   search matches one bank or all of them. */
+.import-template-list {
+	margin: 8px 0 0;
+	padding: 4px;
+	max-height: 220px;
+	overflow-y: auto;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	background-color: var(--colors-background-field);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 6px;
+}
+
+/* A real button, so the keyboard reaches every template and the one focus ring lands on it */
+.import-template-entry {
+	width: 100%;
+	padding: 7px 10px;
+	background: none;
+	border: 1px solid transparent;
+	border-radius: 5px;
+	font: inherit;
+	font-size: 13px;
+	line-height: 1.4;
+	text-align: left;
+	color: var(--colors-text-primary);
+	cursor: pointer;
+}
+
+.import-template-entry:hover {
+	background-color: var(--colors-interactive-hover-background);
+}
+
+/* The one that is chosen, which is what the file chooser will open for */
+.import-template-entry[aria-pressed='true'] {
+	background-color: var(--colors-interactive-hover-background);
+	border-color: var(--colors-accent-muted);
+	color: var(--colors-accent-primary);
+}
+
+.import-template-empty {
+	margin: 0;
+	padding: 10px;
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--colors-text-secondary);
+}

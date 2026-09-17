@@ -1,6 +1,7 @@
-import { useState, type ReactElement } from 'react';
+import 'src/components/import/ImportTemplateDialog.css';
+import { useMemo, useState, type ReactElement } from 'react';
 import { FormDialog, FormField } from 'src/components/common/FormDialog';
-import { SelectField, type SelectOption } from 'src/components/common/SelectField';
+import { TextField } from 'src/components/common/TextField';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { IMPORT_TEMPLATES } from 'src/logic/import/ImportTemplates';
 import type { ImportTemplate } from 'src/logic/import/ImportTemplate';
@@ -12,12 +13,11 @@ import type { ImportTemplate } from 'src/logic/import/ImportTemplate';
  * handed over with nothing said about it is a workbook nothing can do anything with. It opens unchosen every time, like every
  * other picker in the application.
  *
- * **What the panel says about the template it is on is the shape it expects** — the sheet, the headings, the way that export
- * writes a date — so that a file refused afterwards is refused against something the user has already read.
+ * **The templates are a list narrowed by typing rather than a picker.** One bank may have several, and a picker of a few dozen
+ * is a picker nobody reads to the end of — where typing a bank's name leaves the two or three entries that could be meant.
+ * **Typing narrows and never chooses**: a template is chosen by pressing it, so a search that happens to leave one entry still
+ * takes the press that says it was the one meant.
  */
-
-// The entry the picker opens on, until a template is chosen. It is never one that is acted on.
-const NOTHING_CHOSEN = '';
 
 export interface ImportTemplateDialogProps {
 
@@ -36,18 +36,30 @@ export interface ImportTemplateDialogProps {
  */
 export const ImportTemplateDialog = ({ onChoose, onCancel }: ImportTemplateDialogProps): ReactElement => {
 	const { t } = useTranslator();
-	const [ chosenId, setChosenId ] = useState<string>(NOTHING_CHOSEN);
+	const [ search, setSearch ] = useState('');
+	const [ chosenId, setChosenId ] = useState<string | undefined>(undefined);
 
-	const chosen = IMPORT_TEMPLATES.find((template) => {
-		return template.id === chosenId;
-	});
+	const named = useMemo(() => {
+		return IMPORT_TEMPLATES.map((template) => {
+			return { template, name: t(`import.templates.${template.id}.name`) };
+		});
+	}, [ t ]);
 
-	const options: readonly SelectOption<string>[] = [
-		{ value: NOTHING_CHOSEN, label: t('import.templateChoose') },
-		...IMPORT_TEMPLATES.map((template) => {
-			return { value: template.id, label: t(`import.templates.${template.id}.name`) };
-		})
-	];
+	const matching = useMemo(() => {
+		const wanted = search.trim().toLowerCase();
+
+		return wanted === '' ?
+			named :
+			named.filter((entry) => {
+				return entry.name.toLowerCase().includes(wanted);
+			});
+	}, [ named, search ]);
+
+	// A template narrowed out of the list is a template that is no longer chosen, so that what is pressed and what is read can
+	// never be two different things
+	const chosen = matching.find((entry) => {
+		return entry.template.id === chosenId;
+	})?.template;
 
 	return (
 		<FormDialog
@@ -60,14 +72,31 @@ export const ImportTemplateDialog = ({ onChoose, onCancel }: ImportTemplateDialo
 				}
 			}}
 			onCancel={onCancel}>
-			<FormField
-				label={t('import.template')}
-				hint={chosen ? t(`import.templates.${chosen.id}.shape`) : t('import.templateNote')}>
-				<SelectField
-					value={chosenId}
-					options={options}
-					label={t('import.template')}
-					onChange={setChosenId}/>
+			<FormField label={t('import.template')} hint={t('import.templateNote')}>
+				<TextField
+					value={search}
+					label={t('import.templateSearch')}
+					placeholder={t('import.templateSearchPlaceholder')}
+					onChange={setSearch}/>
+				{matching.length === 0 ?
+					<p className='import-template-empty'>{t('import.templateNoMatch', { search: search.trim() })}</p> :
+					<ul className='import-template-list'>
+						{matching.map((entry) => {
+							return (
+								<li key={entry.template.id}>
+									<button
+										type='button'
+										className='import-template-entry'
+										aria-pressed={entry.template.id === chosenId}
+										onClick={() => {
+											setChosenId(entry.template.id);
+										}}>
+										{entry.name}
+									</button>
+								</li>
+							);
+						})}
+					</ul>}
 			</FormField>
 		</FormDialog>
 	);
