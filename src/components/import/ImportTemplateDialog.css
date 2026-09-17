@@ -1,17 +1,24 @@
-/* The templates, under the box that narrows them. It scrolls rather than growing, so the panel is the same height whether the
-   search matches one bank or all of them. */
+/* The templates, under the box that narrows them. **Its height is fixed rather than bounded**: a box that grew and shrank with
+   what the search left in it would move the buttons under it on every keystroke, which is the one thing a panel being typed
+   into must not do. It scrolls instead. */
 .import-template-list {
 	margin: 8px 0 0;
 	padding: 4px;
-	max-height: 220px;
+	box-sizing: border-box;
+	height: 220px;
 	overflow-y: auto;
+	background-color: var(--colors-background-field);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 6px;
+}
+
+.import-template-entries {
+	margin: 0;
+	padding: 0;
 	list-style: none;
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
-	background-color: var(--colors-background-field);
-	border: 1px solid var(--colors-border-strong);
-	border-radius: 6px;
 }
 
 /* A real button, so the keyboard reaches every template and the one focus ring lands on it */
@@ -42,7 +49,7 @@
 
 .import-template-empty {
 	margin: 0;
-	padding: 10px;
+	padding: 6px;
 	font-size: 12px;
 	line-height: 1.6;
 	color: var(--colors-text-secondary);

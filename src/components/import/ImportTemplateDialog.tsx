@@ -78,25 +78,28 @@ export const ImportTemplateDialog = ({ onChoose, onCancel }: ImportTemplateDialo
 					label={t('import.templateSearch')}
 					placeholder={t('import.templateSearchPlaceholder')}
 					onChange={setSearch}/>
-				{matching.length === 0 ?
-					<p className='import-template-empty'>{t('import.templateNoMatch', { search: search.trim() })}</p> :
-					<ul className='import-template-list'>
-						{matching.map((entry) => {
-							return (
-								<li key={entry.template.id}>
-									<button
-										type='button'
-										className='import-template-entry'
-										aria-pressed={entry.template.id === chosenId}
-										onClick={() => {
-											setChosenId(entry.template.id);
-										}}>
-										{entry.name}
-									</button>
-								</li>
-							);
-						})}
-					</ul>}
+				{/* The box is the same height whatever the search leaves in it, so the panel never grows or shrinks under the hands */}
+				<div className='import-template-list'>
+					{matching.length === 0 ?
+						<p className='import-template-empty'>{t('import.templateNoMatch', { search: search.trim() })}</p> :
+						<ul className='import-template-entries'>
+							{matching.map((entry) => {
+								return (
+									<li key={entry.template.id}>
+										<button
+											type='button'
+											className='import-template-entry'
+											aria-pressed={entry.template.id === chosenId}
+											onClick={() => {
+												setChosenId(entry.template.id);
+											}}>
+											{entry.name}
+										</button>
+									</li>
+								);
+							})}
+						</ul>}
+				</div>
 			</FormField>
 		</FormDialog>
 	);
