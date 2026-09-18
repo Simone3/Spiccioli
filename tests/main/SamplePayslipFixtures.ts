@@ -18,7 +18,8 @@ const SAMPLE_PAYSLIPS_SCRIPT = path.join(PROJECT_ROOT, 'scripts', 'write-sample-
 // The file each sample is written to, which is what the script names them
 const SAMPLE_FILE_NAMES: Record<string, string> = {
 	full: 'sample-payslip.pdf',
-	sparse: 'sample-payslip-sparse.pdf'
+	sparse: 'sample-payslip-sparse.pdf',
+	thirteenth: 'sample-payslip-thirteenth.pdf'
 };
 
 /**

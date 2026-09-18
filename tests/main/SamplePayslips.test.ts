@@ -101,6 +101,7 @@ describe('the shipped payslip template', () => {
 		}
 
 		expect(applied.values.month).toBe(12);
+		expect(applied.values.label).toBeNull();
 		expect(applied.missing).toEqual([ 'refunds', 'carPayment' ]);
 		expect(applied.values.figures).toEqual({
 			contractGross: 250000,
@@ -110,5 +111,23 @@ describe('the shipped payslip template', () => {
 			employerContribution: 10000,
 			severanceContribution: 17525
 		});
+	});
+
+	// The one payslip this form does not name after a month: its period box says what the payment is, not when it was paid
+	it('files a tredicesima into December and labels it with what the document called it', async() => {
+		const applied = await readSample('thirteenth');
+
+		expect(applied.outcome).toBe('read');
+
+		if(applied.outcome !== 'read') {
+			return;
+		}
+
+		expect(applied.values.year).toBe(2026);
+		expect(applied.values.month).toBe(12);
+		expect(applied.values.label).toBe('13a MENS.');
+		expect(applied.missing).toEqual([ 'refunds' ]);
+		expect(applied.values.figures.carPayment).toBe(9500);
+		expect(applied.values.figures.netPayment).toBe(192560);
 	});
 });

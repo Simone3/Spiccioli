@@ -34,6 +34,36 @@ const ITALIAN_MONTHS = [
 ] as const;
 
 /**
+ * What the period box says on the payslip of a *tredicesima*, which the form names after the payment and not after the month.
+ *
+ * **It is December and it is not a thirteenth month** ([§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips)): the
+ * payslip is a second December one carrying a label, so this says which month it lands in and the label below says what the
+ * document called it.
+ */
+const THIRTEENTH_MONTH = { name: '13a MENS.', month: 12 };
+
+// Which month each name the period box can carry is: the twelve, and the one name that is a payment rather than a month
+const PERIOD_MONTHS: Readonly<Record<string, number>> = {
+	...Object.fromEntries(ITALIAN_MONTHS.map((name, index) => {
+		return [ name, index + 1 ];
+	})),
+	[THIRTEENTH_MONTH.name]: THIRTEENTH_MONTH.month
+};
+
+// The one character in those names that a pattern would otherwise read as "any character at all"
+const PATTERN_DOT = /\./gu;
+
+/**
+ * The names above as one alternation, which is what the period line is looked for by.
+ *
+ * **Reading it off the same object the months are resolved from** is what keeps a name the pattern matches from being a name
+ * nothing can say the month of.
+ */
+const PERIOD_NAMES = Object.keys(PERIOD_MONTHS).map((name) => {
+	return name.replace(PATTERN_DOT, '\\.');
+}).join('|');
+
+/**
  * Reply's Italian payslip, which is the `Mod. Cedolino TS` form TeamSystem's payroll prints.
  *
  * **The form is a grid of boxes and not a list of figures.** A band of headings is printed across the page and the figures sit
@@ -57,20 +87,30 @@ const ITALIAN_MONTHS = [
  * the employer's share never passes through the pay at all, so it is printed among the `DATI STATISTICI` — as is the severance
  * credited into the fund the same month.
  *
- * **No label is read.** The form prints no name for a month that carries an extra payment, so that field opens empty and is
- * typed like any other ([§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips)).
+ * **The label comes out of the period box too.** A *tredicesima* is the one payslip this form does not name after a month: its
+ * `MESE RETRIBUITO` box says `13a MENS.` instead, which is read as December and as the label that says which of that month's
+ * two payslips this one is ([§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips)). An ordinary month names itself
+ * and carries no label at all.
  */
 const REPLY_ITALY: PayslipTemplate = {
 	id: 'reply-italy',
 	source: { kind: 'pdf' },
 
-	// The band under "MESE RETRIBUITO", which opens the line the month and the year are the first two things on
+	/**
+	 * The band under `MESE RETRIBUITO`, which opens the line the month and the year are the first two things on.
+	 *
+	 * **Case is not held to**, no two of the names differing by it and the form printing `13a` with a small letter in the middle
+	 * of a box of capitals.
+	 */
 	period: {
-		pattern: new RegExp(`^(${ITALIAN_MONTHS.join('|')})\\s+(\\d{4})\\b`, 'u'),
+		pattern: new RegExp(`^(${PERIOD_NAMES})\\s+(\\d{4})\\b`, 'iu'),
 		monthGroup: 1,
 		yearGroup: 2,
-		monthNames: ITALIAN_MONTHS
+		monthNames: PERIOD_MONTHS
 	},
+
+	// The same box, read for what the form called the payment: an ordinary month names itself and carries no label at all
+	label: new RegExp(`^(${THIRTEENTH_MONTH.name.replace(PATTERN_DOT, '\\.')})\\s+\\d{4}\\b`, 'iu'),
 	table: /^DESCRIZIONE VOCE$/u,
 	figures: {
 		contractGross: { in: 'box', heading: /^RETRIBUZIONE DI FATTO$/u },

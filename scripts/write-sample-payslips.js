@@ -173,12 +173,15 @@ const linesOf = (sample) => {
 };
 
 /**
- * The two samples.
+ * The three samples.
  *
  * The first prints every figure the template reads, the car under both of the labels it can be withheld under so that the two are summed.
  * **The second prints neither the expenses nor the car**, which is the ordinary month of somebody who claimed nothing and drives their own
  * car — and it is what exercises the other half of the template: a figure the document does not print is an empty field on the form and is
  * named there, never a zero.
+ *
+ * **The third is a tredicesima**, which is the one payslip this form does not name after a month: its period box says what the payment is
+ * instead of when it was paid, and the template reads that as December and as the label saying which of that month's two payslips it is.
  */
 const SAMPLES = [
 	{
@@ -214,6 +217,25 @@ const SAMPLES = [
 			entryLine(570, '930 FONDO C/DIPE', 'trattenute', '55,00'),
 			entryLine(558, '931 FONDO C/AZIENDA', 'statistici', '100,00'),
 			entryLine(546, '935 CONTRIBUZIONE TFR', 'statistici', '175,25')
+		]
+	},
+	{
+		id: 'thirteenth',
+		fileName: 'sample-payslip-thirteenth.pdf',
+		year: 2026,
+
+		// What the period box says on a tredicesima, which is the payment and not the month it falls in
+		month: '13a MENS.',
+		figures: {
+			contractGross: '2.500,00',
+			gross: '2.500,00',
+			netPayment: '1.925,60'
+		},
+		entries: [
+			entryLine(570, '820 TRATTENUTA USO AUTO', 'trattenute', '95,00'),
+			entryLine(558, '930 FONDO C/DIPE', 'trattenute', '45,00'),
+			entryLine(546, '931 FONDO C/AZIENDA', 'statistici', '90,00'),
+			entryLine(534, '935 CONTRIBUZIONE TFR', 'statistici', '160,00')
 		]
 	}
 ];

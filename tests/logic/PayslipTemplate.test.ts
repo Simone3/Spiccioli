@@ -179,11 +179,30 @@ describe('applyPayslipTemplate', () => {
 		expect(applied.outcome === 'read' && applied.missing).toContain('employeeContribution');
 	});
 
-	it('reads the name a document prints for the month, where the template says where one is', () => {
-		const template = { ...REPLY_ITALY, label: /^ANNOTAZIONI (.+)$/u };
-		const applied = read([ ...documentOf(), line([ 27, 'ANNOTAZIONI' ], [ 120, 'TREDICESIMA' ]) ], template);
+	/**
+	 * A *tredicesima* is the one payslip this form does not name after a month: its period box says what the payment is instead
+	 * of when it was paid. It is a second December payslip with a label and never a thirteenth month, so both come out of that
+	 * one box — the month it lands in and the words the document called it by.
+	 */
+	it('files a period the form names after the payment into the month it falls in, and labels it', () => {
+		const document = documentOf();
 
-		expect(applied.outcome === 'read' && applied.values.label).toBe('TREDICESIMA');
+		document[1] = line([ 25, '13a MENS.' ], [ 85, '2026' ], [ 121, '000' ]);
+
+		const applied = read(document);
+
+		expect(applied.outcome).toBe('read');
+
+		if(applied.outcome !== 'read') {
+			return;
+		}
+
+		expect(applied.values.month).toBe(12);
+		expect(applied.values.label).toBe('13a MENS.');
+
+		// It is the period box that changed and nothing else, so every figure is still read exactly where it was
+		expect(applied.values.figures.netPayment).toBe(201033);
+		expect(applied.missing).toEqual([]);
 	});
 
 	it('refuses a document with no period line, which is a document this template does not describe', () => {

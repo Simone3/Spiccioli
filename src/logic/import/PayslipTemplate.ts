@@ -78,13 +78,20 @@ export interface PayslipPeriod {
 	yearGroup: number;
 
 	/**
-	 * The twelve months as the document names them, in order, where it names them rather than numbering them.
+	 * Which of the twelve each name the period line can carry is, for a document that names its period rather than numbering
+	 * it. Left out, the month is read as digits.
 	 *
 	 * **A payroll form written for one country prints the month in that country's language**, and which of the twelve
 	 * `SETTEMBRE` is is a fact about the document rather than about the reader — so the template states it, the same way it
-	 * states its separators. Left out, the month is read as digits.
+	 * states its separators.
+	 *
+	 * **More than one name may be the same month**, because a form names an extra payment after the payment and not after the
+	 * month it falls in: a *tredicesima*'s period box says `13a MENS.` where an ordinary December's says `DICEMBRE`, and
+	 * [§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips) files it as a second December payslip with a label
+	 * rather than as a thirteenth month. **Which month it lands in is stated here and what it is called is not**: the label is
+	 * read off the document by `label` below, like every other label, so nothing here writes words of its own onto a payslip.
 	 */
-	monthNames?: readonly string[];
+	monthNames?: Readonly<Record<string, number>>;
 }
 
 /**
@@ -458,6 +465,32 @@ const figureOf = (lines: readonly PayslipLine[], template: PayslipTemplate, figu
 };
 
 /**
+ * Reads a month the document numbered.
+ * @param text What the period line said the month was.
+ * @returns The month, or undefined where it is not digits.
+ */
+const readNumberedMonth = (text: string): number | undefined => {
+	return MONTH_DIGITS.test(text) ? Number(text) : undefined;
+};
+
+/**
+ * Reads a month the document named.
+ *
+ * **The names are matched without regard to case**, a form being free to print the same name in capitals in one box and in
+ * small letters in another, and none of the twelve differing from another by case alone.
+ * @param text What the period line said the month was.
+ * @param names Which of the twelve each name the template listed is.
+ * @returns The month, or undefined where the template lists no such name.
+ */
+const readNamedMonth = (text: string, names: Readonly<Record<string, number>>): number | undefined => {
+	const found = Object.entries(names).find(([ name ]) => {
+		return name.toUpperCase() === text.toUpperCase();
+	});
+
+	return found?.[1];
+};
+
+/**
  * Reads the period the document is for.
  * @param texts The document, one line of text per entry.
  * @param period Where the template says it is printed.
@@ -477,23 +510,15 @@ const readPeriod = (texts: readonly string[], period: PayslipPeriod): { year: nu
 		return undefined;
 	}
 
-	// A named month is one of the twelve the template listed, counted from the top of the year
-	if(period.monthNames !== undefined) {
-		const named = period.monthNames.findIndex((name) => {
-			return name.toUpperCase() === monthText.toUpperCase();
-		});
+	const month = period.monthNames === undefined ? readNumberedMonth(monthText) : readNamedMonth(monthText, period.monthNames);
 
-		return named < 0 ? undefined : { year: Number(yearText), month: named + 1 };
-	}
-
-	if(!MONTH_DIGITS.test(monthText)) {
+	// A month the document does not name, or one outside the twelve, is a line that matched something it was not meant to —
+	// which is the same as not finding one at all
+	if(month === undefined || month < MONTH_RANGE.minimum || month > MONTH_RANGE.maximum) {
 		return undefined;
 	}
 
-	const month = Number(monthText);
-
-	// A month outside the twelve is a line that matched something it was not meant to, and is the same as not finding one
-	return month < MONTH_RANGE.minimum || month > MONTH_RANGE.maximum ? undefined : { year: Number(yearText), month };
+	return { year: Number(yearText), month };
 };
 
 /**
