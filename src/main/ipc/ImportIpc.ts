@@ -4,12 +4,13 @@ import type { BrowserWindow, Dialog, IpcMain } from 'electron';
 import { IMPORT_FILE_CONFIG } from 'src/config/AppConfig';
 import { appLogger } from 'src/framework/main/logging/AppLogger';
 import { decodeDelimitedText, parseDelimitedRows } from 'src/main/import/DelimitedGrid';
+import { readPdfLines } from 'src/main/import/PdfText';
 import { readXlsxGrid } from 'src/main/import/XlsxGrid';
 import { SPICCIOLI_IMPORT_IPC_CHANNELS } from 'src/types/ImportIpcChannels';
-import type { ImportSource, ReadImportFileRequest, ReadImportFileResult } from 'src/types/ImportIpcTypes';
+import type { ImportScope, ImportSource, ReadImportFileRequest, ReadImportFileResult } from 'src/types/ImportIpcTypes';
 
 /**
- * The renderer's way to a bank export, and the only one there is.
+ * The renderer's way to a file an import reads, and the only one there is.
  *
  * **One round trip does the whole of it**: the chooser opens, the bytes are read, and a grid of cell text comes back. The path
  * never crosses, because nothing in the window has anything to do with one — the file is read here and is not opened again.
@@ -51,9 +52,15 @@ export interface RegisterImportIpcHandlersOptions {
  * @param source What the template says the bytes are.
  * @returns The grid, or why there is none.
  */
-const readGrid = (bytes: Buffer, source: ImportSource): ReadImportFileResult | { outcome: 'grid'; rows: string[][] } => {
+const readGrid = async(bytes: Buffer, source: ImportSource): Promise<ReadImportFileResult | { outcome: 'grid'; rows: string[][] }> => {
 	if(source.kind === 'csv') {
 		return { outcome: 'grid', rows: parseDelimitedRows(decodeDelimitedText(bytes, source.encoding), source.delimiter) };
+	}
+
+	if(source.kind === 'pdf') {
+		const document = await readPdfLines(bytes);
+
+		return document.outcome === 'lines' ? { outcome: 'grid', rows: document.lines } : { outcome: 'refused', refusal: { reason: 'not-a-pdf' } };
 	}
 
 	const sheet = readXlsxGrid(bytes, source.sheet);
@@ -90,14 +97,18 @@ export const registerImportIpcHandlers = ({
 	 * back at the downloads folder is right, that being where the export that prompted the run has just landed. Remembering it
 	 * any longer would be a stored setting, and the preferences of [§10](../../../docs/functional/specs/10-settings.md) are a
 	 * closed list that has no place for one.
+	 *
+	 * **One folder per import and not one between them.** A payslip and a bank statement are downloaded from different places,
+	 * so an import that opened where the other one last went would be sending the user somewhere they have never kept this
+	 * kind of file.
 	 */
-	let lastDirectory: string | undefined;
+	const lastDirectory = new Map<ImportScope, string>();
 
 	ipcMain.handle(SPICCIOLI_IMPORT_IPC_CHANNELS.readFile, async(_event, request: ReadImportFileRequest): Promise<ReadImportFileResult> => {
 		const window = getWindow();
 		const options = {
 			title: request.dialogTitle,
-			defaultPath: lastDirectory ?? initialDirectory(),
+			defaultPath: lastDirectory.get(request.scope) ?? initialDirectory(),
 			properties: [ 'openFile' as const ],
 			filters: [ { name: request.fileTypeName, extensions: request.extensions } ]
 		};
@@ -111,7 +122,7 @@ export const registerImportIpcHandlers = ({
 
 		// Taken from the file that was chosen rather than from the one that was read: a file refused afterwards was still found
 		// in the folder the user went to, and sending them back to the downloads folder to try again would be the wrong help
-		lastDirectory = path.dirname(filePath);
+		lastDirectory.set(request.scope, path.dirname(filePath));
 
 		let bytes: Buffer;
 
@@ -130,7 +141,7 @@ export const registerImportIpcHandlers = ({
 			return { outcome: 'refused', refusal: { reason: 'unreadable' } };
 		}
 
-		const grid = readGrid(bytes, request.source);
+		const grid = await readGrid(bytes, request.source);
 
 		if(grid.outcome !== 'grid') {
 			appLogger.warn('Could not read a bank export', {

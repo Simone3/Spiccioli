@@ -1,10 +1,11 @@
 import { useState, type ReactElement } from 'react';
-import { FormDialog, FormField, FormSection } from 'src/components/common/FormDialog';
+import { FormDialog, FormField, FormNotice, FormSection } from 'src/components/common/FormDialog';
 import { AmountField, IntegerField } from 'src/components/common/NumericFields';
 import { SelectField, type SelectOption } from 'src/components/common/SelectField';
 import { TextField } from 'src/components/common/TextField';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
+import type { PayslipFigure, PayslipImportValues } from 'src/logic/import/PayslipTemplate';
 import { isMonthInContract } from 'src/logic/salaries/Contracts';
 import type { Cents, Contract, Payslip } from 'src/types/LedgerTypes';
 
@@ -25,6 +26,11 @@ import type { Cents, Contract, Payslip } from 'src/types/LedgerTypes';
  *
  * **The month has to fall inside the contract's life**, which is what a partial first or last year is caught by, and the
  * refusal says so beside the month rather than in a modal.
+ *
+ * **A form opened from a document arrives filled in and is saved by hand like any other.** What the template read goes into the
+ * fields it belongs to, a figure it did not find leaves its field empty, and the notice above the first field says which
+ * document it came from and which figures were not on it — so every value is seen beside its own label before anything is
+ * written, and a template that read a line wrong is caught here rather than in the file.
  */
 
 // The bounds of the validation specification: the twelve months of the year
@@ -65,6 +71,12 @@ export interface PayslipFormProps {
 	// The payslip being corrected, or undefined while one is being created
 	payslip: Payslip | undefined;
 
+	// What a document was read as, where the form was opened from one. It fills in the fields a new payslip would open empty.
+	prefill?: PayslipImportValues;
+
+	// What the form says about itself above the first field, where it did not open empty
+	notice?: string;
+
 	onSave: (values: PayslipFormValues) => void;
 	onCancel: () => void;
 }
@@ -76,24 +88,32 @@ export interface PayslipFormProps {
  * @param props.years The years the picker offers.
  * @param props.initialYear The year it opens on.
  * @param props.payslip The payslip being corrected, where there is one.
+ * @param props.prefill What a document was read as, where the form was opened from one.
+ * @param props.notice What the form says about itself, where it did not open empty.
  * @param props.onSave What to do with the payslip the form holds.
  * @param props.onCancel What abandoning it does.
  * @returns The form.
  */
-export const PayslipForm = ({ contract, years, initialYear, payslip, onSave, onCancel }: PayslipFormProps): ReactElement => {
+export const PayslipForm = ({ contract, years, initialYear, payslip, prefill, notice, onSave, onCancel }: PayslipFormProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
-	const [ year, setYear ] = useState(payslip?.year ?? initialYear);
-	const [ month, setMonth ] = useState<number | undefined>(payslip?.month);
-	const [ label, setLabel ] = useState(payslip?.label ?? '');
-	const [ contractGross, setContractGross ] = useState<number | undefined>(payslip?.contractGross);
-	const [ gross, setGross ] = useState<number | undefined>(payslip?.gross);
-	const [ netPayment, setNetPayment ] = useState<number | undefined>(payslip?.netPayment);
-	const [ refunds, setRefunds ] = useState<number | undefined>(payslip?.refunds);
-	const [ carPayment, setCarPayment ] = useState<number | undefined>(payslip?.carPayment);
-	const [ employeeContribution, setEmployeeContribution ] = useState<number | undefined>(payslip?.employeeContribution);
-	const [ employerContribution, setEmployerContribution ] = useState<number | undefined>(payslip?.employerContribution);
-	const [ severanceContribution, setSeveranceContribution ] = useState<number | undefined>(payslip?.severanceContribution);
+
+	// The payslip being corrected first, then whatever a document was read as, and an empty field where there is neither
+	const figureOf = (figure: PayslipFigure): Cents | undefined => {
+		return payslip?.[figure] ?? prefill?.figures[figure];
+	};
+
+	const [ year, setYear ] = useState(payslip?.year ?? prefill?.year ?? initialYear);
+	const [ month, setMonth ] = useState<number | undefined>(payslip?.month ?? prefill?.month);
+	const [ label, setLabel ] = useState(payslip?.label ?? prefill?.label ?? '');
+	const [ contractGross, setContractGross ] = useState<number | undefined>(figureOf('contractGross'));
+	const [ gross, setGross ] = useState<number | undefined>(figureOf('gross'));
+	const [ netPayment, setNetPayment ] = useState<number | undefined>(figureOf('netPayment'));
+	const [ refunds, setRefunds ] = useState<number | undefined>(figureOf('refunds'));
+	const [ carPayment, setCarPayment ] = useState<number | undefined>(figureOf('carPayment'));
+	const [ employeeContribution, setEmployeeContribution ] = useState<number | undefined>(figureOf('employeeContribution'));
+	const [ employerContribution, setEmployerContribution ] = useState<number | undefined>(figureOf('employerContribution'));
+	const [ severanceContribution, setSeveranceContribution ] = useState<number | undefined>(figureOf('severanceContribution'));
 	const [ notes, setNotes ] = useState(payslip?.notes ?? '');
 
 	const isMonthOutside = month !== undefined && !isMonthInContract(contract, year, month);
@@ -169,6 +189,8 @@ export const PayslipForm = ({ contract, years, initialYear, payslip, onSave, onC
 			canSave={canSave}
 			onSave={save}
 			onCancel={onCancel}>
+			{notice && <FormNotice>{notice}</FormNotice>}
+
 			<FormField label={t('payslips.form.year')}>
 				<SelectField
 					value={String(year)}

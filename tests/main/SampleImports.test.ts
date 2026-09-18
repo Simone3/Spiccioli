@@ -21,11 +21,15 @@ const readWith = (template: ImportTemplate): ImportValues[] => {
 	if(template.source.kind === 'csv') {
 		grid = parseDelimitedRows(decodeDelimitedText(bytes, template.source.encoding), template.source.delimiter);
 	}
-	else {
+	else if(template.source.kind === 'xlsx') {
 		const read = readXlsxGrid(bytes, template.source.sheet);
 
 		expect(read.outcome).toBe('grid');
 		grid = read.outcome === 'grid' ? read.rows : [];
+	}
+	else {
+		// No bank export is a PDF, the shape being the payslip templates' and not these ones'
+		throw new Error(`The "${template.id}" template reads a shape this test does not build`);
 	}
 
 	const applied = applyImportTemplate(grid, template);

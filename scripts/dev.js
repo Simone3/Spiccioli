@@ -2,7 +2,7 @@ const { spawn } = require('node:child_process');
 const { once } = require('node:events');
 const esbuild = require('esbuild');
 const electronExecutablePath = require('electron');
-const { electronBundleOptions, projectRoot } = require('./electron-bundle');
+const { copyPdfWorker, electronBundleOptions, projectRoot } = require('./electron-bundle');
 
 // The development loop: the renderer is served by a Vite development server, so editing a component hot-reloads it in place, and the
 // Electron main and preload sources are rebuilt by a watching esbuild that relaunches Electron whenever they change. This is what
@@ -135,6 +135,9 @@ const startDevelopmentLoop = async() => {
 	}
 
 	// Watching triggers the first build itself, and that build is what starts Electron
+	// The bundle's own file, which a rebuild never touches and a watching build therefore never writes
+	copyPdfWorker();
+
 	esbuildContext = await esbuild.context({
 		...electronBundleOptions,
 		plugins: [ relaunchOnRebuild ]

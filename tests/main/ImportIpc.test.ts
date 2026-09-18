@@ -1,5 +1,6 @@
 import type { Dialog, IpcMain, IpcMainInvokeEvent, OpenDialogOptions, OpenDialogReturnValue } from 'electron';
 import { buildSampleImport } from './SampleImportFixtures';
+import { buildSamplePayslip } from './SamplePayslipFixtures';
 import { registerImportIpcHandlers } from 'src/main/ipc/ImportIpc';
 import { SPICCIOLI_IMPORT_IPC_CHANNELS } from 'src/types/ImportIpcChannels';
 import type { ReadImportFileRequest, ReadImportFileResult } from 'src/types/ImportIpcTypes';
@@ -13,6 +14,7 @@ type RegisteredIpcHandler = (event: IpcMainInvokeEvent, ...args: unknown[]) => u
 
 const XLSX_REQUEST: ReadImportFileRequest = {
 	source: { kind: 'xlsx', sheet: { by: 'index', index: 0 } },
+	scope: 'transactions',
 	fileTypeName: 'Excel workbook',
 	extensions: [ 'xlsx' ],
 	dialogTitle: 'Choose a bank export'
@@ -145,6 +147,31 @@ describe('reading a bank export over IPC', () => {
 		expect(result.outcome === 'refused' && result.refusal.reason).toBe('empty');
 	});
 
+	test('reads a payslip document out as the lines it prints', async() => {
+		const result = await invokeRead(
+			{ bytes: buildSamplePayslip('sample'), chosen: [ '/somewhere/payslip.pdf' ] },
+			{ ...XLSX_REQUEST, scope: 'payslips', source: { kind: 'pdf' }, extensions: [ 'pdf' ] }
+		);
+
+		expect(result.outcome).toBe('read');
+
+		if(result.outcome === 'read') {
+			expect(result.fileName).toBe('payslip.pdf');
+			expect(result.rows.map((row) => {
+				return row.join(' ');
+			})).toContain('Period: 07/2026');
+		}
+	});
+
+	test('refuses a file that is not a document', async() => {
+		const result = await invokeRead(
+			{ bytes: Buffer.from('Date,Description,Amount', 'utf8') },
+			{ ...XLSX_REQUEST, scope: 'payslips', source: { kind: 'pdf' }, extensions: [ 'pdf' ] }
+		);
+
+		expect(result.outcome === 'refused' && result.refusal.reason).toBe('not-a-pdf');
+	});
+
 	test('reads a delimited file under the delimiter and the encoding the template names', async() => {
 		const result = await invokeRead(
 			{ bytes: Buffer.from([ 0x43, 0x69, 0x74, 0x74, 0xe0, 0x3b, 0x31, 0x32 ]) },
@@ -171,6 +198,17 @@ describe('where the chooser opens', () => {
 		await run.read();
 
 		expect(run.opened[1].defaultPath).toBe('/Users/someone/Documents/Banks');
+	});
+
+	// A payslip and a bank statement are downloaded from different places, so one memory between them would send each import
+	// back to where the other one went
+	test('remembers a folder per import and never one between them', async() => {
+		const run = registerRun({ chosen: [ '/Users/someone/Documents/Banks/statement.xlsx' ] });
+
+		await run.read();
+		await run.read({ ...XLSX_REQUEST, scope: 'payslips' });
+
+		expect(run.opened[1].defaultPath).toBe(DOWNLOADS);
 	});
 
 	// The folder was where the user went to, whether or not what they found there could be read: sending them back to the

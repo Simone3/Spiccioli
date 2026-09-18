@@ -56,10 +56,15 @@ const ZEROS_ONLY = /^0*$/u;
 // Trim, collapse whitespace, case-fold: the whitespace of a bank description is not what tells two rows apart
 const WHITESPACE_RUN = /\s+/gu;
 
-export interface ImportFormat {
-	dateFormat: DateFormat;
+// What the two separator controls say a figure's characters mean, which is the whole of what reading one takes: a payslip has
+// figures and no dates, and the reader below is the same one either way
+export interface ImportNumberFormat {
 	decimalSeparator: DecimalSeparator;
 	thousandsSeparator: ThousandsSeparator;
+}
+
+export interface ImportFormat extends ImportNumberFormat {
+	dateFormat: DateFormat;
 }
 
 /**
@@ -279,10 +284,10 @@ const readsAsCents = (decimalText: string): boolean => {
  * price is two figures, and the one that multiplies them reads each of them by this and never by a grammar of its own
  * ([`ImportTemplate.ts`](../import/ImportTemplate.ts)).
  * @param text The column, trimmed.
- * @param format What the controls say the characters mean.
+ * @param format What the controls, or a template, say the characters mean.
  * @returns The amount in cents, or undefined when the column is not one these separators admit.
  */
-export const readAmount = (text: string, format: ImportFormat): Cents | undefined => {
+export const readAmount = (text: string, format: ImportNumberFormat): Cents | undefined => {
 	const outside = stripLeadingSign(text);
 	const inside = stripLeadingSign(stripCurrencyMarker(outside.rest));
 

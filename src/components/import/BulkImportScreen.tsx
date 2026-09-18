@@ -6,7 +6,7 @@ import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { EmptyState } from 'src/components/common/EmptyState';
 import { SelectField, type SelectOption } from 'src/components/common/SelectField';
 import { ImportPreviewTable } from 'src/components/import/ImportPreviewTable';
-import { ImportTemplateDialog } from 'src/components/import/ImportTemplateDialog';
+import { TemplateChooserDialog } from 'src/components/import/TemplateChooserDialog';
 import { APP_ROUTES } from 'src/components/shell/AppRoutes';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useHandOverToTransactions } from 'src/components/shell/ScreenHandoff';
@@ -14,7 +14,7 @@ import { useLedger } from 'src/contexts/LedgerContext';
 import { useFormatter, usePreferences } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { applyImportTemplate, type ImportTemplate } from 'src/logic/import/ImportTemplate';
-import { extensionsForImportSource } from 'src/logic/import/ImportTemplates';
+import { extensionsForImportSource, findImportTemplate, IMPORT_TEMPLATES } from 'src/logic/import/ImportTemplates';
 import { separatorsCollide } from 'src/logic/preferences/Preferences';
 import {
 	buildImportedTransactions,
@@ -160,7 +160,12 @@ export const BulkImportScreen = (): ReactElement => {
 			return t('import.uploadRefusal.sheetMissing', { sheet: refusal.sheet });
 		}
 
-		return refusal.reason === 'not-a-workbook' ? t('import.uploadRefusal.notAWorkbook') : t(`import.uploadRefusal.${refusal.reason}`);
+		if(refusal.reason === 'not-a-workbook' || refusal.reason === 'not-a-pdf') {
+			// No template on this screen reads a PDF, so the second of them is here to be exhaustive rather than to be shown
+			return t(refusal.reason === 'not-a-workbook' ? 'import.uploadRefusal.notAWorkbook' : 'import.uploadRefusal.notAPdf');
+		}
+
+		return t(`import.uploadRefusal.${refusal.reason}`);
 	};
 
 	/**
@@ -180,6 +185,7 @@ export const BulkImportScreen = (): ReactElement => {
 		try {
 			const result = await window.spiccioliImport.readFile({
 				source: template.source,
+				scope: 'transactions',
 				fileTypeName: t(`import.fileTypes.${template.source.kind}`),
 				extensions: extensionsForImportSource(template.source),
 				dialogTitle: t('import.uploadDialogTitle')
@@ -215,6 +221,11 @@ export const BulkImportScreen = (): ReactElement => {
 		}
 	};
 
+	// The list the chooser shows, named out of the translation bundle: a template carries an id and never its own name
+	const templateChoices = IMPORT_TEMPLATES.map((template) => {
+		return { id: template.id, name: t(`import.templates.${template.id}.name`) };
+	});
+
 	// Filling a box that already holds something replaces it, so the question is asked before the chooser opens rather than
 	// after a file has been read and there is nothing left to go back to
 	const chooseTemplate = (template: ImportTemplate): void => {
@@ -226,6 +237,14 @@ export const BulkImportScreen = (): ReactElement => {
 
 		setTemplateDialogOpen(false);
 		setTemplateToReplaceWith(template);
+	};
+
+	const chooseTemplateById = (id: string): void => {
+		const template = findImportTemplate(id);
+
+		if(template) {
+			chooseTemplate(template);
+		}
 	};
 
 	const toggleRow = (line: number): void => {
@@ -428,8 +447,12 @@ export const BulkImportScreen = (): ReactElement => {
 			</section>
 
 			{templateDialogOpen && (
-				<ImportTemplateDialog
-					onChoose={chooseTemplate}
+				<TemplateChooserDialog
+					title={t('import.uploadTitle')}
+					note={t('import.templateNote')}
+					searchPlaceholder={t('import.templateSearchPlaceholder')}
+					entries={templateChoices}
+					onChoose={chooseTemplateById}
 					onCancel={() => {
 						setTemplateDialogOpen(false);
 					}}/>

@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { makeContract, makeContractYear, makePayslip, makeSeededDocument, renderOpenLedger } from '../testUtils';
+import { makeContract, makeContractYear, makePayslip, makeSeededDocument, renderOpenLedger, stubImportBridge } from '../testUtils';
 import type { LedgerDocument, Payslip } from 'src/types/LedgerTypes';
 
 // An ended contract, so that the rows of the per-year table are the same whatever day the suite is run on
@@ -54,6 +54,31 @@ const addPayslip = (): HTMLElement => {
 // Month, label, the five entered figures, the derived net salary, and then the one column the three credits are written into
 const PENSION_FUND_COLUMN = 8;
 
+// The lines the sample template reads, as the main process hands a document over: one entry per printed line
+const PAYSLIP_LINES: string[][] = [
+	[ 'SAMPLE PAYROLL SERVICES' ],
+	[ 'Period:', '03/2025' ],
+	[ 'Contract gross', '3.300,00' ],
+	[ 'Gross total', '3.300,00' ],
+	[ 'Net payment', '1.990,00' ],
+	[ 'Expense refunds', '0,00' ],
+	[ 'Pension fund - employee', '0,00' ],
+	[ 'Pension fund - employer', '0,00' ],
+	[ 'Severance (TFR)', '0,00' ]
+];
+
+const importPayslip = async(rows: string[][] = PAYSLIP_LINES): Promise<void> => {
+	stubImportBridge({
+		readFile: () => {
+			return Promise.resolve({ outcome: 'read', fileName: 'payslip.pdf', rows });
+		}
+	});
+
+	await userEvent.click(screen.getByRole('button', { name: 'Import payslip…' }));
+	await userEvent.click(screen.getByRole('button', { name: 'Sample payslip PDF' }));
+	await userEvent.click(screen.getByRole('button', { name: 'Choose file…' }));
+};
+
 const yearRow = (year: string): HTMLElement => {
 	return screen.getByRole('button', { name: `Show the payslips of ${year}` }).closest('tr') as HTMLElement;
 };
@@ -103,6 +128,45 @@ describe('the Salaries screen', () => {
 
 		expect(within(row).getByText('€ 42.900,00')).toBeInTheDocument();
 		expect(within(row).getByText('€ 2.170,00')).toBeInTheDocument();
+	});
+
+	// The document fills the form in and never the file: the payslip exists once the form the figures landed on is saved
+	test('opens the payslip form on what a document was read as, naming the figures it did not carry', async() => {
+		await openSalaries(withContract());
+		await importPayslip();
+
+		const form = screen.getByRole('dialog', { name: 'Add payslip' });
+
+		expect(within(form).getByText(/Read from payslip\.pdf/)).toBeInTheDocument();
+		expect(within(form).getByText(/Not found on it: Car/)).toBeInTheDocument();
+		expect(within(form).getByRole('textbox', { name: 'Month' })).toHaveValue('3');
+		expect(within(form).getByRole('textbox', { name: 'Gross' })).toHaveValue('3300,00');
+		expect(within(form).getByRole('textbox', { name: 'Car' })).toHaveValue('');
+
+		// Nothing has been written: the one row of the year appears once the form is saved, and not before
+		expect(within(yearRow('2025')).getByText('0')).toBeInTheDocument();
+
+		await userEvent.type(within(form).getByRole('textbox', { name: 'Car' }), '0');
+		await userEvent.click(within(form).getByRole('button', { name: 'Save' }));
+
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+		expect(within(yearRow('2025')).getByText('€ 1.990,00')).toBeInTheDocument();
+	});
+
+	test('refuses a document whose year the contract never covered, and writes nothing', async() => {
+		await openSalaries(withContract());
+		await importPayslip([ [ 'Period:', '03/2022' ], [ 'Gross total', '3.300,00' ] ]);
+
+		expect(screen.getByText('That payslip is for 2022, which is outside Acme S.p.A.. Nothing has been changed.')).toBeInTheDocument();
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+	});
+
+	test('refuses a document the template does not describe, and writes nothing', async() => {
+		await openSalaries(withContract());
+		await importPayslip([ [ 'A letter from the bank' ] ]);
+
+		expect(screen.getByText(/The line naming the month and the year is not in that document/)).toBeInTheDocument();
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 	});
 
 	test('reads the hourly figures as undefined until the working days are entered', async() => {

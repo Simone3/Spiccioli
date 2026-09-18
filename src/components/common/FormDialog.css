@@ -54,6 +54,19 @@
 	align-items: start;
 }
 
+/* What a form that arrived filled in says about itself, spanning both columns above the first field */
+.form-dialog-notice {
+	grid-column: 1 / -1;
+	margin: 0;
+	padding: 8px 10px;
+	background-color: var(--colors-background-field);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 6px;
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--colors-text-secondary);
+}
+
 /* The name of a run of fields, spanning both columns: it is a heading over them rather than a label beside one */
 .form-dialog-section {
 	grid-column: 1 / -1;

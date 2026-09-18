@@ -60,6 +60,26 @@ export const FormSection = ({ label }: FormSectionProps): ReactElement => {
 	return <h3 className='form-dialog-section'>{label}</h3>;
 };
 
+export interface FormNoticeProps {
+
+	// What the form has to say about itself before the first field: where the values it opened on came from
+	children: ReactNode;
+}
+
+/**
+ * A line across the top of a form, above the fields.
+ *
+ * **It is for a form that did not open empty.** A form the user opened themselves needs no explaining; one that arrives filled
+ * in from a document has to say so, and has to say what it could not fill in, or the empty fields under it read as fields the
+ * document said were nothing.
+ * @param props The notice's props.
+ * @param props.children What it says.
+ * @returns The notice.
+ */
+export const FormNotice = ({ children }: FormNoticeProps): ReactElement => {
+	return <p className='form-dialog-notice'>{children}</p>;
+};
+
 export interface FormFieldProps {
 	label: string;
 

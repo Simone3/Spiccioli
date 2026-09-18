@@ -1,5 +1,5 @@
 /**
- * What crosses the bridge when a bank export is read.
+ * What crosses the bridge when a file an import reads is read.
  *
  * The split is the one storage already keeps: **the main process owns the file and the renderer owns what it means**. What goes
  * out is a description of the bytes — which sheet, which delimiter, which encoding — and what comes back is **a grid of the
@@ -35,12 +35,32 @@ export type ImportSource = {
 
 	// What the bytes spell text in. Bank exports are still written in the Windows code page more often than not.
 	encoding: 'utf-8' | 'windows-1252';
+} | {
+
+	/**
+	 * A document that prints its figures rather than tabulating them, which is what a payslip is.
+	 *
+	 * **There is nothing to declare.** A workbook has sheets and a delimited file has a delimiter; a PDF has neither, and the
+	 * lines it prints are the whole of what crosses — one entry per line, holding the pieces of text along it.
+	 */
+	kind: 'pdf';
 };
+
+/**
+ * Which import is asking, which is the whole of what the folder the chooser opens in is remembered under.
+ *
+ * **A payslip and a bank export do not live in the same folder**, so one memory shared between them would send every import
+ * back to where the other one was taken from ([§5.7](../../docs/functional/specs/05-transactions.md#57-bulk-import)).
+ */
+export type ImportScope = 'transactions' | 'payslips';
 
 export interface ReadImportFileRequest {
 	source: ImportSource;
 
-	// What the file chooser offers, named for the template rather than for the extension: "Excel workbook", "CSV file"
+	// Which import is asking, which says which remembered folder the chooser opens in
+	scope: ImportScope;
+
+	// What the file chooser offers, named for the template rather than for the extension: "Excel workbook", "PDF document"
 	fileTypeName: string;
 	extensions: string[];
 
@@ -65,7 +85,11 @@ export type ImportFileRefusal = {
 	sheet: string;
 } | {
 
-	// The file is there and readable and holds no rows at all
+	// The bytes are not a PDF, or are one nothing can be opened out of: encrypted, truncated, or written to no standard at all
+	reason: 'not-a-pdf';
+} | {
+
+	// The file is there and readable and holds no rows at all. A PDF whose text is a picture of text is this one too.
 	reason: 'empty';
 } | {
 

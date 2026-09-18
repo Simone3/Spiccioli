@@ -5,6 +5,7 @@ import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { EmptyState } from 'src/components/common/EmptyState';
 import { SelectField, type SelectOption } from 'src/components/common/SelectField';
 import { TabBar } from 'src/components/common/TabBar';
+import { TemplateChooserDialog } from 'src/components/import/TemplateChooserDialog';
 import { ContractForm, type ContractFormValues } from 'src/components/salaries/ContractForm';
 import { ContractsTable } from 'src/components/salaries/ContractsTable';
 import { ContractYearsTable } from 'src/components/salaries/ContractYearsTable';
@@ -19,11 +20,15 @@ import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useRemembered } from 'src/contexts/ScreenMemoryContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
+import { extensionsForImportSource } from 'src/logic/import/ImportTemplates';
+import { applyPayslipTemplate, type PayslipFigure, type PayslipImportValues } from 'src/logic/import/PayslipTemplate';
+import { findPayslipTemplate, PAYSLIP_TEMPLATES } from 'src/logic/import/PayslipTemplates';
 import { createLedgerId } from 'src/logic/ledger/LedgerDocument';
 import { formatMinorUnitsAsPlainDecimal, MONEY_SCALES } from 'src/logic/money/Money';
 import { countPayslipsPerContract, contractYearRange, sortContracts } from 'src/logic/salaries/Contracts';
 import { netSalary, payslipsOfContract, sortPayslipsOfYear } from 'src/logic/salaries/Payslips';
 import { deriveSalaryYears, type SalaryChartWindow, type SalaryYearFigures } from 'src/logic/salaries/SalaryFigures';
+import type { ImportFileRefusal } from 'src/types/ImportIpcTypes';
 import type { Contract, ContractYear, LedgerId, Payslip } from 'src/types/LedgerTypes';
 
 /**
@@ -39,6 +44,10 @@ import type { Contract, ContractYear, LedgerId, Payslip } from 'src/types/Ledger
  * **`Working days` is the ContractYear record and not a report of one.** The cell opens the form that is the whole of it: a
  * number creates the record and an empty field deletes it, which is the one delete in the application that is not confirmed —
  * it puts the year back exactly where it was.
+ *
+ * **A payslip document is read onto the form and never into the file.** *Import payslip* asks which template, reads the
+ * document under it, and opens the ordinary *Add payslip* form with what it found already in the fields — so the one way a
+ * payslip is written is still somebody pressing *Save* on that form, with every figure visible beside its own label.
  */
 
 type SalariesTab = 'payslips' | 'contracts';
@@ -50,6 +59,12 @@ interface ContractDraft {
 
 interface PayslipDraft {
 	payslip: Payslip | undefined;
+
+	// What a document was read as, where the form is being opened from one
+	prefill?: PayslipImportValues;
+
+	// What the form says about itself above its first field, where it did not open empty
+	notice?: string;
 }
 
 /**
@@ -74,6 +89,8 @@ export const SalariesScreen = (): ReactElement => {
 	const [ payslipToDelete, setPayslipToDelete ] = useState<Payslip | undefined>(undefined);
 	const [ workingDaysDraft, setWorkingDaysDraft ] = useState<SalaryYearFigures | undefined>(undefined);
 	const [ refusal, setRefusal ] = useState<string | undefined>(undefined);
+	const [ templateDialogOpen, setTemplateDialogOpen ] = useState(false);
+	const [ reading, setReading ] = useState(false);
 
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
 
@@ -323,6 +340,122 @@ export const SalariesScreen = (): ReactElement => {
 		</AppButton>
 	);
 
+	// The list the chooser shows, named out of the translation bundle: a template carries an id and never its own name
+	const payslipTemplateChoices = PAYSLIP_TEMPLATES.map((template) => {
+		return { id: template.id, name: t(`payslips.import.templates.${template.id}.name`) };
+	});
+
+	// What the file itself could not be: the document rather than anything printed on it
+	const fileRefusalMessage = (fileRefusal: ImportFileRefusal): string => {
+		if(fileRefusal.reason === 'not-a-pdf') {
+			return t('import.uploadRefusal.notAPdf');
+		}
+
+		return fileRefusal.reason === 'empty' ? t('payslips.import.refusal.noText') : t('import.uploadRefusal.unreadable');
+	};
+
+	/**
+	 * What the form says about itself: which document it was filled in from, and which figures were not on it.
+	 *
+	 * **The figures that were not read are named rather than counted**, an empty field on a filled-in form otherwise reading as
+	 * a figure the document said was nothing.
+	 * @param fileName The document.
+	 * @param missing The figures the template did not come back with.
+	 * @returns The notice.
+	 */
+	const importNotice = (fileName: string, missing: readonly PayslipFigure[]): string => {
+		if(missing.length === 0) {
+			return t('payslips.import.notice', { fileName });
+		}
+
+		const named = missing.map((figure) => {
+			return t(`payslips.form.${figure}`);
+		}).join(', ');
+
+		return t('payslips.import.noticeWithMissing', { fileName, figures: named });
+	};
+
+	/**
+	 * Reads one payslip document under one template, and opens the form on what it found.
+	 *
+	 * **Nothing is written here.** A document that could not be read says why and leaves the screen as it was; one that could
+	 * opens the ordinary *Add payslip* form, filled in as far as the document went, and the payslip exists only once that form
+	 * is saved.
+	 * @param id The template the user chose.
+	 */
+	const readPayslipDocument = async(id: string): Promise<void> => {
+		const template = findPayslipTemplate(id);
+
+		setTemplateDialogOpen(false);
+
+		if(!template || !selectedContract || selectedYear === undefined) {
+			return;
+		}
+
+		setRefusal(undefined);
+		setReading(true);
+
+		try {
+			const result = await window.spiccioliImport.readFile({
+				source: template.source,
+				scope: 'payslips',
+				fileTypeName: t(`import.fileTypes.${template.source.kind}`),
+				extensions: extensionsForImportSource(template.source),
+				dialogTitle: t('payslips.import.dialogTitle')
+			});
+
+			if(result.outcome === 'cancelled') {
+				return;
+			}
+
+			if(result.outcome === 'refused') {
+				setRefusal(fileRefusalMessage(result.refusal));
+
+				return;
+			}
+
+			const applied = applyPayslipTemplate(result.rows, template);
+
+			if(applied.outcome === 'refused') {
+				setRefusal(t(`payslips.import.refusal.${applied.refusal.reason === 'no-text' ? 'noText' : 'periodMissing'}`));
+
+				return;
+			}
+
+			// The year picker holds the contract's own years, so a document from another contract's year has nowhere to land
+			if(!years.some((row) => {
+				return row.year === applied.values.year;
+			})) {
+				setRefusal(t('payslips.import.refusal.yearOutsideContract', {
+					year: String(applied.values.year),
+					contract: selectedContract.name
+				}));
+
+				return;
+			}
+
+			setPayslipDraft({
+				payslip: undefined,
+				prefill: applied.values,
+				notice: importNotice(result.fileName, applied.missing)
+			});
+		}
+		finally {
+			setReading(false);
+		}
+	};
+
+	const importPayslipButton = (
+		<AppButton
+			disabled={reading}
+			onClick={() => {
+				setRefusal(undefined);
+				setTemplateDialogOpen(true);
+			}}>
+			{reading ? t('payslips.import.reading') : t('payslips.import.action')}
+		</AppButton>
+	);
+
 	const addPayslipButton = (
 		<AppButton
 			variant='primary'
@@ -374,6 +507,7 @@ export const SalariesScreen = (): ReactElement => {
 		return (
 			<div className='salaries-screen-actions'>
 				{contractSelector()}
+				{importPayslipButton}
 				{addPayslipButton}
 			</div>
 		);
@@ -478,6 +612,20 @@ export const SalariesScreen = (): ReactElement => {
 					}}/>
 			)}
 
+			{templateDialogOpen && (
+				<TemplateChooserDialog
+					title={t('payslips.import.title')}
+					note={t('payslips.import.templateNote')}
+					searchPlaceholder={t('payslips.import.templateSearchPlaceholder')}
+					entries={payslipTemplateChoices}
+					onChoose={(id) => {
+						void readPayslipDocument(id);
+					}}
+					onCancel={() => {
+						setTemplateDialogOpen(false);
+					}}/>
+			)}
+
 			{payslipDraft && selectedContract && selectedYear !== undefined && (
 				<PayslipForm
 					contract={selectedContract}
@@ -486,6 +634,8 @@ export const SalariesScreen = (): ReactElement => {
 					})}
 					initialYear={selectedYear}
 					payslip={payslipDraft.payslip}
+					prefill={payslipDraft.prefill}
+					notice={payslipDraft.notice}
 					onSave={savePayslip}
 					onCancel={() => {
 						setPayslipDraft(undefined);

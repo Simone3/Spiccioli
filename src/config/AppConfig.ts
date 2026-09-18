@@ -117,10 +117,18 @@ export const SHUTDOWN_CONFIG = {
 	pollIntervalMs: 50
 } as const;
 
-// The bank export an import may be filled from. The bound is on the file rather than on the rows: a whole export is read into
-// memory to be turned into a grid, and a file far past what a statement can be is refused before that happens.
+// The file an import may be filled from, a bank export or a payslip alike. The bound is on the file rather than on the rows: a
+// whole file is read into memory to be turned into a grid, and one far past what a statement or a payslip can be is refused
+// before that happens.
 export const IMPORT_FILE_CONFIG = {
 	maximumFileSizeBytes: 20 * 1024 * 1024
+} as const;
+
+// How a PDF's pieces of text are grouped back into the lines it prints. A document is free to nudge a figure a fraction of a
+// point off the words beside it, and a reader would still call that one line; the tolerance is a fraction of a line's height, so
+// two lines of an ordinary payslip are never folded into one.
+export const PDF_TEXT_CONFIG = {
+	lineTolerancePoints: 2
 } as const;
 
 // The transactions list, one of the two paginated tables in the application. Every other table is shown in full.

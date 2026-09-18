@@ -148,10 +148,15 @@ export const findImportTemplate = (id: string): ImportTemplate | undefined => {
 };
 
 /**
- * What the file chooser is allowed to offer for a template, which is the extension its export actually carries.
+ * What the file chooser is allowed to offer for a template, which is the extension the file it reads actually carries. It
+ * covers the payslip templates beside these ones, a chooser being a chooser.
  * @param source What the template says its file is.
  * @returns The extensions, without their dots, as a chooser takes them.
  */
 export const extensionsForImportSource = (source: ImportSource): string[] => {
-	return source.kind === 'xlsx' ? [ 'xlsx' ] : [ 'csv' ];
+	if(source.kind === 'xlsx') {
+		return [ 'xlsx' ];
+	}
+
+	return source.kind === 'pdf' ? [ 'pdf' ] : [ 'csv' ];
 };

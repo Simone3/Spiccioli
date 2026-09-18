@@ -487,6 +487,7 @@ export const EN_TRANSLATIONS = {
 		// one of these: it goes into the box and is marked in the preview like any other unreadable row.
 		uploadRefusal: {
 			notAWorkbook: 'That file is not a spreadsheet this template can read. Nothing has been changed.',
+			notAPdf: 'That file is not a PDF this template can read. Nothing has been changed.',
 			sheetMissing: 'That workbook carries no sheet called “{sheet}”, which is where this template expects the rows. Nothing has been changed.',
 			empty: 'That file holds no rows at all. Nothing has been changed.',
 			unreadable: 'That file could not be read. Nothing has been changed.',
@@ -498,7 +499,8 @@ export const EN_TRANSLATIONS = {
 		// What the chooser calls the files it offers, named for the shape rather than for the extension
 		fileTypes: {
 			xlsx: 'Excel workbook',
-			csv: 'CSV file'
+			csv: 'CSV file',
+			pdf: 'PDF document'
 		},
 
 		// One entry per template the application ships, each written against a real export of that bank's
@@ -1377,6 +1379,32 @@ export const EN_TRANSLATIONS = {
 			netSalary: 'Net salary',
 			netSalaryHint: 'Derived: net payment − refunds + car.',
 			notes: 'Notes'
+		},
+
+		// Reading a payslip document onto the form. Nothing here writes a payslip: what a document was read as is what the
+		// *Add payslip* form opens on, and the payslip exists once that form is saved.
+		import: {
+			action: 'Import payslip…',
+			reading: 'Reading…',
+			title: 'Import a payslip',
+			dialogTitle: 'Choose a payslip',
+			templateNote: 'Pick a template for your payslip.',
+			templateSearchPlaceholder: 'Type an employer name',
+			notice: 'Read from {fileName}. Check every figure before saving.',
+			noticeWithMissing: 'Read from {fileName}. Not found on it: {figures}. Check every figure before saving.',
+
+			// The document is refused whole and the screen is left as it was. A figure the template did not find is not one of
+			// these: it is an empty field on the form, named in the notice above it.
+			refusal: {
+				noText: 'That document prints no text at all, so there is nothing to read. A scan of a payslip is a picture of one. Nothing has been changed.',
+				periodMissing: 'The line naming the month and the year is not in that document, so this template does not describe it. Nothing has been changed.',
+				yearOutsideContract: 'That payslip is for {year}, which is outside {contract}. Nothing has been changed.'
+			},
+
+			// One entry per template the application ships
+			templates: {
+				sample: { name: 'Sample payslip PDF' }
+			}
 		}
 	},
 

@@ -466,7 +466,11 @@ module.exports = defineConfig([
 					'tests/**',
 					'@fontsource/inter/*.css',
 					'react-datepicker/dist/*.css',
-					'react-dom/client'
+					'react-dom/client',
+
+					// The build of the PDF library that runs under Node, which is the only one that does: its package points at a build
+					// written for a browser, and one module in the main process reaches past it on purpose
+					'pdfjs-dist/legacy/build/pdf.mjs'
 				]
 			}],
 			'import/no-webpack-loader-syntax': 'off',
