@@ -24,11 +24,16 @@ module.exports = {
 			// The icons are read from the repository at package time, so they do not need to be copied into the application itself
 			/^\/assets($|\/)/,
 
-			// The PDF library is bundled into "dist/electron/main.js" by esbuild, and the one file that bundling cannot reach — the worker
-			// it loads a document in — is copied next to it by "scripts/electron-bundle.js". So the package needs nothing out of
-			// "node_modules" for it, and shipping the installed copy as well would carry 35 MB of viewer, character maps and standard
-			// fonts that nothing here loads ([§8.3](docs/technical/08-decisions.md#83-the-dependencies-the-application-adds))
-			/^\/node_modules\/pdfjs-dist($|\/)/,
+			// **Every dependency but one is bundled, so the package carries none of them.** Vite bundles the renderer's into "build/" —
+			// fonts and all, as emitted assets — and esbuild bundles the main process's into "dist/electron/main.js", the one file that
+			// bundling cannot reach being the PDF library's worker, which "scripts/electron-bundle.js" copies beside it. **What is left is
+			// "electron-log"**, which is external to the esbuild bundle and is therefore the one thing a packaged run resolves out of
+			// "node_modules" at all; "electron" resolves to the runtime's own module and never to a folder here.
+			//
+			// Shipping the installed copies as well is around 43 MB of a second copy of code that is already inside the two bundles
+			// ([§3.6](docs/technical/03-build-and-run.md#36-packaging)). **Adding a dependency that the bundlers cannot reach means naming
+			// it here**, beside "electron-log", or a packaged run fails on a module a development run resolves.
+			/^\/node_modules\/(?!electron-log(\/|$))/,
 
 			/^\/\.vscode($|\/)/,
 			/^\/coverage($|\/)/,

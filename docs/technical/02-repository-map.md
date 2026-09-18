@@ -14,7 +14,7 @@ Every non-generated file in the repository and what it is for. Generated folders
 | `tsconfig.json` | Strict TypeScript, `baseUrl: "."`, covering `src` and `tests` — which is what makes `src/...` imports resolve |
 | `eslint.config.js` | The flat ESLint config: style, TypeScript, import, React, JSDoc and Vitest rules, plus the rule that keeps `src/framework` from importing application code |
 | `vite.config.mts` | The renderer bundle and the Vitest configuration, in one file |
-| `forge.config.js` | Electron Forge: the application identity, the four makers, the fuses applied at package time, and what is kept out of the package — including the installed PDF library, which is bundled rather than carried ([§3.6](03-build-and-run.md#36-packaging)) |
+| `forge.config.js` | Electron Forge: the application identity, the four makers, the fuses applied at package time, and what is kept out of the package — which is the whole of `node_modules` but `electron-log`, everything else being inside the two bundles already ([§3.6](03-build-and-run.md#36-packaging)) |
 | `index.html` | The renderer's HTML shell and the strict Content-Security-Policy the built page ships with |
 | `CLAUDE.md` | The rules and commands for Claude Code |
 | `README.md` | The landing page a user reads |
