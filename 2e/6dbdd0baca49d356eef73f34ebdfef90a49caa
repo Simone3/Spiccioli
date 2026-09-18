@@ -1,0 +1,67 @@
+src/logic/import/PayslipTemplates.ts
+  s_d7db72a1360310::t_b318622f1a022e 50-58
+  s_d7db72a1360310::t_0f13517290892a 16,18-19,21-49,59-64,66-74,76-87,92
+src/main/ipc/ImportIpc.ts
+  s_d7db72a1360310::t_c5743a824c0b9f 19-21,57,65-83,184
+src/components/salaries/SalariesScreen.tsx
+  s_d7db72a1360310::t_3280bfaeeef2d3 24,417
+docs/technical/08-decisions.md
+  s_d7db72a1360310::t_f471d6c7071b61 69
+  s_d7db72a1360310::t_fc03675b46d37c 75
+src/logic/import/PayslipTemplate.ts
+  s_d7db72a1360310::t_b318622f1a022e 440-460,529
+  s_d7db72a1360310::t_ef330f5f1b1536 8,13-19,52-66,79-87,90-129,134,154-163,168,221-233,241-274,279,283-285,296-322,324-439,461-462,466-467,476-479,485-489,502-503,509-511,514,518-519,540
+  s_d7db72a1360310::t_5dcdf1fb577408 480-484
+tests/main/ImportIpc.test.ts
+  s_d7db72a1360310::t_10445e3b18c78e 150,152,160-169
+docs/technical/02-repository-map.md
+  s_d7db72a1360310::t_f471d6c7071b61 41,130-131,166
+tests/components/SalariesScreen.test.tsx
+  s_d7db72a1360310::t_de1de7bc18a16b 57-84,87,90-103,108,188,196
+src/main/import/PdfText.ts
+  s_d7db72a1360310::t_92fba164e589fb 7-8
+  s_d7db72a1360310::t_4141fb9e17a98a 12-18,38-43,48,55,69,74,83,124
+docs/technical/03-build-and-run.md
+  s_d7db72a1360310::t_f471d6c7071b61 27
+CLAUDE.md
+  s_d7db72a1360310::t_fc03675b46d37c 54
+scripts/write-sample-payslips.js
+  s_d7db72a1360310::t_ddb6af1fd0dbd2 118-119,129-130,133,146,156,158,164-165,169
+  s_d7db72a1360310::t_482bb3cecd3c9f 5,8-14,17,24-25,28,46,54-56,94-109,111-112,120-128,131-132,134-145,147-155,157,159-163,166-168,170-171,176,178-181,185,188,192-201,204-205,207,211-217
+docs/technical/07-testing.md
+  s_d7db72a1360310::t_f471d6c7071b61 46
+src/types/ImportIpcTypes.ts
+  s_d7db72a1360310::t_4c0b322a45ae06 111-123
+  s_d7db72a1360310::t_c5743a824c0b9f 44-45
+tests/main/SamplePayslipFixtures.ts
+  s_d7db72a1360310::t_3e1782b3683200 20-21
+src/i18n/lang/en.ts
+  s_d7db72a1360310::t_3280bfaeeef2d3 1404,1406
+tests/main/SamplePayslips.test.ts
+  s_d7db72a1360310::t_225127fed39fef 4,12-14,20,27,31-32,40-49,52-55,63-65,83-84,93-95,104-112
+tests/logic/PayslipTemplate.test.ts
+  s_d7db72a1360310::t_b318622f1a022e 177
+  s_d7db72a1360310::t_17fef9a8efcaf6 195-198
+  s_d7db72a1360310::t_80fb344f6efb11 1-8,14-18,24-57,60-82,85-86,91-104,110,119,127-128,136-146,148-149,154,162,166-171,173,178-184,186,190,204,212
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "2e6dbdd0baca49d356eef73f34ebdfef90a49caa",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d7db72a1360310": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d3b3ce84-bb4f-4be6-be75-f67c3b7f5ae5",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
