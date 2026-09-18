@@ -1,0 +1,30 @@
+docs/technical/08-decisions.md
+  s_a116cbd10126f7::t_36df0540b56828 77
+docs/technical/03-build-and-run.md
+  s_a116cbd10126f7::t_36df0540b56828 83-84
+docs/technical/02-repository-map.md
+  s_a116cbd10126f7::t_36df0540b56828 17
+forge.config.js
+  s_a116cbd10126f7::t_277bb43564ec02 27-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "932bae5a3c3654cb8132c4d9025fa96569d9bb53",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a116cbd10126f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "156e1134-5b83-4da0-a23a-d96ac0dfdeac",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
