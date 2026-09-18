@@ -1,0 +1,40 @@
+scripts/write-sample-payslips.js
+  s_d7db72a1360310::t_6df4867b76f985 176,182-184,221-238
+  s_d7db72a1360310::t_29e8220701d90b 239
+tests/main/SamplePayslipFixtures.ts
+  s_d7db72a1360310::t_6df4867b76f985 21-22
+tests/main/SamplePayslips.test.ts
+  s_d7db72a1360310::t_de3f9c56de0e5d 104,115-131
+  s_d7db72a1360310::t_cb89064649cfa9 132
+docs/technical/02-repository-map.md
+  s_d7db72a1360310::t_f123d47220100f 131
+src/logic/import/PayslipTemplates.ts
+  s_d7db72a1360310::t_e113f82c6a35ab 36-65,90-93,99-104,106,109,111-113
+docs/technical/07-testing.md
+  s_d7db72a1360310::t_f123d47220100f 46
+src/logic/import/PayslipTemplate.ts
+  s_d7db72a1360310::t_ab38e6b90cb3a5 81-82,86-92,94,467-492,513,515-517,521
+tests/logic/PayslipTemplate.test.ts
+  s_d7db72a1360310::t_979f6e144929d5 182-188,190-205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "2100825182b6b0a00bd0839c3350941bfed2a9a5",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d7db72a1360310": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d3b3ce84-bb4f-4be6-be75-f67c3b7f5ae5",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
