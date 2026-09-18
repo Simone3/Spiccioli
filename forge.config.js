@@ -23,6 +23,13 @@ module.exports = {
 		ignore: [
 			// The icons are read from the repository at package time, so they do not need to be copied into the application itself
 			/^\/assets($|\/)/,
+
+			// The PDF library is bundled into "dist/electron/main.js" by esbuild, and the one file that bundling cannot reach — the worker
+			// it loads a document in — is copied next to it by "scripts/electron-bundle.js". So the package needs nothing out of
+			// "node_modules" for it, and shipping the installed copy as well would carry 35 MB of viewer, character maps and standard
+			// fonts that nothing here loads ([§8.3](docs/technical/08-decisions.md#83-the-dependencies-the-application-adds))
+			/^\/node_modules\/pdfjs-dist($|\/)/,
+
 			/^\/\.vscode($|\/)/,
 			/^\/coverage($|\/)/,
 			/^\/node_modules\/\.cache($|\/)/,

@@ -80,6 +80,7 @@ The plugin throws if it finds no policy to rewrite. The two policies live in dif
 - **`asar: true`**, and the fuses plugin turns off `RunAsNode`, the `NODE_OPTIONS` variable and the CLI inspect arguments, turns on cookie encryption and ASAR integrity validation, and requires the app to load from the ASAR archive.
 - **The identity** is `productName: "Spiccioli"` in `package.json` and `appBundleId: "io.github.simone3.spiccioli"` here. The bundle identifier cannot be changed lightly once the application is installed anywhere: macOS keeps permissions, window state and launch services entries under it, and a new one reads as a different application. The category is `public.app-category.finance`.
 - **`assets/`, `.vscode/`, `coverage/`, `out/` and `tests/` are excluded** from the package. The icons are read from the repository at package time and do not need to be copied inside.
+- **`node_modules/pdfjs-dist` is excluded too**, which is the one dependency the package does not carry. It is bundled into `dist/electron/main.js` by esbuild and the one file bundling cannot reach — `pdf.worker.mjs` — is copied beside it ([§3.3](#33-two-bundles-two-bundlers)), so nothing at run time resolves it out of `node_modules`. Shipping the installed copy as well would carry **33 MB** of viewer, character maps and standard fonts that nothing here loads.
 - **Four makers**: Squirrel for Windows, ZIP for macOS, and deb and rpm for Linux. The Linux package names are lowercase by convention while the binary inside keeps the `productName` spelling.
 
 ## 3.7 Icons

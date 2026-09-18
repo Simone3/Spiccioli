@@ -1,4 +1,3 @@
-import { getDocument, VerbosityLevel } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { PDF_TEXT_CONFIG } from 'src/config/AppConfig';
 
 /**
@@ -18,6 +17,11 @@ import { PDF_TEXT_CONFIG } from 'src/config/AppConfig';
  *
  * **Nothing is rendered.** Only the text layer is asked for, so a document whose text is a picture of one — a scan, a
  * photograph — comes back with no lines at all and is refused above, and no font, image or colour is ever decoded.
+ *
+ * **The library is loaded the first time a document is read and not when the process starts.** It is a megabyte of code that
+ * announces on the console what it would need to draw a page with, and a run that never imports a payslip has no use for
+ * either — so the import is where the reading is, and the start-up of a session that opens a file and looks at it carries
+ * nothing of this.
  */
 
 // Where a text item's position sits in the transform the library hands back with it
@@ -82,6 +86,7 @@ const linesOf = (items: readonly PositionedText[]): string[][] => {
  * @returns The lines, or the one refusal there is.
  */
 export const readPdfLines = async(bytes: Buffer): Promise<ReadPdfLinesResult> => {
+	const { getDocument, VerbosityLevel } = await import('pdfjs-dist/legacy/build/pdf.mjs');
 	let document;
 
 	try {
