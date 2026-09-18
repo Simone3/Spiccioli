@@ -4,13 +4,18 @@ import { PDF_TEXT_CONFIG } from 'src/config/AppConfig';
  * A PDF read out as the lines of text it prints, and nothing else.
  *
  * **This is the one module in the application that imports the PDF library** ([§8.3](../../../docs/technical/08-decisions.md#83-the-dependencies-the-application-adds)),
- * the way the price provider is the one thing behind an adapter: what leaves here is an array of strings, so nothing above it
- * has a PDF in it and swapping the library out is a change to this file.
+ * the way the price provider is the one thing behind an adapter: what leaves here is text and the points it is printed at, so
+ * nothing above it has a PDF in it and swapping the library out is a change to this file.
  *
  * **A PDF has no rows.** What a document carries is pieces of text at positions on a page, and the lines a reader sees are
  * something the eye does rather than something the file states. So the pieces are grouped back into lines by the baseline they
- * sit on and ordered left to right along it — which is all a payslip template needs, every figure on one being printed on the
- * same line as the words naming it.
+ * sit on and ordered left to right along it.
+ *
+ * **A piece keeps where it starts across the page, and that is not decoration.** A payslip is a form of boxes: a line of
+ * headings and a line of figures under it, and which heading a figure belongs to is said by nothing but where the two sit. The
+ * text alone cannot answer it — a deduction and a credit are printed identically and differ only by the column they are in — so
+ * the horizontal position of each piece crosses with it and the template reads the columns off the headings ([`PayslipTemplate.ts`](../../logic/import/PayslipTemplate.ts)).
+ * **Nothing here knows what a column is**: what leaves is a position in points, and the meaning of one is the template's.
  *
  * **A figure crosses as the characters the page spells it with**, like every other cell an import reads: what a `2.500,00`
  * means is the template's business and the amount parser's, and neither of them is here ([§8.2](../../../docs/technical/08-decisions.md#82-what-d3-fixes)).
@@ -30,20 +35,24 @@ const ITEM_TRANSFORM = {
 	y: 5
 } as const;
 
+// One piece of text along a printed line: what it says, and where it starts across the page in the points a PDF measures in
+export interface PrintedPiece {
+	text: string;
+	x: number;
+}
+
 export type ReadPdfLinesResult = {
 	outcome: 'lines';
 
 	// One entry per printed line, each holding the pieces of text along it from left to right
-	lines: string[][];
+	lines: PrintedPiece[][];
 } | {
 
 	// The bytes are not a PDF, or are one nothing can be opened out of: encrypted, truncated, or written to no standard at all
 	outcome: 'not-a-pdf';
 };
 
-interface PositionedText {
-	text: string;
-	x: number;
+interface PositionedText extends PrintedPiece {
 	y: number;
 }
 
@@ -57,12 +66,12 @@ interface PositionedText {
  * @param items The pieces of text on the page, in no particular order.
  * @returns The lines, top to bottom, each left to right.
  */
-const linesOf = (items: readonly PositionedText[]): string[][] => {
+const linesOf = (items: readonly PositionedText[]): PrintedPiece[][] => {
 	// Down the page first and across it second, which is the order the lines are then cut out of
 	const ordered = [ ...items ].sort((left, right) => {
 		return Math.abs(left.y - right.y) <= PDF_TEXT_CONFIG.lineTolerancePoints ? left.x - right.x : right.y - left.y;
 	});
-	const lines: string[][] = [];
+	const lines: PrintedPiece[][] = [];
 	let baseline: number | undefined;
 
 	ordered.forEach((item) => {
@@ -71,7 +80,7 @@ const linesOf = (items: readonly PositionedText[]): string[][] => {
 			lines.push([]);
 		}
 
-		lines[lines.length - 1].push(item.text);
+		lines[lines.length - 1].push({ text: item.text, x: item.x });
 	});
 
 	return lines;
@@ -112,7 +121,7 @@ export const readPdfLines = async(bytes: Buffer): Promise<ReadPdfLinesResult> =>
 		return { outcome: 'not-a-pdf' };
 	}
 
-	const lines: string[][] = [];
+	const lines: PrintedPiece[][] = [];
 
 	try {
 		for(let pageNumber = 1; pageNumber <= document.numPages; pageNumber++) {

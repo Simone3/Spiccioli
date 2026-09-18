@@ -21,7 +21,7 @@ import { useRemembered } from 'src/contexts/ScreenMemoryContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { extensionsForImportSource } from 'src/logic/import/ImportTemplates';
-import { applyPayslipTemplate, type PayslipFigure, type PayslipImportValues } from 'src/logic/import/PayslipTemplate';
+import { applyPayslipTemplate, payslipLinesOf, type PayslipFigure, type PayslipImportValues } from 'src/logic/import/PayslipTemplate';
 import { findPayslipTemplate, PAYSLIP_TEMPLATES } from 'src/logic/import/PayslipTemplates';
 import { createLedgerId } from 'src/logic/ledger/LedgerDocument';
 import { formatMinorUnitsAsPlainDecimal, MONEY_SCALES } from 'src/logic/money/Money';
@@ -414,7 +414,7 @@ export const SalariesScreen = (): ReactElement => {
 				return;
 			}
 
-			const applied = applyPayslipTemplate(result.rows, template);
+			const applied = applyPayslipTemplate(payslipLinesOf(result.rows, result.positions), template);
 
 			if(applied.outcome === 'refused') {
 				setRefusal(t(`payslips.import.refusal.${applied.refusal.reason === 'no-text' ? 'noText' : 'periodMissing'}`));

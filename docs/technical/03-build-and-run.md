@@ -24,7 +24,7 @@ npm run build          # build-react + build-electron
 npm run build-icons    # regenerate assets/icon.{icns,ico,png} from assets/icon.svg
 npm run write-sample-ledger  # write dist/sample-ledger.spiccioli from §9 alone
 npm run write-sample-imports # write dist/sample-imports/, one sample bank export per import template
-npm run write-sample-payslips # write dist/sample-payslips/, the documents the sample payslip template reads
+npm run write-sample-payslips # write dist/sample-payslips/, the documents the shipped payslip template reads
 npm run make           # build the installers for the current platform
 ```
 

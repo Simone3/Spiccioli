@@ -41,7 +41,8 @@ export type ImportSource = {
 	 * A document that prints its figures rather than tabulating them, which is what a payslip is.
 	 *
 	 * **There is nothing to declare.** A workbook has sheets and a delimited file has a delimiter; a PDF has neither, and the
-	 * lines it prints are the whole of what crosses — one entry per line, holding the pieces of text along it.
+	 * lines it prints are the whole of what crosses — one entry per line, holding the pieces of text along it and the point
+	 * each of them starts at.
 	 */
 	kind: 'pdf';
 };
@@ -107,6 +108,19 @@ export type ReadImportFileResult = {
 
 	// One entry per row, each holding the text of its cells from the first column to the last one that carries anything
 	rows: string[][];
+
+	/**
+	 * Where each piece of each row starts across the page, in the points a PDF measures in — **for a printed document only**.
+	 *
+	 * A grid has columns of its own and carries none of this. A payslip has no columns at all: it is a form of boxes, where a
+	 * line of headings sits above a line of figures and which heading a figure belongs to is said by nothing but where the two
+	 * sit. Two figures under two different headings are printed identically, so the text alone cannot tell a deduction from a
+	 * credit and the position has to cross with it ([`PayslipTemplate.ts`](../logic/import/PayslipTemplate.ts)).
+	 *
+	 * **Nothing here reads one.** A position in points is no more interpreted than a cell's text is: which column a heading
+	 * opens is the template's business, and the template is the renderer's.
+	 */
+	positions?: number[][];
 } | {
 	outcome: 'refused';
 	refusal: ImportFileRefusal;

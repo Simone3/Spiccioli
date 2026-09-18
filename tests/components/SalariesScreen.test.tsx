@@ -54,28 +54,58 @@ const addPayslip = (): HTMLElement => {
 // Month, label, the five entered figures, the derived net salary, and then the one column the three credits are written into
 const PENSION_FUND_COLUMN = 8;
 
-// The lines the sample template reads, as the main process hands a document over: one entry per printed line
-const PAYSLIP_LINES: string[][] = [
-	[ 'SAMPLE PAYROLL SERVICES' ],
-	[ 'Period:', '03/2025' ],
-	[ 'Contract gross', '3.300,00' ],
-	[ 'Gross total', '3.300,00' ],
-	[ 'Net payment', '1.990,00' ],
-	[ 'Expense refunds', '0,00' ],
-	[ 'Pension fund - employee', '0,00' ],
-	[ 'Pension fund - employer', '0,00' ],
-	[ 'Severance (TFR)', '0,00' ]
+/**
+ * One printed line, as the pieces along it and the point each of them starts at.
+ *
+ * **A payslip is a form of boxes**, so a line handed over without its points is a line the template can read nothing out of:
+ * the heading naming a figure is on one line and the figure is under it, and which heading it is under is said by where it
+ * sits and by nothing else.
+ * @param pieces Each piece as the point it starts at and what it says.
+ * @returns The line.
+ */
+const line = (...pieces: readonly (readonly [ number, string ])[]): readonly (readonly [ number, string ])[] => {
+	return pieces;
+};
+
+// The document the shipped template reads, as the main process hands one over. A March with nothing withheld for a car.
+const PAYSLIP_LINES = [
+	line([ 27, 'MESE RETRIBUITO' ], [ 113, 'COD.' ]),
+	line([ 25, 'MARZO' ], [ 85, '2025' ], [ 121, '000' ]),
+	line([ 27, 'RETRIBUZIONE DI FATTO' ], [ 140, 'QUAL.' ], [ 180, 'QUALIFICA' ]),
+	line([ 49, '3.300,00 40 IMP. TECNICO' ], [ 289, '50' ]),
+	line([ 20, 'CODICE' ], [ 70, 'DESCRIZIONE VOCE' ], [ 344, 'COMPETENZE' ], [ 423, 'TRATTENUTE' ], [ 502, 'DATI STATISTICI' ]),
+	line([ 43, '715 NOTA SPESE FEBBRAIO' ], [ 382, '0,00' ]),
+	line([ 43, '930 FONDO C/DIPE' ], [ 463, '0,00' ]),
+	line([ 43, '931 FONDO C/AZIENDA' ], [ 534, '0,00' ]),
+	line([ 43, '935 CONTRIBUZIONE TFR' ], [ 534, '0,00' ]),
+	line([ 27, 'TOTALE LORDO' ], [ 120, 'IMPON. CONTR. SOC.' ]),
+	line([ 55, '3.300,00' ], [ 133, '3.300,00' ]),
+	line([ 27, 'IRPEF ERARIO' ], [ 400, 'ARROTONDAMENTO' ], [ 500, 'NETTO BUSTA' ]),
+	line([ 430, '0,00' ], [ 523, '1.990,00' ])
 ];
 
-const importPayslip = async(rows: string[][] = PAYSLIP_LINES): Promise<void> => {
+const importPayslip = async(lines: readonly (readonly (readonly [ number, string ])[])[] = PAYSLIP_LINES): Promise<void> => {
 	stubImportBridge({
 		readFile: () => {
-			return Promise.resolve({ outcome: 'read', fileName: 'payslip.pdf', rows });
+			return Promise.resolve({
+				outcome: 'read',
+				fileName: 'payslip.pdf',
+				rows: lines.map((printed) => {
+					return printed.map(([ , text ]) => {
+						return text;
+					});
+				}),
+				positions: lines.map((printed) => {
+					return printed.map(([ x ]) => {
+						return x;
+					});
+				})
+			});
 		}
 	});
 
 	await userEvent.click(screen.getByRole('button', { name: 'Import payslip…' }));
-	await userEvent.click(screen.getByRole('button', { name: 'Sample payslip PDF' }));
+	await userEvent.click(screen.getByRole('button', { name: 'Reply Italy PDF' }));
 	await userEvent.click(screen.getByRole('button', { name: 'Choose file…' }));
 };
 
@@ -155,7 +185,7 @@ describe('the Salaries screen', () => {
 
 	test('refuses a document whose year the contract never covered, and writes nothing', async() => {
 		await openSalaries(withContract());
-		await importPayslip([ [ 'Period:', '03/2022' ], [ 'Gross total', '3.300,00' ] ]);
+		await importPayslip([ line([ 25, 'MARZO' ], [ 85, '2022' ]), line([ 27, 'TOTALE LORDO' ]), line([ 55, '3.300,00' ]) ]);
 
 		expect(screen.getByText('That payslip is for 2022, which is outside Acme S.p.A.. Nothing has been changed.')).toBeInTheDocument();
 		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -163,7 +193,7 @@ describe('the Salaries screen', () => {
 
 	test('refuses a document the template does not describe, and writes nothing', async() => {
 		await openSalaries(withContract());
-		await importPayslip([ [ 'A letter from the bank' ] ]);
+		await importPayslip([ line([ 27, 'A letter from the bank' ]) ]);
 
 		expect(screen.getByText(/The line naming the month and the year is not in that document/)).toBeInTheDocument();
 		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

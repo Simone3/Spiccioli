@@ -147,9 +147,9 @@ describe('reading a bank export over IPC', () => {
 		expect(result.outcome === 'refused' && result.refusal.reason).toBe('empty');
 	});
 
-	test('reads a payslip document out as the lines it prints', async() => {
+	test('reads a payslip document out as the lines it prints and the points they sit at', async() => {
 		const result = await invokeRead(
-			{ bytes: buildSamplePayslip('sample'), chosen: [ '/somewhere/payslip.pdf' ] },
+			{ bytes: buildSamplePayslip('full'), chosen: [ '/somewhere/payslip.pdf' ] },
 			{ ...XLSX_REQUEST, scope: 'payslips', source: { kind: 'pdf' }, extensions: [ 'pdf' ] }
 		);
 
@@ -157,9 +157,16 @@ describe('reading a bank export over IPC', () => {
 
 		if(result.outcome === 'read') {
 			expect(result.fileName).toBe('payslip.pdf');
-			expect(result.rows.map((row) => {
-				return row.join(' ');
-			})).toContain('Period: 07/2026');
+
+			const line = result.rows.findIndex((row) => {
+				return row[0] === 'TOTALE LORDO';
+			});
+
+			expect(line).toBeGreaterThan(-1);
+
+			// A printed line has no cells, so what says which heading a figure belongs to is the point it is printed at
+			expect(result.positions?.[line]).toHaveLength(result.rows[line].length);
+			expect(result.positions?.[line][0]).toBeCloseTo(27);
 		}
 	});
 

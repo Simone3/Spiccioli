@@ -16,7 +16,9 @@ import type { ImportScope, ImportSource, ReadImportFileRequest, ReadImportFileRe
  * never crosses, because nothing in the window has anything to do with one — the file is read here and is not opened again.
  *
  * **Nothing here knows what a column is for.** Which of them carries a date and which carries an amount is the template's
- * business and the template is the renderer's, so what this answers with is the text the cells hold and no reading of it.
+ * business and the template is the renderer's, so what this answers with is the text the cells hold and no reading of it. A
+ * printed document has no cells at all, so the point each piece of a line starts at crosses beside the text and is read by the
+ * payslip template and by nothing before it.
  *
  * **What it writes to the log is a path, a count and a reason, and never a cell** ([§8.4](../../../docs/technical/08-decisions.md#84-what-d14-logs)):
  * an export is somebody's spending, line by line, and the log is the one place in the application it must not reach.
@@ -52,7 +54,7 @@ export interface RegisterImportIpcHandlersOptions {
  * @param source What the template says the bytes are.
  * @returns The grid, or why there is none.
  */
-const readGrid = async(bytes: Buffer, source: ImportSource): Promise<ReadImportFileResult | { outcome: 'grid'; rows: string[][] }> => {
+const readGrid = async(bytes: Buffer, source: ImportSource): Promise<ReadImportFileResult | { outcome: 'grid'; rows: string[][]; positions?: number[][] }> => {
 	if(source.kind === 'csv') {
 		return { outcome: 'grid', rows: parseDelimitedRows(decodeDelimitedText(bytes, source.encoding), source.delimiter) };
 	}
@@ -60,7 +62,25 @@ const readGrid = async(bytes: Buffer, source: ImportSource): Promise<ReadImportF
 	if(source.kind === 'pdf') {
 		const document = await readPdfLines(bytes);
 
-		return document.outcome === 'lines' ? { outcome: 'grid', rows: document.lines } : { outcome: 'refused', refusal: { reason: 'not-a-pdf' } };
+		if(document.outcome !== 'lines') {
+			return { outcome: 'refused', refusal: { reason: 'not-a-pdf' } };
+		}
+
+		// The text and the points it is printed at, taken apart into the two arrays that cross: a printed line has no cells, and
+		// which heading a figure sits under is answered by nothing but where it sits
+		return {
+			outcome: 'grid',
+			rows: document.lines.map((line) => {
+				return line.map((piece) => {
+					return piece.text;
+				});
+			}),
+			positions: document.lines.map((line) => {
+				return line.map((piece) => {
+					return piece.x;
+				});
+			})
+		};
 	}
 
 	const sheet = readXlsxGrid(bytes, source.sheet);
@@ -161,6 +181,6 @@ export const registerImportIpcHandlers = ({
 
 		appLogger.info('Read a bank export', { type: 'import.read', path: filePath, kind: request.source.kind, rows: grid.rows.length });
 
-		return { outcome: 'read', fileName: path.basename(filePath), rows: grid.rows };
+		return { outcome: 'read', fileName: path.basename(filePath), rows: grid.rows, positions: grid.positions };
 	});
 };

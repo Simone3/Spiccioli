@@ -1401,9 +1401,9 @@ export const EN_TRANSLATIONS = {
 				yearOutsideContract: 'That payslip is for {year}, which is outside {contract}. Nothing has been changed.'
 			},
 
-			// One entry per template the application ships
+			// One entry per template the application ships, each written against a real payslip of that employer's
 			templates: {
-				sample: { name: 'Sample payslip PDF' }
+				'reply-italy': { name: 'Reply Italy PDF' }
 			}
 		}
 	},
