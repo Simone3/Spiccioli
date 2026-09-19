@@ -1,0 +1,40 @@
+src/i18n/lang/en.ts
+  s_d7db72a1360310::t_4c6a99b96259ba 1407-1412
+src/components/salaries/SalariesScreen.tsx
+  s_d7db72a1360310::t_4c6a99b96259ba 417-419
+tests/main/SamplePayslips.test.ts
+  s_d7db72a1360310::t_da3c708c0646ec 22-24,30,131
+tests/components/SalariesScreen.test.tsx
+  s_d7db72a1360310::t_f67ee3a74d4817 186-196
+tests/logic/PayslipTemplate.test.ts
+  s_d7db72a1360310::t_da3c708c0646ec 5,86-93,95,161-173,223-225
+src/logic/import/PayslipTemplates.ts
+  s_d7db72a1360310::t_4c6a99b96259ba 88-90,93-96,115-119,130-142
+  s_d7db72a1360310::t_251c63a0e4bda3 143-149
+docs/technical/02-repository-map.md
+  s_d7db72a1360310::t_81e4b6bcc34a88 130-131
+src/logic/import/PayslipTemplate.ts
+  s_d7db72a1360310::t_1d15f66f4d1c34 63
+  s_d7db72a1360310::t_2adb92e14b1d84 52-62,64-80,183-185,187,496-510,576,579-583,614
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "21004005c85c93e4530c874d98cabef9c717355d",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d7db72a1360310": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d3b3ce84-bb4f-4be6-be75-f67c3b7f5ae5",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
