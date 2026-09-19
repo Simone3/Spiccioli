@@ -1386,9 +1386,12 @@ export const EN_TRANSLATIONS = {
 		import: {
 			action: 'Import payslip…',
 			reading: 'Reading…',
-			title: 'Import a payslip',
-			dialogTitle: 'Choose a payslip',
-			templateNote: 'Pick a template for your payslip.',
+			title: 'Import payslips',
+			dialogTitle: 'Choose one or more payslips',
+			chooseFile: 'Choose documents…',
+
+			// The one place the number of documents can be said before the chooser opens, the chooser itself being the system's
+			templateNote: 'Pick the template your payslips were printed on. You can choose several documents at once, and they are all read under this one template.',
 			templateSearchPlaceholder: 'Type an employer name',
 			notice: 'Read from {fileName}. Check every figure before saving.',
 			noticeWithMissing: 'Read from {fileName}. Not found on it: {figures}. Check every figure before saving.',
@@ -1414,7 +1417,9 @@ export const EN_TRANSLATIONS = {
 
 			// Several documents at once, which open a recap instead of a form: one row per document, a tick on each, one save
 			batch: {
-				title: 'Import payslips',
+
+				// Not "Import payslips", which is the panel this one opens from: a title says which of the two is up
+				title: 'What these documents hold',
 				subtitle: '{contract} · {template} · {documents}',
 				documentCount: {
 					one: '1 document',
@@ -1441,7 +1446,7 @@ export const EN_TRANSLATIONS = {
 					document: 'Document',
 					status: 'What it would do'
 				},
-				statusNew: 'Will be written',
+				statusNew: 'New',
 				statusDuplicate: 'Already recorded',
 				statusDuplicateInSelection: 'Same as a row above',
 				statusZeroed: {

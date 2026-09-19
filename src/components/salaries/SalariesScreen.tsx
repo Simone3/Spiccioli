@@ -744,6 +744,7 @@ export const SalariesScreen = (): ReactElement => {
 					title={t('payslips.import.title')}
 					note={t('payslips.import.templateNote')}
 					searchPlaceholder={t('payslips.import.templateSearchPlaceholder')}
+					chooseLabel={t('payslips.import.chooseFile')}
 					entries={payslipTemplateChoices}
 					onChoose={(id) => {
 						void readPayslipDocuments(id);

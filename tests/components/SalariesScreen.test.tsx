@@ -113,7 +113,7 @@ const chooseDocuments = async(files: readonly ImportFileOutcome[]): Promise<void
 
 	await userEvent.click(screen.getByRole('button', { name: 'Import payslip…' }));
 	await userEvent.click(screen.getByRole('button', { name: 'Reply Italy PDF' }));
-	await userEvent.click(screen.getByRole('button', { name: 'Choose file…' }));
+	await userEvent.click(screen.getByRole('button', { name: 'Choose documents…' }));
 };
 
 // The same document, for another month: the period box is the one line that says which month a payslip is for
@@ -218,7 +218,7 @@ describe('the Salaries screen', () => {
 			asDocument('march.pdf', PAYSLIP_LINES)
 		]);
 
-		const recap = screen.getByRole('dialog', { name: 'Import payslips' });
+		const recap = screen.getByRole('dialog', { name: 'What these documents hold' });
 
 		// The rows are ordered the way the payslip table orders its own, whatever order the chooser handed them over in
 		const rows = within(recap).getAllByRole('row').slice(1);
@@ -252,7 +252,7 @@ describe('the Salaries screen', () => {
 			asDocument('april.pdf', monthOf('APRILE'))
 		]);
 
-		const recap = screen.getByRole('dialog', { name: 'Import payslips' });
+		const recap = screen.getByRole('dialog', { name: 'What these documents hold' });
 
 		expect(within(recap).getByText('Already recorded')).toBeInTheDocument();
 		expect(within(recap).getByText('No line naming the month: not a document this template describes')).toBeInTheDocument();
@@ -272,7 +272,7 @@ describe('the Salaries screen', () => {
 		await openSalaries(withContract());
 		await importPayslip([ line([ 27, 'A letter from the bank' ]) ]);
 
-		expect(screen.queryByRole('dialog', { name: 'Import payslips' })).not.toBeInTheDocument();
+		expect(screen.queryByRole('dialog', { name: 'What these documents hold' })).not.toBeInTheDocument();
 		expect(screen.getByText(/The line naming the month and the year is not in that document/)).toBeInTheDocument();
 	});
 

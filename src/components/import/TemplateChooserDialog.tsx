@@ -35,6 +35,9 @@ export interface TemplateChooserDialogProps {
 	// What the search box suggests typing, which is what the names in this list are made of
 	searchPlaceholder: string;
 
+	// What the button that opens the file chooser says, where "Choose file…" would be saying the wrong number of them
+	chooseLabel?: string;
+
 	entries: readonly TemplateChoice[];
 
 	// Called with the id of the template chosen, which is what opens the file chooser
@@ -49,6 +52,7 @@ export interface TemplateChooserDialogProps {
  * @param props.title What the panel is called.
  * @param props.note What the list is of.
  * @param props.searchPlaceholder What the search box suggests typing.
+ * @param props.chooseLabel What the button that opens the file chooser says.
  * @param props.entries The templates offered.
  * @param props.onChoose What to do with the template chosen.
  * @param props.onCancel What cancelling does.
@@ -58,6 +62,7 @@ export const TemplateChooserDialog = ({
 	title,
 	note,
 	searchPlaceholder,
+	chooseLabel,
 	entries,
 	onChoose,
 	onCancel
@@ -86,7 +91,7 @@ export const TemplateChooserDialog = ({
 		<FormDialog
 			title={title}
 			canSave={chosen !== undefined}
-			saveLabel={t('import.uploadChooseFile')}
+			saveLabel={chooseLabel ?? t('import.uploadChooseFile')}
 			onSave={() => {
 				if(chosen) {
 					onChoose(chosen.id);
