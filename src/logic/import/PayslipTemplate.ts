@@ -50,6 +50,35 @@ export const PAYSLIP_FIGURES = [
 export type PayslipFigure = typeof PAYSLIP_FIGURES[number];
 
 /**
+ * What the application calls each payslip a document says is one of a kind that carries a name.
+ *
+ * **A payslip is named after what it is and not after what the payroll called it.** A form's own shorthand for a *tredicesima*
+ * is `13a MENS.`, which says nothing to somebody reading the Payslips table and would be a different string on every employer's
+ * form — so the document says *which* payment this is and the application says what to call it.
+ *
+ * **Which makes it wording a user reads, and wording lives in the translation bundle** ([§5](../../../docs/technical/05-text-and-languages.md)):
+ * it arrives here as a parameter, the way `DateUtils` takes its day names, so nothing in this file holds a word of English.
+ */
+export interface PayslipLabels {
+
+	// A second December payslip, which is the thirteenth month's pay
+	thirteenth: string;
+}
+
+export type PayslipLabelName = keyof PayslipLabels;
+
+/**
+ * Where a document says the payslip is one that carries a name, and which name it is given.
+ *
+ * **The pattern recognises and never captures.** What the form prints there is its own shorthand and is not the label: the
+ * label is the name above, which is why this says which one rather than where to read one.
+ */
+export interface PayslipLabelSource {
+	pattern: RegExp;
+	name: PayslipLabelName;
+}
+
+/**
  * One piece of text along a printed line: what it says, and where it starts across the page.
  *
  * **The point is in the points a PDF measures in**, which is the unit it crossed the bridge in. Nothing here compares one
@@ -151,11 +180,11 @@ export interface PayslipTemplate {
 	period: PayslipPeriod;
 
 	/**
-	 * Where a name for the payslip is printed, on a document that prints one: a *tredicesima* is a second December payslip and
-	 * the label is what says so ([§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips)). Its first capture group is
-	 * the name. **A document that prints none simply leaves the field empty**, which is what an ordinary month is.
+	 * Where the document says this payslip is one that carries a name, and which name that is: a *tredicesima* is a second
+	 * December payslip and the label is what says which of the two it is ([§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips)).
+	 * **A document that says nothing of the kind simply leaves the field empty**, which is what an ordinary month is.
 	 */
-	label?: RegExp;
+	label?: PayslipLabelSource;
 
 	/**
 	 * The heading that names the document's table of entries, on a document that prints one.
@@ -465,6 +494,21 @@ const figureOf = (lines: readonly PayslipLine[], template: PayslipTemplate, figu
 };
 
 /**
+ * Reads the name this payslip carries, on a document that says it is one that carries one.
+ * @param texts The document, one line of text per entry.
+ * @param source Where the template says that is stated, where its form states it at all.
+ * @param labels What the application calls each of them.
+ * @returns The name, or null where the document says nothing of the kind — which is what an ordinary month is.
+ */
+const readLabel = (texts: readonly string[], source: PayslipLabelSource | undefined, labels: PayslipLabels): string | null => {
+	if(source === undefined || firstMatch(texts, source.pattern) === undefined) {
+		return null;
+	}
+
+	return labels[source.name];
+};
+
+/**
  * Reads a month the document numbered.
  * @param text What the period line said the month was.
  * @returns The month, or undefined where it is not digits.
@@ -529,9 +573,14 @@ const readPeriod = (texts: readonly string[], period: PayslipPeriod): { year: nu
  * empty — the document is the only thing that fills one in.
  * @param lines The document, one entry per printed line holding the pieces of text along it.
  * @param template The template the user chose.
+ * @param labels What the application calls each payslip a document says carries a name.
  * @returns The values the form opens on, or why the document could not be read at all.
  */
-export const applyPayslipTemplate = (lines: readonly PayslipLine[], template: PayslipTemplate): ApplyPayslipTemplateResult => {
+export const applyPayslipTemplate = (
+	lines: readonly PayslipLine[],
+	template: PayslipTemplate,
+	labels: PayslipLabels
+): ApplyPayslipTemplateResult => {
 	const printed = lines.filter((line) => {
 		return payslipLineText(line) !== '';
 	});
@@ -562,8 +611,5 @@ export const applyPayslipTemplate = (lines: readonly PayslipLine[], template: Pa
 		figures[figure] = amount;
 	});
 
-	const labelMatch = template.label === undefined ? undefined : firstMatch(texts, template.label);
-	const label = (labelMatch?.[1] ?? '').trim();
-
-	return { outcome: 'read', values: { ...period, label: label === '' ? null : label, figures }, missing };
+	return { outcome: 'read', values: { ...period, label: readLabel(texts, template.label, labels), figures }, missing };
 };

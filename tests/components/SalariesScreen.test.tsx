@@ -183,6 +183,17 @@ describe('the Salaries screen', () => {
 		expect(within(yearRow('2025')).getByText('€ 1.990,00')).toBeInTheDocument();
 	});
 
+	// The form's own shorthand for a tredicesima says nothing to anybody reading the table, so the application names it
+	test('labels a tredicesima with the application\'s own word and files it into December', async() => {
+		await openSalaries(withContract());
+		await importPayslip([ line([ 25, '13a MENS.' ], [ 85, '2025' ]), ...PAYSLIP_LINES.slice(2) ]);
+
+		const form = screen.getByRole('dialog', { name: 'Add payslip' });
+
+		expect(within(form).getByRole('textbox', { name: 'Month' })).toHaveValue('12');
+		expect(within(form).getByRole('textbox', { name: 'Label' })).toHaveValue('13th');
+	});
+
 	test('refuses a document whose year the contract never covered, and writes nothing', async() => {
 		await openSalaries(withContract());
 		await importPayslip([ line([ 25, 'MARZO' ], [ 85, '2022' ]), line([ 27, 'TOTALE LORDO' ]), line([ 55, '3.300,00' ]) ]);

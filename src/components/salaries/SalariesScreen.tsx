@@ -414,7 +414,9 @@ export const SalariesScreen = (): ReactElement => {
 				return;
 			}
 
-			const applied = applyPayslipTemplate(payslipLinesOf(result.rows, result.positions), template);
+			const applied = applyPayslipTemplate(payslipLinesOf(result.rows, result.positions), template, {
+				thirteenth: t('payslips.import.labels.thirteenth')
+			});
 
 			if(applied.outcome === 'refused') {
 				setRefusal(t(`payslips.import.refusal.${applied.refusal.reason === 'no-text' ? 'noText' : 'periodMissing'}`));

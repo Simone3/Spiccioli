@@ -19,12 +19,15 @@ import { readPdfLines } from 'src/main/import/PdfText';
 
 const REPLY_ITALY = PAYSLIP_TEMPLATES[0];
 
+// What the screen reads out of the translation bundle, written differently here so that a label can only have come from it
+const LABELS = { thirteenth: 'the thirteenth month' };
+
 const readSample = async(id: string): Promise<ReturnType<typeof applyPayslipTemplate>> => {
 	const document = await readPdfLines(buildSamplePayslip(id));
 
 	expect(document.outcome).toBe('lines');
 
-	return applyPayslipTemplate(document.outcome === 'lines' ? document.lines : [], REPLY_ITALY);
+	return applyPayslipTemplate(document.outcome === 'lines' ? document.lines : [], REPLY_ITALY, LABELS);
 };
 
 describe('readPdfLines', () => {
@@ -125,7 +128,7 @@ describe('the shipped payslip template', () => {
 
 		expect(applied.values.year).toBe(2026);
 		expect(applied.values.month).toBe(12);
-		expect(applied.values.label).toBe('13a MENS.');
+		expect(applied.values.label).toBe('the thirteenth month');
 		expect(applied.missing).toEqual([ 'refunds' ]);
 		expect(applied.values.figures.carPayment).toBe(9500);
 		expect(applied.values.figures.netPayment).toBe(192560);

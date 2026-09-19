@@ -2,6 +2,7 @@ import {
 	applyPayslipTemplate,
 	payslipLinesOf,
 	payslipLineText,
+	type PayslipLabels,
 	type PayslipLine,
 	type PayslipPiece,
 	type PayslipTemplate
@@ -82,8 +83,16 @@ const documentOf = (entries: readonly PayslipLine[] = ENTRIES): PayslipLine[] =>
 	];
 };
 
+/**
+ * What the application calls each payslip a document says carries a name.
+ *
+ * **Nothing here is what the bundle says**, deliberately: a label that came out of this object is a label the reader did not
+ * invent, and one that came out of the document would be the form's own shorthand showing up in the Payslips table.
+ */
+const LABELS: PayslipLabels = { thirteenth: 'the thirteenth month' };
+
 const read = (lines: readonly PayslipLine[] = documentOf(), template: PayslipTemplate = REPLY_ITALY): ReturnType<typeof applyPayslipTemplate> => {
-	return applyPayslipTemplate(lines, template);
+	return applyPayslipTemplate(lines, template, LABELS);
 };
 
 describe('payslipLineText', () => {
@@ -149,6 +158,19 @@ describe('applyPayslipTemplate', () => {
 		expect(applied.outcome === 'read' && applied.missing).toContain('employeeContribution');
 	});
 
+	// Each side of the fund is printed under either of two labels, and a month somebody joined in prints both of them
+	it('sums a fund contribution printed under both of the labels it can carry', () => {
+		const applied = read(documentOf([
+			entry('930 FONDO C/DIPE', 'trattenute', '60,00'),
+			entry('931 QUOTA ISCR.FONDO DIPEND.', 'trattenute', '15,00'),
+			entry('940 FONDO C/AZIENDA', 'statistici', '110,50'),
+			entry('941 QUOTA ISCR. FONDO AZIENDA', 'statistici', '20,00')
+		]));
+
+		expect(applied.outcome === 'read' && applied.values.figures.employeeContribution).toBe(7500);
+		expect(applied.outcome === 'read' && applied.values.figures.employerContribution).toBe(13050);
+	});
+
 	// A payslip with no car in a month with no car is the ordinary case: the field is left empty and is named, never zeroed
 	it('reports a figure the document does not print rather than writing a zero', () => {
 		const applied = read(documentOf([ entry('930 FONDO C/DIPE', 'trattenute', '60,00') ]));
@@ -198,7 +220,9 @@ describe('applyPayslipTemplate', () => {
 		}
 
 		expect(applied.values.month).toBe(12);
-		expect(applied.values.label).toBe('13a MENS.');
+
+		// What the form printed there is a payroll's shorthand; what the payslip is called is the application's word for it
+		expect(applied.values.label).toBe('the thirteenth month');
 
 		// It is the period box that changed and nothing else, so every figure is still read exactly where it was
 		expect(applied.values.figures.netPayment).toBe(201033);

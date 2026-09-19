@@ -1404,6 +1404,12 @@ export const EN_TRANSLATIONS = {
 			// One entry per template the application ships, each written against a real payslip of that employer's
 			templates: {
 				'reply-italy': { name: 'Reply Italy PDF' }
+			},
+
+			// What a payslip a document says carries a name is called. The form's own shorthand for one is a payroll's and
+			// says nothing to anybody reading the Payslips table, so the application names it and the document only says which.
+			labels: {
+				thirteenth: '13th'
 			}
 		}
 	},

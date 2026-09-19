@@ -85,12 +85,15 @@ const PERIOD_NAMES = Object.keys(PERIOD_MONTHS).map((name) => {
  *
  * **The pension fund is credited from two sides.** The employee's share is withheld from the pay and is a `TRATTENUTE` line;
  * the employer's share never passes through the pay at all, so it is printed among the `DATI STATISTICI` — as is the severance
- * credited into the fund the same month.
+ * credited into the fund the same month. **Each side is printed under either of two labels**: the standing contribution, and
+ * the fee for joining the fund, which is charged on top of it in the month somebody joins. Both are that side's money into
+ * that fund, so a month printing both has them summed, exactly as the two car lines are.
  *
  * **The label comes out of the period box too.** A *tredicesima* is the one payslip this form does not name after a month: its
- * `MESE RETRIBUITO` box says `13a MENS.` instead, which is read as December and as the label that says which of that month's
- * two payslips this one is ([§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips)). An ordinary month names itself
- * and carries no label at all.
+ * `MESE RETRIBUITO` box says `13a MENS.` instead, which files the payslip into December and marks it as the one of that
+ * month's two that is the thirteenth month's pay ([§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips)). **What
+ * that label then reads is the application's word and not the form's**: `13a MENS.` is a payroll's shorthand and says nothing
+ * to anybody reading the Payslips table. An ordinary month names itself and carries no label at all.
  */
 const REPLY_ITALY: PayslipTemplate = {
 	id: 'reply-italy',
@@ -109,8 +112,11 @@ const REPLY_ITALY: PayslipTemplate = {
 		monthNames: PERIOD_MONTHS
 	},
 
-	// The same box, read for what the form called the payment: an ordinary month names itself and carries no label at all
-	label: new RegExp(`^(${THIRTEENTH_MONTH.name.replace(PATTERN_DOT, '\\.')})\\s+\\d{4}\\b`, 'iu'),
+	// The same box, read for which payment it says this is: an ordinary month names itself and carries no label at all
+	label: {
+		pattern: new RegExp(`^${THIRTEENTH_MONTH.name.replace(PATTERN_DOT, '\\.')}\\s+\\d{4}\\b`, 'iu'),
+		name: 'thirteenth'
+	},
 	table: /^DESCRIZIONE VOCE$/u,
 	figures: {
 		contractGross: { in: 'box', heading: /^RETRIBUZIONE DI FATTO$/u },
@@ -121,10 +127,26 @@ const REPLY_ITALY: PayslipTemplate = {
 			label: new RegExp(`\\bNOTA SPESE (?:${ITALIAN_MONTHS.join('|')})\\b`, 'u'),
 			column: /^COMPETENZE$/u
 		},
-		carPayment: { in: 'table', label: /\b(?:TRATTENUTA USO AUTO|ADDEBITO MULTE)/u, column: /^TRATTENUTE$/u },
-		employeeContribution: { in: 'table', label: /\bFONDO C\/DIPE/u, column: /^TRATTENUTE$/u },
-		employerContribution: { in: 'table', label: /\bFONDO C\/AZIENDA/u, column: /^DATI STATISTICI$/u },
-		severanceContribution: { in: 'table', label: /\bCONTRIBUZIONE TFR/u, column: /^DATI STATISTICI$/u }
+		carPayment: {
+			in: 'table',
+			label: /\b(?:TRATTENUTA USO AUTO|ADDEBITO MULTE)/u,
+			column: /^TRATTENUTE$/u
+		},
+		employeeContribution: {
+			in: 'table',
+			label: /\b(?:FONDO C\/DIPE|QUOTA ISCR\.\s*FONDO DIPEND)/u,
+			column: /^TRATTENUTE$/u
+		},
+		employerContribution: {
+			in: 'table',
+			label: /\b(?:FONDO C\/AZIENDA|QUOTA ISCR\.\s*FONDO AZIENDA)/u,
+			column: /^DATI STATISTICI$/u
+		},
+		severanceContribution: {
+			in: 'table',
+			label: /\bCONTRIBUZIONE TFR/u,
+			column: /^DATI STATISTICI$/u
+		}
 	},
 	format: { decimalSeparator: 'comma', thousandsSeparator: 'dot' }
 };
