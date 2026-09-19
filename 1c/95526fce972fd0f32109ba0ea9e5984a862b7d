@@ -1,0 +1,83 @@
+docs/technical/02-repository-map.md
+  s_0bc9ee7ad54d68::t_c0ea6ca07bad88 37,89,119
+docs/technical/01-architecture.md
+  s_0bc9ee7ad54d68::t_2af413b6284a88 20,29,31
+tests/logic/PayslipImportBatch.test.ts
+  s_0bc9ee7ad54d68::t_f82c945c5f0421 1-133,145-206
+  s_0bc9ee7ad54d68::t_6a6ed1ec8c0d5c 134-144
+docs/functional/specs/15-out-of-scope.md
+  s_0bc9ee7ad54d68::t_86ffbec9b89712 24
+src/types/ImportIpcTypes.ts
+  s_0bc9ee7ad54d68::t_3acfd47f978008 129-165,168-170,176-184
+  s_0bc9ee7ad54d68::t_c7423ac0d0dffa 166-167
+src/components/salaries/SalariesScreen.css
+  s_0bc9ee7ad54d68::t_cd9b339d397276 123-237
+tests/components/SalariesScreen.test.tsx
+  s_0bc9ee7ad54d68::t_9f3ed967adb6ab 119-123,126,213-231,235-277
+  s_0bc9ee7ad54d68::t_f4520f7fbcfb15 232-234
+  s_0bc9ee7ad54d68::t_bb6d4089abdecb 4,88-95,97-110,124-125
+  s_0bc9ee7ad54d68::t_e0a42fce9a80d9 127,278
+src/components/salaries/PayslipImportRecap.tsx
+  s_0bc9ee7ad54d68::t_ded710f1339fc0 1,79,81-87,312
+  s_0bc9ee7ad54d68::t_9f992a9399785d 2-78,80,88-311,313-370
+src/i18n/lang/en.ts
+  s_0bc9ee7ad54d68::t_671d18127c8138 1413-1470
+src/types/ImportIpcChannels.ts
+  s_0bc9ee7ad54d68::t_6635b4d17d556a 5-8
+docs/functional/specs/08-salaries.md
+  s_0bc9ee7ad54d68::t_a489384543828e 29
+  s_0bc9ee7ad54d68::t_cb0929c9aace36 32
+  s_0bc9ee7ad54d68::t_ada596d9db1e6b 34-41
+docs/functional/specs/14-empty-and-error-states.md
+  s_0bc9ee7ad54d68::t_02ddeb95689eb9 32
+src/components/salaries/SalariesScreen.tsx
+  s_0bc9ee7ad54d68::t_75e23c6a231d1c 37,514-538,573,756-766
+  s_0bc9ee7ad54d68::t_c7423ac0d0dffa 13,25-32,40,73-78,114-116,407,409,484,749
+  s_0bc9ee7ad54d68::t_5b343c9b67d5df 60-63
+  s_0bc9ee7ad54d68::t_192c807968a2f3 402,405-406,408,410-454,457,470,482-483,489-490,495-503,505-507,539-572
+  s_0bc9ee7ad54d68::t_63a99adede6b57 117,574,767-769
+src/logic/salaries/Payslips.ts
+  s_0bc9ee7ad54d68::t_2cdec3aa2a3586 53-56,59
+src/config/AppConfig.ts
+  s_0bc9ee7ad54d68::t_6635b4d17d556a 124-128
+src/logic/salaries/PayslipImportBatch.ts
+  s_0bc9ee7ad54d68::t_2c1d9df3c83bc8 1-233,249-270,272-303
+  s_0bc9ee7ad54d68::t_96bd74312e93d7 234-248,271
+docs/functional/specs/13-validation.md
+  s_0bc9ee7ad54d68::t_987d68f734bac0 131-132
+src/main/preload/Preload.ts
+  s_0bc9ee7ad54d68::t_6635b4d17d556a 113-115
+docs/functional/why/15-out-of-scope.md
+  s_0bc9ee7ad54d68::t_ee40b0d97c04e3 35
+src/main/ipc/ImportIpc.ts
+  s_0bc9ee7ad54d68::t_0e71c6625a3040 10-17
+  s_0bc9ee7ad54d68::t_c0aec9ef243f14 38-40,65,67,173,215
+  s_0bc9ee7ad54d68::t_c7423ac0d0dffa 249
+  s_0bc9ee7ad54d68::t_a926ab39d8fdc4 137-147,149,153,159,162,164-165,167-172,191,209,212-214,216-248,250-258
+tests/testUtils/AppTestFactory.tsx
+  s_0bc9ee7ad54d68::t_c0aec9ef243f14 79-81
+tests/main/ImportIpc.test.ts
+  s_0bc9ee7ad54d68::t_6373cc0ecd24f8 6,26-28,33-40,51,82,87,95,97-98,105-107
+  s_0bc9ee7ad54d68::t_71bb630c9400d2 208-276
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "1c95526fce972fd0f32109ba0ea9e5984a862b7d",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0bc9ee7ad54d68": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eacbbb0d-f372-4582-9835-9ec62ea502e8",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
