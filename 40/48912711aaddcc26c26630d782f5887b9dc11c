@@ -1,0 +1,34 @@
+src/components/salaries/SalariesScreen.tsx
+  s_0bc9ee7ad54d68::t_15505215a08882 747
+src/components/import/TemplateChooserDialog.tsx
+  s_0bc9ee7ad54d68::t_27849f6b8e28a6 38-40,55,65,94
+src/i18n/lang/en.ts
+  s_0bc9ee7ad54d68::t_7cd434605dfc3c 1420-1422
+  s_0bc9ee7ad54d68::t_15505215a08882 1389-1394,1449
+tests/components/SalariesScreen.test.tsx
+  s_0bc9ee7ad54d68::t_35653488c9d65e 116
+  s_0bc9ee7ad54d68::t_7cd434605dfc3c 221,255,275
+docs/technical/02-repository-map.md
+  s_0bc9ee7ad54d68::t_22af961e15b944 86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4048912711aaddcc26c26630d782f5887b9dc11c",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0bc9ee7ad54d68": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eacbbb0d-f372-4582-9835-9ec62ea502e8",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
