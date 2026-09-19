@@ -120,3 +120,118 @@
 	text-decoration: underline;
 	cursor: pointer;
 }
+
+/* A document this import could not read, stated in the cell beside the document it is about */
+.salaries-screen-refused {
+	color: var(--colors-danger-text);
+}
+
+/* The file a row was read from, which is a path and is written the way every path in the application is */
+.salaries-screen-document {
+	font-family: var(--font-family-mono);
+	font-size: 11.5px;
+	color: var(--colors-text-secondary);
+}
+
+/* The recap a selection of several documents opens instead of a form: the rows, the ticks, and the one save for all of them */
+.payslip-recap-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	padding: 24px;
+	background-color: var(--colors-modal-overlay);
+}
+
+/* The panel never grows past the window it is centred in: a selection of a whole year lists every document of it, and it is the
+   list that scrolls rather than the panel that runs off the top and the bottom of the screen. */
+.payslip-recap-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 1180px;
+	max-height: 100%;
+	padding: 22px;
+	background-color: var(--colors-background-secondary);
+	border: 1px solid var(--colors-border-strong);
+	border-radius: 10px;
+	box-shadow: 0 24px 48px var(--colors-modal-shadow);
+}
+
+/* The one part of the panel that can be any length. Everything above and below it keeps its size. */
+.payslip-recap-panel .data-table-scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+}
+
+/* The columns stay named while the list is scrolled past them, the rule under a stuck header being painted on the header */
+.payslip-recap-panel .data-table thead th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background-color: var(--colors-background-secondary);
+	box-shadow: inset 0 -1px 0 var(--colors-border-strong);
+}
+
+.payslip-recap-heading {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 12px;
+}
+
+.payslip-recap-title {
+	margin: 0;
+	font-family: var(--font-family-display);
+	font-size: 19px;
+	font-weight: 700;
+}
+
+.payslip-recap-subtitle {
+	font-family: var(--font-family-mono);
+	font-size: 11.5px;
+	color: var(--colors-text-faint);
+}
+
+/* What the recap says about itself before the rows: that nothing is written yet, and what a zero in them means */
+.payslip-recap-notice {
+	margin: 0;
+	padding: 10px 12px;
+	background-color: var(--colors-background-primary);
+	border: 1px solid var(--colors-border-subtle);
+	border-radius: 6px;
+	color: var(--colors-text-secondary);
+}
+
+/* The selectors, which set the whole selection rather than adding to it */
+.payslip-recap-selectors {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.payslip-recap-selectors-label {
+	font-family: var(--font-family-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--colors-text-faint);
+}
+
+/* A row nothing will be written for: stated rather than hidden, and quieter than the ones that will */
+.payslip-recap-row-quiet td {
+	color: var(--colors-text-faint);
+}
+
+.payslip-recap-actions {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+}

@@ -121,7 +121,11 @@ export const SHUTDOWN_CONFIG = {
 // whole file is read into memory to be turned into a grid, and one far past what a statement or a payslip can be is refused
 // before that happens.
 export const IMPORT_FILE_CONFIG = {
-	maximumFileSizeBytes: 20 * 1024 * 1024
+	maximumFileSizeBytes: 20 * 1024 * 1024,
+
+	// How many documents one selection may carry, which is five years of monthly payslips and the extra payment each of those
+	// years holds. It is what a folder selected whole runs into rather than a limit anybody imports up to.
+	maximumFiles: 65
 } as const;
 
 // How a PDF's pieces of text are grouped back into the lines it prints. A document is free to nudge a figure a fraction of a

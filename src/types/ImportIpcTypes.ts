@@ -126,9 +126,60 @@ export type ReadImportFileResult = {
 	refusal: ImportFileRefusal;
 };
 
+/**
+ * One document of a selection, read or refused on its own.
+ *
+ * **A document nothing can be read out of never stops the ones beside it** ([§8.1](../../docs/functional/specs/08-salaries.md#81-payslips)):
+ * a scan among twelve payslips is one marked row in the recap, exactly as a row the paste box cannot read is one marked row in
+ * the preview and not a refusal of the paste ([§5.7](../../docs/functional/specs/05-transactions.md#57-bulk-import)).
+ *
+ * **Every one of them carries the file's own name**, the refusals included: a selection is accounted for document by document,
+ * and a row saying a document could not be read has to say which document that was.
+ */
+export type ImportFileOutcome = {
+	fileName: string;
+	outcome: 'read';
+	rows: string[][];
+	positions?: number[][];
+} | {
+	fileName: string;
+	outcome: 'refused';
+	refusal: ImportFileRefusal;
+};
+
+/**
+ * What a chooser that takes several documents answers with.
+ *
+ * **The whole selection is refused for one reason only**, which is a selection larger than an import reads at a time. Every
+ * other refusal belongs to a document and travels on that document's own outcome.
+ */
+export type ReadImportFilesResult = {
+	outcome: 'cancelled';
+} | {
+	outcome: 'read';
+
+	// One entry per document, in the order the chooser handed them over
+	files: readonly ImportFileOutcome[];
+} | {
+	outcome: 'too-many';
+
+	// How many were chosen, and how many an import reads at a time: the message the user reads names both
+	count: number;
+	limit: number;
+};
+
 // What the preload publishes on "window.spiccioliImport"
 export interface SpiccioliImportApi {
 
 	// Opens the chooser and answers with the grid, which is one round trip because nothing in the window ever needs the path
 	readFile: (request: ReadImportFileRequest) => Promise<ReadImportFileResult>;
+
+	/**
+	 * The same chooser, taking more than one document at a time, which is what a selection of payslips is read through
+	 * ([§8.1](../../docs/functional/specs/08-salaries.md#81-payslips)).
+	 *
+	 * **A selection of one is not special here.** It comes back as one entry like any other, and which of the two things it
+	 * opens — the form or the recap — is the screen's decision and not this bridge's.
+	 */
+	readFiles: (request: ReadImportFileRequest) => Promise<ReadImportFilesResult>;
 }

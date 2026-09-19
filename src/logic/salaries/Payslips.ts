@@ -50,10 +50,13 @@ export const formatPayslipPeriod = (payslip: Payslip, translator: SpiccioliTrans
 /**
  * The one figure a payslip does not store: what the month was actually worth, with the reimbursements taken back out of it and
  * the car put back into it.
- * @param payslip The payslip.
+ * **It is read off the three figures and not off the record**, so the recap of the bulk import derives it for a payslip that
+ * does not exist yet ([§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips)) the same way the table derives it for
+ * one that does.
+ * @param payslip The payslip, or the three figures of one.
  * @returns netPayment − refunds + carPayment, in cents.
  */
-export const netSalary = (payslip: Payslip): Cents => {
+export const netSalary = (payslip: Pick<Payslip, 'netPayment' | 'refunds' | 'carPayment'>): Cents => {
 	return payslip.netPayment - payslip.refunds + payslip.carPayment;
 };
 

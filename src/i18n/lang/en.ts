@@ -1410,6 +1410,64 @@ export const EN_TRANSLATIONS = {
 			// says nothing to anybody reading the Payslips table, so the application names it and the document only says which.
 			labels: {
 				thirteenth: '13th'
+			},
+
+			// Several documents at once, which open a recap instead of a form: one row per document, a tick on each, one save
+			batch: {
+				title: 'Import payslips',
+				subtitle: '{contract} · {template} · {documents}',
+				documentCount: {
+					one: '1 document',
+					other: '{count} documents'
+				},
+				payslipCount: {
+					one: '1 payslip',
+					other: '{count} payslips'
+				},
+
+				// The recap has nothing to type into, so what a document did not print is written as a zero and said so here
+				notice: 'Nothing is written until you save. A figure a document did not print is written as 0 — the last column says how many — and is corrected on the payslip’s own form afterwards.',
+
+				table: 'The payslips these documents would write',
+				selectLabel: 'Select',
+				selectors: {
+					writable: 'All that can be written',
+					none: 'None'
+				},
+				tickAll: 'Write every document that can be written',
+				select: 'Write the payslip read from {document}',
+				cannotSelect: 'Nothing can be written from {document}',
+				columns: {
+					document: 'Document',
+					status: 'What it would do'
+				},
+				statusNew: 'Will be written',
+				statusDuplicate: 'Already recorded',
+				statusDuplicateInSelection: 'Same as a row above',
+				statusZeroed: {
+					one: '1 figure was not printed and is written as 0',
+					other: '{count} figures were not printed and are written as 0'
+				},
+				footer: '{ticked} of {documents} ticked.',
+				nothingToWrite: 'Nothing in this selection can be written. Cancel is the way out of it.',
+				save: {
+					one: 'Save 1 payslip',
+					other: 'Save {count} payslips'
+				},
+
+				// A refusal as a row states it, which is short because it sits in a cell beside the document it is about
+				refusals: {
+					noText: 'Prints no text at all — a scan of a payslip, not a payslip',
+					periodMissing: 'No line naming the month: not a document this template describes',
+					yearOutsideContract: '{year} is outside this contract',
+					monthOutsideContract: 'That month is outside this contract',
+					grossMissing: 'Not printed: {figures} — and a gross may not be zero',
+					notAPdf: 'Not a PDF that can be opened',
+					unreadable: 'Could not be read off the disk'
+				},
+
+				// The one refusal the whole selection takes, nothing having been read for it
+				tooMany: 'That is {count} documents, and an import reads at most {limit} at a time. Nothing has been changed.'
 			}
 		}
 	},

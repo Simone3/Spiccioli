@@ -7,7 +7,14 @@ import { decodeDelimitedText, parseDelimitedRows } from 'src/main/import/Delimit
 import { readPdfLines } from 'src/main/import/PdfText';
 import { readXlsxGrid } from 'src/main/import/XlsxGrid';
 import { SPICCIOLI_IMPORT_IPC_CHANNELS } from 'src/types/ImportIpcChannels';
-import type { ImportScope, ImportSource, ReadImportFileRequest, ReadImportFileResult } from 'src/types/ImportIpcTypes';
+import type {
+	ImportFileOutcome,
+	ImportScope,
+	ImportSource,
+	ReadImportFileRequest,
+	ReadImportFileResult,
+	ReadImportFilesResult
+} from 'src/types/ImportIpcTypes';
 
 /**
  * The renderer's way to a file an import reads, and the only one there is.
@@ -27,6 +34,9 @@ import type { ImportScope, ImportSource, ReadImportFileRequest, ReadImportFileRe
 type ImportIpcMain = Pick<IpcMain, 'handle'>;
 
 type ImportDialog = Pick<Dialog, 'showOpenDialog'>;
+
+// What one file comes back as, which is everything a read answers with except the answer for a chooser nobody chose anything in
+type ReadFileOutcome = Exclude<ReadImportFileResult, { outcome: 'cancelled' }>;
 
 export interface RegisterImportIpcHandlersOptions {
 	ipcMain: ImportIpcMain;
@@ -52,9 +62,9 @@ export interface RegisterImportIpcHandlersOptions {
  * Turns the bytes into a grid under the source the template declared.
  * @param bytes The whole file.
  * @param source What the template says the bytes are.
- * @returns The grid, or why there is none.
+ * @returns The grid, or why there is none. Never *cancelled*: bytes that are here were chosen.
  */
-const readGrid = async(bytes: Buffer, source: ImportSource): Promise<ReadImportFileResult | { outcome: 'grid'; rows: string[][]; positions?: number[][] }> => {
+const readGrid = async(bytes: Buffer, source: ImportSource): Promise<ReadFileOutcome | { outcome: 'grid'; rows: string[][]; positions?: number[][] }> => {
 	if(source.kind === 'csv') {
 		return { outcome: 'grid', rows: parseDelimitedRows(decodeDelimitedText(bytes, source.encoding), source.delimiter) };
 	}
@@ -124,26 +134,43 @@ export const registerImportIpcHandlers = ({
 	 */
 	const lastDirectory = new Map<ImportScope, string>();
 
-	ipcMain.handle(SPICCIOLI_IMPORT_IPC_CHANNELS.readFile, async(_event, request: ReadImportFileRequest): Promise<ReadImportFileResult> => {
+	/**
+	 * Opens the chooser and says what was chosen.
+	 *
+	 * **Where it opens is remembered from the file that was chosen and not from the one that was read**: a file refused
+	 * afterwards was still found in the folder the user went to, and sending them back to the downloads folder to try again
+	 * would be the wrong help.
+	 * @param request What the chooser offers and what it is called.
+	 * @param multiple Whether it takes more than one document at a time.
+	 * @returns The paths, which is empty where the chooser was dismissed.
+	 */
+	const choose = async(request: ReadImportFileRequest, multiple: boolean): Promise<readonly string[]> => {
 		const window = getWindow();
+		const properties = multiple ? [ 'openFile' as const, 'multiSelections' as const ] : [ 'openFile' as const ];
 		const options = {
 			title: request.dialogTitle,
 			defaultPath: lastDirectory.get(request.scope) ?? initialDirectory(),
-			properties: [ 'openFile' as const ],
+			properties,
 			filters: [ { name: request.fileTypeName, extensions: request.extensions } ]
 		};
 		const chosen = await (window ? dialog.showOpenDialog(window, options) : dialog.showOpenDialog(options));
 
 		if(chosen.canceled || chosen.filePaths.length === 0) {
-			return { outcome: 'cancelled' };
+			return [];
 		}
 
-		const filePath = chosen.filePaths[0];
+		lastDirectory.set(request.scope, path.dirname(chosen.filePaths[0]));
 
-		// Taken from the file that was chosen rather than from the one that was read: a file refused afterwards was still found
-		// in the folder the user went to, and sending them back to the downloads folder to try again would be the wrong help
-		lastDirectory.set(request.scope, path.dirname(filePath));
+		return chosen.filePaths;
+	};
 
+	/**
+	 * Everything one chosen file goes through: how large it is, the bytes, and the grid the template's source turns them into.
+	 * @param filePath The file.
+	 * @param source What the template says the bytes are.
+	 * @returns The grid, or why there is none. Never *cancelled*: a file that was chosen was chosen.
+	 */
+	const readOne = async(filePath: string, source: ImportSource): Promise<ReadFileOutcome> => {
 		let bytes: Buffer;
 
 		try {
@@ -161,7 +188,7 @@ export const registerImportIpcHandlers = ({
 			return { outcome: 'refused', refusal: { reason: 'unreadable' } };
 		}
 
-		const grid = await readGrid(bytes, request.source);
+		const grid = await readGrid(bytes, source);
 
 		if(grid.outcome !== 'grid') {
 			appLogger.warn('Could not read a bank export', {
@@ -179,8 +206,55 @@ export const registerImportIpcHandlers = ({
 			return { outcome: 'refused', refusal: { reason: 'empty' } };
 		}
 
-		appLogger.info('Read a bank export', { type: 'import.read', path: filePath, kind: request.source.kind, rows: grid.rows.length });
+		appLogger.info('Read a bank export', { type: 'import.read', path: filePath, kind: source.kind, rows: grid.rows.length });
 
 		return { outcome: 'read', fileName: path.basename(filePath), rows: grid.rows, positions: grid.positions };
+	};
+
+	// A document's outcome carries the document's own name, the refusals included: a selection is accounted for one row at a time
+	const named = (filePath: string, outcome: ReadFileOutcome): ImportFileOutcome => {
+		return outcome.outcome === 'read' ?
+			outcome :
+			{ fileName: path.basename(filePath), outcome: 'refused', refusal: outcome.refusal };
+	};
+
+	ipcMain.handle(SPICCIOLI_IMPORT_IPC_CHANNELS.readFile, async(_event, request: ReadImportFileRequest): Promise<ReadImportFileResult> => {
+		const chosen = await choose(request, false);
+
+		return chosen.length === 0 ? { outcome: 'cancelled' } : await readOne(chosen[0], request.source);
+	});
+
+	/**
+	 * The same thing for a chooser that takes several documents, which is how a selection of payslips is read.
+	 *
+	 * **The files are read one after another and each one answers for itself.** A document nothing can be read out of comes
+	 * back refused beside the ones that could be, because it is one marked row in the recap and never the end of the selection
+	 * ([§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips)).
+	 */
+	ipcMain.handle(SPICCIOLI_IMPORT_IPC_CHANNELS.readFiles, async(_event, request: ReadImportFileRequest): Promise<ReadImportFilesResult> => {
+		const chosen = await choose(request, true);
+
+		if(chosen.length === 0) {
+			return { outcome: 'cancelled' };
+		}
+
+		// The one refusal the whole selection takes, and the one nothing is read for: a folder chosen whole rather than a batch
+		if(chosen.length > IMPORT_FILE_CONFIG.maximumFiles) {
+			appLogger.warn('Refused a selection larger than an import reads at a time', {
+				type: 'import.refused',
+				files: chosen.length,
+				reason: 'too-many'
+			});
+
+			return { outcome: 'too-many', count: chosen.length, limit: IMPORT_FILE_CONFIG.maximumFiles };
+		}
+
+		const files: ImportFileOutcome[] = [];
+
+		for(const filePath of chosen) {
+			files.push(named(filePath, await readOne(filePath, request.source)));
+		}
+
+		return { outcome: 'read', files };
 	});
 };

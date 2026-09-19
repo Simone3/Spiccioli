@@ -110,6 +110,9 @@ const spiccioliLedger: SpiccioliLedgerApi = {
 const spiccioliImport: SpiccioliImportApi = {
 	readFile: (request) => {
 		return ipcRenderer.invoke(SPICCIOLI_IMPORT_IPC_CHANNELS.readFile, request);
+	},
+	readFiles: (request) => {
+		return ipcRenderer.invoke(SPICCIOLI_IMPORT_IPC_CHANNELS.readFiles, request);
 	}
 };
 

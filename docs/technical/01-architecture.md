@@ -17,7 +17,7 @@ The two processes are bundled separately and by different tools, because they ar
 
 ## 1.2 What crosses the bridge
 
-Five groups of channels, and they all follow one pattern: the names in `src/types/…IpcChannels.ts`, the shapes in `src/types/…IpcTypes.ts`, a handler in `src/main/ipc/`, and the preload publishing one function per thing the renderer may ask for.
+Six groups of channels, and they all follow one pattern: the names in `src/types/…IpcChannels.ts`, the shapes in `src/types/…IpcTypes.ts`, a handler in `src/main/ipc/`, and the preload publishing one function per thing the renderer may ask for.
 
 | Group | Files | Role |
 | --- | --- | --- |
@@ -26,8 +26,9 @@ Five groups of channels, and they all follow one pattern: the names in `src/type
 | The ledger | `src/types/LedgerIpcChannels.ts` `LedgerIpcTypes.ts`, `src/main/ipc/LedgerIpc.ts` | Everything about the file: the two dialogs, reading, creating, saving, the copies, where the copies live, the recent list, the preferences, **the ledger a launch handed over**, and the two answers to a shutdown that are not a close — calling it off, and holding its wait while the user answers for changes the file never took |
 | Diagnostics | `src/types/LedgerIpcChannels.ts`, `src/main/ipc/DiagnosticsIpc.ts` | The renderer's failures, written into the operational log by the process that owns it |
 | Prices | `src/types/PriceIpcChannels.ts` `PriceIpcTypes.ts`, `src/main/ipc/PricesIpc.ts` | **The one thing in the application that touches the network**: a listing and a span per security out, the days it carries or a reason back, how far the pass has got while it runs, and the line saying what the confirmation wrote |
+| Imports | `src/types/ImportIpcChannels.ts` `ImportIpcTypes.ts`, `src/main/ipc/ImportIpc.ts` | The files an import reads: a bank export ([§5.7](../functional/specs/05-transactions.md#57-bulk-import)) and a payslip ([§8.1](../functional/specs/08-salaries.md#81-payslips)). **Two channels, one document and several**, the second being how a selection of payslips is read — and in it **every document answers for itself**, because one that cannot be read is one marked row of the recap and never the end of the selection. What comes back is the text of the cells, plus the point each piece of a printed line starts at, and **never a path** |
 
-`src/main/preload/Preload.ts` publishes them as `window.spiccioliAppInfo`, `window.spiccioliAppMenu`, `window.spiccioliLedger`, `window.spiccioliPrices` and `window.spiccioliDiagnostics`, and `src/vite-env.d.ts` tells TypeScript what `window` carries.
+`src/main/preload/Preload.ts` publishes them as `window.spiccioliAppInfo`, `window.spiccioliAppMenu`, `window.spiccioliLedger`, `window.spiccioliPrices`, `window.spiccioliImport` and `window.spiccioliDiagnostics`, and `src/vite-env.d.ts` tells TypeScript what `window` carries.
 
 A channel is a request the renderer makes and the main process answers. For events pushed the other way, the framework's `subscribeToChannel` (`src/framework/preload/IpcBridge.ts`) is what the preload wraps a listener in, so the renderer gets the payload without an Electron event object it could not receive anyway. Six events are pushed today. Five are the ledger's: a write attempt that failed, an external modification, a File-menu command, the request to finish saving before the session closes, and the word that a launch has left a ledger waiting to be taken. The sixth is the drawn menu bar's, sent whenever the menu is rebuilt — which is every time the recent list changes Open Recent underneath it.
 

@@ -76,6 +76,9 @@ export const stubImportBridge = (overrides: Partial<SpiccioliImportApi> = {}): S
 		readFile: () => {
 			return Promise.resolve({ outcome: 'cancelled' });
 		},
+		readFiles: () => {
+			return Promise.resolve({ outcome: 'cancelled' });
+		},
 		...overrides
 	};
 

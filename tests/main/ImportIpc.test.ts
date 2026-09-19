@@ -3,7 +3,7 @@ import { buildSampleImport } from './SampleImportFixtures';
 import { buildSamplePayslip } from './SamplePayslipFixtures';
 import { registerImportIpcHandlers } from 'src/main/ipc/ImportIpc';
 import { SPICCIOLI_IMPORT_IPC_CHANNELS } from 'src/types/ImportIpcChannels';
-import type { ReadImportFileRequest, ReadImportFileResult } from 'src/types/ImportIpcTypes';
+import type { ReadImportFileRequest, ReadImportFileResult, ReadImportFilesResult } from 'src/types/ImportIpcTypes';
 
 /**
  * The one channel a bank export crosses. What it answers with is a grid or a reason, and **never a path**: the file is read
@@ -23,9 +23,20 @@ const XLSX_REQUEST: ReadImportFileRequest = {
 interface HandlerOptions {
 	chosen?: string[];
 	bytes?: Buffer;
+
+	// What each file holds, where a selection of several needs them to differ
+	bytesOf?: (filePath: string) => Buffer;
 	size?: number;
 	throws?: boolean;
 }
+
+const PDF_REQUEST: ReadImportFileRequest = {
+	source: { kind: 'pdf' },
+	scope: 'payslips',
+	fileTypeName: 'PDF document',
+	extensions: [ 'pdf' ],
+	dialogTitle: 'Choose a payslip'
+};
 
 const DOWNLOADS = '/Users/someone/Downloads';
 
@@ -37,6 +48,7 @@ const DOWNLOADS = '/Users/someone/Downloads';
  */
 const registerRun = (options: HandlerOptions): {
 	read: (request?: ReadImportFileRequest) => Promise<ReadImportFileResult>;
+	readMany: (request?: ReadImportFileRequest) => Promise<ReadImportFilesResult>;
 	opened: OpenDialogOptions[];
 } => {
 	const handlers = new Map<string, RegisteredIpcHandler>();
@@ -67,12 +79,12 @@ const registerRun = (options: HandlerOptions): {
 		initialDirectory: () => {
 			return DOWNLOADS;
 		},
-		readFile: () => {
+		readFile: (filePath: string) => {
 			if(options.throws) {
 				throw new Error('no such file');
 			}
 
-			return options.bytes ?? buildSampleImport('isybank');
+			return options.bytesOf?.(filePath) ?? options.bytes ?? buildSampleImport('isybank');
 		},
 		fileSize: () => {
 			return options.size ?? 1000;
@@ -80,15 +92,19 @@ const registerRun = (options: HandlerOptions): {
 	});
 
 	const handler = handlers.get(SPICCIOLI_IMPORT_IPC_CHANNELS.readFile);
+	const manyHandler = handlers.get(SPICCIOLI_IMPORT_IPC_CHANNELS.readFiles);
 
-	if(!handler) {
-		throw new Error('The import channel was not registered');
+	if(!handler || !manyHandler) {
+		throw new Error('The import channels were not registered');
 	}
 
 	return {
 		opened,
 		read: async(request: ReadImportFileRequest = XLSX_REQUEST) => {
 			return await handler({} as IpcMainInvokeEvent, request) as ReadImportFileResult;
+		},
+		readMany: async(request: ReadImportFileRequest = PDF_REQUEST) => {
+			return await manyHandler({} as IpcMainInvokeEvent, request) as ReadImportFilesResult;
 		}
 	};
 };
@@ -186,6 +202,75 @@ describe('reading a bank export over IPC', () => {
 		);
 
 		expect(result.outcome === 'read' && result.rows).toEqual([ [ 'Città', '12' ] ]);
+	});
+});
+
+/**
+ * A chooser that takes several documents at once, which is how a selection of payslips is read.
+ *
+ * **Every document answers for itself.** A selection is accounted for one row at a time, so a scan among twelve payslips comes
+ * back refused beside the eleven that could be read rather than taking them down with it.
+ */
+describe('reading a selection of documents over IPC', () => {
+	const SELECTION = [ '/somewhere/march.pdf', '/somewhere/letter.pdf', '/somewhere/april.pdf' ];
+
+	// The payslip for the two that are payslips, and something nothing can be opened out of for the one in the middle
+	const bytesOf = (filePath: string): Buffer => {
+		return filePath.endsWith('letter.pdf') ? Buffer.from('Dear customer', 'utf8') : buildSamplePayslip('full');
+	};
+
+	test('opens a chooser that takes more than one document', async() => {
+		const run = registerRun({ chosen: SELECTION, bytesOf });
+
+		await run.readMany();
+
+		expect(run.opened[0].properties).toContain('multiSelections');
+	});
+
+	test('answers with one outcome per document, each carrying the name of its own file', async() => {
+		const result = await registerRun({ chosen: SELECTION, bytesOf }).readMany();
+
+		expect(result.outcome).toBe('read');
+
+		if(result.outcome !== 'read') {
+			return;
+		}
+
+		expect(result.files.map((file) => {
+			return file.fileName;
+		})).toEqual([ 'march.pdf', 'letter.pdf', 'april.pdf' ]);
+
+		// The one nothing could be opened out of is refused where it stands, and the two beside it are read
+		expect(result.files[0].outcome).toBe('read');
+		expect(result.files[1].outcome === 'refused' && result.files[1].refusal.reason).toBe('not-a-pdf');
+		expect(result.files[2].outcome === 'read' && result.files[2].rows.length).toBeGreaterThan(0);
+
+		// The path never crosses, whatever happened to the file it points at
+		expect(JSON.stringify(result)).not.toContain('/somewhere');
+	});
+
+	test('answers a chooser that was dismissed with nothing having happened', async() => {
+		expect((await registerRun({ chosen: [] }).readMany()).outcome).toBe('cancelled');
+	});
+
+	// The one refusal a whole selection takes. Nothing is read for it, which is what the read that would throw is here to say.
+	test('refuses a selection larger than an import reads at a time, without reading any of it', async() => {
+		const folder = Array.from({ length: 66 }, (_unused, index) => {
+			return `/somewhere/payslip-${index}.pdf`;
+		});
+		const result = await registerRun({ chosen: folder, throws: true }).readMany();
+
+		expect(result.outcome === 'too-many' && result.count).toBe(66);
+		expect(result.outcome === 'too-many' && result.limit).toBe(65);
+	});
+
+	test('remembers the folder a selection was taken from, the same way one file does', async() => {
+		const run = registerRun({ chosen: [ '/Users/someone/Documents/Payslips/march.pdf' ], bytesOf });
+
+		await run.readMany();
+		await run.readMany();
+
+		expect(run.opened[1].defaultPath).toBe('/Users/someone/Documents/Payslips');
 	});
 });
 

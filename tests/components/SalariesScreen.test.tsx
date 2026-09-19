@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { makeContract, makeContractYear, makePayslip, makeSeededDocument, renderOpenLedger, stubImportBridge } from '../testUtils';
+import type { ImportFileOutcome } from 'src/types/ImportIpcTypes';
 import type { LedgerDocument, Payslip } from 'src/types/LedgerTypes';
 
 // An ended contract, so that the rows of the per-year table are the same whatever day the suite is run on
@@ -84,29 +85,44 @@ const PAYSLIP_LINES = [
 	line([ 430, '0,00' ], [ 523, '1.990,00' ])
 ];
 
-const importPayslip = async(lines: readonly (readonly (readonly [ number, string ])[])[] = PAYSLIP_LINES): Promise<void> => {
-	stubImportBridge({
-		readFile: () => {
-			return Promise.resolve({
-				outcome: 'read',
-				fileName: 'payslip.pdf',
-				rows: lines.map((printed) => {
-					return printed.map(([ , text ]) => {
-						return text;
-					});
-				}),
-				positions: lines.map((printed) => {
-					return printed.map(([ x ]) => {
-						return x;
-					});
-				})
+// One document as the main process hands it over: the text of each line, and the point each piece of it starts at
+const asDocument = (fileName: string, lines: readonly (readonly (readonly [ number, string ])[])[]): ImportFileOutcome => {
+	return {
+		outcome: 'read',
+		fileName,
+		rows: lines.map((printed) => {
+			return printed.map(([ , text ]) => {
+				return text;
 			});
+		}),
+		positions: lines.map((printed) => {
+			return printed.map(([ x ]) => {
+				return x;
+			});
+		})
+	};
+};
+
+// The chooser, whatever it came back with: the template is picked first and the documents second, as it always is
+const chooseDocuments = async(files: readonly ImportFileOutcome[]): Promise<void> => {
+	stubImportBridge({
+		readFiles: () => {
+			return Promise.resolve({ outcome: 'read', files });
 		}
 	});
 
 	await userEvent.click(screen.getByRole('button', { name: 'Import payslip…' }));
 	await userEvent.click(screen.getByRole('button', { name: 'Reply Italy PDF' }));
 	await userEvent.click(screen.getByRole('button', { name: 'Choose file…' }));
+};
+
+// The same document, for another month: the period box is the one line that says which month a payslip is for
+const monthOf = (month: string): readonly (readonly (readonly [ number, string ])[])[] => {
+	return [ PAYSLIP_LINES[0], line([ 25, month ], [ 85, '2025' ], [ 121, '000' ]), ...PAYSLIP_LINES.slice(2) ];
+};
+
+const importPayslip = async(lines: readonly (readonly (readonly [ number, string ])[])[] = PAYSLIP_LINES): Promise<void> => {
+	await chooseDocuments([ asDocument('payslip.pdf', lines) ]);
 };
 
 const yearRow = (year: string): HTMLElement => {
@@ -192,6 +208,72 @@ describe('the Salaries screen', () => {
 
 		expect(within(form).getByRole('textbox', { name: 'Month' })).toHaveValue('12');
 		expect(within(form).getByRole('textbox', { name: 'Label' })).toHaveValue('13th');
+	});
+
+	// Several documents never reach a form: the recap states what each of them would write, and the ticked rows are written together
+	test('opens a recap for a selection of documents and writes the rows that are ticked', async() => {
+		await openSalaries(withContract());
+		await chooseDocuments([
+			asDocument('april.pdf', monthOf('APRILE')),
+			asDocument('march.pdf', PAYSLIP_LINES)
+		]);
+
+		const recap = screen.getByRole('dialog', { name: 'Import payslips' });
+
+		// The rows are ordered the way the payslip table orders its own, whatever order the chooser handed them over in
+		const rows = within(recap).getAllByRole('row').slice(1);
+
+		expect(within(rows[0]).getByText('march.pdf')).toBeInTheDocument();
+		expect(within(rows[1]).getByText('april.pdf')).toBeInTheDocument();
+		expect(within(rows[0]).getByText('03/2025')).toBeInTheDocument();
+
+		// The one figure the document did not print is written as a zero, and the row says so rather than leaving it to be found
+		expect(within(rows[0]).getByText('1 figure was not printed and is written as 0')).toBeInTheDocument();
+
+		// The net payment and the net salary derived from it, which the recap inserts where the payslip table inserts it
+		expect(within(rows[0]).getAllByText('€ 1.990,00')).toHaveLength(2);
+
+		// Nothing has been written yet: the year still holds nothing, and it is the save on the recap that fills it
+		expect(within(yearRow('2025')).getByText('0')).toBeInTheDocument();
+
+		await userEvent.click(within(recap).getByRole('button', { name: 'Save 2 payslips' }));
+
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+		expect(within(yearRow('2025')).getByText('2')).toBeInTheDocument();
+		expect(within(yearRow('2025')).getByText('€ 3.980,00')).toBeInTheDocument();
+	});
+
+	// A document that cannot be read is one marked row, and a payslip the file already holds is a flag and not a refusal
+	test('marks what it cannot write and unticks what is already there, without touching the rows beside them', async() => {
+		await openSalaries(withContract({ payslips: [ payslip({ id: 'march', month: 3 }) ] }));
+		await chooseDocuments([
+			asDocument('march.pdf', PAYSLIP_LINES),
+			asDocument('letter.pdf', [ line([ 27, 'A letter from the bank' ]) ]),
+			asDocument('april.pdf', monthOf('APRILE'))
+		]);
+
+		const recap = screen.getByRole('dialog', { name: 'Import payslips' });
+
+		expect(within(recap).getByText('Already recorded')).toBeInTheDocument();
+		expect(within(recap).getByText('No line naming the month: not a document this template describes')).toBeInTheDocument();
+		expect(within(recap).getByRole('checkbox', { name: 'Nothing can be written from letter.pdf' })).toBeDisabled();
+
+		// Only April arrives ticked: the duplicate is unticked and the letter cannot be ticked at all
+		expect(within(recap).getByRole('button', { name: 'Save 1 payslip' })).toBeEnabled();
+
+		// A duplicate is untickable by nothing, so somebody who means it can tick it again
+		await userEvent.click(within(recap).getByRole('checkbox', { name: 'Write the payslip read from march.pdf' }));
+		await userEvent.click(within(recap).getByRole('button', { name: 'Save 2 payslips' }));
+
+		expect(within(yearRow('2025')).getByText('3')).toBeInTheDocument();
+	});
+
+	test('refuses a selection of one the same way it always has, on the screen and not in a recap', async() => {
+		await openSalaries(withContract());
+		await importPayslip([ line([ 27, 'A letter from the bank' ]) ]);
+
+		expect(screen.queryByRole('dialog', { name: 'Import payslips' })).not.toBeInTheDocument();
+		expect(screen.getByText(/The line naming the month and the year is not in that document/)).toBeInTheDocument();
 	});
 
 	test('refuses a document whose year the contract never covered, and writes nothing', async() => {

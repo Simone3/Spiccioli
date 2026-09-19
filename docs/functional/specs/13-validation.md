@@ -128,6 +128,8 @@ What the forms refuse. Everything here is enforced at the point of entry, by the
 | refunds, carPayment | Amount fields, required, ≥ 0. These are magnitudes; the formula of [§11.7](11-calculations.md#117-salary-figures) applies their signs. |
 | employeeContribution, employerContribution, severanceContribution | Amount fields, required, ≥ 0. Magnitudes, and **zero is the ordinary value for a heading the payslip has nothing under** — it expects no credit and takes no part in check 5 ([§11.6](11-calculations.md#116-derived-matching)). |
 
+**The recap the bulk payslip import writes from applies exactly these rules and relaxes none of them** ([§8.1](08-salaries.md#81-payslips)). A document whose month falls outside the contract's life, and one missing either gross, cannot be ticked — there being no legal value to stand in for what was not printed. Every other figure a document did not print is written as **0**, which is a value the rules above admit wherever they are not the two grosses.
+
 ### Rule
 
 | Field | Rule |

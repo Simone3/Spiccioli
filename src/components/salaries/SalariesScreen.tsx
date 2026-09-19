@@ -10,6 +10,7 @@ import { ContractForm, type ContractFormValues } from 'src/components/salaries/C
 import { ContractsTable } from 'src/components/salaries/ContractsTable';
 import { ContractYearsTable } from 'src/components/salaries/ContractYearsTable';
 import { PayslipForm, type PayslipFormValues } from 'src/components/salaries/PayslipForm';
+import { PayslipImportRecap } from 'src/components/salaries/PayslipImportRecap';
 import { formatPayslipMonth, PayslipsTable } from 'src/components/salaries/PayslipsTable';
 import { SalaryCharts } from 'src/components/salaries/SalaryCharts';
 import { WorkingDaysForm } from 'src/components/salaries/WorkingDaysForm';
@@ -21,14 +22,22 @@ import { useRemembered } from 'src/contexts/ScreenMemoryContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { extensionsForImportSource } from 'src/logic/import/ImportTemplates';
-import { applyPayslipTemplate, payslipLinesOf, type PayslipFigure, type PayslipImportValues } from 'src/logic/import/PayslipTemplate';
+import {
+	applyPayslipTemplate,
+	payslipLinesOf,
+	type PayslipFigure,
+	type PayslipImportValues,
+	type PayslipTemplate,
+	type PayslipTemplateId
+} from 'src/logic/import/PayslipTemplate';
 import { findPayslipTemplate, PAYSLIP_TEMPLATES } from 'src/logic/import/PayslipTemplates';
 import { createLedgerId } from 'src/logic/ledger/LedgerDocument';
 import { formatMinorUnitsAsPlainDecimal, MONEY_SCALES } from 'src/logic/money/Money';
 import { countPayslipsPerContract, contractYearRange, sortContracts } from 'src/logic/salaries/Contracts';
+import { buildPayslipBatch, defaultPayslipSelection, isWritablePayslipRow, type PayslipBatchRow } from 'src/logic/salaries/PayslipImportBatch';
 import { netSalary, payslipsOfContract, sortPayslipsOfYear } from 'src/logic/salaries/Payslips';
 import { deriveSalaryYears, type SalaryChartWindow, type SalaryYearFigures } from 'src/logic/salaries/SalaryFigures';
-import type { ImportFileRefusal } from 'src/types/ImportIpcTypes';
+import type { ImportFileOutcome, ImportFileRefusal } from 'src/types/ImportIpcTypes';
 import type { Contract, ContractYear, LedgerId, Payslip } from 'src/types/LedgerTypes';
 
 /**
@@ -48,6 +57,10 @@ import type { Contract, ContractYear, LedgerId, Payslip } from 'src/types/Ledger
  * **A payslip document is read onto the form and never into the file.** *Import payslip* asks which template, reads the
  * document under it, and opens the ordinary *Add payslip* form with what it found already in the fields — so the one way a
  * payslip is written is still somebody pressing *Save* on that form, with every figure visible beside its own label.
+ *
+ * **Several documents at once open the recap instead**, which is a list and not a form: every document has a row stating the
+ * payslip it would write, a row that cannot be written says why and cannot be ticked, and *Save* writes the ticked rows in one
+ * go. Nothing is written by either path without somebody pressing *Save* on what they can see.
  */
 
 type SalariesTab = 'payslips' | 'contracts';
@@ -55,6 +68,12 @@ type SalariesTab = 'payslips' | 'contracts';
 // The record a form is open on. An undefined record is one being created; an undefined draft is a form that is not open.
 interface ContractDraft {
 	contract: Contract | undefined;
+}
+
+// The recap a selection of several documents is read into: what it would write, and which template read it
+interface PayslipBatch {
+	templateId: PayslipTemplateId;
+	rows: readonly PayslipBatchRow[];
 }
 
 interface PayslipDraft {
@@ -91,6 +110,10 @@ export const SalariesScreen = (): ReactElement => {
 	const [ refusal, setRefusal ] = useState<string | undefined>(undefined);
 	const [ templateDialogOpen, setTemplateDialogOpen ] = useState(false);
 	const [ reading, setReading ] = useState(false);
+
+	// The recap a selection of several documents opened, and the rows of it that will be written
+	const [ batch, setBatch ] = useState<PayslipBatch | undefined>(undefined);
+	const [ tickedRows, setTickedRows ] = useState<ReadonlySet<string>>(new Set());
 
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
 
@@ -376,14 +399,62 @@ export const SalariesScreen = (): ReactElement => {
 	};
 
 	/**
-	 * Reads one payslip document under one template, and opens the form on what it found.
+	 * Opens the ordinary *Add payslip* form on one document, which is what a selection of one does.
 	 *
 	 * **Nothing is written here.** A document that could not be read says why and leaves the screen as it was; one that could
-	 * opens the ordinary *Add payslip* form, filled in as far as the document went, and the payslip exists only once that form
-	 * is saved.
+	 * opens the form filled in as far as the document went, and the payslip exists only once that form is saved.
+	 * @param file The document, as the main process read it.
+	 * @param template The template it was read under.
+	 */
+	const openFormOnDocument = (file: ImportFileOutcome, template: PayslipTemplate): void => {
+		if(!selectedContract) {
+			return;
+		}
+
+		if(file.outcome === 'refused') {
+			setRefusal(fileRefusalMessage(file.refusal));
+
+			return;
+		}
+
+		const applied = applyPayslipTemplate(payslipLinesOf(file.rows, file.positions), template, {
+			thirteenth: t('payslips.import.labels.thirteenth')
+		});
+
+		if(applied.outcome === 'refused') {
+			setRefusal(t(`payslips.import.refusal.${applied.refusal.reason === 'no-text' ? 'noText' : 'periodMissing'}`));
+
+			return;
+		}
+
+		// The year picker holds the contract's own years, so a document from another contract's year has nowhere to land
+		if(!years.some((row) => {
+			return row.year === applied.values.year;
+		})) {
+			setRefusal(t('payslips.import.refusal.yearOutsideContract', {
+				year: String(applied.values.year),
+				contract: selectedContract.name
+			}));
+
+			return;
+		}
+
+		setPayslipDraft({
+			payslip: undefined,
+			prefill: applied.values,
+			notice: importNotice(file.fileName, applied.missing)
+		});
+	};
+
+	/**
+	 * Reads the chosen payslip documents under one template, and opens the one thing their number asks for.
+	 *
+	 * **One document opens the form and several open the recap** ([§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips)).
+	 * Neither writes anything: the form is saved by hand as it always was, and the recap writes only the rows that are ticked
+	 * when *Save* is pressed on it.
 	 * @param id The template the user chose.
 	 */
-	const readPayslipDocument = async(id: string): Promise<void> => {
+	const readPayslipDocuments = async(id: string): Promise<void> => {
 		const template = findPayslipTemplate(id);
 
 		setTemplateDialogOpen(false);
@@ -396,7 +467,7 @@ export const SalariesScreen = (): ReactElement => {
 		setReading(true);
 
 		try {
-			const result = await window.spiccioliImport.readFile({
+			const result = await window.spiccioliImport.readFiles({
 				source: template.source,
 				scope: 'payslips',
 				fileTypeName: t(`import.fileTypes.${template.source.kind}`),
@@ -408,43 +479,97 @@ export const SalariesScreen = (): ReactElement => {
 				return;
 			}
 
-			if(result.outcome === 'refused') {
-				setRefusal(fileRefusalMessage(result.refusal));
+			// The one refusal a whole selection takes, and the one nothing was read for
+			if(result.outcome === 'too-many') {
+				setRefusal(t('payslips.import.batch.tooMany', { count: result.count, limit: result.limit }));
 
 				return;
 			}
 
-			const applied = applyPayslipTemplate(payslipLinesOf(result.rows, result.positions), template, {
-				thirteenth: t('payslips.import.labels.thirteenth')
+			if(result.files.length === 1) {
+				openFormOnDocument(result.files[0], template);
+
+				return;
+			}
+
+			const rows = buildPayslipBatch({
+				files: result.files,
+				template,
+				labels: { thirteenth: t('payslips.import.labels.thirteenth') },
+				contract: selectedContract,
+				years: years.map((row) => {
+					return row.year;
+				}),
+				existing: document?.payslips ?? []
 			});
 
-			if(applied.outcome === 'refused') {
-				setRefusal(t(`payslips.import.refusal.${applied.refusal.reason === 'no-text' ? 'noText' : 'periodMissing'}`));
-
-				return;
-			}
-
-			// The year picker holds the contract's own years, so a document from another contract's year has nowhere to land
-			if(!years.some((row) => {
-				return row.year === applied.values.year;
-			})) {
-				setRefusal(t('payslips.import.refusal.yearOutsideContract', {
-					year: String(applied.values.year),
-					contract: selectedContract.name
-				}));
-
-				return;
-			}
-
-			setPayslipDraft({
-				payslip: undefined,
-				prefill: applied.values,
-				notice: importNotice(result.fileName, applied.missing)
-			});
+			setBatch({ templateId: template.id, rows });
+			setTickedRows(defaultPayslipSelection(rows));
 		}
 		finally {
 			setReading(false);
 		}
+	};
+
+	// A row is ticked or unticked on its own, a duplicate being a flag and not a refusal
+	const togglePayslipRow = (key: string): void => {
+		setTickedRows((current) => {
+			const next = new Set(current);
+
+			if(current.has(key)) {
+				next.delete(key);
+			}
+			else {
+				next.add(key);
+			}
+
+			return next;
+		});
+	};
+
+	// The two selectors set the whole selection rather than adding to it, and what they reach is every row that can be written
+	const tickEveryPayslipRow = (all: boolean): void => {
+		setTickedRows(all && batch ?
+			new Set(batch.rows.filter(isWritablePayslipRow).map((row) => {
+				return row.key;
+			})) :
+			new Set());
+	};
+
+	/**
+	 * Writes the ticked rows of the recap, all of them in one go.
+	 *
+	 * **The per-year selection follows the last payslip written**, which is the rule a form saved into another year already
+	 * follows: a selection spanning two years is left on the later of them, where the last of it landed.
+	 */
+	const savePayslipBatch = (): void => {
+		if(!batch || !selectedContract) {
+			return;
+		}
+
+		const contractId = selectedContract.id;
+		const writing = batch.rows.flatMap((row) => {
+			return row.outcome === 'read' && tickedRows.has(row.key) ? [ row.values ] : [];
+		});
+
+		if(writing.length === 0) {
+			return;
+		}
+
+		updateDocument((current) => {
+			return {
+				...current,
+				payslips: [
+					...current.payslips,
+					...writing.map((values) => {
+						return { id: createLedgerId(), contractId, ...values };
+					})
+				]
+			};
+		});
+
+		setChosenYear(writing[writing.length - 1].year);
+		setBatch(undefined);
 	};
 
 	const importPayslipButton = (
@@ -621,10 +746,24 @@ export const SalariesScreen = (): ReactElement => {
 					searchPlaceholder={t('payslips.import.templateSearchPlaceholder')}
 					entries={payslipTemplateChoices}
 					onChoose={(id) => {
-						void readPayslipDocument(id);
+						void readPayslipDocuments(id);
 					}}
 					onCancel={() => {
 						setTemplateDialogOpen(false);
+					}}/>
+			)}
+
+			{batch && selectedContract && (
+				<PayslipImportRecap
+					contract={selectedContract}
+					templateName={t(`payslips.import.templates.${batch.templateId}.name`)}
+					rows={batch.rows}
+					ticked={tickedRows}
+					onToggle={togglePayslipRow}
+					onTickAll={tickEveryPayslipRow}
+					onSave={savePayslipBatch}
+					onCancel={() => {
+						setBatch(undefined);
 					}}/>
 			)}
 
