@@ -1,9 +1,11 @@
 
 # current
 
-add payslips via pdf upload (and save PDF as attachment too?)
-
 add investments via pdf upload
+
+
+
+
 
 
 
