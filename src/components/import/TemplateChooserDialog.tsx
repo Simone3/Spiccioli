@@ -1,5 +1,5 @@
 import 'src/components/import/TemplateChooserDialog.css';
-import { useMemo, useState, type ReactElement } from 'react';
+import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
 import { FormDialog, FormField } from 'src/components/common/FormDialog';
 import { TextField } from 'src/components/common/TextField';
 import { useTranslator } from 'src/i18n/TranslationContext';
@@ -16,8 +16,10 @@ import { useTranslator } from 'src/i18n/TranslationContext';
  * narrows and never chooses**: a template is chosen by pressing it, so a search that happens to leave one entry still takes the
  * press that says it was the one meant.
  *
- * **It knows nothing about what a template reads.** Both imports show the same list of names and get back the one that was
- * pressed; which of them is a bank export and which is a payslip is the screen's business and never this dialog's.
+ * **It knows nothing about what a template reads.** Every import shows the same list of names and gets back the one that was
+ * pressed; which of them is a bank export, a payslip or a broker's export is the screen's business and never this dialog's.
+ * **An import that asks something else before the file does it here, above the list** — the trade import's account — and says
+ * whether that has been answered, the file chooser opening only once it has.
  */
 
 // One entry of the list: what is pressed, and what it says
@@ -40,6 +42,12 @@ export interface TemplateChooserDialogProps {
 
 	entries: readonly TemplateChoice[];
 
+	// Whatever else the import asks before the file, as "FormField" rows above the list
+	children?: ReactNode;
+
+	// Whether those have been answered, which the file chooser waits on as it waits on the template
+	ready?: boolean;
+
 	// Called with the id of the template chosen, which is what opens the file chooser
 	onChoose: (id: string) => void;
 
@@ -54,6 +62,8 @@ export interface TemplateChooserDialogProps {
  * @param props.searchPlaceholder What the search box suggests typing.
  * @param props.chooseLabel What the button that opens the file chooser says.
  * @param props.entries The templates offered.
+ * @param props.children Whatever else the import asks before the file.
+ * @param props.ready Whether that has been answered.
  * @param props.onChoose What to do with the template chosen.
  * @param props.onCancel What cancelling does.
  * @returns The dialog.
@@ -64,6 +74,8 @@ export const TemplateChooserDialog = ({
 	searchPlaceholder,
 	chooseLabel,
 	entries,
+	children,
+	ready = true,
 	onChoose,
 	onCancel
 }: TemplateChooserDialogProps): ReactElement => {
@@ -90,14 +102,15 @@ export const TemplateChooserDialog = ({
 	return (
 		<FormDialog
 			title={title}
-			canSave={chosen !== undefined}
+			canSave={chosen !== undefined && ready}
 			saveLabel={chooseLabel ?? t('import.uploadChooseFile')}
 			onSave={() => {
-				if(chosen) {
+				if(chosen && ready) {
 					onChoose(chosen.id);
 				}
 			}}
 			onCancel={onCancel}>
+			{children}
 			<FormField label={t('import.template')} hint={note}>
 				<TextField
 					value={search}

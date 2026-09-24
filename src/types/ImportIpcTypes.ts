@@ -50,10 +50,10 @@ export type ImportSource = {
 /**
  * Which import is asking, which is the whole of what the folder the chooser opens in is remembered under.
  *
- * **A payslip and a bank export do not live in the same folder**, so one memory shared between them would send every import
- * back to where the other one was taken from ([§5.7](../../docs/functional/specs/05-transactions.md#57-bulk-import)).
+ * **A payslip, a bank export and a broker's export do not live in the same folder**, so one memory shared between them would
+ * send every import back to where another one was taken from ([§5.7](../../docs/functional/specs/05-transactions.md#57-bulk-import)).
  */
-export type ImportScope = 'transactions' | 'payslips';
+export type ImportScope = 'transactions' | 'payslips' | 'trades';
 
 export interface ReadImportFileRequest {
 	source: ImportSource;

@@ -212,11 +212,13 @@ const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 
 const PHANTOM_LEAP_DAY_SERIAL = 60;
 
-const cleaned = (text: string): string => {
+// A cell as every template reads it: trimmed, with every run of whitespace inside it collapsed to one space
+export const cleanImportCell = (text: string): string => {
 	return text.trim().replace(WHITESPACE_RUN, ' ');
 };
 
-const cellAt = (row: readonly string[], index: number): string => {
+// What a row holds at a position, which is nothing at all past the last cell the row carries
+export const importCellAt = (row: readonly string[], index: number): string => {
 	return row[index] ?? '';
 };
 
@@ -275,8 +277,8 @@ export const dateFromSpreadsheetSerial = (text: string, dateFormat: DateFormat):
  * @returns What goes into the amount column of the box.
  */
 export const signedFromDebitAndCredit = (debit: string, credit: string): string => {
-	const out = cleaned(debit);
-	const into = cleaned(credit);
+	const out = cleanImportCell(debit);
+	const into = cleanImportCell(credit);
 
 	if(out !== '' && into !== '') {
 		return `${out} ${into}`;
@@ -323,10 +325,10 @@ const readSign = (sign: ImportSign, row: readonly string[], positionOf: (column:
 		return 1;
 	}
 
-	const stated = cleaned(cellAt(row, positionOf(sign.column))).toLowerCase();
+	const stated = cleanImportCell(importCellAt(row, positionOf(sign.column))).toLowerCase();
 	const matches = (values: readonly string[]): boolean => {
 		return values.some((value) => {
-			return cleaned(value).toLowerCase() === stated;
+			return cleanImportCell(value).toLowerCase() === stated;
 		});
 	};
 
@@ -358,7 +360,7 @@ const countTimesPrice = (
 	format: ImportFormat,
 	positionOf: (column: ImportColumn) => number
 ): string => {
-	const text = cleaned(cell);
+	const text = cleanImportCell(cell);
 	const match = amount.pattern.exec(text);
 
 	if(!match) {
@@ -366,7 +368,7 @@ const countTimesPrice = (
 	}
 
 	const count = Number(match[1]);
-	const price = readAmount(cleaned(match[2] ?? ''), format);
+	const price = readAmount(cleanImportCell(match[2] ?? ''), format);
 	const sign = readSign(amount.sign, row, positionOf);
 
 	if(!Number.isSafeInteger(count) || price === undefined || sign === undefined) {
@@ -378,23 +380,47 @@ const countTimesPrice = (
 	return Number.isSafeInteger(total) ? amountText(total, format) : text;
 };
 
+// The rows of figures a template found, and where on the sheet each of them is — counting from one, as a spreadsheet counts them
+export interface LocatedImportRows {
+	dataRows: readonly (readonly string[])[];
+	lines: readonly number[];
+	headerRow: readonly string[];
+}
+
 /**
  * Finds where the rows of figures begin, and what row carries the headings above them.
  * @param rows The grid.
  * @param header What the template says sits above the figures.
- * @returns The first row of figures and the headings over it, or undefined where the headings are not there at all.
+ * @returns The rows of figures, the line each is on, and the headings over them — or undefined where the headings are not there.
  */
-const locateRows = (rows: readonly string[][], header: ImportHeader): { dataRows: readonly string[][]; headerRow: readonly string[] } | undefined => {
+export const locateImportRows = (rows: readonly string[][], header: ImportHeader): LocatedImportRows | undefined => {
+	const located = (indexes: readonly number[], headerRow: readonly string[]): LocatedImportRows => {
+		return {
+			dataRows: indexes.map((index) => {
+				return rows[index];
+			}),
+			lines: indexes.map((index) => {
+				return index + 1;
+			}),
+			headerRow
+		};
+	};
+	const from = (first: number): number[] => {
+		return rows.map((_row, index) => {
+			return index;
+		}).slice(first);
+	};
+
 	if(header.by === 'skip') {
-		return { dataRows: rows.slice(header.rows), headerRow: header.rows > 0 ? rows[header.rows - 1] ?? [] : [] };
+		return located(from(header.rows), header.rows > 0 ? rows[header.rows - 1] ?? [] : []);
 	}
 
 	const wanted = header.labels.map((label) => {
-		return cleaned(label).toLowerCase();
+		return cleanImportCell(label).toLowerCase();
 	});
 	const isHeader = (row: readonly string[]): boolean => {
 		const present = new Set(row.map((cell) => {
-			return cleaned(cell).toLowerCase();
+			return cleanImportCell(cell).toLowerCase();
 		}));
 
 		return wanted.every((label) => {
@@ -409,15 +435,12 @@ const locateRows = (rows: readonly string[][], header: ImportHeader): { dataRows
 
 	// An export that prints its headings again before every row has no run of rows to take: each row is the one under a heading
 	if(header.repeats === true) {
-		return {
-			headerRow: rows[found],
-			dataRows: rows.filter((row, index) => {
-				return index > 0 && isHeader(rows[index - 1]) && !isHeader(row);
-			})
-		};
+		return located(from(0).filter((index) => {
+			return index > 0 && isHeader(rows[index - 1]) && !isHeader(rows[index]);
+		}), rows[found]);
 	}
 
-	return { dataRows: rows.slice(found + 1), headerRow: rows[found] };
+	return located(from(found + 1), rows[found]);
 };
 
 /**
@@ -426,14 +449,14 @@ const locateRows = (rows: readonly string[][], header: ImportHeader): { dataRows
  * @param headerRow The row the headings are on, where there is one.
  * @returns The position, or undefined where the export carries no such heading.
  */
-const resolveColumn = (column: ImportColumn, headerRow: readonly string[]): number | undefined => {
+export const resolveImportColumn = (column: ImportColumn, headerRow: readonly string[]): number | undefined => {
 	if(column.by === 'index') {
 		return column.index;
 	}
 
-	const wanted = cleaned(column.label).toLowerCase();
+	const wanted = cleanImportCell(column.label).toLowerCase();
 	const found = headerRow.findIndex((cell) => {
-		return cleaned(cell).toLowerCase() === wanted;
+		return cleanImportCell(cell).toLowerCase() === wanted;
 	});
 
 	return found === -1 ? undefined : found;
@@ -449,7 +472,7 @@ const resolveColumn = (column: ImportColumn, headerRow: readonly string[]): numb
  * @returns The box's text, or why this file is not the export the template describes.
  */
 export const applyImportTemplate = (rows: readonly string[][], template: ImportTemplate): ApplyImportTemplateResult => {
-	const located = locateRows(rows, template.header);
+	const located = locateImportRows(rows, template.header);
 
 	if(!located) {
 		return { outcome: 'refused', refusal: { reason: 'header-missing', labels: template.header.by === 'labels' ? template.header.labels : [] } };
@@ -479,13 +502,13 @@ export const applyImportTemplate = (rows: readonly string[][], template: ImportT
 	];
 
 	for(const entry of wanted) {
-		if(resolveColumn(entry.column, headerRow) === undefined) {
+		if(resolveImportColumn(entry.column, headerRow) === undefined) {
 			return { outcome: 'refused', refusal: { reason: 'column-missing', label: entry.column.by === 'header' ? entry.column.label : entry.label } };
 		}
 	}
 
 	const positionOf = (column: ImportColumn): number => {
-		return resolveColumn(column, headerRow) ?? 0;
+		return resolveImportColumn(column, headerRow) ?? 0;
 	};
 
 	const datePosition = positionOf(template.date.column);
@@ -498,7 +521,7 @@ export const applyImportTemplate = (rows: readonly string[][], template: ImportT
 	 * @returns What goes into the date column of the box.
 	 */
 	const dateOf = (row: readonly string[]): string => {
-		const cell = cleaned(cellAt(row, datePosition));
+		const cell = cleanImportCell(importCellAt(row, datePosition));
 		const taken = template.date.pattern ? template.date.pattern.exec(cell)?.[1] ?? cell : cell;
 
 		return template.date.cell === 'serial' ? dateFromSpreadsheetSerial(taken, template.format.dateFormat) : taken;
@@ -511,14 +534,14 @@ export const applyImportTemplate = (rows: readonly string[][], template: ImportT
 	 */
 	const amountOf = (row: readonly string[]): string => {
 		if(template.amount.kind === 'signed') {
-			return cleaned(cellAt(row, positionOf(template.amount.column)));
+			return cleanImportCell(importCellAt(row, positionOf(template.amount.column)));
 		}
 
 		if(template.amount.kind === 'debitCredit') {
-			return signedFromDebitAndCredit(cellAt(row, positionOf(template.amount.debit)), cellAt(row, positionOf(template.amount.credit)));
+			return signedFromDebitAndCredit(importCellAt(row, positionOf(template.amount.debit)), importCellAt(row, positionOf(template.amount.credit)));
 		}
 
-		return countTimesPrice(cellAt(row, positionOf(template.amount.column)), template.amount, row, template.format, positionOf);
+		return countTimesPrice(importCellAt(row, positionOf(template.amount.column)), template.amount, row, template.format, positionOf);
 	};
 
 	const lines: string[] = [];
@@ -537,7 +560,7 @@ export const applyImportTemplate = (rows: readonly string[][], template: ImportT
 		}
 
 		const description = descriptionPositions.map((position) => {
-			return cleaned(cellAt(row, position));
+			return cleanImportCell(importCellAt(row, position));
 		}).filter((part) => {
 			return part !== '';
 		}).join(template.description.separator);

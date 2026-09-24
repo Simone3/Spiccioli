@@ -1,7 +1,7 @@
-import { useEffect, useId, useRef, type ReactElement, type ReactNode } from 'react';
-import { AppButton } from 'src/components/common/AppButton';
+import type { ReactElement, ReactNode } from 'react';
 import { Chip } from 'src/components/common/Chip';
-import { DataTable, type DataTableColumn } from 'src/components/common/DataTable';
+import type { DataTableColumn } from 'src/components/common/DataTable';
+import { ImportRecap } from 'src/components/import/ImportRecap';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import {
@@ -75,15 +75,6 @@ export const PayslipImportRecap = ({
 }: PayslipImportRecapProps): ReactElement => {
 	const { t } = useTranslator();
 	const formatter = useFormatter();
-	const titleId = useId();
-	const panelRef = useRef<HTMLDivElement>(null);
-
-	// The keyboard opens on the first row that can be ticked, and on the panel itself where there is no such row
-	useEffect(() => {
-		const panel = panelRef.current;
-
-		(panel?.querySelector<HTMLElement>('input:not([disabled])') ?? panel)?.focus();
-	}, []);
 
 	const writable = rows.filter(isWritablePayslipRow);
 	const tickedCount = rows.filter((row) => {
@@ -195,35 +186,6 @@ export const PayslipImportRecap = ({
 
 	const columns: readonly DataTableColumn<PayslipBatchRow>[] = [
 		{
-			key: 'selection',
-			header: (
-				<input
-					type='checkbox'
-					className='data-table-checkbox'
-					checked={writable.length > 0 && tickedCount === writable.length}
-					disabled={writable.length === 0}
-					aria-label={t('payslips.import.batch.tickAll')}
-					onChange={() => {
-						onTickAll(tickedCount !== writable.length);
-					}}/>
-			),
-			render: (row) => {
-				const canWrite = isWritablePayslipRow(row);
-
-				return (
-					<input
-						type='checkbox'
-						className='data-table-checkbox'
-						checked={ticked.has(row.key)}
-						disabled={!canWrite}
-						aria-label={t(canWrite ? 'payslips.import.batch.select' : 'payslips.import.batch.cannotSelect', { document: row.fileName })}
-						onChange={() => {
-							onToggle(row.key);
-						}}/>
-				);
-			}
-		},
-		{
 			key: 'document',
 			header: t('payslips.import.batch.columns.document'),
 			render: (row) => {
@@ -301,70 +263,36 @@ export const PayslipImportRecap = ({
 	];
 
 	return (
-		<div
-			className='payslip-recap-overlay'
-			role='presentation'
-			onKeyDown={(event) => {
-				if(event.key === 'Escape') {
-					onCancel();
-				}
-			}}>
-			<div className='payslip-recap-panel' role='dialog' aria-modal='true' aria-labelledby={titleId} ref={panelRef} tabIndex={-1}>
-				<div className='payslip-recap-heading'>
-					<h2 className='payslip-recap-title' id={titleId}>{t('payslips.import.batch.title')}</h2>
-					<span className='payslip-recap-subtitle'>
-						{t('payslips.import.batch.subtitle', {
-							contract: contract.name,
-							template: templateName,
-							documents: t('payslips.import.batch.documentCount', { count: rows.length })
-						})}
-					</span>
-				</div>
-
-				<p className='payslip-recap-notice'>{t('payslips.import.batch.notice')}</p>
-
-				<div className='payslip-recap-selectors'>
-					<span className='payslip-recap-selectors-label'>{t('payslips.import.batch.selectLabel')}</span>
-					<AppButton
-						disabled={writable.length === 0}
-						onClick={() => {
-							onTickAll(true);
-						}}>
-						{t('payslips.import.batch.selectors.writable')}
-					</AppButton>
-					<AppButton
-						disabled={tickedCount === 0}
-						onClick={() => {
-							onTickAll(false);
-						}}>
-						{t('payslips.import.batch.selectors.none')}
-					</AppButton>
-				</div>
-
-				<DataTable
-					columns={columns}
-					rows={rows}
-					label={t('payslips.import.batch.table')}
-					footer={writable.length === 0 ?
-						t('payslips.import.batch.nothingToWrite') :
-						t('payslips.import.batch.footer', {
-							ticked: t('payslips.import.batch.payslipCount', { count: tickedCount }),
-							documents: t('payslips.import.batch.documentCount', { count: rows.length })
-						})}
-					getRowClassName={(row) => {
-						return isWritablePayslipRow(row) ? undefined : 'payslip-recap-row-quiet';
-					}}
-					getRowKey={(row) => {
-						return row.key;
-					}}/>
-
-				<div className='payslip-recap-actions'>
-					<AppButton variant='ghost' onClick={onCancel}>{t('dialog.cancel')}</AppButton>
-					<AppButton variant='primary' disabled={tickedCount === 0} onClick={onSave}>
-						{t('payslips.import.batch.save', { count: tickedCount })}
-					</AppButton>
-				</div>
-			</div>
-		</div>
+		<ImportRecap
+			title={t('payslips.import.batch.title')}
+			subtitle={t('payslips.import.batch.subtitle', {
+				contract: contract.name,
+				template: templateName,
+				documents: t('payslips.import.batch.documentCount', { count: rows.length })
+			})}
+			notices={[ t('payslips.import.batch.notice') ]}
+			columns={columns}
+			rows={rows}
+			getRowKey={(row) => {
+				return row.key;
+			}}
+			isWritable={isWritablePayslipRow}
+			selectLabel={(row, canWrite) => {
+				return t(canWrite ? 'payslips.import.batch.select' : 'payslips.import.batch.cannotSelect', { document: row.fileName });
+			}}
+			tickAllLabel={t('payslips.import.batch.tickAll')}
+			tableLabel={t('payslips.import.batch.table')}
+			footer={writable.length === 0 ?
+				t('payslips.import.batch.nothingToWrite') :
+				t('payslips.import.batch.footer', {
+					ticked: t('payslips.import.batch.payslipCount', { count: tickedCount }),
+					documents: t('payslips.import.batch.documentCount', { count: rows.length })
+				})}
+			ticked={ticked}
+			onToggle={onToggle}
+			onTickAll={onTickAll}
+			saveLabel={t('payslips.import.batch.save', { count: tickedCount })}
+			onSave={onSave}
+			onCancel={onCancel}/>
 	);
 };

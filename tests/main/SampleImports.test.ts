@@ -1,6 +1,10 @@
+import { makeSecurity } from '../testUtils';
 import { buildSampleImport } from './SampleImportFixtures';
 import { applyImportTemplate, type ImportTemplate } from 'src/logic/import/ImportTemplate';
 import { findImportTemplate, IMPORT_TEMPLATES } from 'src/logic/import/ImportTemplates';
+import { applyTradeImportTemplate } from 'src/logic/import/TradeImportTemplate';
+import { TRADE_IMPORT_TEMPLATES } from 'src/logic/import/TradeImportTemplates';
+import { buildTradeImportRows } from 'src/logic/investments/TradeImport';
 import { isReadImportRow, parseImportRows, type ImportValues } from 'src/logic/transactions/TransactionImport';
 import { decodeDelimitedText, parseDelimitedRows } from 'src/main/import/DelimitedGrid';
 import { readXlsxGrid } from 'src/main/import/XlsxGrid';
@@ -111,5 +115,49 @@ describe('every shipped template against its own export', () => {
 			{ date: '2026-09-10', description: 'SpotifyIT', amount: -1199 },
 			{ date: '2026-09-08', description: 'Rimborso "spese" , settembre', amount: 15000 }
 		]);
+	});
+});
+
+describe('the shipped broker template against its own export', () => {
+	test('reads the trades out of the rows around them, and marks what the recap may not write', () => {
+		const [ template ] = TRADE_IMPORT_TEMPLATES;
+		const read = readXlsxGrid(buildSampleImport(template.id), template.source.kind === 'xlsx' ? template.source.sheet : { by: 'index', index: 0 });
+
+		expect(read.outcome).toBe('grid');
+
+		const applied = applyTradeImportTemplate(read.outcome === 'grid' ? read.rows : [], template);
+
+		expect(applied.outcome).toBe('rows');
+
+		if(applied.outcome !== 'rows') {
+			return;
+		}
+
+		// The dividend and the custody fee are not trades, and the totals line under the blank row is not a row at all
+		expect(applied.dropped).toBe(2);
+
+		const rows = buildTradeImportRows({
+			cells: applied.rows,
+			format: template.format,
+			acceptedCurrencies: template.currency?.accepted,
+			accountId: 'broker',
+			securities: [ makeSecurity({ id: 'swda', isin: 'IE00B4L5Y983', ticker: 'SWDA' }) ],
+			trades: [],
+			created: [],
+			today: '2026-09-24'
+		});
+
+		expect(rows.map((row) => {
+			return [ row.cells.line, row.cells.kind, row.outcome ];
+		})).toEqual([
+			[ 6, 'purchase', 'read' ],
+			[ 8, 'purchase', 'newSecurity' ],
+			[ 9, 'sale', 'read' ],
+			[ 11, 'purchase', 'refused' ]
+		]);
+		expect(rows[0]).toMatchObject({ values: { date: '2026-01-15', quantity: 10000000, unitPrice: 985000, fees: 295, zeroed: [] } });
+		expect(rows[1]).toMatchObject({ cells: { ticker: 'VWCE', name: 'Vanguard FTSE All-World UCITS ETF' }, values: { fees: 0, zeroed: [ 'fees' ] } });
+		expect(rows[2]).toMatchObject({ values: { quantity: 4000000, unitPrice: 1027500, fees: 295, taxes: 120 } });
+		expect(rows[3]).toMatchObject({ refusal: { reason: 'currency' } });
 	});
 });

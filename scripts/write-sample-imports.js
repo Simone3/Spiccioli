@@ -3,7 +3,8 @@ const path = require('node:path');
 const zlib = require('node:zlib');
 const { projectRoot } = require('./electron-bundle');
 
-// Writes one sample bank export per template the Bulk import screen ships.
+// Writes one sample export per template an import ships: one bank export per template of the Bulk import screen, and one broker
+// export per template of *Import trades…*.
 //
 // They are here rather than committed as binaries for the reason "write-sample-ledger.js" is here, and for one more: a real export is
 // somebody's spending, and a fixture written in source is a fixture that carries none of it. **Each one is the shape of that bank's export
@@ -218,7 +219,47 @@ const TRADE_REPUBLIC = {
 	]
 };
 
-const SAMPLES = [ ISYBANK, ING, DIRECTA, EDENRED, TRADE_REPUBLIC ];
+/**
+ * The invented broker the trade import's sample template reads, "Movimenti titoli". Rows of dossier and period above the headings, the
+ * trade date beside the value date, and everything a broker's export mixes in with its trades: a dividend and a custody fee, which are not
+ * trades at all; a purchase with an ISIN and no ticker and one with a ticker and no ISIN; a purchase that prints no fee; a sale that
+ * withholds a tax; and a trade settled in dollars, which the currency column is there to refuse.
+ */
+const SAMPLE_BROKER = {
+	id: 'sample-broker',
+	fileName: 'sample-broker.xlsx',
+	kind: 'xlsx',
+	sheetName: 'Movimenti titoli',
+	rows: [
+		[ 'Sample Broker S.p.A. — Movimenti titoli' ],
+		[ 'Dossier:', '12345/678' ],
+		[ 'Periodo:', '01/01/2026 - 30/06/2026' ],
+		[],
+		[ 'Data operazione', 'Data valuta', 'Operazione', 'ISIN', 'Simbolo', 'Titolo', 'Quantità', 'Prezzo', 'Commissioni', 'Ritenute', 'Divisa' ],
+		[
+			date('2026-01-15'), date('2026-01-17'), 'Acquisto', 'IE00B4L5Y983', 'SWDA', 'iShares Core MSCI World UCITS ETF',
+			number('10'), number('98.5'), number('2.95'), '', 'EUR'
+		],
+		[ date('2026-02-03'), date('2026-02-05'), 'Dividendo', 'IE00B3F81R35', '', 'iShares Core EUR Corp Bond', '', '', '', number('1.3'), 'EUR' ],
+
+		// A ticker and no ISIN, and no fee printed: a zero the recap names
+		[ date('2026-03-10'), date('2026-03-12'), 'Acquisto', '', 'VWCE', 'Vanguard FTSE All-World UCITS ETF', number('5.5'), number('110.2'), '', '', 'EUR' ],
+
+		[
+			date('2026-04-20'), date('2026-04-22'), 'Vendita', 'IE00B4L5Y983', 'SWDA', 'iShares Core MSCI World UCITS ETF',
+			number('4'), number('102.75'), number('2.95'), number('1.2'), 'EUR'
+		],
+		[ date('2026-05-02'), date('2026-05-02'), 'Commissioni custodia', '', '', '', '', '', number('4'), '', 'EUR' ],
+
+		// Settled in dollars, which is a row the recap marks rather than one it writes at the wrong rate
+		[ date('2026-06-12'), date('2026-06-15'), 'Acquisto', 'US0378331005', 'AAPL', 'Apple Inc.', number('2'), number('190.1'), number('5'), '', 'USD' ],
+
+		[],
+		[ 'Totale movimenti', '', '', '', '', '', '', '', number('15.85'), number('2.5') ]
+	]
+};
+
+const SAMPLES = [ ISYBANK, ING, DIRECTA, EDENRED, TRADE_REPUBLIC, SAMPLE_BROKER ];
 
 /**
  * Escapes the five characters XML cannot carry as themselves.
@@ -498,6 +539,6 @@ if(require.main === module) {
 	const outputDirectory = process.argv[2] === undefined ? DEFAULT_OUTPUT_DIRECTORY : path.resolve(process.argv[2]);
 
 	for(const written of writeSampleImports(outputDirectory)) {
-		console.log(`Wrote a sample bank export to ${written}`);
+		console.log(`Wrote a sample export to ${written}`);
 	}
 }

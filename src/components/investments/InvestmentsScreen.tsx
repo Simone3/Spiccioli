@@ -12,6 +12,7 @@ import { SecuritiesTable } from 'src/components/investments/SecuritiesTable';
 import { SecurityForm } from 'src/components/investments/SecurityForm';
 import { toSecurity, type SecurityFormValues } from 'src/components/investments/SecurityFields';
 import { TradeFiltersBar } from 'src/components/investments/TradeFilters';
+import { TradeImportFlow } from 'src/components/investments/TradeImportFlow';
 import { TradeForm, type TradeFormValues } from 'src/components/investments/TradeForm';
 import { TradesTable } from 'src/components/investments/TradesTable';
 import { UpdatePricesDialog } from 'src/components/investments/UpdatePricesDialog';
@@ -58,6 +59,7 @@ import {
 	tradeTotal,
 	type TradeFilters
 } from 'src/logic/investments/Trades';
+import { importedTradePeriod, type TradeImportWrite } from 'src/logic/investments/TradeImport';
 import { createLedgerId, nextInsertionSeq } from 'src/logic/ledger/LedgerDocument';
 import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
 import type { Account, IsoDate, LedgerId, Price, Security, TenThousandths, Trade, TradeKind } from 'src/types/LedgerTypes';
@@ -69,9 +71,13 @@ import type { Account, IsoDate, LedgerId, Price, Security, TenThousandths, Trade
  * trades each time it is shown, so correcting a trade recorded eight years ago moves every figure that depends on it at once —
  * which is why a holding is never edited and a position is never repaired by hand.
  *
- * **A security is created from two tabs and is the same record either way.** The purchase form expands to create one while the
- * first trade that needs it is recorded; the Securities tab creates one on its own and is where every correction afterwards is
- * made, the price history included.
+ * **A security is created from three places and is the same record every way.** The purchase form expands to create one while
+ * the first trade that needs it is recorded; the trade import creates one for a row of an export that names an instrument the
+ * file does not hold; the Securities tab creates one on its own and is where every correction afterwards is made, the price
+ * history included.
+ *
+ * **A broker's export is read from either trade tab and writes both kinds.** *Import trades…* does the same thing on Purchases
+ * and on Sales, and lands back on the tab it was opened from, filtered to the account and the days it wrote.
  *
  * **Every price is handled on the Securities tab and nowhere else**: the history, the form that writes one and *Update prices*
  * all sit there, because a price belongs to a security. Holdings states the price it derives from and links to that tab.
@@ -117,6 +123,9 @@ export const InvestmentsScreen = (): ReactElement => {
 	const [ refusal, setRefusal ] = useState<string | undefined>(undefined);
 	const [ notice, setNotice ] = useState<string | undefined>(undefined);
 	const [ isUpdatingPrices, setIsUpdatingPrices ] = useState(false);
+
+	// The tab *Import trades…* was pressed on, which is where the import lands when it has written, or undefined while none is open
+	const [ importingFrom, setImportingFrom ] = useState<TradeKind | undefined>(undefined);
 
 	const today = DateUtils.toStandardYearMonthDay(DateUtils.startOfToday());
 
@@ -405,6 +414,56 @@ export const InvestmentsScreen = (): ReactElement => {
 		setTradeDraft(undefined);
 	};
 
+	/**
+	 * Writes what the import's recap was confirmed with: the trades and the securities it created for them, in one step.
+	 *
+	 * **The screen lands on the tab the import was opened from**, filtered to the account and the days written and to nothing
+	 * else — the tab's filters are replaced rather than added to, so what is on screen is what was just written.
+	 * @param kind The tab the import was opened from.
+	 * @param written What the recap writes.
+	 * @param accountId The account the export was read into.
+	 */
+	const writeImportedTrades = (kind: TradeKind, written: TradeImportWrite, accountId: LedgerId): void => {
+		setImportingFrom(undefined);
+
+		const period = importedTradePeriod(written.trades);
+
+		if(!period) {
+			return;
+		}
+
+		updateDocument((current) => {
+			return {
+				...current,
+				securities: [ ...current.securities, ...written.securities ],
+				trades: [ ...current.trades, ...written.trades ]
+			};
+		});
+
+		const filters: TradeFilters = { securityId: undefined, accountId, fromDate: period.fromDate, toDate: period.toDate };
+
+		if(kind === 'purchase') {
+			setPurchaseFilters(filters);
+		}
+		else {
+			setSaleFilters(filters);
+		}
+
+		setTab(kind === 'purchase' ? 'purchases' : 'sales');
+	};
+
+	const importTradesButton = (kind: TradeKind): ReactElement => {
+		return (
+			<AppButton
+				onClick={() => {
+					setRefusal(undefined);
+					setImportingFrom(kind);
+				}}>
+				{t('trades.import.action')}
+			</AppButton>
+		);
+	};
+
 	const deleteTrade = (trade: Trade): void => {
 		updateDocument((current) => {
 			return {
@@ -510,6 +569,7 @@ export const InvestmentsScreen = (): ReactElement => {
 		if(all.length === 0) {
 			return (
 				<EmptyState message={kind === 'purchase' ? t('emptyState.purchases') : t('emptyState.sales')}>
+					{importTradesButton(kind)}
 					{addButton}
 				</EmptyState>
 			);
@@ -717,17 +777,40 @@ export const InvestmentsScreen = (): ReactElement => {
 			const kind: TradeKind = tab === 'purchases' ? 'purchase' : 'sale';
 
 			return (
-				<AppButton
-					variant='primary'
-					onClick={() => {
-						setTradeDraft({ kind, trade: undefined });
-					}}>
-					{kind === 'purchase' ? t('trades.addPurchase') : t('trades.addSale')}
-				</AppButton>
+				<div className='investments-screen-update-prices-buttons'>
+					{importTradesButton(kind)}
+					<AppButton
+						variant='primary'
+						onClick={() => {
+							setTradeDraft({ kind, trade: undefined });
+						}}>
+						{kind === 'purchase' ? t('trades.addPurchase') : t('trades.addSale')}
+					</AppButton>
+				</div>
 			);
 		}
 
 		return undefined;
+	};
+
+	const importFlow = (): ReactNode => {
+		if(importingFrom === undefined) {
+			return undefined;
+		}
+
+		return (
+			<TradeImportFlow
+				onWrite={(written, accountId) => {
+					writeImportedTrades(importingFrom, written, accountId);
+				}}
+				onRefused={(message) => {
+					setImportingFrom(undefined);
+					setRefusal(message);
+				}}
+				onClose={() => {
+					setImportingFrom(undefined);
+				}}/>
+		);
 	};
 
 	// Nothing has been recorded at all: the screen says what starts it rather than showing four empty tabs
@@ -743,8 +826,25 @@ export const InvestmentsScreen = (): ReactElement => {
 						}}>
 						{t('trades.addPurchase')}
 					</AppButton>
+					{importTradesButton('purchase')}
 					<AppLinkButton to={APP_ROUTES.accounts}>{t('emptyState.goToAccounts')}</AppLinkButton>
 				</EmptyState>
+
+				{refusal && (
+					<div className='investments-screen-refusal' role='alert'>
+						<p>{refusal}</p>
+						<button
+							type='button'
+							className='investments-screen-refusal-dismiss'
+							onClick={() => {
+								setRefusal(undefined);
+							}}>
+							{t('notice.dismiss')}
+						</button>
+					</div>
+				)}
+
+				{importFlow()}
 
 				{tradeDraft && (
 					<TradeForm
@@ -836,6 +936,8 @@ export const InvestmentsScreen = (): ReactElement => {
 						saveTrade(tradeDraft.kind, tradeDraft.trade, values);
 					}}/>
 			)}
+
+			{importFlow()}
 
 			{securityToDelete && (
 				<ConfirmDialog

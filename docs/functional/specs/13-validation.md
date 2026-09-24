@@ -68,9 +68,9 @@ What the forms refuse. Everything here is enforced at the point of entry, by the
 
 | Field | Rule |
 | --- | --- |
-| kind | Required, `purchase` or `sale`. Not a field on the form — it is which tab the trade was recorded from ([§7.2](07-investments.md#72-purchases), [§7.3](07-investments.md#73-sales)) — and it is **locked once the trade exists**. Deleting the row and recording it again is how a purchase becomes a sale. |
+| kind | Required, `purchase` or `sale`. Not a field on the form — it is which tab the trade was recorded from ([§7.2](07-investments.md#72-purchases), [§7.3](07-investments.md#73-sales)), and on an imported trade it is what the export's direction column says ([§7.7](07-investments.md#77-importing-trades)) — and it is **locked once the trade exists**. Deleting the row and recording it again is how a purchase becomes a sale. |
 | accountId | Required. The picker lists **brokerage accounts only**, closed ones included and marked ([§4.3](04-accounts.md#43-creating-and-editing)). |
-| securityId | Required — chosen from the existing list or created inline ([§7.5](07-investments.md#75-recording-a-trade-and-where-securities-come-from)). |
+| securityId | Required — chosen from the existing list or created inline ([§7.5](07-investments.md#75-recording-a-trade-and-where-securities-come-from)); on an imported trade, matched by ISIN or ticker or created from the recap ([§7.7](07-investments.md#77-importing-trades)). |
 | date | Required, date picker. **Not in the future**, exactly as for a transaction. No bound against the *account's* dates — check 12 reports those. |
 | quantity | Required, > 0, at most 6 decimals. Direction is `kind`, never a negative quantity. |
 | unitPrice | Required, > 0, at most 4 decimals. |

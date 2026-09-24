@@ -8,6 +8,7 @@ import {
 	makeSecurity,
 	makeTrade,
 	renderOpenLedger,
+	stubImportBridge,
 	stubPricesBridge
 } from '../testUtils';
 import type { LedgerDocument, Trade } from 'src/types/LedgerTypes';
@@ -633,3 +634,89 @@ describe('the Investments screen', () => {
 		expect(within(panel).queryByRole('button', { name: /^Retry/ })).not.toBeInTheDocument();
 	});
 });
+
+// A broker's export as the main process hands it over: the grid of cell text, the dates as the day counts a sheet keeps them as
+const BROKER_EXPORT: string[][] = [
+	[ 'Sample Broker S.p.A. — Movimenti titoli' ],
+	[ 'Data operazione', 'Operazione', 'ISIN', 'Simbolo', 'Titolo', 'Quantità', 'Prezzo', 'Commissioni', 'Ritenute', 'Divisa' ],
+	[ '46056', 'Dividendo', 'IE00B3F81R35', '', 'iShares Core EUR Corp Bond', '', '', '', '1.3', 'EUR' ],
+	[ '46091', 'Acquisto', '', 'VWCE', 'Vanguard FTSE All-World', '5.5', '110.2', '', '', 'EUR' ],
+	[ '46132', 'Vendita', 'IE00B4L5Y983', 'SWDA', 'iShares Core MSCI World', '4', '102.75', '2.95', '1.2', 'EUR' ]
+];
+
+describe('importing trades from a broker\'s export', () => {
+	test('reads purchases and sales together, creates the security a row needs, and lands on the tab it was opened from', async() => {
+		await openInvestments(withRecords({
+			trades: [ purchase({ id: 'one', date: '2025-06-10', quantity: 10 * QUANTITY_UNITS, unitPrice: 90 * UNITS }) ]
+		}));
+		stubImportBridge({
+			readFile: () => {
+				return Promise.resolve({ outcome: 'read', fileName: 'movimenti.xlsx', rows: BROKER_EXPORT });
+			}
+		});
+		await userEvent.click(screen.getByRole('tab', { name: 'Sales · 0' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Import trades…' }));
+
+		const chooser = screen.getByRole('dialog', { name: 'Import trades' });
+
+		await userEvent.click(within(chooser).getByRole('button', { name: 'Sample Broker Excel' }));
+
+		// The file waits on the account as it waits on the template
+		expect(within(chooser).getByRole('button', { name: 'Choose file…' })).toBeDisabled();
+
+		await userEvent.selectOptions(within(chooser).getByRole('combobox', { name: 'Account' }), 'dossier');
+		await userEvent.click(within(chooser).getByRole('button', { name: 'Choose file…' }));
+
+		const recap = await screen.findByRole('dialog', { name: 'What this export holds' });
+
+		// The dividend is only counted, and the purchase of an instrument the file does not hold waits for it to be created
+		expect(within(recap).getByText('1 row of the export is not a purchase or a sale, and is left out.')).toBeInTheDocument();
+		expect(within(recap).getByRole('checkbox', { name: 'Nothing can be written from row 4 yet' })).toBeDisabled();
+		expect(within(recap).getByRole('checkbox', { name: 'Import the trade on row 5' })).toBeChecked();
+
+		await userEvent.click(within(recap).getByRole('button', { name: 'Create the security row 4 names' }));
+
+		const form = screen.getByRole('dialog', { name: 'Add security' });
+
+		expect(within(form).getByRole('textbox', { name: 'Ticker' })).toHaveValue('VWCE');
+		expect(within(form).getByRole('textbox', { name: 'Name' })).toHaveValue('Vanguard FTSE All-World');
+
+		await userEvent.type(within(form).getByRole('textbox', { name: 'ISIN' }), 'IE00BK5BQT80');
+		await userEvent.click(within(form).getByRole('button', { name: 'Save' }));
+
+		// Nothing is in the file yet, and the row the new security resolves arrives ticked
+		expect(within(recap).getByRole('checkbox', { name: 'Import the trade on row 4' })).toBeChecked();
+		expect(within(recap).getByText('not printed, written as 0: fees')).toBeInTheDocument();
+
+		await userEvent.click(within(recap).getByRole('button', { name: 'Import 2 trades' }));
+
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+		// Back on Sales, filtered to what was written; the purchase is on its own tab and the new security on the Securities tab
+		expect(screen.getByRole('tab', { name: 'Sales · 1' })).toHaveAttribute('aria-selected', 'true');
+		expect(screen.getByRole('table', { name: 'Sales' })).toHaveTextContent('€ 1,20');
+		expect(screen.getByRole('tab', { name: 'Purchases · 2' })).toBeInTheDocument();
+		expect(screen.getByRole('tab', { name: 'Securities · 2' })).toBeInTheDocument();
+	});
+
+	test('says why a file the template cannot read at all is refused, and opens nothing', async() => {
+		await openInvestments(withRecords({ trades: [ purchase() ] }));
+		stubImportBridge({
+			readFile: () => {
+				return Promise.resolve({ outcome: 'read', fileName: 'estratto.xlsx', rows: [ [ 'Data', 'Importo' ] ] });
+			}
+		});
+		await userEvent.click(screen.getByRole('tab', { name: 'Purchases · 1' }));
+		await userEvent.click(screen.getByRole('button', { name: 'Import trades…' }));
+
+		const chooser = screen.getByRole('dialog', { name: 'Import trades' });
+
+		await userEvent.selectOptions(within(chooser).getByRole('combobox', { name: 'Account' }), 'dossier');
+		await userEvent.click(within(chooser).getByRole('button', { name: 'Sample Broker Excel' }));
+		await userEvent.click(within(chooser).getByRole('button', { name: 'Choose file…' }));
+
+		expect(await screen.findByRole('alert')).toHaveTextContent('The headings this template expects are not in that file.');
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+	});
+});
+

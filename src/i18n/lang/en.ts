@@ -573,6 +573,15 @@ export const EN_TRANSLATIONS = {
 		}
 	},
 
+	// The panel an import states what it would write in, whichever import opened it: the ticks and the two selectors over them
+	importRecap: {
+		selectLabel: 'Select',
+		selectors: {
+			writable: 'All that can be written',
+			none: 'None'
+		}
+	},
+
 	// The three receipt states, written the same way wherever they are shown. The stored "na" is never one of them.
 	receiptStates: {
 		pending: 'Pending',
@@ -922,6 +931,100 @@ export const EN_TRANSLATIONS = {
 			netProceeds: 'Net proceeds',
 			derived: 'Computed as you type, and never entered.',
 			noBrokerageAccount: 'There is no brokerage account yet. Add one on Accounts, and this form will offer it.'
+		},
+
+		// A broker's export read into trades: the account and the template first, the file second, and a recap before anything is written
+		import: {
+			action: 'Import trades…',
+			reading: 'Reading…',
+			title: 'Import trades',
+			templateNote: 'Pick a template for your broker’s export. Purchases and sales are read from the same file.',
+			templateSearchPlaceholder: 'Type a broker name',
+			account: 'Account',
+			accountChoose: 'Choose an account',
+			accountHint: 'Brokerage accounts only. Every trade in the export is written into this one.',
+			dialogTitle: 'Choose a broker export',
+
+			// One entry per template the application ships
+			templates: {
+				'sample-broker': { name: 'Sample Broker Excel' }
+			},
+			recap: {
+
+				// Not "Import trades", which is the panel this one opens from: a title says which of the two is up
+				title: 'What this export holds',
+				subtitle: '{account} · {template} · {fileName}',
+				notice: 'Nothing is written until you import. Purchases and sales are written together, each landing on its own tab.',
+				droppedNotice: {
+					one: '1 row of the export is not a purchase or a sale, and is left out.',
+					other: '{count} rows of the export are not purchases or sales, and are left out.'
+				},
+				newSecurityNotice: {
+					one: '1 row names a security this file does not hold yet. Create it from the row, and every row naming it is matched at once.',
+					other: '{count} rows name a security this file does not hold yet. Create each from its row, and every row naming it is matched at once.'
+				},
+				zeroedNotice: {
+					one: '1 row does not print its fees or its taxes, which are written as 0 — correct them on the trade’s own form afterwards.',
+					other: '{count} rows do not print their fees or their taxes, which are written as 0 — correct them on the trade’s own form afterwards.'
+				},
+				table: 'The trades this export would write',
+				tickAll: 'Import every trade that can be written',
+				select: 'Import the trade on row {line}',
+				cannotSelect: 'Nothing can be written from row {line} yet',
+				columns: {
+					line: 'Row',
+					kind: 'Kind',
+					total: 'Total',
+					status: 'What it would do'
+				},
+				kinds: {
+					purchase: 'Purchase',
+					sale: 'Sale'
+				},
+				statusNew: 'New',
+				statusDuplicate: 'Already recorded',
+				statusZeroed: 'not printed, written as 0: {figures}',
+				zeroedFigures: {
+					fees: 'fees',
+					taxes: 'taxes'
+				},
+				statusTickerDiffers: 'matched by ISIN — the export calls it {ticker}',
+				statusNewSecurity: 'Not in this file',
+				createSecurity: 'Create security…',
+				createSecurityLabel: 'Create the security row {line} names',
+				createSecuritySubtitle: 'For row {line} of {fileName}',
+				tradeCount: {
+					one: '1 trade',
+					other: '{count} trades'
+				},
+				rowCount: {
+					one: '1 row',
+					other: '{count} rows'
+				},
+				footer: '{ticked} of {rows} ticked.',
+				nothingYet: 'Nothing can be written until the securities these rows name are created.',
+				nothingToWrite: 'Nothing in this export can be written. Cancel is the way out of it.',
+				save: {
+					one: 'Import 1 trade',
+					other: 'Import {count} trades'
+				},
+
+				// A refusal as a row states it, which is short because it sits in a cell beside the row it is about
+				refusals: {
+					date: 'The date is not a real day written as {dateFormat}',
+					futureDate: 'The date is in the future',
+					currency: 'Not stated in EUR',
+					securityMissing: 'No ISIN and no ticker',
+					quantity: 'The quantity is not above 0 with at most 6 decimals',
+					unitPrice: 'The unit price is not above 0 with at most 4 decimals',
+					fees: 'The fees are not a figure of 0 or more',
+					taxes: 'The taxes are not a figure of 0 or more',
+					tickerAmbiguous: {
+						one: '1 security has this ticker — the row needs an ISIN',
+						other: '{count} securities have this ticker — the row needs an ISIN'
+					}
+				}
+			}
 		}
 	},
 
@@ -1434,11 +1537,6 @@ export const EN_TRANSLATIONS = {
 				notice: 'Nothing is written until you save. A figure a document did not print is written as 0 — the last column says how many — and is corrected on the payslip’s own form afterwards.',
 
 				table: 'The payslips these documents would write',
-				selectLabel: 'Select',
-				selectors: {
-					writable: 'All that can be written',
-					none: 'None'
-				},
 				tickAll: 'Write every document that can be written',
 				select: 'Write the payslip read from {document}',
 				cannotSelect: 'Nothing can be written from {document}',

@@ -162,11 +162,14 @@ const padded = (value: string): string => {
  *
  * **Every part must be a real one and nothing is ever rolled over**: a thirty-first of February is marked rather than carried
  * into March, and so are a month outside 1 – 12 and a day of zero.
+ *
+ * **It is exported because the trade import reads its dates by it** ([§7.7](../../../docs/functional/specs/07-investments.md#77-importing-trades)),
+ * and a second grammar for a date would be a second place for the two imports to disagree.
  * @param text The column, trimmed.
  * @param dateFormat Which order the three parts are in.
  * @returns The day as the file stores it, or undefined when the column is not a date under that order.
  */
-const readDate = (text: string, dateFormat: DateFormat): IsoDate | undefined => {
+export const readImportDate = (text: string, dateFormat: DateFormat): IsoDate | undefined => {
 	const match = DATE_PATTERN.exec(text);
 
 	if(!match) {
@@ -258,36 +261,38 @@ const removeGrouping = (text: string, thousandsSeparator: ThousandsSeparator): s
 };
 
 /**
- * Says whether the decimal part of an amount is a figure the file can hold, which is a figure whose cents are all of it.
+ * Says whether the decimal part of a figure is one the file can hold at the scale it is stored at.
  *
- * **Places past the cent are read only when they are zeros**: an export writing `3.860000` is saying `3,86` in a longer hand, so
- * the row is read rather than refused. A non-zero place past the cent is a figure this application has no room for and is
+ * **Places past the scale are read only when they are zeros**: an export writing `3.860000` is saying `3,86` in a longer hand, so
+ * the row is read rather than refused. A non-zero place past the scale is a figure this application has no room for and is
  * refused, exactly as the amount field refuses a third decimal typed into it.
  * @param decimalText The decimal part, digits only.
+ * @param scale How many decimal places the figure is stored with.
  * @returns Whether it is a figure this paste admits.
  */
-const readsAsCents = (decimalText: string): boolean => {
-	return ZEROS_ONLY.test(decimalText.slice(MONEY_SCALES.amount));
+const readsAtScale = (decimalText: string, scale: number): boolean => {
+	return ZEROS_ONLY.test(decimalText.slice(scale));
 };
 
 /**
- * Reads an amount column under the two separators the controls name.
+ * Reads a figure under the two separators the controls name, at the scale it is stored at — cents for an amount, millionths for
+ * a quantity, ten-thousandths for a unit price ([§8.2](../../../docs/technical/08-decisions.md#82-what-d3-fixes)).
  *
  * **The decimal character may appear at most once**, whichever character it is: a field is never asked to work out which of two
- * identical characters was meant as which. Zero, one and two decimals are all read, and further ones are read too **as long as
- * they are zeros**, some exports writing an amount to six places; a non-zero place past the cent is refused, exactly as the
- * amount field refuses a third decimal. The sign is a leading "-" for money out and a leading "+" or nothing at all for money
- * in, and **it may sit on either side of a leading currency marker** — but only on one of the two, a field signed on both being
- * unreadable.
+ * identical characters was meant as which. Any number of decimals up to the scale is read, and further ones are read too **as
+ * long as they are zeros**, some exports writing an amount to six places; a non-zero place past the scale is refused, exactly as
+ * the field of that kind refuses one typed in. The sign is a leading "-" for money out and a leading "+" or nothing at all for
+ * money in, and **it may sit on either side of a leading currency marker** — but only on one of the two, a field signed on both
+ * being unreadable.
  *
- * **It is exported because a template may have to read a figure before the box does** — a cell holding a count and a unit
- * price is two figures, and the one that multiplies them reads each of them by this and never by a grammar of its own
- * ([`ImportTemplate.ts`](../import/ImportTemplate.ts)).
+ * **It is the one grammar for a figure the imports have.** An amount in the box, a unit price inside a voucher cell, a figure on
+ * a payslip and a quantity in a broker's export are all read by it, and never by a grammar of their own.
  * @param text The column, trimmed.
  * @param format What the controls, or a template, say the characters mean.
- * @returns The amount in cents, or undefined when the column is not one these separators admit.
+ * @param scale How many decimal places the figure is stored with.
+ * @returns The figure in minor units of that scale, or undefined when the column is not one these separators admit.
  */
-export const readAmount = (text: string, format: ImportNumberFormat): Cents | undefined => {
+export const readImportFigure = (text: string, format: ImportNumberFormat, scale: number): number | undefined => {
 	const outside = stripLeadingSign(text);
 	const inside = stripLeadingSign(stripCurrencyMarker(outside.rest));
 
@@ -309,18 +314,32 @@ export const readAmount = (text: string, format: ImportNumberFormat): Cents | un
 		return undefined;
 	}
 
-	if(decimalText !== undefined && (!DIGITS_ONLY.test(decimalText) || !readsAsCents(decimalText))) {
+	if(decimalText !== undefined && (!DIGITS_ONLY.test(decimalText) || !readsAtScale(decimalText, scale))) {
 		return undefined;
 	}
 
-	const centsText = (decimalText ?? '').slice(0, MONEY_SCALES.amount).padEnd(MONEY_SCALES.amount, '0');
-	const cents = Number(`${removeGrouping(wholeText, format.thousandsSeparator)}${centsText}`);
+	const minorText = (decimalText ?? '').slice(0, scale).padEnd(scale, '0');
+	const minor = Number(`${removeGrouping(wholeText, format.thousandsSeparator)}${minorText}`);
 
-	if(!Number.isSafeInteger(cents)) {
+	if(!Number.isSafeInteger(minor)) {
 		return undefined;
 	}
 
-	return outside.isNegative || inside.isNegative ? -cents : cents;
+	return outside.isNegative || inside.isNegative ? -minor : minor;
+};
+
+/**
+ * Reads an amount column under the two separators the controls name: a figure in cents, by the one grammar above.
+ *
+ * **It is exported because a template may have to read a figure before the box does** — a cell holding a count and a unit
+ * price is two figures, and the one that multiplies them reads each of them by this and never by a grammar of its own
+ * ([`ImportTemplate.ts`](../import/ImportTemplate.ts)).
+ * @param text The column, trimmed.
+ * @param format What the controls, or a template, say the characters mean.
+ * @returns The amount in cents, or undefined when the column is not one these separators admit.
+ */
+export const readAmount = (text: string, format: ImportNumberFormat): Cents | undefined => {
+	return readImportFigure(text, format, MONEY_SCALES.amount);
 };
 
 const readRow = (fields: ImportRowFields, columns: number, format: ImportFormat, today: IsoDate): ImportRow => {
@@ -328,7 +347,7 @@ const readRow = (fields: ImportRowFields, columns: number, format: ImportFormat,
 		return { ...fields, outcome: 'unreadable', refusal: { reason: 'columns', columns } };
 	}
 
-	const date = readDate(fields.date, format.dateFormat);
+	const date = readImportDate(fields.date, format.dateFormat);
 
 	if(date === undefined) {
 		return { ...fields, outcome: 'unreadable', refusal: { reason: 'date' } };

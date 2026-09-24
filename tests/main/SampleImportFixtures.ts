@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 /**
- * The sample bank exports, built the way somebody would build them by hand.
+ * The sample exports — a bank's and a broker's — built the way somebody would build them by hand.
  *
  * `scripts/write-sample-imports.js` is run as a script rather than required as a module, so that its entry point is exercised
  * too — the same thing `FileFormat.test.ts` does with the sample ledger, and for the same reason: a script nobody runs is a
@@ -21,7 +21,8 @@ const SAMPLE_FILE_NAMES: Record<string, string> = {
 	ing: 'ing.xlsx',
 	directa: 'directa.xlsx',
 	edenred: 'edenred.xlsx',
-	'trade-republic': 'trade-republic.csv'
+	'trade-republic': 'trade-republic.csv',
+	'sample-broker': 'sample-broker.xlsx'
 };
 
 /**

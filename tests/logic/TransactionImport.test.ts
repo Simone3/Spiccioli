@@ -6,6 +6,7 @@ import {
 	findImportDuplicates,
 	importedPeriod,
 	parseImportRows,
+	readImportFigure,
 	type ImportFormat,
 	type ImportRow
 } from 'src/logic/transactions/TransactionImport';
@@ -203,6 +204,21 @@ describe('reading the amount column', () => {
 	test('refuses an amount that is not a figure at all', () => {
 		expect(refusalOf(row('11/07/2026', 'X', ''))).toBe('amount');
 		expect(refusalOf(row('11/07/2026', 'X', 'saldo'))).toBe('amount');
+	});
+});
+
+describe('reading a figure at the scale it is stored at', () => {
+	test('reads a quantity to six places and a unit price to four, the same grammar as an amount', () => {
+		expect(readImportFigure('12,5', ITALIAN, 6)).toBe(12500000);
+		expect(readImportFigure('0,000001', ITALIAN, 6)).toBe(1);
+		expect(readImportFigure('1.054,3', ITALIAN, 4)).toBe(10543000);
+		expect(readImportFigure('€ 98,1234', ITALIAN, 4)).toBe(981234);
+	});
+
+	test('refuses a non-zero place past the scale rather than rounding it, and reads zeros past it', () => {
+		expect(readImportFigure('0,0000001', ITALIAN, 6)).toBeUndefined();
+		expect(readImportFigure('98,12345', ITALIAN, 4)).toBeUndefined();
+		expect(readImportFigure('98,123400', ITALIAN, 4)).toBe(981234);
 	});
 });
 

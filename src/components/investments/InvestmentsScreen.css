@@ -213,10 +213,18 @@
 	cursor: pointer;
 }
 
-/* The button that opens the modal, beside the one that adds a security. The press sends nothing: what leaves the machine is
-   stated on the page that sends it. */
+/* The button that opens the modal, beside the one that adds a security — and on the two trade tabs, *Import trades…* beside
+   the one that adds a trade. The price press sends nothing: what leaves the machine is stated on the page that sends it. */
 .investments-screen-update-prices-buttons {
 	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+/* A row of the trade import whose security the file does not hold: what is missing, and the one thing that puts it right */
+.investments-screen-import-status {
+	display: flex;
+	flex-wrap: wrap;
 	gap: 8px;
 	align-items: center;
 }
