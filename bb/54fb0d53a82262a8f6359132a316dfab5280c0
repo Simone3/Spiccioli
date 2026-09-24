@@ -1,0 +1,110 @@
+src/types/ImportIpcTypes.ts
+  s_6f977222c09586::t_1f0e1d498f6f7f 53-54,56
+tests/components/InvestmentsScreen.test.tsx
+  s_6f977222c09586::t_850b08360d6836 11,637-648,652-669,671-702,704-710,717,719-722
+  s_6f977222c09586::t_cc5b1c7ccd5ce3 711-716
+  s_6f977222c09586::t_cf6c2948e0b0ab 649-651,703
+  s_6f977222c09586::t_fc05f8c6eb48a3 670,718
+src/components/import/ImportRecap.tsx
+  s_6f977222c09586::t_8e745d56774971 1-201
+docs/technical/03-build-and-run.md
+  s_6f977222c09586::t_b85fd9be3c3de0 26
+src/logic/import/TradeImportTemplate.ts
+  s_6f977222c09586::t_a42f6bd32c0b2a 1-265
+scripts/write-sample-imports.js
+  s_6f977222c09586::t_fcc58be217fee8 6-7,222-262,542
+docs/functional/why/07-investments.md
+  s_6f977222c09586::t_04710d6f0deb78 17-18
+tests/logic/TransactionImport.test.ts
+  s_6f977222c09586::t_66adf00f8dc6aa 9,210-222
+  s_6f977222c09586::t_2fbb466b391864 223-224
+tests/main/SampleImportFixtures.ts
+  s_6f977222c09586::t_fcc58be217fee8 7,24-25
+docs/functional/why/15-out-of-scope.md
+  s_6f977222c09586::t_04710d6f0deb78 34
+src/components/import/TemplateChooserDialog.tsx
+  s_6f977222c09586::t_6488d3511f94de 2,19-22,45-50,65-66,77-78,105,108,113
+src/i18n/lang/en.ts
+  s_6f977222c09586::t_5f166454d2826b 934-1027
+  s_6f977222c09586::t_6d56130181b73d 576-584
+tests/logic/TradeImportTemplate.test.ts
+  s_6f977222c09586::t_39993e862e3e5d 1-79,82-115
+  s_6f977222c09586::t_af5316b60f6f62 80-81
+src/components/investments/TradeImportFlow.tsx
+  s_6f977222c09586::t_eb114caaa682f0 69
+  s_6f977222c09586::t_c544dacca02311 261,263-265
+  s_6f977222c09586::t_a976184767dbf7 19,260
+  s_6f977222c09586::t_127c7ec0e68dac 1-10,12-18,20-68,72-244,246-259,262,266-290
+  s_6f977222c09586::t_05f2286afa23aa 11,70-71,245
+docs/functional/specs/07-investments.md
+  s_6f977222c09586::t_bf7155290b60ec 35,52
+  s_6f977222c09586::t_d81ee4cbb36d67 144-196
+docs/functional/specs/15-out-of-scope.md
+  s_6f977222c09586::t_bf7155290b60ec 20,23
+src/components/investments/InvestmentsScreen.tsx
+  s_6f977222c09586::t_eb114caaa682f0 15,62,74-80,127-129,417-466,572,780-789,796-815,829,833-848,940
+  s_6f977222c09586::t_186b0e2da2600e 941
+src/logic/import/ImportTemplate.ts
+  s_6f977222c09586::t_46ad55be2c5e26 215-216,220-221,280-281,328,331,363,371,419,423,452,457,459,475,505,511,524,537,541,544,563
+  s_6f977222c09586::t_4b378961c60b59 383-389,394,396-413,415,438-440,443
+src/components/salaries/PayslipImportRecap.tsx
+  s_6f977222c09586::t_6d56130181b73d 1,3-4,266-296
+docs/technical/02-repository-map.md
+  s_6f977222c09586::t_99073a7737fa04 86,88-89,116,132-133,169
+  s_6f977222c09586::t_b85fd9be3c3de0 123
+CLAUDE.md
+  s_6f977222c09586::t_b85fd9be3c3de0 53
+docs/functional/specs/13-validation.md
+  s_6f977222c09586::t_bf7155290b60ec 71,73
+src/components/investments/InvestmentsScreen.css
+  s_6f977222c09586::t_b5a1cc81edc58e 216-217,224-227
+  s_6f977222c09586::t_594fef773b6597 228-231
+src/logic/import/TradeImportTemplates.ts
+  s_6f977222c09586::t_89da9b40f5d698 1-51
+docs/functional/specs/14-empty-and-error-states.md
+  s_6f977222c09586::t_bf7155290b60ec 29-30
+tests/main/SampleImports.test.ts
+  s_6f977222c09586::t_af5316b60f6f62 1
+  s_6f977222c09586::t_501c8fa0d0a943 5-7,120-161
+  s_6f977222c09586::t_5b9d3df1b493a2 162-163
+docs/technical/07-testing.md
+  s_6f977222c09586::t_b85fd9be3c3de0 47
+docs/technical/01-architecture.md
+  s_6f977222c09586::t_b85fd9be3c3de0 29
+src/components/investments/SecurityForm.tsx
+  s_6f977222c09586::t_8cd58149f8a2e6 22-25,33-41,50-52,57,62,65,72
+src/components/investments/TradeImportRecap.tsx
+  s_6f977222c09586::t_1e544b002a5d7b 1-164,166-318,320-333
+  s_6f977222c09586::t_16786ec448efda 165,319
+tests/logic/TradeImport.test.ts
+  s_6f977222c09586::t_288f431fdd090b 1-218
+src/logic/transactions/TransactionImport.ts
+  s_6f977222c09586::t_56580ebae115a1 165-167,172,264,266-267,270,273-274,278-279,282-286,288-289,292-293,295,317,321-322,324,328-342,350
+src/logic/investments/TradeImport.ts
+  s_6f977222c09586::t_d36220e63a02e6 1-5,7-427
+  s_6f977222c09586::t_1f0e1d498f6f7f 6
+src/components/import/ImportRecap.css
+  s_6f977222c09586::t_835efaac3155d6 1-13,16-102
+  s_6f977222c09586::t_6d56130181b73d 14-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "bb54fb0d53a82262a8f6359132a316dfab5280c0",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6f977222c09586": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8961144a-929e-4cb6-b86a-485997672e12",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
