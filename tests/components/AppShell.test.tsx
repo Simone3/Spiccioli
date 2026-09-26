@@ -49,7 +49,7 @@ describe('the empty states', () => {
 
 		expect(screen.getByRole('heading', { name: 'Accounts', level: 1 })).toBeInTheDocument();
 		expect(screen.getByRole('tab', { name: 'Institutions' })).toHaveAttribute('aria-selected', 'true');
-		expect(screen.getByText('Only a Cash account does without one — that is what physical cash is. Add one when a bank turns up.')).toBeInTheDocument();
+		expect(screen.getByText('Add the first institution — the bank or broker an account is held at. Only a Cash account needs none.')).toBeInTheDocument();
 	});
 
 	test('say what fills Transactions, and both ways a row gets into the file', async() => {

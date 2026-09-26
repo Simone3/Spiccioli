@@ -105,7 +105,7 @@ export const EN_TRANSLATIONS = {
 	emptyState: {
 		portfolio: 'Nothing here yet — add the accounts you want to track.',
 		accounts: 'Add the first account — a current account is the usual place to start.',
-		institutions: 'Only a Cash account does without one — that is what physical cash is. Add one when a bank turns up.',
+		institutions: 'Add the first institution — the bank or broker an account is held at. Only a Cash account needs none.',
 		transactions: 'Import a bank export, or add a row by hand.',
 		transactionsFiltered: 'No transaction matches these filters.',
 		bulkImport: 'There is no account to import into yet. Add a cash account first, and the import will offer it.',

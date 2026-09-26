@@ -156,7 +156,7 @@ describe('the Institutions tab', () => {
 	test('says what an institution is for, and is the only place one is created', async() => {
 		await openInstitutions();
 
-		expect(screen.getByText(/Only a Cash account does without one/)).toBeInTheDocument();
+		expect(screen.getByText(/Add the first institution/)).toBeInTheDocument();
 
 		await userEvent.click(screen.getByRole('button', { name: 'Add institution' }));
 		await userEvent.type(screen.getByRole('textbox', { name: 'Name' }), 'Banca Sella');
