@@ -7,14 +7,15 @@ const withRecords = (overrides: Partial<LedgerDocument> = {}): LedgerDocument =>
 	return { ...makeSeededDocument(), ...overrides };
 };
 
-const openAccounts = async(document: LedgerDocument = makeSeededDocument()): Promise<void> => {
+// The screen opens on Institutions by itself, so the Accounts tab is one click further
+const openInstitutions = async(document: LedgerDocument = makeSeededDocument()): Promise<void> => {
 	await renderOpenLedger(document);
 	await userEvent.click(screen.getByRole('link', { name: 'Accounts' }));
 };
 
-const openInstitutions = async(document: LedgerDocument = makeSeededDocument()): Promise<void> => {
-	await openAccounts(document);
-	await userEvent.click(screen.getByRole('tab', { name: 'Institutions' }));
+const openAccounts = async(document: LedgerDocument = makeSeededDocument()): Promise<void> => {
+	await openInstitutions(document);
+	await userEvent.click(screen.getByRole('tab', { name: 'Accounts' }));
 };
 
 describe('the Accounts screen', () => {

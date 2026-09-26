@@ -2,7 +2,7 @@
 
 *[Index](../README.md) · [why it is this way](../why/04-accounts.md)*
 
-Two tabs: Accounts, Institutions. The spine of the file — transactions, balances and net worth all hang off an account, so it sits second in the sidebar and everything else refers back to it.
+Two tabs: Institutions, Accounts. The screen opens on Institutions. The spine of the file — transactions, balances and net worth all hang off an account, so it sits second in the sidebar and everything else refers back to it.
 
 > **How an account is written, everywhere in the application.** *Institution · Account* — *Fineco · Conto Corrente*, never *Fineco* and never *Conto Corrente* on its own. Both halves earn their place: two banks may each hold a *Conto Corrente* and the name rules permit it ([§13](13-validation.md)), so the institution is what tells them apart, while which account of a bank's several a record sits on is what the matching of [§11.6](11-calculations.md#116-derived-matching) turns on. The order is the institution first, which is also the order the accounts table sorts in ([§4.1](#41-accounts)).
 >
@@ -32,7 +32,7 @@ Two tabs: Accounts, Institutions. The spine of the file — transactions, balanc
 
 ## 4.3 Creating and editing
 
-Both forms live on the Accounts screen, and **each tab creates what it lists**: *Add account* on the Accounts tab, *Add institution* on the Institutions tab. They are two independent forms and neither opens the other.
+Both forms live on the Accounts screen, and **each tab creates what it lists**: *Add institution* on the Institutions tab, *Add account* on the Accounts tab. They are two independent forms and neither opens the other.
 
 - **Default sell fee** is a flat amount, used only for the “if sold today” figures of [§11.3](11-calculations.md#113-hypothetical-liquidation) and therefore for net worth itself ([§3.1](03-portfolio.md#31-behaviour)). Fees actually charged are recorded on each trade. Type a zero to see gross figures — the field is required and has no empty state ([§13](13-validation.md)).
 - **Institution** offers the institutions already recorded and nothing else — no *None* entry and no *New institution…* entry ([§4.2](#42-institutions)). **It is required on seven of the eight types and disabled on the eighth**: a `Cash` account is physical cash, which is held by nobody, so the field greys out and shows *None* ([§13](13-validation.md)) — a disabled state rather than an entry anyone can pick. **Switching the type is what moves it**: choosing `Cash` clears the field and disables it, choosing anything else re-enables it empty and marks it until an institution is picked. This is the one field on the form whose *state* the type changes rather than its value; the other is exit tax, which the type adds and removes outright.

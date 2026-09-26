@@ -94,6 +94,16 @@ describe('the Checks screen', () => {
 		expect(await screen.findByRole('heading', { name: 'Transactions', level: 1 })).toBeInTheDocument();
 		expect(screen.getByRole('combobox', { name: 'Account' })).toHaveValue('account-1');
 	});
+
+	// Accounts opens on Institutions by itself, so an entry naming an account has to ask for the tab the accounts are on
+	test('follows an entry naming an account to the Accounts tab', async() => {
+		await openChecks(withRecords({ accounts: [ makeAccount({ closingDate: '2026-01-01' }) ] }));
+
+		await userEvent.click(await screen.findByRole('button', { name: /Conto Corrente/ }));
+
+		expect(await screen.findByRole('heading', { name: 'Accounts', level: 1 })).toBeInTheDocument();
+		expect(screen.getByRole('tab', { name: 'Accounts' })).toHaveAttribute('aria-selected', 'true');
+	});
 });
 
 describe('the Matched column', () => {

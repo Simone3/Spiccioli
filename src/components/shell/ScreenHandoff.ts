@@ -37,6 +37,12 @@ export interface TransactionHandoff {
 	category?: LedgerId;
 }
 
+export interface AccountsHandoff {
+
+	// Which of the two tabs to open on, the one it would open on by itself holding institutions rather than accounts
+	tab: 'institutions' | 'accounts';
+}
+
 export interface InvestmentsHandoff {
 
 	// Which of the four tabs to open on
@@ -58,6 +64,16 @@ export interface SalariesHandoff {
 	// Which year of that contract's payslips to select, the per-year table always having a row selected
 	year: number;
 }
+
+/**
+ * Reads the tab the Accounts screen was handed.
+ * @returns The hand-over, or undefined when the screen was reached from the sidebar.
+ */
+export const useAccountsHandoff = (): AccountsHandoff | undefined => {
+	const location = useLocation();
+
+	return (location.state as AccountsHandoff | null) ?? undefined;
+};
 
 /**
  * Reads the filters the Transactions screen was handed.
@@ -135,8 +151,9 @@ const TRADE_TABS: Record<TradeKind, InvestmentsHandoff['tab']> = {
  * **A transaction is handed its account and its own day**, which is the narrowest set of ordinary filters that certainly
  * contains it; a trade is handed its security, its account and its day; a payslip is handed its contract and its year, which is
  * the pair the Payslips tab is always scoped by; a security is handed itself, and an account is handed nothing at all — the
- * Accounts screen has no filter and no paging, so the record is on the table the moment the screen is reached. **It is still an
- * arrival**: the Accounts screen opens on the tab the accounts are on rather than on the one it was left on ([§12.2]).
+ * Accounts screen has no filter and no paging, so the record is on the table the moment its tab is open. **It is still an
+ * arrival**: the Accounts screen opens on the tab the accounts are on rather than on the one it was left on ([§12.2]), and is
+ * told which, the tab it opens on by itself being Institutions.
  *
  * **One link names no record**: a threshold a check's description states is a preference, and following it lands on Settings,
  * which has nothing to be started over.
@@ -183,8 +200,8 @@ export const useFollowCheckLink = (): (link: CheckLink) => void => {
 				return;
 			case 'accounts':
 			default:
-				// Accounts has no filter and no paging: every account is on the one table, so arriving there is arriving at the record
-				arriveAt('accounts', APP_ROUTES.accounts);
+				// Accounts has no filter and no paging: every account is on the one table, so arriving on its tab is arriving at the record
+				arriveAt('accounts', APP_ROUTES.accounts, { tab: 'accounts' } satisfies AccountsHandoff);
 		}
 	}, [ arriveAt ]);
 };

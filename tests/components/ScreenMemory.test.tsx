@@ -62,14 +62,14 @@ describe('a screen left and come back to', () => {
 	test('is found on the tab it was left on', async() => {
 		await renderOpenLedger(withRecords());
 		await goTo('Accounts');
-		await userEvent.click(screen.getByRole('tab', { name: 'Institutions' }));
+		await userEvent.click(screen.getByRole('tab', { name: 'Accounts' }));
 
-		expect(screen.getByRole('tab', { name: 'Institutions' })).toHaveAttribute('aria-selected', 'true');
+		expect(screen.getByRole('tab', { name: 'Accounts' })).toHaveAttribute('aria-selected', 'true');
 
 		await goTo('Portfolio');
 		await goTo('Accounts');
 
-		expect(screen.getByRole('tab', { name: 'Institutions' })).toHaveAttribute('aria-selected', 'true');
+		expect(screen.getByRole('tab', { name: 'Accounts' })).toHaveAttribute('aria-selected', 'true');
 	});
 
 	test('keeps nothing it was doing, a bulk selection included', async() => {

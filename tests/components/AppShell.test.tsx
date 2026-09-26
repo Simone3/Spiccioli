@@ -48,7 +48,8 @@ describe('the empty states', () => {
 		await userEvent.click(screen.getByRole('link', { name: 'Go to Accounts' }));
 
 		expect(screen.getByRole('heading', { name: 'Accounts', level: 1 })).toBeInTheDocument();
-		expect(screen.getByText('Add the first account — a current account is the usual place to start.')).toBeInTheDocument();
+		expect(screen.getByRole('tab', { name: 'Institutions' })).toHaveAttribute('aria-selected', 'true');
+		expect(screen.getByText('Only a Cash account does without one — that is what physical cash is. Add one when a bank turns up.')).toBeInTheDocument();
 	});
 
 	test('say what fills Transactions, and both ways a row gets into the file', async() => {

@@ -1,5 +1,5 @@
 import 'src/components/accounts/AccountsScreen.css';
-import { useMemo, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { AccountForm, type AccountFormValues } from 'src/components/accounts/AccountForm';
 import { AccountsTable } from 'src/components/accounts/AccountsTable';
 import { InstitutionForm, type InstitutionFormValues } from 'src/components/accounts/InstitutionForm';
@@ -8,6 +8,7 @@ import { AppButton } from 'src/components/common/AppButton';
 import { ConfirmDialog } from 'src/components/common/ConfirmDialog';
 import { EmptyState } from 'src/components/common/EmptyState';
 import { TabBar } from 'src/components/common/TabBar';
+import { useAccountsHandoff } from 'src/components/shell/ScreenHandoff';
 import { ScreenLayout } from 'src/components/shell/ScreenLayout';
 import { useLedger } from 'src/contexts/LedgerContext';
 import { useRemembered } from 'src/contexts/ScreenMemoryContext';
@@ -28,7 +29,7 @@ import type { Account, Institution, LedgerId } from 'src/types/LedgerTypes';
 /**
  * Accounts, which is the spine every other screen hangs off: transactions, balances and net worth all hang off an account.
  *
- * Two tabs, and **each one creates what it lists** — *Add account* on the first, *Add institution* on the second. They are two
+ * Two tabs, and **each one creates what it lists** — *Add institution* on the first, *Add account* on the second. They are two
  * independent forms and neither opens the other: the account form picks from the institutions already recorded and cannot make
  * one.
  *
@@ -59,12 +60,21 @@ export const AccountsScreen = (): ReactElement => {
 	const { document, updateDocument } = useLedger();
 
 	// Which tab is the one thing this screen is found showing when it is come back to ([§12.2]): it has no filter and no paging
-	const [ tab, setTab ] = useRemembered<AccountsScreenTab>('accounts', 'tab', 'accounts');
+	const [ tab, setTab ] = useRemembered<AccountsScreenTab>('accounts', 'tab', 'institutions');
 	const [ accountDraft, setAccountDraft ] = useState<AccountDraft | undefined>(undefined);
 	const [ institutionDraft, setInstitutionDraft ] = useState<InstitutionDraft | undefined>(undefined);
 	const [ accountToDelete, setAccountToDelete ] = useState<Account | undefined>(undefined);
 	const [ institutionToDelete, setInstitutionToDelete ] = useState<Institution | undefined>(undefined);
 	const [ refusal, setRefusal ] = useState<string | undefined>(undefined);
+
+	// A check entry naming an account arrives asking for the tab the accounts are on, which is not the one opened by itself
+	const handoff = useAccountsHandoff();
+
+	useEffect(() => {
+		if(handoff) {
+			setTab(handoff.tab);
+		}
+	}, [ handoff, setTab ]);
 
 	const accounts = useMemo(() => {
 		return document?.accounts ?? [];
@@ -240,8 +250,8 @@ export const AccountsScreen = (): ReactElement => {
 				label={t('screens.accounts')}
 				active={tab}
 				tabs={[
-					{ key: 'accounts', label: t('accounts.tabs.accounts') },
-					{ key: 'institutions', label: t('accounts.tabs.institutions') }
+					{ key: 'institutions', label: t('accounts.tabs.institutions') },
+					{ key: 'accounts', label: t('accounts.tabs.accounts') }
 				]}
 				onSelect={(key) => {
 					setRefusal(undefined);
