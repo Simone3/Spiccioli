@@ -1,0 +1,57 @@
+scripts/write-sample-imports.js
+  s_6f977222c09586::t_3d863fd9708152 6-7,168-197,250,252-254,257-262,266
+docs/technical/02-repository-map.md
+  s_6f977222c09586::t_94c7101df20ed9 116,132-133,169
+src/components/investments/TradeImportFlow.tsx
+  s_6f977222c09586::t_875bb74a455423 13-18,93
+tests/main/SampleImports.test.ts
+  s_6f977222c09586::t_0c3a26189aef5c 5-7,11,99-107,125-127,132-139,141-143,145-146,148-152,154-157,159-161,163-165,167,169,173-183,185-189,193-195,197-223
+tests/components/InvestmentsScreen.test.tsx
+  s_6f977222c09586::t_eef17fd5cee954 638,640-643,661,671,673-674,676,680-681,684,688,715
+src/components/investments/TradeImportRecap.tsx
+  s_6f977222c09586::t_875bb74a455423 9-10,12,152-169,201,264,269,284
+docs/functional/specs/07-investments.md
+  s_6f977222c09586::t_94c7101df20ed9 155-157,163,168,170-171
+src/logic/import/TradeImportTemplates.ts
+  s_6f977222c09586::t_dcf8998387a2de 11-13,18-23,25,27-28,30-35,37-43,48-72
+tests/main/SampleImportFixtures.ts
+  s_6f977222c09586::t_3d863fd9708152 7,24
+src/i18n/lang/en.ts
+  s_6f977222c09586::t_875bb74a455423 949-950,983,1013-1015
+src/logic/investments/TradeImport.ts
+  s_6f977222c09586::t_c252851d985a9c 2,4-5,17-21,42,60-65,113-114,201-203,205-238,240-263,266,268,278-279,289,299,305,307-308,311,319,326-327,330
+tests/logic/TradeImport.test.ts
+  s_6f977222c09586::t_2495b49906090d 2,21-30,45-47,56,78,95-98,102,110,117-146
+tests/logic/TradeImportTemplate.test.ts
+  s_6f977222c09586::t_acaadfdc2177c0 12
+  s_6f977222c09586::t_2495b49906090d 20-21,50-52,63-65,84-112
+  s_6f977222c09586::t_0a860236fd26c9 113-114
+src/logic/import/TradeImportTemplate.ts
+  s_6f977222c09586::t_853f2d26bf5861 343-345,393,402
+  s_6f977222c09586::t_00c6d2a72b0046 29-33,41,69-109,134,136-141,153-166,171-172,185-190,202,209-237,245,249,252-258,285-289,316-331,335,341,346,368-375,388-390,400-401,403-409
+  s_6f977222c09586::t_23df916dec3fa5 332-334,336-340
+  s_6f977222c09586::t_89c30b559d0750 342,410-411
+docs/technical/07-testing.md
+  s_6f977222c09586::t_94c7101df20ed9 47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "00d1335a52d4d505a916af3a81152a7fcef53c09",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6f977222c09586": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8961144a-929e-4cb6-b86a-485997672e12",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
