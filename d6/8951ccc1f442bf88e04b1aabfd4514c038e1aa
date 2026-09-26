@@ -1,0 +1,14 @@
+src/components/investments/TradeForm.tsx
+  h_08e8a5184a38af 241
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "d68951ccc1f442bf88e04b1aabfd4514c038e1aa",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
