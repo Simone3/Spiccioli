@@ -1,0 +1,36 @@
+src/components/shell/ScreenHandoff.ts
+  s_53e2d9460a402c::t_ac0fb6cb81b005 40-45,68-77,154-156,203-204
+tests/components/ScreenMemory.test.tsx
+  s_53e2d9460a402c::t_059bc9af3cb475 65,67,72
+tests/components/AccountsScreen.test.tsx
+  s_53e2d9460a402c::t_059bc9af3cb475 10-11,16-18
+docs/functional/specs/04-accounts.md
+  s_53e2d9460a402c::t_ac0fb6cb81b005 5,35
+tests/components/ChecksScreen.test.tsx
+  s_53e2d9460a402c::t_60b7ebfecadee0 97-106
+src/components/accounts/AccountsScreen.tsx
+  s_53e2d9460a402c::t_ac0fb6cb81b005 2,11,32,63,70-78,253-254
+tests/components/AppShell.test.tsx
+  s_53e2d9460a402c::t_059bc9af3cb475 51-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e8a0c887d14830abccdffdd436c7f19e283b87ff",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_53e2d9460a402c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b4009975-d198-42b5-ad37-7fcb69b1aac6",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
