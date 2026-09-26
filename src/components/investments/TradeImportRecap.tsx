@@ -92,9 +92,6 @@ export const TradeImportRecap = ({
 	const tickedCount = rows.filter((row) => {
 		return ticked.has(row.key);
 	}).length;
-	const zeroedCount = rows.filter((row) => {
-		return row.outcome !== 'refused' && row.values.zeroed.length > 0;
-	}).length;
 	const waitingCount = rows.filter((row) => {
 		return row.outcome === 'newSecurity';
 	}).length;
@@ -286,11 +283,10 @@ export const TradeImportRecap = ({
 		}
 	];
 
+	// What a row is waiting on and which of its figures are zeros is said in its own last column, and not again up here
 	const notices: ReactNode[] = [
 		t('trades.import.recap.notice'),
-		...dropped > 0 ? [ t('trades.import.recap.droppedNotice', { count: dropped }) ] : [],
-		...waitingCount > 0 ? [ t('trades.import.recap.newSecurityNotice', { count: waitingCount }) ] : [],
-		...zeroedCount > 0 ? [ t('trades.import.recap.zeroedNotice', { count: zeroedCount }) ] : []
+		...dropped > 0 ? [ t('trades.import.recap.droppedNotice', { count: dropped }) ] : []
 	];
 
 	const footer = (): string => {

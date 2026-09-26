@@ -227,7 +227,7 @@ export const TradeImportFlow = ({ onWrite, onRefused, onClose }: TradeImportFlow
 					void readExport(id);
 				}}
 				onCancel={onClose}>
-				<FormField label={t('trades.import.account')} hint={t('trades.import.accountHint')}>
+				<FormField label={t('trades.import.account')}>
 					<AccountPicker
 						side='brokerage'
 						value={accountId}

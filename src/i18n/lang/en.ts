@@ -942,7 +942,6 @@ export const EN_TRANSLATIONS = {
 			templateSearchPlaceholder: 'Type a broker name',
 			account: 'Account',
 			accountChoose: 'Choose an account',
-			accountHint: 'Brokerage accounts only. Every trade in the export is written into this one.',
 			dialogTitle: 'Choose a broker export',
 
 			// One entry per template the application ships
@@ -958,14 +957,6 @@ export const EN_TRANSLATIONS = {
 				droppedNotice: {
 					one: '1 row of the export is not a purchase or a sale, and is left out.',
 					other: '{count} rows of the export are not purchases or sales, and are left out.'
-				},
-				newSecurityNotice: {
-					one: '1 row names a security this file does not hold yet. Create it from the row, and every row naming it is matched at once.',
-					other: '{count} rows name a security this file does not hold yet. Create each from its row, and every row naming it is matched at once.'
-				},
-				zeroedNotice: {
-					one: '1 row does not print its fees or its taxes, which are written as 0 — correct them on the trade’s own form afterwards.',
-					other: '{count} rows do not print their fees or their taxes, which are written as 0 — correct them on the trade’s own form afterwards.'
 				},
 				table: 'The trades this export would write',
 				tickAll: 'Import every trade that can be written',
