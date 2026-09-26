@@ -238,7 +238,7 @@ export const TradeForm = ({ kind, trade, onSave, onCancel }: TradeFormProps): Re
 				<TextField value={notes} label={t('trades.form.notes')} placeholder={t('form.optional')} onChange={setNotes}/>
 			</FormField>
 
-			<FormField label={isSale ? t('trades.form.netProceeds') : t('trades.form.totalCost')} hint={t('trades.form.derived')}>
+			<FormField label={isSale ? t('trades.form.netProceeds') : t('trades.form.totalCost')}>
 				<p className='investments-screen-derived'>
 					{total === undefined ? t('table.notApplicable') : formatter.amount(total)}
 				</p>

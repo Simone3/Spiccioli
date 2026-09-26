@@ -929,7 +929,6 @@ export const EN_TRANSLATIONS = {
 			notes: 'Notes',
 			totalCost: 'Total cost',
 			netProceeds: 'Net proceeds',
-			derived: 'Computed as you type, and never entered.',
 			noBrokerageAccount: 'There is no brokerage account yet. Add one on Accounts, and this form will offer it.'
 		},
 
