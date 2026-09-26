@@ -1,0 +1,31 @@
+docs/functional/why/15-out-of-scope.md
+  s_6f977222c09586::t_306602c71d2829 34
+docs/functional/specs/07-investments.md
+  s_6f977222c09586::t_306602c71d2829 167
+src/components/investments/TradeImportRecap.tsx
+  s_6f977222c09586::t_0dcacf7aa2d61f 286
+  s_6f977222c09586::t_306602c71d2829 289
+src/components/investments/TradeImportFlow.tsx
+  s_6f977222c09586::t_306602c71d2829 230
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "cf1be03a08ed04561d23d034989d3a75104e95cb",
+  "prompts": {},
+  "humans": {
+    "h_08e8a5184a38af": {
+      "author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6f977222c09586": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8961144a-929e-4cb6-b86a-485997672e12",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Simone Graziussi <simone.graziussi@gmail.com>"
+    }
+  }
+}
