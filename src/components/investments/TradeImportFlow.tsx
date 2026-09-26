@@ -10,7 +10,12 @@ import { useTranslator } from 'src/i18n/TranslationContext';
 import { DateUtils } from 'src/framework/utils/DateUtils';
 import { formatAccountName, indexInstitutions } from 'src/logic/accounts/Accounts';
 import { extensionsForImportSource } from 'src/logic/import/ImportTemplates';
-import { applyTradeImportTemplate, type TradeImportCells, type TradeImportTemplate } from 'src/logic/import/TradeImportTemplate';
+import {
+	applyTradeImportTemplate,
+	tradeImportReadingOf,
+	type TradeImportCells,
+	type TradeImportTemplate
+} from 'src/logic/import/TradeImportTemplate';
 import { findTradeImportTemplate, TRADE_IMPORT_TEMPLATES } from 'src/logic/import/TradeImportTemplates';
 import {
 	buildImportedTrades,
@@ -85,8 +90,7 @@ export const TradeImportFlow = ({ onWrite, onRefused, onClose }: TradeImportFlow
 	const rowsFor = (from: TradeImportRead, withCreated: readonly CreatedSecurity[]): readonly TradeImportRow[] => {
 		return buildTradeImportRows({
 			cells: from.cells,
-			format: from.template.format,
-			acceptedCurrencies: from.template.currency?.accepted,
+			reading: tradeImportReadingOf(from.template),
 			accountId: from.accountId,
 			securities: document?.securities ?? [],
 			trades: document?.trades ?? [],

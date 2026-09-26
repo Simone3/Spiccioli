@@ -3,8 +3,8 @@ const path = require('node:path');
 const zlib = require('node:zlib');
 const { projectRoot } = require('./electron-bundle');
 
-// Writes one sample export per template an import ships: one bank export per template of the Bulk import screen, and one broker
-// export per template of *Import trades…*.
+// Writes one sample export per template the Bulk import screen ships — and, since a broker's movements list is one file read by two
+// imports, the Directa and Trade Republic ones carry the trades *Import trades…* reads out of them too.
 //
 // They are here rather than committed as binaries for the reason "write-sample-ledger.js" is here, and for one more: a real export is
 // somebody's spending, and a fixture written in source is a fixture that carries none of it. **Each one is the shape of that bank's export
@@ -165,6 +165,36 @@ const DIRECTA = {
 		[
 			'26-06-2026', '30-06-2026', 'Vendita', 'CRPE', 'LU1829219127', '',
 			'Amundi EUR Corporate Bond Clim', number('11'), number('234.56'), number('0'), 'EUR', number('12321312')
+		],
+
+		// The sale's commission and withholding, on rows of their own under the same order reference
+		[
+			'26-06-2026', '30-06-2026', 'Commissioni', 'CRPE', 'LU1829219127', '',
+			'Amundi EUR Corporate Bond Clim', number('0'), number('-5'), number('0'), 'EUR', number('12321312')
+		],
+		[
+			'26-06-2026', '30-06-2026', 'Rit. etf', 'CRPE', 'LU1829219127', '',
+			'Amundi EUR Corporate Bond Clim', number('0'), number('-1.2'), number('0'), 'EUR', number('12321312')
+		],
+		[
+			'18-06-2026', '22-06-2026', 'Acquisto', 'SWDA', 'IE00B4L5Y983', '',
+			'iShares Core MSCI World', number('7'), number('-702.87'), number('0'), 'EUR', number('12300001')
+		],
+		[
+			'18-06-2026', '22-06-2026', 'Commissioni', 'SWDA', 'IE00B4L5Y983', '',
+			'iShares Core MSCI World', number('0'), number('-1.5'), number('0'), 'EUR', number('12300001')
+		],
+
+		// No commission at all, and a total a price of four places cannot give back: € 12,34567 a unit is € 12,3457 once stored
+		[
+			'17-06-2026', '19-06-2026', 'Acquisto', 'VWCE', 'IE00BK5BQT80', '',
+			'Vanguard FTSE All-World', number('1000'), number('-12345.67'), number('0'), 'EUR', number('12300002')
+		],
+
+		// A commission whose order is not in the export, the period having started after it
+		[
+			'16-06-2026', '16-06-2026', 'Commissioni', 'EIMI', 'IE00BKM4GZ66', '',
+			'iShares Core MSCI EM IMI', number('0'), number('-1.5'), number('0'), 'EUR', number('12299999')
 		]
 	]
 };
@@ -215,51 +245,25 @@ const TRADE_REPUBLIC = {
 		[
 			'2026-09-08T09:12:00.000000Z', '2026-09-08', 'DEFAULT', 'CASH', 'PAYMENT_INBOUND', '', 'Rossi, Mario', '', '', '',
 			'150.000000', '', '', 'EUR', '', '', '', 'Rimborso "spese" , settembre', '22b19b53-d569-8g62-9ues-ge593dc392f9', '', '', '', ''
+		],
+
+		// A savings plan's execution, which is a BUY like any other: a fraction of a share, and figures to ten places
+		[
+			'2026-09-02T08:05:11.000000Z', '2026-09-02', 'DEFAULT', 'TRADING', 'BUY', 'FUND', 'iShares Core MSCI World USD (Acc)',
+			'IE00B4L5Y983', '0.0113980000', '321.1000000000', '-3.660000', '', '', 'EUR', '', '', '', 'Savings plan execution',
+			'33c29c64-e670-9h73-0vfs-hf604ed403g0', '', '', '', ''
+		],
+
+		// A sale, with the fee and the tax written as the money that left the account
+		[
+			'2026-08-28T14:30:00.000000Z', '2026-08-28', 'DEFAULT', 'TRADING', 'SELL', 'STOCK', 'Apple Inc.',
+			'US0378331005', '2.0000000000', '205.5000000000', '406.580000', '-1.000000', '-3.420000', 'EUR', '', '', '',
+			'Sell trade US0378331005 Apple Inc.', '44d39d75-f781-0i84-1wgt-ig715fe514h1', '', '', '', ''
 		]
 	]
 };
 
-/**
- * The invented broker the trade import's sample template reads, "Movimenti titoli". Rows of dossier and period above the headings, the
- * trade date beside the value date, and everything a broker's export mixes in with its trades: a dividend and a custody fee, which are not
- * trades at all; a purchase with an ISIN and no ticker and one with a ticker and no ISIN; a purchase that prints no fee; a sale that
- * withholds a tax; and a trade settled in dollars, which the currency column is there to refuse.
- */
-const SAMPLE_BROKER = {
-	id: 'sample-broker',
-	fileName: 'sample-broker.xlsx',
-	kind: 'xlsx',
-	sheetName: 'Movimenti titoli',
-	rows: [
-		[ 'Sample Broker S.p.A. — Movimenti titoli' ],
-		[ 'Dossier:', '12345/678' ],
-		[ 'Periodo:', '01/01/2026 - 30/06/2026' ],
-		[],
-		[ 'Data operazione', 'Data valuta', 'Operazione', 'ISIN', 'Simbolo', 'Titolo', 'Quantità', 'Prezzo', 'Commissioni', 'Ritenute', 'Divisa' ],
-		[
-			date('2026-01-15'), date('2026-01-17'), 'Acquisto', 'IE00B4L5Y983', 'SWDA', 'iShares Core MSCI World UCITS ETF',
-			number('10'), number('98.5'), number('2.95'), '', 'EUR'
-		],
-		[ date('2026-02-03'), date('2026-02-05'), 'Dividendo', 'IE00B3F81R35', '', 'iShares Core EUR Corp Bond', '', '', '', number('1.3'), 'EUR' ],
-
-		// A ticker and no ISIN, and no fee printed: a zero the recap names
-		[ date('2026-03-10'), date('2026-03-12'), 'Acquisto', '', 'VWCE', 'Vanguard FTSE All-World UCITS ETF', number('5.5'), number('110.2'), '', '', 'EUR' ],
-
-		[
-			date('2026-04-20'), date('2026-04-22'), 'Vendita', 'IE00B4L5Y983', 'SWDA', 'iShares Core MSCI World UCITS ETF',
-			number('4'), number('102.75'), number('2.95'), number('1.2'), 'EUR'
-		],
-		[ date('2026-05-02'), date('2026-05-02'), 'Commissioni custodia', '', '', '', '', '', number('4'), '', 'EUR' ],
-
-		// Settled in dollars, which is a row the recap marks rather than one it writes at the wrong rate
-		[ date('2026-06-12'), date('2026-06-15'), 'Acquisto', 'US0378331005', 'AAPL', 'Apple Inc.', number('2'), number('190.1'), number('5'), '', 'USD' ],
-
-		[],
-		[ 'Totale movimenti', '', '', '', '', '', '', '', number('15.85'), number('2.5') ]
-	]
-};
-
-const SAMPLES = [ ISYBANK, ING, DIRECTA, EDENRED, TRADE_REPUBLIC, SAMPLE_BROKER ];
+const SAMPLES = [ ISYBANK, ING, DIRECTA, EDENRED, TRADE_REPUBLIC ];
 
 /**
  * Escapes the five characters XML cannot carry as themselves.

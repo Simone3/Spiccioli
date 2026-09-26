@@ -9,7 +9,7 @@ import { applyTradeImportTemplate, type TradeImportTemplate } from 'src/logic/im
  */
 
 const BROKER: TradeImportTemplate = {
-	id: 'sample-broker',
+	id: 'directa',
 	source: { kind: 'csv', delimiter: ';', encoding: 'utf-8' },
 	header: { by: 'labels', labels: [ 'Data', 'Tipo', 'Quantità', 'Prezzo' ] },
 	date: { column: { by: 'header', label: 'Data' }, cell: 'text' },
@@ -17,8 +17,8 @@ const BROKER: TradeImportTemplate = {
 	isin: { by: 'header', label: 'ISIN' },
 	ticker: { by: 'header', label: 'Simbolo' },
 	quantity: { by: 'header', label: 'Quantità' },
-	unitPrice: { by: 'header', label: 'Prezzo' },
-	fees: { by: 'header', label: 'Commissioni' },
+	price: { by: 'unit', column: { by: 'header', label: 'Prezzo' } },
+	fees: { column: { by: 'header', label: 'Commissioni' }, written: 'positive' },
 	format: { dateFormat: 'DD/MM/YYYY', decimalSeparator: 'comma', thousandsSeparator: 'none' },
 	stopAtBlankRow: true
 };
@@ -47,9 +47,9 @@ describe('applying a broker template', () => {
 					ticker: 'SWDA',
 					name: '',
 					quantity: '10',
-					unitPrice: '98,50',
-					fees: '2,95',
-					taxes: '',
+					price: '98,50',
+					fees: [ '2,95' ],
+					taxes: [],
 					currency: ''
 				},
 				{
@@ -60,9 +60,9 @@ describe('applying a broker template', () => {
 					ticker: 'VWCE',
 					name: '',
 					quantity: '4',
-					unitPrice: '102,75',
-					fees: '',
-					taxes: '',
+					price: '102,75',
+					fees: [],
+					taxes: [],
 					currency: ''
 				}
 			]
@@ -79,6 +79,37 @@ describe('applying a broker template', () => {
 
 		expect(applied).toMatchObject({ outcome: 'rows', dropped: 2, rows: [ { line: 3 } ] });
 		expect(applied.outcome === 'rows' ? applied.rows : []).toHaveLength(1);
+	});
+
+	test('joins the rows an order prints its commission and withholding on to the first trade of that order', () => {
+		const joined: TradeImportTemplate = {
+			...BROKER,
+			header: { by: 'labels', labels: [ 'Data', 'Tipo', 'Importo', 'Rif' ] },
+			price: { by: 'total', column: { by: 'header', label: 'Importo' } },
+			fees: undefined,
+			attached: { reference: { by: 'header', label: 'Rif' }, amount: { by: 'header', label: 'Importo' }, fees: [ 'Commissioni' ], taxes: [ 'Rit. etf' ] }
+		};
+		const headings = [ 'Data', 'Tipo', 'ISIN', 'Simbolo', 'Quantità', 'Importo', 'Rif' ];
+		const applied = applyTradeImportTemplate([
+			headings,
+			[ '26/06/2026', 'Vendita', 'LU1829219127', 'CRPE', '6', '120,00', '100' ],
+			[ '26/06/2026', 'Vendita', 'LU1829219127', 'CRPE', '5', '100,00', '100' ],
+			[ '26/06/2026', 'Commissioni', '', '', '0', '-5,00', '100' ],
+			[ '26/06/2026', 'Commissioni', '', '', '0', '-1,00', '100' ],
+			[ '26/06/2026', 'rit. ETF', '', '', '0', '-1,20', '100' ],
+			[ '20/06/2026', 'Commissioni', '', '', '0', '-1,50', '99' ],
+			[ '20/06/2026', 'Commissioni', '', '', '0', '-1,50', '' ]
+		], joined);
+
+		// The two executions of one order stay two trades, and the order's commission lands on the first of them once
+		expect(applied).toMatchObject({
+			outcome: 'rows',
+			dropped: 2,
+			rows: [
+				{ line: 2, price: '120,00', fees: [ '-5,00', '-1,00' ], taxes: [ '-1,20' ] },
+				{ line: 3, price: '100,00', fees: [], taxes: [] }
+			]
+		});
 	});
 
 	test('stops at a blank row, which is what keeps a totals line out of the recap', () => {

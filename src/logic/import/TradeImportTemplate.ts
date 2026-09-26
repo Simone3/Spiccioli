@@ -26,6 +26,11 @@ import type { TradeKind } from 'src/types/LedgerTypes';
  * import's own reader ([`TradeImport.ts`](../investments/TradeImport.ts)), so a row this hands over and that reader refuses is an
  * ordinary marked row of the recap, and the template never has to agree with the reader about what a figure is.
  *
+ * **Some exports print a trade across several rows** — the execution on one, its commission and its withholding on rows of their
+ * own sharing the order's reference — and a template says so: those rows are **attached** to the trade that carries the same
+ * reference, never made rows of the recap themselves. One that finds no trade to attach to is counted with the rows that are not
+ * trades, which is what it amounts to.
+ *
  * **The refusals here are about the file and not about a row**, and they are the bank templates' three.
  */
 
@@ -33,7 +38,7 @@ import type { TradeKind } from 'src/types/LedgerTypes';
  * The templates the application ships, as a closed set: a template's id is what names it in the translation bundle, so adding
  * one is adding a name here and an entry beside it there.
  */
-export const TRADE_IMPORT_TEMPLATE_IDS = [ 'sample-broker' ] as const;
+export const TRADE_IMPORT_TEMPLATE_IDS = [ 'directa', 'trade-republic' ] as const;
 
 export type TradeImportTemplateId = typeof TRADE_IMPORT_TEMPLATE_IDS[number];
 
@@ -61,6 +66,47 @@ export interface TradeImportCurrency {
 	accepted: string[];
 }
 
+/**
+ * How an export states what one unit cost: the unit price itself, or the whole of what the execution moved, which the reader
+ * divides by the quantity.
+ *
+ * **A total is a figure of money, signed the way a statement signs one**: out of the account on a purchase and into it on a sale.
+ * It is the gross execution, before any commission or withholding — those are the fees and the taxes, stated apart.
+ */
+export type TradeImportPrice = {
+	by: 'unit';
+	column: ImportColumn;
+} | {
+	by: 'total';
+	column: ImportColumn;
+};
+
+/**
+ * How an export writes a fee or a tax: as the plain figure it is, or as money leaving the account — negative, the way the rest of
+ * a statement writes a debit. A figure pointing the other way is not read as its magnitude: it is a marked row.
+ */
+export type TradeImportFigureSign = 'positive' | 'moneyOut';
+
+export interface TradeImportFigure {
+	column: ImportColumn;
+	written: TradeImportFigureSign;
+}
+
+/**
+ * The rows an export prints a trade's commission and withholding on, where it does not print them on the trade's own row.
+ *
+ * **They are matched on the order's reference**, a row whose direction cell is in one of the two lists being attached to the first
+ * trade of the export that carries the same reference — and **its figure is money**, negative as it leaves the account. Several
+ * rows of one kind on one order are summed. **The lists are closed and matched whole**, like the direction column's: a
+ * withholding the broker has just started calling something else is a row left out, never a fee.
+ */
+export interface TradeImportAttachments {
+	reference: ImportColumn;
+	amount: ImportColumn;
+	fees: string[];
+	taxes: string[];
+}
+
 export interface TradeImportTemplate {
 	id: TradeImportTemplateId;
 
@@ -85,11 +131,14 @@ export interface TradeImportTemplate {
 	name?: ImportColumn;
 
 	quantity: ImportColumn;
-	unitPrice: ImportColumn;
+	price: TradeImportPrice;
 
-	// The two figures an export may not print, which are then written as zeros and said to be
-	fees?: ImportColumn;
-	taxes?: ImportColumn;
+	// The two figures an export may not print, which are then written as zeros and said to be — on the trade's own row
+	fees?: TradeImportFigure;
+	taxes?: TradeImportFigure;
+
+	// Or on rows of their own, joined to the trade by the order's reference
+	attached?: TradeImportAttachments;
 
 	// Read where the export mixes currencies, and left out where it states everything in EUR
 	currency?: TradeImportCurrency;
@@ -102,10 +151,25 @@ export interface TradeImportTemplate {
 }
 
 /**
+ * What the reader has to be told about the cells a template hands over, besides the cells: how the figures are written, whether
+ * the price is a unit price or a total, and which currencies a row may be stated in.
+ */
+export interface TradeImportReading {
+	format: ImportFormat;
+	price: TradeImportPrice['by'];
+	fees: TradeImportFigureSign;
+	taxes: TradeImportFigureSign;
+
+	// Undefined where the template reads no currency, every row then being EUR
+	acceptedCurrencies: readonly string[] | undefined;
+}
+
+/**
  * The cells one trade is made of, as the export wrote them — trimmed, collapsed, and nothing more.
  *
  * **An empty string is a cell the row left empty or a column the export does not have**, which are the same thing to every rule
- * that reads one: a fee that is not there is missing either way.
+ * that reads one: a fee that is not there is missing either way. **A fee and a tax are lists**, an export printing them on rows
+ * of their own being able to print more than one, and an empty list is a figure the export did not print at all.
  */
 export interface TradeImportCells {
 
@@ -118,9 +182,12 @@ export interface TradeImportCells {
 	ticker: string;
 	name: string;
 	quantity: string;
-	unitPrice: string;
-	fees: string;
-	taxes: string;
+
+	// The unit price or the total, whichever the template says the export prints
+	price: string;
+
+	fees: readonly string[];
+	taxes: readonly string[];
 
 	// Empty where the template reads no currency, and the cell as written where it does
 	currency: string;
@@ -132,11 +199,40 @@ export type ApplyTradeImportTemplateResult = {
 	// The rows the direction column names, in the order the export has them
 	rows: readonly TradeImportCells[];
 
-	// How many rows it names as neither, which is the one thing the recap says about them
+	// How many rows it names as neither, and how many attached rows found no trade: the one thing the recap says about either
 	dropped: number;
 } | {
 	outcome: 'refused';
 	refusal: ImportTemplateRefusal;
+};
+
+/**
+ * What the reader is told about a template's cells.
+ * @param template The template.
+ * @returns How its cells are to be read.
+ */
+export const tradeImportReadingOf = (template: TradeImportTemplate): TradeImportReading => {
+	// Rows of their own are rows of a statement, and a statement writes money leaving the account as a debit
+	const signOf = (figure: TradeImportFigure | undefined): TradeImportFigureSign => {
+		return template.attached ? 'moneyOut' : figure?.written ?? 'positive';
+	};
+
+	return {
+		format: template.format,
+		price: template.price.by,
+		fees: signOf(template.fees),
+		taxes: signOf(template.taxes),
+		acceptedCurrencies: template.currency?.accepted
+	};
+};
+
+// Whether a cell says one of the values a closed list holds, compared whole, trimmed and case-folded
+const isOneOf = (values: readonly string[], cell: string): boolean => {
+	const stated = cleanImportCell(cell).toLowerCase();
+
+	return values.some((value) => {
+		return cleanImportCell(value).toLowerCase() === stated;
+	});
 };
 
 /**
@@ -146,19 +242,19 @@ export type ApplyTradeImportTemplateResult = {
  * @returns The kind, or undefined where the row is not a trade.
  */
 const kindOf = (direction: TradeImportDirection, cell: string): TradeKind | undefined => {
-	const stated = cleanImportCell(cell).toLowerCase();
-	const matches = (values: readonly string[]): boolean => {
-		return values.some((value) => {
-			return cleanImportCell(value).toLowerCase() === stated;
-		});
-	};
-
-	if(matches(direction.purchase)) {
+	if(isOneOf(direction.purchase, cell)) {
 		return 'purchase';
 	}
 
-	return matches(direction.sale) ? 'sale' : undefined;
+	return isOneOf(direction.sale, cell) ? 'sale' : undefined;
 };
+
+// A row the template says belongs to a trade printed elsewhere: which order, which of the two figures, and the figure
+interface AttachedRow {
+	reference: string;
+	figure: 'fees' | 'taxes';
+	amount: string;
+}
 
 /**
  * Applies a broker template to the grid a file was read out as.
@@ -186,9 +282,11 @@ export const applyTradeImportTemplate = (rows: readonly string[][], template: Tr
 		{ column: template.ticker, label: 'ticker' },
 		{ column: template.name, label: 'name' },
 		{ column: template.quantity, label: 'quantity' },
-		{ column: template.unitPrice, label: 'unitPrice' },
-		{ column: template.fees, label: 'fees' },
-		{ column: template.taxes, label: 'taxes' },
+		{ column: template.price.column, label: 'price' },
+		{ column: template.fees?.column, label: 'fees' },
+		{ column: template.taxes?.column, label: 'taxes' },
+		{ column: template.attached?.reference, label: 'reference' },
+		{ column: template.attached?.amount, label: 'amount' },
 		{ column: template.currency?.column, label: 'currency' }
 	];
 
@@ -215,7 +313,37 @@ export const applyTradeImportTemplate = (rows: readonly string[][], template: Tr
 		return template.date.cell === 'serial' ? dateFromSpreadsheetSerial(taken, template.format.dateFormat) : taken;
 	};
 
-	const trades: TradeImportCells[] = [];
+	// A figure on the trade's own row is a list of one, and a cell the row left empty is a list of none
+	const figureOf = (row: readonly string[], figure: TradeImportFigure | undefined): string[] => {
+		const cell = cellOf(row, figure?.column);
+
+		return cell === '' ? [] : [ cell ];
+	};
+
+	// Which of the two figures a row is printed to carry, where the template prints them on rows of their own
+	const attachmentOf = (row: readonly string[]): AttachedRow | undefined => {
+		const { attached } = template;
+
+		if(!attached) {
+			return undefined;
+		}
+
+		const stated = cellOf(row, template.direction.column);
+		const attach = (figure: AttachedRow['figure']): AttachedRow => {
+			return { reference: cellOf(row, attached.reference), figure, amount: cellOf(row, attached.amount) };
+		};
+
+		if(isOneOf(attached.fees, stated)) {
+			return attach('fees');
+		}
+
+		return isOneOf(attached.taxes, stated) ? attach('taxes') : undefined;
+	};
+
+	// The fees and the taxes stay open while the attached rows are joined to their trades, which is the last thing done here
+	const trades: (TradeImportCells & { fees: string[]; taxes: string[] })[] = [];
+	const references: string[] = [];
+	const attachments: AttachedRow[] = [];
 	let dropped = 0;
 	let sawRow = false;
 
@@ -237,7 +365,14 @@ export const applyTradeImportTemplate = (rows: readonly string[][], template: Tr
 		const kind = kindOf(template.direction, cellOf(row, template.direction.column));
 
 		if(kind === undefined) {
-			dropped += 1;
+			const attachment = attachmentOf(row);
+
+			if(attachment) {
+				attachments.push(attachment);
+			}
+			else {
+				dropped += 1;
+			}
 
 			continue;
 		}
@@ -250,15 +385,28 @@ export const applyTradeImportTemplate = (rows: readonly string[][], template: Tr
 			ticker: cellOf(row, template.ticker),
 			name: cellOf(row, template.name),
 			quantity: cellOf(row, template.quantity),
-			unitPrice: cellOf(row, template.unitPrice),
-			fees: cellOf(row, template.fees),
-			taxes: cellOf(row, template.taxes),
+			price: cellOf(row, template.price.column),
+			fees: figureOf(row, template.fees),
+			taxes: figureOf(row, template.taxes),
 			currency: cellOf(row, template.currency?.column)
 		});
+		references.push(template.attached ? cellOf(row, template.attached.reference) : '');
 	}
 
 	if(!sawRow) {
 		return { outcome: 'refused', refusal: { reason: 'no-rows' } };
+	}
+
+	// Each attached row goes to the first trade of its order, an order filled in two executions carrying its commission once
+	for(const attachment of attachments) {
+		const owner = attachment.reference === '' ? undefined : trades[references.indexOf(attachment.reference)];
+
+		if(owner) {
+			owner[attachment.figure].push(attachment.amount);
+		}
+		else {
+			dropped += 1;
+		}
 	}
 
 	return { outcome: 'rows', rows: trades, dropped };

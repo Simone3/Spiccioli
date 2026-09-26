@@ -1,5 +1,5 @@
 import { makeSecurity, makeTrade } from '../testUtils';
-import type { TradeImportCells } from 'src/logic/import/TradeImportTemplate';
+import type { TradeImportCells, TradeImportReading } from 'src/logic/import/TradeImportTemplate';
 import {
 	buildImportedTrades,
 	buildTradeImportRows,
@@ -9,7 +9,6 @@ import {
 	type TradeImportOptions,
 	type TradeImportRow
 } from 'src/logic/investments/TradeImport';
-import type { ImportFormat } from 'src/logic/transactions/TransactionImport';
 
 /**
  * A broker's export turned into the rows the trade recap ticks and writes.
@@ -19,7 +18,16 @@ import type { ImportFormat } from 'src/logic/transactions/TransactionImport';
  * purchase form finds one — or offers to create it — and that a trade already in the file arrives unticked.
  */
 
-const FORMAT: ImportFormat = { dateFormat: 'DD/MM/YYYY', decimalSeparator: 'comma', thousandsSeparator: 'none' };
+const READING: TradeImportReading = {
+	format: { dateFormat: 'DD/MM/YYYY', decimalSeparator: 'comma', thousandsSeparator: 'none' },
+	price: 'unit',
+	fees: 'positive',
+	taxes: 'positive',
+	acceptedCurrencies: undefined
+};
+
+// An export that prints what the execution moved instead of a unit price, and its commission and withholding as debits
+const TOTALS: TradeImportReading = { ...READING, price: 'total', fees: 'moneyOut', taxes: 'moneyOut' };
 
 const TODAY = '2026-09-24';
 
@@ -34,9 +42,9 @@ const cellsOf = (overrides: Partial<TradeImportCells> = {}): TradeImportCells =>
 		ticker: 'SWDA',
 		name: 'iShares Core MSCI World',
 		quantity: '10',
-		unitPrice: '98,50',
-		fees: '2,95',
-		taxes: '',
+		price: '98,50',
+		fees: [ '2,95' ],
+		taxes: [],
 		currency: '',
 		...overrides
 	};
@@ -45,8 +53,7 @@ const cellsOf = (overrides: Partial<TradeImportCells> = {}): TradeImportCells =>
 const build = (cells: readonly TradeImportCells[], overrides: Partial<TradeImportOptions> = {}): readonly TradeImportRow[] => {
 	return buildTradeImportRows({
 		cells,
-		format: FORMAT,
-		acceptedCurrencies: undefined,
+		reading: READING,
 		accountId: 'broker',
 		securities: [ SWDA ],
 		trades: [],
@@ -68,7 +75,7 @@ describe('reading a row', () => {
 			securityId: 'swda',
 			duplicate: false,
 			tickerDiffers: false,
-			values: { date: '2026-01-15', quantity: 10000000, unitPrice: 985000, fees: 295, taxes: 0, zeroed: [] }
+			values: { date: '2026-01-15', quantity: 10000000, unitPrice: 985000, fees: 295, taxes: 0, zeroed: [], roundedFrom: undefined }
 		});
 	});
 
@@ -85,14 +92,14 @@ describe('reading a row', () => {
 		expect(refusalOf({ quantity: '0' })).toBe('quantity');
 		expect(refusalOf({ quantity: '-3' })).toBe('quantity');
 		expect(refusalOf({ quantity: '1,0000001' })).toBe('quantity');
-		expect(refusalOf({ unitPrice: '98,12345' })).toBe('unitPrice');
-		expect(refusalOf({ fees: 'n/a' })).toBe('fees');
-		expect(refusalOf({ fees: '-2,95' })).toBe('fees');
-		expect(refusalOf({ kind: 'sale', taxes: 'abc' })).toBe('taxes');
+		expect(refusalOf({ price: '98,12345' })).toBe('unitPrice');
+		expect(refusalOf({ fees: [ 'n/a' ] })).toBe('fees');
+		expect(refusalOf({ fees: [ '-2,95' ] })).toBe('fees');
+		expect(refusalOf({ kind: 'sale', taxes: [ 'abc' ] })).toBe('taxes');
 	});
 
 	test('refuses a currency the template does not accept, an empty one included', () => {
-		const accepted = { acceptedCurrencies: [ 'EUR' ] };
+		const accepted = { reading: { ...READING, acceptedCurrencies: [ 'EUR' ] } };
 
 		expect(one(cellsOf({ currency: 'eur' }), accepted).outcome).toBe('read');
 		expect(one(cellsOf({ currency: 'USD' }), accepted)).toMatchObject({ outcome: 'refused', refusal: { reason: 'currency' } });
@@ -100,14 +107,43 @@ describe('reading a row', () => {
 	});
 
 	test('writes a fee or a tax the export did not print as a zero, and names it', () => {
-		expect(one(cellsOf({ kind: 'sale', fees: '', taxes: '' }))).toMatchObject({
+		expect(one(cellsOf({ kind: 'sale', fees: [], taxes: [] }))).toMatchObject({
 			outcome: 'read',
 			values: { fees: 0, taxes: 0, zeroed: [ 'fees', 'taxes' ] }
 		});
 	});
 
 	test('never reads a tax on a purchase, and never names one missing', () => {
-		expect(one(cellsOf({ taxes: '12,00' }))).toMatchObject({ outcome: 'read', values: { taxes: 0, zeroed: [] } });
+		expect(one(cellsOf({ taxes: [ '12,00' ] }))).toMatchObject({ outcome: 'read', values: { taxes: 0, zeroed: [] } });
+	});
+
+	test('reads a fee and a tax written as debits, summing the rows an order printed them on, and refuses one written as a credit', () => {
+		const debits = { reading: { ...READING, fees: 'moneyOut' as const, taxes: 'moneyOut' as const } };
+
+		expect(one(cellsOf({ kind: 'sale', fees: [ '-2,95', '-1,00' ], taxes: [ '-1,20' ] }), debits)).toMatchObject({
+			outcome: 'read',
+			values: { fees: 395, taxes: 120, zeroed: [] }
+		});
+		expect(one(cellsOf({ fees: [ '2,95' ] }), debits)).toMatchObject({ outcome: 'refused', refusal: { reason: 'fees' } });
+	});
+
+	test('divides a total by the quantity, and says so where the rounded price does not give the total back', () => {
+		// € 234,56 over eleven is € 21,3236, and eleven of those are € 234,56 again
+		expect(one(cellsOf({ kind: 'sale', quantity: '11', price: '234,56', fees: [] }), { reading: TOTALS })).toMatchObject({
+			outcome: 'read',
+			values: { unitPrice: 213236, roundedFrom: undefined }
+		});
+
+		// € 12.345,67 over a thousand is € 12,3457 once rounded, and a thousand of those are € 12.345,70
+		expect(one(cellsOf({ quantity: '1000', price: '-12345,67', fees: [] }), { reading: TOTALS })).toMatchObject({
+			outcome: 'read',
+			values: { unitPrice: 123457, roundedFrom: 1234567 }
+		});
+	});
+
+	test('refuses a total that points the wrong way for the kind of trade', () => {
+		expect(one(cellsOf({ price: '702,87', fees: [] }), { reading: TOTALS })).toMatchObject({ refusal: { reason: 'total' } });
+		expect(one(cellsOf({ kind: 'sale', price: '-702,87', fees: [] }), { reading: TOTALS })).toMatchObject({ refusal: { reason: 'total' } });
 	});
 });
 

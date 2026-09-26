@@ -6,9 +6,10 @@ import { ImportRecap } from 'src/components/import/ImportRecap';
 import { useFormatter } from 'src/contexts/PreferencesContext';
 import { useTranslator } from 'src/i18n/TranslationContext';
 import { isWritableTradeImportRow, type TradeImportRefusal, type TradeImportRow, type TradeImportValues } from 'src/logic/investments/TradeImport';
-import { tradeTotal } from 'src/logic/investments/Trades';
+import { tradeGrossWorking, tradeTotal } from 'src/logic/investments/Trades';
+import { MONEY_SCALES, narrowFromWorkingScale } from 'src/logic/money/Money';
 import type { DateFormat } from 'src/types/PreferencesTypes';
-import type { LedgerId, Security } from 'src/types/LedgerTypes';
+import type { LedgerId, Security, TradeKind } from 'src/types/LedgerTypes';
 
 /**
  * The recap a broker's export opens before anything is written ([§7.7](../../../docs/functional/specs/07-investments.md#77-importing-trades)).
@@ -148,6 +149,24 @@ export const TradeImportRecap = ({
 		return <> <span className='investments-screen-quiet'>{t('trades.import.recap.statusZeroed', { figures })}</span></>;
 	};
 
+	// A price divided out of a total that no longer gives the total back: what the trade will say it moved, against what the export said
+	const roundedText = (values: TradeImportValues, kind: TradeKind): ReactNode => {
+		if(values.roundedFrom === undefined) {
+			return undefined;
+		}
+
+		const gross = narrowFromWorkingScale(tradeGrossWorking({ ...values, kind }), MONEY_SCALES.amount);
+
+		return (
+			<>
+				{' '}
+				<span className='investments-screen-nothing'>
+					{t('trades.import.recap.statusRounded', { gross: formatter.amount(gross), total: formatter.amount(values.roundedFrom) })}
+				</span>
+			</>
+		);
+	};
+
 	// What the row would do to the file, which is the one column a recap exists for
 	const statusOf = (row: TradeImportRow): ReactNode => {
 		if(row.outcome === 'refused') {
@@ -179,6 +198,7 @@ export const TradeImportRecap = ({
 					<span className='investments-screen-negative'>{t('trades.import.recap.statusDuplicate')}</span> :
 					<Chip tone='accent'>{t('trades.import.recap.statusNew')}</Chip>}
 				{zeroedText(row.values)}
+				{roundedText(row.values, row.cells.kind)}
 				{differs}
 			</>
 		);
@@ -241,12 +261,12 @@ export const TradeImportRecap = ({
 		figureColumn('unitPrice', t('trades.columns.unitPrice'), (values) => {
 			return formatter.unitPrice(values.unitPrice);
 		}, (row) => {
-			return row.cells.unitPrice;
+			return row.cells.price;
 		}),
 		figureColumn('fees', t('trades.columns.fees'), (values) => {
 			return formatter.amount(values.fees);
 		}, (row) => {
-			return row.cells.fees;
+			return row.cells.fees.join(' ');
 		}),
 
 		// A purchase carries no tax, so the cell says so rather than printing a zero nobody asked for
@@ -261,7 +281,7 @@ export const TradeImportRecap = ({
 					return <span className='investments-screen-quiet'>{t('table.notApplicable')}</span>;
 				}
 
-				return values ? formatter.amount(values.taxes) : <span className='investments-screen-quiet'>{row.cells.taxes || t('table.notApplicable')}</span>;
+				return values ? formatter.amount(values.taxes) : <span className='investments-screen-quiet'>{row.cells.taxes.join(' ') || t('table.notApplicable')}</span>;
 			}
 		},
 		{

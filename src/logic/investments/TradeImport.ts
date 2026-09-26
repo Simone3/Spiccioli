@@ -1,7 +1,8 @@
 import { isSameName } from 'src/logic/accounts/Accounts';
-import type { TradeImportCells } from 'src/logic/import/TradeImportTemplate';
+import type { TradeImportCells, TradeImportFigureSign, TradeImportReading } from 'src/logic/import/TradeImportTemplate';
 import { createLedgerId, nextInsertionSeq } from 'src/logic/ledger/LedgerDocument';
-import { MONEY_SCALES } from 'src/logic/money/Money';
+import { tradeGrossWorking } from 'src/logic/investments/Trades';
+import { divideAtWorkingScale, MONEY_SCALES, narrowFromWorkingScale, widenToWorkingScale } from 'src/logic/money/Money';
 import { readAmount, readImportDate, readImportFigure, type ImportFormat } from 'src/logic/transactions/TransactionImport';
 import type { Cents, IsoDate, LedgerId, Millionths, Security, TenThousandths, Trade } from 'src/types/LedgerTypes';
 
@@ -12,6 +13,11 @@ import type { Cents, IsoDate, LedgerId, Millionths, Security, TenThousandths, Tr
  * date that is a real day and not a future one, a quantity and a unit price above zero and within their places, fees and taxes
  * that are not below zero — so there is no trade the form refuses that an export can nevertheless put in the file. **Nothing is
  * rounded**: a figure the file has no room for is a marked row.
+ *
+ * **Where an export prints what the execution moved rather than a unit price, the unit price is that total divided by the
+ * quantity** — the one division here, rounded half away from zero to the four places a price is stored with. Where the quantity
+ * times the rounded price no longer gives the total back to the cent the row says so, and stays writable: the difference is what
+ * the pairing of checks 6 and 7 will see ([§11.6](../../../docs/functional/specs/11-calculations.md#116-derived-matching)).
  *
  * **Fees and taxes the export did not print are zeros, and the row says so.** It is the payslip recap's bargain
  * ([§8.1](../../../docs/functional/specs/08-salaries.md#81-payslips)): the zeros are shown as the zeros they will be and put right
@@ -33,7 +39,7 @@ export type TradeImportZeroed = 'fees' | 'taxes';
  * the cell held — the recap shows the cell itself, beside it.
  */
 export type TradeImportRefusal = {
-	reason: 'date' | 'futureDate' | 'currency' | 'securityMissing' | 'quantity' | 'unitPrice' | 'fees' | 'taxes';
+	reason: 'date' | 'futureDate' | 'currency' | 'securityMissing' | 'quantity' | 'unitPrice' | 'total' | 'fees' | 'taxes';
 } | {
 
 	// A ticker that names more than one security, which only an ISIN can tell apart
@@ -51,6 +57,12 @@ export interface TradeImportValues {
 
 	// The figures the export did not print, which are the ones this row writes as zeros
 	zeroed: readonly TradeImportZeroed[];
+
+	/**
+	 * Where the unit price was divided out of a total, the total — in cents, and only where the quantity times the rounded price
+	 * does not give it back. Undefined where the export printed a unit price, or where the rounded price reproduces the total.
+	 */
+	roundedFrom: Cents | undefined;
 }
 
 /**
@@ -98,11 +110,8 @@ export interface TradeImportOptions {
 	// The rows of the export, as the template handed them over
 	cells: readonly TradeImportCells[];
 
-	// What the template says its dates and figures look like
-	format: ImportFormat;
-
-	// The currencies a row may be stated in, where the template reads a currency at all
-	acceptedCurrencies: readonly string[] | undefined;
+	// What the template says its cells are: how its dates and figures look, and what its price and its fees are
+	reading: TradeImportReading;
 
 	// The one account the whole export goes into
 	accountId: LedgerId;
@@ -189,19 +198,74 @@ const matchSecurity = (cells: TradeImportCells, securities: readonly Security[])
 };
 
 /**
- * Reads a fee or a tax, which an export may leave out.
- * @param text The cell.
+ * Reads a fee or a tax, which an export may leave out and may print over several rows.
+ * @param texts The figures as the export printed them, none where it printed none.
+ * @param written Whether the export writes the figure plainly or as money leaving the account.
  * @param format What the template says its figures look like.
- * @returns The figure, zero where the cell is empty, or undefined where it holds something that is not a figure of zero or more.
+ * @returns Their sum, zero where there are none, or undefined where one is not a figure or points the wrong way.
  */
-const readOptionalAmount = (text: string, format: ImportFormat): Cents | undefined => {
-	if(text === '') {
-		return 0;
+const readOptionalAmount = (texts: readonly string[], written: TradeImportFigureSign, format: ImportFormat): Cents | undefined => {
+	let total = 0;
+
+	for(const text of texts) {
+		const amount = readAmount(text, format);
+
+		if(amount === undefined) {
+			return undefined;
+		}
+
+		const figure = written === 'moneyOut' ? -amount : amount;
+
+		if(figure < 0) {
+			return undefined;
+		}
+
+		total += figure;
 	}
 
-	const amount = readAmount(text, format);
+	return total;
+};
 
-	return amount === undefined || amount < 0 ? undefined : amount;
+/**
+ * The unit price of a row: the one the export printed, or the total it printed divided by the quantity.
+ *
+ * **A total is money**, out of the account on a purchase and into it on a sale — one pointing the other way is not read as its
+ * magnitude but refused. The division is the one inexact step and rounds half away from zero, and **the total is handed back
+ * where the rounded price does not reproduce it to the cent**, for the row to say so.
+ * @param cells The row.
+ * @param quantity The quantity, already read.
+ * @param reading What the template says its cells are.
+ * @returns The price and the total it may not reproduce, or why there is no price.
+ */
+const readUnitPrice = (
+	cells: TradeImportCells,
+	quantity: Millionths,
+	reading: TradeImportReading
+): { unitPrice: TenThousandths; roundedFrom: Cents | undefined } | { refusal: TradeImportRefusal } => {
+	if(reading.price === 'unit') {
+		const unitPrice = readImportFigure(cells.price, reading.format, MONEY_SCALES.rate);
+
+		return unitPrice === undefined || unitPrice <= 0 ? { refusal: { reason: 'unitPrice' } } : { unitPrice, roundedFrom: undefined };
+	}
+
+	const signed = readAmount(cells.price, reading.format);
+
+	if(signed === undefined) {
+		return { refusal: { reason: 'total' } };
+	}
+
+	const total = cells.kind === 'purchase' ? -signed : signed;
+	const perUnit = divideAtWorkingScale(widenToWorkingScale(total, MONEY_SCALES.amount), widenToWorkingScale(quantity, MONEY_SCALES.quantity));
+	const unitPrice = narrowFromWorkingScale(perUnit, MONEY_SCALES.rate);
+
+	// A total pointing the wrong way, or one so small against the quantity that no price of four places is above zero
+	if(total <= 0 || unitPrice <= 0) {
+		return { refusal: { reason: 'total' } };
+	}
+
+	const reproduced = narrowFromWorkingScale(tradeGrossWorking({ kind: cells.kind, quantity, unitPrice, fees: 0, taxes: 0 }), MONEY_SCALES.amount);
+
+	return { unitPrice, roundedFrom: reproduced === total ? undefined : total };
 };
 
 /**
@@ -211,7 +275,8 @@ const readOptionalAmount = (text: string, format: ImportFormat): Cents | undefin
  * @returns The figures, or why the row cannot be written.
  */
 const readValues = (cells: TradeImportCells, options: TradeImportOptions): { values: TradeImportValues } | { refusal: TradeImportRefusal } => {
-	const date = readImportDate(cells.date, options.format.dateFormat);
+	const { reading } = options;
+	const date = readImportDate(cells.date, reading.format.dateFormat);
 
 	if(date === undefined) {
 		return { refusal: { reason: 'date' } };
@@ -221,7 +286,7 @@ const readValues = (cells: TradeImportCells, options: TradeImportOptions): { val
 		return { refusal: { reason: 'futureDate' } };
 	}
 
-	if(options.acceptedCurrencies !== undefined && !options.acceptedCurrencies.some((currency) => {
+	if(reading.acceptedCurrencies !== undefined && !reading.acceptedCurrencies.some((currency) => {
 		return isSameName(currency, cells.currency);
 	})) {
 		return { refusal: { reason: 'currency' } };
@@ -231,19 +296,19 @@ const readValues = (cells: TradeImportCells, options: TradeImportOptions): { val
 		return { refusal: { reason: 'securityMissing' } };
 	}
 
-	const quantity = readImportFigure(cells.quantity, options.format, MONEY_SCALES.quantity);
+	const quantity = readImportFigure(cells.quantity, reading.format, MONEY_SCALES.quantity);
 
 	if(quantity === undefined || quantity <= 0) {
 		return { refusal: { reason: 'quantity' } };
 	}
 
-	const unitPrice = readImportFigure(cells.unitPrice, options.format, MONEY_SCALES.rate);
+	const price = readUnitPrice(cells, quantity, reading);
 
-	if(unitPrice === undefined || unitPrice <= 0) {
-		return { refusal: { reason: 'unitPrice' } };
+	if('refusal' in price) {
+		return price;
 	}
 
-	const fees = readOptionalAmount(cells.fees, options.format);
+	const fees = readOptionalAmount(cells.fees, reading.fees, reading.format);
 
 	if(fees === undefined) {
 		return { refusal: { reason: 'fees' } };
@@ -251,18 +316,18 @@ const readValues = (cells: TradeImportCells, options: TradeImportOptions): { val
 
 	// A purchase carries no tax and never reads one, whatever the column says
 	const isSale = cells.kind === 'sale';
-	const taxes = isSale ? readOptionalAmount(cells.taxes, options.format) : 0;
+	const taxes = isSale ? readOptionalAmount(cells.taxes, reading.taxes, reading.format) : 0;
 
 	if(taxes === undefined) {
 		return { refusal: { reason: 'taxes' } };
 	}
 
 	const zeroed: TradeImportZeroed[] = [
-		...cells.fees === '' ? [ 'fees' as const ] : [],
-		...isSale && cells.taxes === '' ? [ 'taxes' as const ] : []
+		...cells.fees.length === 0 ? [ 'fees' as const ] : [],
+		...isSale && cells.taxes.length === 0 ? [ 'taxes' as const ] : []
 	];
 
-	return { values: { date, quantity, unitPrice, fees, taxes, zeroed } };
+	return { values: { date, quantity, unitPrice: price.unitPrice, fees, taxes, zeroed, roundedFrom: price.roundedFrom } };
 };
 
 /**

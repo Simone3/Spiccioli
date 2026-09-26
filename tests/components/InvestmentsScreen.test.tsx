@@ -635,13 +635,12 @@ describe('the Investments screen', () => {
 	});
 });
 
-// A broker's export as the main process hands it over: the grid of cell text, the dates as the day counts a sheet keeps them as
+// A broker's export as the main process hands it over: Trade Republic's, whose symbol is the ISIN and whose fees are debits
 const BROKER_EXPORT: string[][] = [
-	[ 'Sample Broker S.p.A. — Movimenti titoli' ],
-	[ 'Data operazione', 'Operazione', 'ISIN', 'Simbolo', 'Titolo', 'Quantità', 'Prezzo', 'Commissioni', 'Ritenute', 'Divisa' ],
-	[ '46056', 'Dividendo', 'IE00B3F81R35', '', 'iShares Core EUR Corp Bond', '', '', '', '1.3', 'EUR' ],
-	[ '46091', 'Acquisto', '', 'VWCE', 'Vanguard FTSE All-World', '5.5', '110.2', '', '', 'EUR' ],
-	[ '46132', 'Vendita', 'IE00B4L5Y983', 'SWDA', 'iShares Core MSCI World', '4', '102.75', '2.95', '1.2', 'EUR' ]
+	[ 'date', 'type', 'name', 'symbol', 'shares', 'price', 'amount', 'fee', 'tax', 'currency' ],
+	[ '2026-02-03', 'CARD_TRANSACTION', 'SpotifyIT', '', '', '', '-11.990000', '', '', 'EUR' ],
+	[ '2026-03-10', 'BUY', 'Vanguard FTSE All-World', 'IE00BK5BQT80', '5.5000000000', '110.2000000000', '-606.100000', '', '', 'EUR' ],
+	[ '2026-04-20', 'SELL', 'iShares Core MSCI World', 'IE00B4L5Y983', '4.0000000000', '102.7500000000', '406.850000', '-2.950000', '-1.200000', 'EUR' ]
 ];
 
 describe('importing trades from a broker\'s export', () => {
@@ -659,7 +658,7 @@ describe('importing trades from a broker\'s export', () => {
 
 		const chooser = screen.getByRole('dialog', { name: 'Import trades' });
 
-		await userEvent.click(within(chooser).getByRole('button', { name: 'Sample Broker Excel' }));
+		await userEvent.click(within(chooser).getByRole('button', { name: 'Trade Republic CSV' }));
 
 		// The file waits on the account as it waits on the template
 		expect(within(chooser).getByRole('button', { name: 'Choose file…' })).toBeDisabled();
@@ -669,23 +668,24 @@ describe('importing trades from a broker\'s export', () => {
 
 		const recap = await screen.findByRole('dialog', { name: 'What this export holds' });
 
-		// The dividend is only counted, and the purchase of an instrument the file does not hold waits for it to be created
+		// The card payment is only counted, and the purchase of an instrument the file does not hold waits for it to be created
 		expect(within(recap).getByText('1 row of the export is not a purchase or a sale, and is left out.')).toBeInTheDocument();
-		expect(within(recap).getByRole('checkbox', { name: 'Nothing can be written from row 4 yet' })).toBeDisabled();
-		expect(within(recap).getByRole('checkbox', { name: 'Import the trade on row 5' })).toBeChecked();
+		expect(within(recap).getByRole('checkbox', { name: 'Nothing can be written from row 3 yet' })).toBeDisabled();
+		expect(within(recap).getByRole('checkbox', { name: 'Import the trade on row 4' })).toBeChecked();
 
-		await userEvent.click(within(recap).getByRole('button', { name: 'Create the security row 4 names' }));
+		await userEvent.click(within(recap).getByRole('button', { name: 'Create the security row 3 names' }));
 
 		const form = screen.getByRole('dialog', { name: 'Add security' });
 
-		expect(within(form).getByRole('textbox', { name: 'Ticker' })).toHaveValue('VWCE');
+		// The export names the instrument by its ISIN and prints no ticker, so the ticker is the one field left to fill in
+		expect(within(form).getByRole('textbox', { name: 'ISIN' })).toHaveValue('IE00BK5BQT80');
 		expect(within(form).getByRole('textbox', { name: 'Name' })).toHaveValue('Vanguard FTSE All-World');
 
-		await userEvent.type(within(form).getByRole('textbox', { name: 'ISIN' }), 'IE00BK5BQT80');
+		await userEvent.type(within(form).getByRole('textbox', { name: 'Ticker' }), 'VWCE');
 		await userEvent.click(within(form).getByRole('button', { name: 'Save' }));
 
 		// Nothing is in the file yet, and the row the new security resolves arrives ticked
-		expect(within(recap).getByRole('checkbox', { name: 'Import the trade on row 4' })).toBeChecked();
+		expect(within(recap).getByRole('checkbox', { name: 'Import the trade on row 3' })).toBeChecked();
 		expect(within(recap).getByText('not printed, written as 0: fees')).toBeInTheDocument();
 
 		await userEvent.click(within(recap).getByRole('button', { name: 'Import 2 trades' }));
@@ -712,7 +712,7 @@ describe('importing trades from a broker\'s export', () => {
 		const chooser = screen.getByRole('dialog', { name: 'Import trades' });
 
 		await userEvent.selectOptions(within(chooser).getByRole('combobox', { name: 'Account' }), 'dossier');
-		await userEvent.click(within(chooser).getByRole('button', { name: 'Sample Broker Excel' }));
+		await userEvent.click(within(chooser).getByRole('button', { name: 'Directa Excel' }));
 		await userEvent.click(within(chooser).getByRole('button', { name: 'Choose file…' }));
 
 		expect(await screen.findByRole('alert')).toHaveTextContent('The headings this template expects are not in that file.');

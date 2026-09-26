@@ -946,7 +946,8 @@ export const EN_TRANSLATIONS = {
 
 			// One entry per template the application ships
 			templates: {
-				'sample-broker': { name: 'Sample Broker Excel' }
+				directa: { name: 'Directa Excel' },
+				'trade-republic': { name: 'Trade Republic CSV' }
 			},
 			recap: {
 
@@ -979,6 +980,7 @@ export const EN_TRANSLATIONS = {
 					fees: 'fees',
 					taxes: 'taxes'
 				},
+				statusRounded: 'unit price rounded to 4 decimals — the trade moves {gross}, the export says {total}',
 				statusTickerDiffers: 'matched by ISIN — the export calls it {ticker}',
 				statusNewSecurity: 'Not in this file',
 				createSecurity: 'Create security…',
@@ -1008,8 +1010,9 @@ export const EN_TRANSLATIONS = {
 					securityMissing: 'No ISIN and no ticker',
 					quantity: 'The quantity is not above 0 with at most 6 decimals',
 					unitPrice: 'The unit price is not above 0 with at most 4 decimals',
-					fees: 'The fees are not a figure of 0 or more',
-					taxes: 'The taxes are not a figure of 0 or more',
+					total: 'The amount cannot be read, or does not leave the account on a purchase and reach it on a sale',
+					fees: 'The fees are not a figure the account paid',
+					taxes: 'The taxes are not a figure the account paid',
 					tickerAmbiguous: {
 						one: '1 security has this ticker — the row needs an ISIN',
 						other: '{count} securities have this ticker — the row needs an ISIN'
