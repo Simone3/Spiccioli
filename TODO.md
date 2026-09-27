@@ -1,15 +1,6 @@
 
 # current
 
-add investments via pdf upload
-
-
-
-
-
-
-
-
 
 
 
@@ -48,6 +39,7 @@ a projection of net worth from current savings rate
 configurable Portfolio — choose and arrange the cards
 
 net worth goals or milestones
+
 over time graph: show to lines/areas for cash and investments? cash on the bottom and investments piled on top of them? -> explored the idea but the UI would not be that great
 
 ## transactions
@@ -95,12 +87,6 @@ per-fund contribution cadence, with an effective date, instead of one setting fo
 deriving the pension exit rate from years of participation instead of a typed number
 
 ## salaries
-
-TFR left with the employer -> interesting to see what i have there!
-
-actual pension contributions
-
-bulk import of payslips
 
 a pension in place of a salary
 
