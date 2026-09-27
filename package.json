@@ -1,7 +1,7 @@
 {
 	"name": "spiccioli",
 	"productName": "Spiccioli",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "A private ledger for one person",
 	"main": "dist/electron/main.js",
 	"scripts": {
